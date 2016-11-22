@@ -7,6 +7,7 @@
 #
 # Change Log
 #---------------------------------------------------------------------
+# ~ tweak for low energy fit
 # ~ fixed mc+data+tot+resid length issue
 # + another canvas showing the residuals
 # + show the total mc in gray after the fit
@@ -94,19 +95,18 @@ def _myself_(argv):
     gStyle.SetTitleSize(0.050,"xy")
     gStyle.SetLabelSize(0.045,"xy")
 
-
-    
-
     ### get your data!
     if local:
-        data = getHiEdata(["./data/phys/*1324*root*"])
-        #data = getLoEdata(["./data/phys/*1324*root*"])
+        #data = getHiEdata(["./data/phys/*1324*root*"])
+        data = getLoEdata(["./data/phys/*1324*root*"])
     else:
         ### ALL files
-        data = getHiEdata(["/home/mkauer/temp/*1324*root*"])
+        #data = getHiEdata(["/home/mkauer/temp/*1324*root*"])
+        data = getLoEdata(["/home/mkauer/temp/*1324*root*"])
+        
         ### Just one file
         #data = getHiEdata(["/home/mkauer/temp/*1324*root.001"])
-        #data = getLoEdata(["/home/mkauer/temp/*1324*root*"])
+        #data = getLoEdata(["/home/mkauer/temp/*1324*root.001"])
 
     ### define what MC you want and from where
     isos = ['K40','U238','Th232']
@@ -150,7 +150,7 @@ def _myself_(argv):
                 
     
     # get histogram parameters for MC
-    par = hiEhistparam()
+    par = loEhistparam()
     
     for i in range(0,8): # is primary crystal of origin
         for iso in isos:
@@ -169,8 +169,8 @@ def _myself_(argv):
                 mc[iso][loc]["chain"].SetAlias('rng','sin(2.*pi*rndm)*sqrt(-2.*log(rndm))')
 
                 ### set the resolution function - right now it's linear with intercept of 0
-                #mc[iso][loc]["chain"].SetAlias('sigma', str(loEres(i))+' / sqrt(edep['+str(i)+']*1000.)')
-                mc[iso][loc]["chain"].SetAlias('sigma', str(hiEres(i))+' / sqrt(edep['+str(i)+']*1000.)')
+                mc[iso][loc]["chain"].SetAlias('sigma', str(loEres(i))+' / sqrt(edep['+str(i)+']*1000.)')
+                #mc[iso][loc]["chain"].SetAlias('sigma', str(hiEres(i))+' / sqrt(edep['+str(i)+']*1000.)')
                                 
                 ### then draw the shit
                 mc[iso][loc]["chain"].Draw('(edep['+str(i)+']*1000.) + (sigma*edep['+str(i)+']*1000.*rng) >> histo', cut1+cut2)
@@ -184,8 +184,8 @@ def _myself_(argv):
     ### fit the MC to data
     #=================================================================
     #=================================================================
-    fmin = 100 # fit min E window
-    fmax = 3000 # fit max E window
+    fmin = 0 # fit min E window
+    fmax = 100 # fit max E window
 
     fmc = []
     fit = []
@@ -201,7 +201,7 @@ def _myself_(argv):
 
                 ### to scale or not to scale...
                 #---------------------------------------------------------------------
-                mc[iso][loc]["hist"][i].Scale(dat_int/mc_int) # scale to data integral
+                #mc[iso][loc]["hist"][i].Scale(dat_int/mc_int) # scale to data integral
                 mc[iso][loc]["hist"][i].Sumw2() # reset weights
                 #---------------------------------------------------------------------
                 
@@ -244,7 +244,7 @@ def _myself_(argv):
     canv = TCanvas('canv', 'canv', 0, 0, 1600, 900)
     canv.Divide(4,2)
     legs=[]
-    tot = makeHiEtotal() # make a set of total MC histos
+    tot = makeLoEtotal() # make a set of total MC histos
     
     for i in range(0,8):
         canv.cd(i+1)
@@ -288,14 +288,14 @@ def _myself_(argv):
         #data[i].Draw('same')
             
     canv.Update()
-    canv.Print('testing-hi-energy-fit.png')
+    canv.Print('testing-lo-energy-fit.png')
     
     ### draw the residuals
     #-----------------------------------------------------------------
     canv2 = TCanvas('canv2', 'canv2', 0, 0, 1600, 900)
     canv2.Divide(4,2)
     legs2=[]
-    resid = makeHiEresid() # make a set of resid histos
+    resid = makeLoEresid() # make a set of resid histos
     zeros=[]
     
     for i in range(0,8):
@@ -324,7 +324,7 @@ def _myself_(argv):
         legs2[i].Draw()
 
     canv2.Update()
-    canv2.Print('testing-hi-energy-fit-resid.png')
+    canv2.Print('testing-lo-energy-fit-resid.png')
     #-----------------------------------------------------------------
     
     if not batch:
@@ -422,9 +422,33 @@ def makeHiEtotal():
     return total
 
 
+def makeLoEtotal():
+    total = []
+    par = loEhistparam()
+    for i in range(0,8):
+        tot = TH1F("tot", longNames(i), par[0], par[1], par[2])
+        tot.SetLineColor(kGray+1)
+        tot.SetMarkerColor(kGray+1)
+        tot.SetLineWidth(1)
+        total.append(tot)
+    return total
+
+
 def makeHiEresid():
     resid = []
     par = hiEhistparam()
+    for i in range(0,8):
+        res = TH1F("res", longNames(i), par[0], par[1], par[2])
+        res.SetLineColor(kBlack)
+        res.SetMarkerColor(kBlack)
+        res.SetLineWidth(1)
+        resid.append(res)
+    return resid
+
+
+def makeLoEresid():
+    resid = []
+    par = loEhistparam()
     for i in range(0,8):
         res = TH1F("res", longNames(i), par[0], par[1], par[2])
         res.SetLineColor(kBlack)
@@ -546,7 +570,7 @@ def loEhistparam():
     
     hmin = 0
     hmax = 100
-    bins = (hmax-hmin)*2
+    bins = (hmax-hmin)
     return [bins, hmin, hmax]
 
 
@@ -557,7 +581,6 @@ def hiEhistparam():
     
     hmin = 0
     hmax = 3000
-    # fit energy needs to be normalized to bins???
     bins = (hmax-hmin)
     return [bins, hmin, hmax]
 
