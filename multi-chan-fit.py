@@ -31,31 +31,29 @@ def _myself_(argv):
     R = 2
     bins = (hmax-hmin)/R
 
+    volnames = ['NaIDet01Crystal','NaIDet02Crystal','NaIDet03Crystal','NaIDet04Crystal',
+                'NaIDet05Crystal','NaIDet06Crystal','NaIDet07Crystal','NaIDet08Crystal']
+    names = ['NaI-01','NaI-02','NaI-03','NaI-04',
+             'NaI-05','NaI-06','NaI-07','NaI-08']
     sims=[]
-    for i in range(0,1):
-        #del.sim
-        h_sim1 = TH1F('h_sim1','h_sim1',bins,hmin,hmax)
-        #sim = TH1F('sim','sim',bins,hmin,hmax)
-        #sim.append(h_sim1)
-        ch1.Draw('edepResol[0]*1000. >> h_sim1','edepResol[0]*1000. > 0 && primVolumeName == "NaIDet01Crystal"')
-        #ch1.Draw('edepResol[0]*1000. >> sim','edepResol[0]*1000. > 0 && primVolumeName == "NaIDet01Crystal"')
-        #sims.append(sim)
+    for i in range(0,8):
+        sim = TH1F("sim", names[i], bins, hmin, hmax)
+        ch1.Draw('edepResol['+str(i)+']*1000. >> sim','edepResol['+str(i)+']*1000. > 0 && primVolumeName == "'+volnames[0]+'"')
+        sims.append(sim)
     
     c1 = TCanvas("c1","c1",0,0,800,800)
-    c1.Divide(4,4)
-    c1.cd(1)
-    c1_1.SetLogy()
-
-    h_sim1.SetMarkerColor(kRed+1)
-    h_sim1.SetLineColor(kRed+1)
-    h_sim1.SetLineWidth(1)
-    h_sim1.Draw("same")
-    
-    #sim.SetMarkerColor(kRed+1)
-    #sim.SetLineColor(kRed+1)
-    #sim.SetLineWidth(1)
-    #sim.Draw("same")
-    
+    c1.Divide(3,3)
+    for i,sim in enumerate(sims):
+        i=i+1
+        c1.cd(i)
+        c1.cd(i).SetLogy()
+        
+        sim.SetMarkerColor(kRed+1)
+        sim.SetLineColor(kRed+1)
+        sim.SetLineWidth(1)
+        #sim.Draw("same")
+        sim.Draw()
+        
     c1.Update()
     #c1.Print("pytest-fitting.png")
     
