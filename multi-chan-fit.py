@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 
-############################################################
+######################################################################
 # Try to get everything into a dictionary or list
 #
 # version: 2016-10-24
 #
 # Change Log
-#-----------------------------------------------------------
+#---------------------------------------------------------------------
+# ~ plot low energy things - ah, use pmtXX.qc5 no qc_5 - oops
 # + added low energy calib and resolution functions
 # ~ use assumption that res~srqt(E) with intercept=0
 # + working on resolution params, but need at least a linear
@@ -39,7 +40,7 @@
 # + hacking at plot-test.py
 #
 # mkauer@physics.wisc.edu
-############################################################
+######################################################################
 
 import os,sys
 import numpy as np
@@ -69,13 +70,16 @@ def _myself_(argv):
     #data = getData(["data/dryRun/*root"])
     #data = getHiEdata(["data/phys/*root*"])
     #data = getData(["../temp/*1324*root*"])
-    data = getHiEdata(["data/phys/*1324*root*"])
+
+    #data = getHiEdata(["data/phys/*1324*root*"])
+    data = getLoEdata(["data/phys/*1324*root*"])
     
     isos = ['K40','U238','Th232']
     locs = ['internal','pmt']
     #isos = ['K40']
     #locs = ['internal']
-    
+
+    # create a color scheme
     # legend length = MC + data
     ln = int((len(isos)*len(locs))+1)
     # color list and indexes
@@ -101,8 +105,8 @@ def _myself_(argv):
                 print key,nkey,thing
                 
     
-    # get standard histogram parameters
-    par = hiEhistparam()
+    # get histogram parameters for MC
+    par = loEhistparam()
     
     for i in range(0,8): # is primary crystal of origin
         for iso in isos:
@@ -118,41 +122,15 @@ def _myself_(argv):
                 ### test out resolution smearing
                 ###-------------------------------------------------------------------------------
                 ### using Box-Muller? method here for "rng" alias
-                ### ch1.SetAlias("rng","sin(2.*pi*rndm)*sqrt(-2.*log(rndm))")
                 mc[iso][loc]["chain"].SetAlias('rng','sin(2.*pi*rndm)*sqrt(-2.*log(rndm))')
-                ### the above seems to work fine...
-                
-                ### this goes by my res formula of res = p0 * e^(-E+p1/p2) - E/p3 + p4
-                ### /home/mkauer/sandbox/calibration/plots-resolution/
-                ### ch1.SetAlias("sigma","0.435866*exp(-(EnergyDep+0)/0.0291485)-EnergyDep/205.408+0.0530099")
-                #mc[iso][loc]["chain"].SetAlias('sigma', '0.435866 * exp(-(edep['+str(i)+'] + 0.) / 0.0291485) - edep['+str(i)+'] / 205.408 + 0.0530099')
-                ### the above works! just not right for this case!
 
-                ### and this should be linear right?
-                ### ah, but still need an intercept, this assumes the intercept is 0
-                ### crap, add some offset based off dmice17
-                ### just guessing here.... actually doesn't look too bad... :)
-                ### ah, but energy resolution is going up with energy?? That's not right...
-                ### acoroding to estella's numbers, this should be 8e-5 or 0.00008
-                ### CRAP - NO! I need a at lest a line, two points, one point won't do it...
-                ### ch1.SetAlias("sigma","0.435866*exp(-(EnergyDep+0)/0.0291485)-EnergyDep/205.408+0.0530099")
-                #mc[iso][loc]["chain"].SetAlias('sigma', '(-0.0001*edep['+str(i)+']*1000.) + 0.05')
-                #mc[iso][loc]["chain"].SetAlias('sigma', str(hiEres(i, 'edep['+str(i)+']*1000.')))
-                mc[iso][loc]["chain"].SetAlias('sigma', str(hiEres(i))+' / sqrt(edep['+str(i)+']*1000.)')
-                
-                ### maybe E needs to be defined?
-                #mc[iso][loc]["chain"].SetAlias('E', 'edep['+str(i)+']*1000.')
-                #mc[iso][loc]["chain"].SetAlias('sigma', str(hiEres(i, 'E')))
-                
-                
+                ### set the resolution function - right now it's linear with intercept of 0
+                mc[iso][loc]["chain"].SetAlias('sigma', str(loEres(i))+' / sqrt(edep['+str(i)+']*1000.)')
+                                
                 ### then draw the shit
-                ### ch1.Draw("EnergyDep*1000. + sigma*EnergyDep*1000.*rng >> h_sim1","EnergyDep > 0")
                 mc[iso][loc]["chain"].Draw('(edep['+str(i)+']*1000.) + (sigma*edep['+str(i)+']*1000.*rng) >> histo', cut1+cut2)
                 ###-------------------------------------------------------------------------------
 
-                ### skip this guy below for the E res smearing testing above ^^
-                #mc[iso][loc]["chain"].Draw('edep['+str(i)+']*1000. >> histo', cut1+cut2)
-                
                 mc[iso][loc]["hist"].append(histo)
                 mc[iso][loc]["hist"][i].Sumw2()
 
@@ -184,7 +162,7 @@ def _myself_(argv):
                 mc[iso][loc]["hist"][i].SetMarkerColor(cis[count])
                 mc[iso][loc]["hist"][i].SetLineColor(cis[count])
                 
-                ### temp don't draw MC if you just want to show data
+                ### temp - don't draw MC if you just want to show data
                 mc[iso][loc]["hist"][i].Draw("same")
 
                 legs[i].AddEntry(mc[iso][loc]["hist"][i], space+loc+'-'+iso, lopt)
@@ -196,14 +174,14 @@ def _myself_(argv):
         canv.Update()
     
     canv.Update()
-    canv.Print('testing-hi-energy.png')
+    canv.Print('testing-lo-energy.png')
     
     if not noShow:
         if raw_input("[Enter] to continue, [q] to quit \n") == 'q':
             sys.exit()
 
 
-############################################################
+######################################################################
 
 
 def getData(rootfiles=['data/dryRun/*.root']):
@@ -233,7 +211,7 @@ def getHiEdata(rootfiles=['data/dryRun/*.root']):
     Build histograms of the data from all crystals
     """
 
-    # use pmtXX.rqcD1_5 for high energy
+    ### use pmtXX.rqcD1_5 for high energy
     
     chain = TChain("ntp","")
     for rfile in rootfiles:
@@ -243,7 +221,6 @@ def getHiEdata(rootfiles=['data/dryRun/*.root']):
     #par = histparam()
     for i in range(0,8):
         dat = TH1F("dat", longNames(i), par[0], par[1], par[2])
-        #chain.Draw('crystal'+str(i+1)+'.qc5 *'+str(calib(i))+' >> dat')
         chain.Draw('(pmt'+str(i+1)+'1.rqcD1_5 *'+str(hiEcalib(i,0))
                   +' + pmt'+str(i+1)+'2.rqcD1_5 *'+str(hiEcalib(i,1))+')/2.'
                   +' >> dat')
@@ -260,7 +237,7 @@ def getLoEdata(rootfiles=['data/dryRun/*.root']):
     Build histograms of the data from all crystals
     """
 
-    # use pmtXX.qc_5 for low energy
+    ### use pmtXX.qc5 for low energy
     
     chain = TChain("ntp","")
     for rfile in rootfiles:
@@ -270,9 +247,8 @@ def getLoEdata(rootfiles=['data/dryRun/*.root']):
     #par = histparam()
     for i in range(0,8):
         dat = TH1F("dat", longNames(i), par[0], par[1], par[2])
-        #chain.Draw('crystal'+str(i+1)+'.qc5 *'+str(calib(i))+' >> dat')
-        chain.Draw('(pmt'+str(i+1)+'1.qc_5 *'+str(loEcalib(i,0))
-                  +' + pmt'+str(i+1)+'2.qc_5 *'+str(loEcalib(i,1))+')/2.'
+        chain.Draw('(pmt'+str(i+1)+'1.qc5 *'+str(loEcalib(i,0))
+                  +' + pmt'+str(i+1)+'2.qc5 *'+str(loEcalib(i,1))+')/2.'
                   +' >> dat')
         dat.Sumw2()
         dat.SetLineColor(kBlack)
@@ -376,6 +352,39 @@ def loEres(i):
     return resolution[int(i)]
 
 
+def histparam():
+    """
+    Histogram parameters for number of bins, min, and max in keV
+    """
+    
+    hmin = 0
+    hmax = 1800
+    bins = (hmax-hmin)/4
+    return [bins, hmin, hmax]
+
+
+def loEhistparam():
+    """
+    Histogram parameters for the low energy fitting
+    """
+    
+    hmin = 0
+    hmax = 100
+    bins = (hmax-hmin)*2
+    return [bins, hmin, hmax]
+
+
+def hiEhistparam():
+    """
+    Histogram parameters for the high energy fitting
+    """
+    
+    hmin = 0
+    hmax = 3000
+    bins = (hmax-hmin)/4
+    return [bins, hmin, hmax]
+
+
 def names(i):
     """
     The names of the crystals
@@ -423,39 +432,6 @@ def volumeNames(i):
     return volumeNames[int(i)]
 
     
-def histparam():
-    """
-    Histogram parameters for number of bins, min, and max in keV
-    """
-    
-    hmin = 0
-    hmax = 1800
-    bins = (hmax-hmin)/4
-    return [bins, hmin, hmax]
-
-
-def loEhistparam():
-    """
-    Histogram parameters for the low energy fitting
-    """
-    
-    hmin = 0
-    hmax = 100
-    bins = (hmax-hmin)
-    return [bins, hmin, hmax]
-
-
-def hiEhistparam():
-    """
-    Histogram parameters for the high energy fitting
-    """
-    
-    hmin = 0
-    hmax = 3000
-    bins = (hmax-hmin)/4
-    return [bins, hmin, hmax]
-
-
 def rainbow(N):
     from random import randint
     colors=[]
@@ -498,7 +474,7 @@ def rainbow(N):
     return colors, cis
 
 
-############################################################
+######################################################################
 
 if __name__ == "__main__":
     _myself_(sys.argv[1:])
