@@ -1,11 +1,18 @@
 #!/usr/bin/env python
 
 ############################################################
+# Try to get everything into a dictionary or list
 #
-# version: 2016-10-05
+# version: 2016-10-06
 #
 # Change Log
 #-----------------------------------------------------------
+# + shit! finally got colors to work. What a pain in the butt.
+#   The color index can't be too big > 10,000 and you have to
+#   save the list of colors and indexes or they get dumped
+#   out of memory and then it doesn't work right.
+# + urgh... finally got hists into dictionary
+#   hist name must be same as hist var-name (don't know why)
 # + start adding in external backgrounds too
 # ~ use Pushpa's data calibrations - wrong
 # ~ just use this as the default so I don't have multiple
@@ -35,7 +42,7 @@ from ROOT import *
 import ROOT
 
 
-noShow = 1  ### 0 == show-plots  1 == dont-show-plots
+noShow = 0  ### 0 == show-plots  1 == dont-show-plots
 gROOT.SetBatch(noShow)
 
 def _myself_(argv):
@@ -56,133 +63,96 @@ def _myself_(argv):
 
     #data = getData(["data/dryRun/*root"])
     data = getData(["data/phys/*root*"])
-    #data = getData(["../phy_run/*root*"])
     #data = getData(["../temp/*root*"])
     
-    ch1=TChain("MC","")
-    ch1.Add("sim/K40/*internal*root")
-    #ch1.Add("/data/MC/KIMS-NaI/user-scratch/sim/processed/K40/set2/set2_internalK40-1-nEv200000.root")
+    isos = ['K40','U238','Th232']
+    locs = ['internal','pmt']
     
-    ch2=TChain("MC","")
-    ch2.Add("sim/U238/*internal*root")
-    #ch2.Add("/data/MC/KIMS-NaI/user-scratch/sim/processed/U238/set2/set2_internalU238-1-nEv100000.root")
+    # legend length = MC + data
+    ln = int((len(isos)*len(locs))+1)
+    # color list and indexes
+    colors, cis = rainbow(ln-1)
+    
+    mc = {}
+    for iso in isos:
+        mc[iso] = {}
+        for loc in locs:
+            mc[iso][loc] = {}
+            chain=TChain("MC","")
+            chain.Add('sim/'+iso+'/*'+loc+'*root')
+            mc[iso][loc]["chain"] = chain
+            mc[iso][loc]["hist"] = []
 
-    ch3=TChain("MC","")
-    ch3.Add("sim/Th232/*internal*root")
-    #ch3.Add("/data/MC/KIMS-NaI/user-scratch/sim/processed/Th232/set2/set2_internalTh232-1-nEv100000.root")
     
-    ch4=TChain("MC","")
-    ch4.Add("sim/K40/*pmt*root")
-    #ch4.Add("/data/MC/KIMS-NaI/user-scratch/sim/processed/K40/set2/set2_pmtK40-1-nEv200000.root")
+    # just to show I can iterate over this thing
+    for key in mc:
+        #print key
+        for nkey in mc[key]:
+            #print key,nkey
+            for thing in mc[key][nkey]:
+                print key,nkey,thing
+                
     
+    # get standard histogram parameters
     par = histparam()
-    canvs = []
-    #legs = []
-
     
-    sims4 = []
     for i in range(0,8): # is primary crystal of origin
-    #for i in range(0,1): # is primary crystal of origin
+        for iso in isos:
+            for loc in locs:
+                key = str(loc+'-'+iso+'-C'+str(i+1))
+                histo = TH1F('histo', key, par[0], par[1], par[2])
+                cut1 = TCut('MC.edepResol['+str(i)+']*1000. > 0')
+                if loc == 'internal':
+                    cut2 = TCut('MC.primVolumeName == "'+volumeNames(i)+'"')
+                if loc == 'pmt':
+                    cut2 = TCut('MC.primVolumeName == "phys_pmt" ')
+                mc[iso][loc]["chain"].Draw('MC.edepResol['+str(i)+']*1000. >> histo', cut1+cut2)
+                mc[iso][loc]["hist"].append(histo)
+                mc[iso][loc]["hist"][i].Sumw2()
+
+    # have the plotting be seperated out from the loop
+    canv = TCanvas('canv', 'canv', 0, 0, 1600, 900)
+    canv.Divide(4,2)
+    legs=[]
+
+    for i in range(0,8):
+        canv.cd(i+1)
+        canv.cd(i+1).SetLogy()
+        yleg = (1.-(6*ln*0.01))
+        space = '  '
+        leg = TLegend(0.60, yleg, 0.94, 0.88)
+        legs.append(leg)
         
-        sims1 = []
-        sims2 = []
-        sims3 = []
-        #sims4 = []
-        for j in range(0,8): # is surounding crystals and self
-            sim1 = TH1F("sim1", names(j), par[0], par[1], par[2])
-            sim2 = TH1F("sim2", names(j), par[0], par[1], par[2])
-            sim3 = TH1F("sim3", names(j), par[0], par[1], par[2])
-            #cut1 = TCut('event_MC.edepResol['+str(j)+']*1000. > 0')
-            #cut2 = TCut('event_MC.primVolumeName == "'+volumeNames(i)+'"')
-            #ch1.Draw('event_MC.edepResol['+str(j)+']*1000. >> sim1',cut1+cut2)
-            #ch2.Draw('event_MC.edepResol['+str(j)+']*1000. >> sim2',cut1+cut2)
-            cut1 = TCut('MC.edepResol['+str(j)+']*1000. > 0')
-            cut2 = TCut('MC.primVolumeName == "'+volumeNames(i)+'"')
-            ch1.Draw('MC.edepResol['+str(j)+']*1000. >> sim1',cut1+cut2)
-            ch2.Draw('MC.edepResol['+str(j)+']*1000. >> sim2',cut1+cut2)
-            ch3.Draw('MC.edepResol['+str(j)+']*1000. >> sim3',cut1+cut2)
-            sim1.Sumw2()
-            sims1.append(sim1)
-            sim2.Sumw2()
-            sims2.append(sim2)
-            sim3.Sumw2()
-            sims3.append(sim3)
+        data[i].GetYaxis().SetTitle('arb. counts')
+        data[i].GetXaxis().SetTitle('Energy (keV)')
+        data[i].Draw()
 
-            # only need to generate external backgrounds one time
-            if i == 0:
-                sim4 = TH1F("sim4", names(j), par[0], par[1], par[2])
-                cut1 = TCut('MC.edepResol['+str(j)+']*1000. > 0')
-                cut2 = TCut('MC.primVolumeName == "phys_pmt" ')
-                ch4.Draw('MC.edepResol['+str(j)+']*1000. >> sim4',cut1+cut2)
-                sim4.Sumw2()
-                sims4.append(sim4)
+        legs[i].SetFillColor(0)
+        legs[i].SetBorderSize(0)
+        lopt = 'LPE'
+        legs[i].AddEntry(data[i], space+'data', lopt)
 
-        
-        canv = TCanvas(names(i), names(i), 0, 0, 1600, 900)
-        canvs.append(canv)
-        canvs[i].Divide(4,2)
-        legs = []
-        for k in range(0,8):
-            
-            canvs[i].cd(k+1)
-            canvs[i].cd(k+1).SetLogy()
-            
-            leg = TLegend(0.60, 0.65, 0.92, 0.88)
-            legs.append(leg)
-            
-            if k == i:
-                sims1[k].SetMarkerColor(kRed+1)
-                sims1[k].SetLineColor(kRed+1)
-                sims2[k].SetMarkerColor(kBlue+1)
-                sims2[k].SetLineColor(kBlue+1)
-                sims3[k].SetMarkerColor(kGreen+1)
-                sims3[k].SetLineColor(kGreen+1)
-                
-            else:
-                sims1[k].SetMarkerColor(kRed+2)
-                sims1[k].SetLineColor(kRed+2)
-                sims2[k].SetMarkerColor(kBlue+2)
-                sims2[k].SetLineColor(kBlue+2)
-                sims3[k].SetMarkerColor(kGreen+2)
-                sims3[k].SetLineColor(kGreen+2)
-
-            sims4[k].SetMarkerColor(kYellow+2)
-            sims4[k].SetLineColor(kYellow+2)
-            
-            sims1[k].SetLineWidth(1)
-            sims2[k].SetLineWidth(1)
-            sims3[k].SetLineWidth(1)
-            sims4[k].SetLineWidth(1)
-            
-            data[k].GetYaxis().SetTitle('arb. counts')
-            data[k].GetXaxis().SetTitle('Energy (keV)')
-            
-            data[k].Draw()
-            sims1[k].Draw("same")
-            sims2[k].Draw("same")
-            sims3[k].Draw("same")
-            sims4[k].Draw("same")
-            
-            legs[k].SetFillColor(0)
-            legs[k].SetBorderSize(0)
-            lopt='LPE'
-            legs[k].AddEntry(data[k],  '  data',     lopt)
-            legs[k].AddEntry(sims1[k], '  xtal K40',   lopt)
-            legs[k].AddEntry(sims2[k], '  xtal U238',  lopt)
-            legs[k].AddEntry(sims3[k], '  xtal Th232', lopt)
-            legs[k].AddEntry(sims4[k], '  pmt K40', lopt)
-            legs[k].Draw("same")
+        count = 0
+        for j, loc in enumerate(locs):
+            for k, iso in enumerate(isos):
+                mc[iso][loc]["hist"][i].SetMarkerColor(cis[count])
+                mc[iso][loc]["hist"][i].SetLineColor(cis[count])
+                mc[iso][loc]["hist"][i].Draw("same")
+                legs[i].AddEntry(mc[iso][loc]["hist"][i], space+loc+'-'+iso, lopt)
+                count += 1
+        legs[i].Draw("same")
+        canv.Update()
+    
+    canv.Update()
+    canv.Print('testing.png')
+    
+    if not noShow:
+        if raw_input("[Enter] to continue, [q] to quit \n") == 'q':
+            sys.exit()
 
 
-        canvs[i].Update()
-        canvs[i].Print('testing-'+names(i)+'.png')
-
-        if not noShow:
-            if raw_input("[Enter] to continue, [q] to quit \n") == 'q':
-                sys.exit()
-                
-        
 ############################################################
+
 
 def getData(rootfiles=['data/dryRun/*.root']):
     """
@@ -220,6 +190,7 @@ def calib(i):
                     0.00032017]
     #return calibrations[int(i)]
     return 0.0004
+
 
 def names(i):
     """
@@ -277,6 +248,48 @@ def histparam():
     hmax = 1800
     bins = (hmax-hmin)/2
     return [bins, hmin, hmax]
+
+
+def rainbow(N):
+    from random import randint
+    colors=[]
+    cis=[]
+    # ci cannot be too large > 10,000!
+    ci = randint(1000, 5000)
+    for h in range(N):
+        H = float(h)/float(N)
+        ci += 1
+        if H <= 1/5. :
+            R=1.
+            G=1.*5*H
+            B=0.
+        elif H > 1/5. and H <= 2/5. :
+            R=1.-(1*5*(H-1/5.))
+            G=1.
+            B=0.
+        elif H > 2/5. and H <= 3/5. :
+            R=0.
+            G=1.
+            B=1.*5*(H-2/5.)
+        elif H > 3/5. and H <= 4/5. :
+            R=0.
+            G=1.-(1*5*(H-3/5.))
+            B=1.
+        elif H > 4/5. and H <= 1. :
+            R=1.*5*(H-4/5.)
+            G=0.
+            B=1.
+        elif H > 1. :
+            R=1.
+            G=1.
+            B=1.
+        
+        color = TColor(ci, R, G, B)
+        # must keep the color and the ci in memory
+        colors.append(color)
+        cis.append(ci)
+        
+    return colors, cis
 
 
 ############################################################
