@@ -1,12 +1,19 @@
 #!/usr/bin/env python
 
 ######################################################################
-# Try to get everything into a dictionary or list
+# Fit the MC to data! 
 #
-# version: 2016-10-24
+# version: 2016-10-25
 #
 # Change Log
 #---------------------------------------------------------------------
+# ~ fixed mc+data+tot+resid length issue
+# + another canvas showing the residuals
+# + show the total mc in gray after the fit
+# + get hostname and select data path based off hostname
+# + try to fit high energy stuff - based off my dm17 fitting code
+# ~ tweak legend size to make a little more consistent,
+#   but it's still not quite right, i don't know why..
 # ~ plot low energy things - ah, use pmtXX.qc5 no qc_5 - oops
 # + added low energy calib and resolution functions
 # ~ use assumption that res~srqt(E) with intercept=0
@@ -41,18 +48,39 @@
 #
 # mkauer@physics.wisc.edu
 ######################################################################
+#
+# Where is MC?
+# /data/MC/KIMS-NaI/user-scratch/sim/processed/K40/set2
+# /data/MC/KIMS-NaI/user-scratch/sim/processed/U238/set2
+# /data/MC/KIMS-NaI/user-scratch/sim/processed/Th232/set2
+#
+# Where is raw data?
+# /data/KIMS/COSINE/PHY_RUN
+#
+######################################################################
 
 import os,sys
+import socket
 import numpy as np
 from ROOT import *
 import ROOT
 
 
-noShow = 0  ### 0 == show-plots  1 == dont-show-plots
-gROOT.SetBatch(noShow)
+### figure out if running on laptop or at CUP
+local = 0
+host = str(socket.gethostname())
+if 'local' in host:
+    local = 1
+
+### 0 == show-plots  1 == dont-show-plots
+batch = 0
+if not local:
+    batch = 1
+gROOT.SetBatch(batch)
+
 
 def _myself_(argv):
-    
+
     gROOT.Reset()
     gStyle.SetPalette(1)
     gStyle.SetOptStat("")
@@ -67,23 +95,33 @@ def _myself_(argv):
     gStyle.SetLabelSize(0.045,"xy")
 
 
-    #data = getData(["data/dryRun/*root"])
-    #data = getHiEdata(["data/phys/*root*"])
-    #data = getData(["../temp/*1324*root*"])
-
-    #data = getHiEdata(["data/phys/*1324*root*"])
-    data = getLoEdata(["data/phys/*1324*root*"])
     
-    isos = ['K40','U238','Th232']
-    locs = ['internal','pmt']
-    #isos = ['K40']
-    #locs = ['internal']
 
-    # create a color scheme
-    # legend length = MC + data
-    ln = int((len(isos)*len(locs))+1)
+    ### get your data!
+    if local:
+        data = getHiEdata(["./data/phys/*1324*root*"])
+        #data = getLoEdata(["./data/phys/*1324*root*"])
+    else:
+        ### ALL files
+        data = getHiEdata(["/home/mkauer/temp/*1324*root*"])
+        ### Just one file
+        #data = getHiEdata(["/home/mkauer/temp/*1324*root.001"])
+        #data = getLoEdata(["/home/mkauer/temp/*1324*root*"])
+
+    ### define what MC you want and from where
+    isos = ['K40','U238','Th232']
+    #locs = ['internal','pmt']
+    #isos = ['U238','Th232']
+    locs = ['internal']
+    
+    # legend length = MC + data + total-mc
+    Nlg = int((len(isos)*len(locs))+2)
+    #print 'legend length =',ln
+
+    # create a color scheme for MC
     # color list and indexes
-    colors, cis = rainbow(ln-1)
+    Nmc = int((len(isos)*len(locs)))
+    colors, cis = rainbow(Nmc)
     
     mc = {}
     for iso in isos:
@@ -91,7 +129,13 @@ def _myself_(argv):
         for loc in locs:
             mc[iso][loc] = {}
             chain=TChain("MC","")
-            chain.Add('sim/'+iso+'/*'+loc+'*root')
+            if local:
+                chain.Add('./sim/'+iso+'/'+'*'+loc+'*root')
+            else:
+                ### ALL files
+                chain.Add('/data/MC/KIMS-NaI/user-scratch/sim/processed/'+iso+'/set2/'+'set2_*'+loc+'*root')
+                ### Just one file
+                #chain.Add('/data/MC/KIMS-NaI/user-scratch/sim/processed/'+iso+'/set2/'+'set2_*'+loc+'*-1-*root')
             mc[iso][loc]["chain"] = chain
             mc[iso][loc]["hist"] = []
 
@@ -106,7 +150,7 @@ def _myself_(argv):
                 
     
     # get histogram parameters for MC
-    par = loEhistparam()
+    par = hiEhistparam()
     
     for i in range(0,8): # is primary crystal of origin
         for iso in isos:
@@ -125,62 +169,170 @@ def _myself_(argv):
                 mc[iso][loc]["chain"].SetAlias('rng','sin(2.*pi*rndm)*sqrt(-2.*log(rndm))')
 
                 ### set the resolution function - right now it's linear with intercept of 0
-                mc[iso][loc]["chain"].SetAlias('sigma', str(loEres(i))+' / sqrt(edep['+str(i)+']*1000.)')
+                #mc[iso][loc]["chain"].SetAlias('sigma', str(loEres(i))+' / sqrt(edep['+str(i)+']*1000.)')
+                mc[iso][loc]["chain"].SetAlias('sigma', str(hiEres(i))+' / sqrt(edep['+str(i)+']*1000.)')
                                 
                 ### then draw the shit
                 mc[iso][loc]["chain"].Draw('(edep['+str(i)+']*1000.) + (sigma*edep['+str(i)+']*1000.*rng) >> histo', cut1+cut2)
                 ###-------------------------------------------------------------------------------
 
                 mc[iso][loc]["hist"].append(histo)
-                mc[iso][loc]["hist"][i].Sumw2()
+                #mc[iso][loc]["hist"][i].Sumw2()
+                #print 'this',mc[iso][loc]["hist"][i]
+                
 
+    ### fit the MC to data
+    #=================================================================
+    #=================================================================
+    fmin = 100 # fit min E window
+    fmax = 3000 # fit max E window
+
+    fmc = []
+    fit = []
+    results = []
+    for i in range(0,8):
+        fmc.append(TObjArray(Nmc)) # number of MC to fit to
+        dat_int = data[i].Integral(fmin,fmax) # data integral to normalize to
+        #print i,'dat_int =',dat_int
+        for iso in isos:
+            for loc in locs:
+                mc_int = mc[iso][loc]["hist"][i].Integral(fmin,fmax) # MC integral
+                #print iso,loc,'mc_int =',mc_int
+
+                ### to scale or not to scale...
+                #---------------------------------------------------------------------
+                mc[iso][loc]["hist"][i].Scale(dat_int/mc_int) # scale to data integral
+                mc[iso][loc]["hist"][i].Sumw2() # reset weights
+                #---------------------------------------------------------------------
+                
+                fmc[i].Add(mc[iso][loc]["hist"][i]) # add to the TFractionFitter object
+                
+        fit.append(TFractionFitter(data[i], fmc[i])) # create the TFF data and MC objects
+        
+        for l in range(Nmc):
+            # set bounds on the MC put into fmc TObject
+            fit[i].Constrain(l, 0.01, 10.0)
+        
+        fit[i].SetRangeX(fmin, fmax) # set global range, should be the same as fmin and fmax?
+        
+        status = fit[i].Fit() # do the fit!
+        chi2 = fit[i].GetChisquare()
+        ndf = fit[i].GetNDF()
+        #print "Fit done with status ",status," -  chi2/ndf =",chi2,"/",ndf
+        results.append("NaI-C"+str(i+1)+" fit completed with status "+str(status))
+        results.append("fit chi2/ndf = "+str(round(chi2,2))+"/"+str(ndf)+" = "+str(round(chi2/float(ndf),2)))
+        
+        for j, iso in enumerate(isos):
+            for k, loc in enumerate(locs):
+                value = ROOT.Double(0.0)
+                error = ROOT.Double(0.0)
+                l = j+k
+                #print l
+                fit[i].GetResult(l, value, error)
+                #print iso,loc,'=',value,' +/- ',error
+                results.append(str(iso)+' '+str(loc)+' = '+str(round(value,4))+' +/- '+str(round(error,4)))
+                mc[iso][loc]["hist"][i].Scale(value)
+        results.append('\n')
+    
+    print '\n\n'
+    for line in results:
+        print line
+    #=================================================================
+    #=================================================================
+        
     # have the plotting be seperated out from the loop
     canv = TCanvas('canv', 'canv', 0, 0, 1600, 900)
     canv.Divide(4,2)
     legs=[]
-
+    tot = makeHiEtotal() # make a set of total MC histos
+    
     for i in range(0,8):
         canv.cd(i+1)
         canv.cd(i+1).SetLogy()
-        yleg = (1.-(6*ln*0.01))
+        #yleg = (1.-(6*ln*0.01))
+        ylegstart = 0.88
+        ylegend = (ylegstart-(Nlg*0.04))
         space = '  '
-        leg = TLegend(0.60, yleg, 0.94, 0.88)
+        leg = TLegend(0.60, ylegend, 0.94, ylegstart)
         legs.append(leg)
+        legs[i].SetFillColor(0)
+        legs[i].SetBorderSize(0)
+        lopt = 'LPE'
         
         data[i].GetYaxis().SetTitle('arb. counts')
         data[i].GetXaxis().SetTitle('Energy (keV)')
         data[i].Draw()
-
-        legs[i].SetFillColor(0)
-        legs[i].SetBorderSize(0)
-        lopt = 'LPE'
         legs[i].AddEntry(data[i], space+'data', lopt)
 
-        count = 0
-        for j, loc in enumerate(locs):
-            for k, iso in enumerate(isos):
-                mc[iso][loc]["hist"][i].SetMarkerColor(cis[count])
-                mc[iso][loc]["hist"][i].SetLineColor(cis[count])
+        for j, iso in enumerate(isos):
+            for k, loc in enumerate(locs):
+                ### set mc colors
+                mc[iso][loc]["hist"][i].SetMarkerColor(cis[j+k])
+                mc[iso][loc]["hist"][i].SetLineColor(cis[j+k])
                 
                 ### temp - don't draw MC if you just want to show data
                 mc[iso][loc]["hist"][i].Draw("same")
 
+                ### add MC to total MC hist
+                tot[i].Add(mc[iso][loc]["hist"][i])
+
+                ### create the legend entry for MC
                 legs[i].AddEntry(mc[iso][loc]["hist"][i], space+loc+'-'+iso, lopt)
-                count += 1
+
+        tot[i].Sumw2()
+        tot[i].Draw("same")
+        legs[i].AddEntry(tot[i], space+'Total MC', lopt)
         legs[i].Draw("same")
         
         # put data back on top
-        data[i].Draw('same')
-        canv.Update()
-    
+        #data[i].Draw('same')
+            
     canv.Update()
-    canv.Print('testing-lo-energy.png')
+    canv.Print('testing-hi-energy-fit.png')
     
-    if not noShow:
-        if raw_input("[Enter] to continue, [q] to quit \n") == 'q':
-            sys.exit()
+    ### draw the residuals
+    #-----------------------------------------------------------------
+    canv2 = TCanvas('canv2', 'canv2', 0, 0, 1600, 900)
+    canv2.Divide(4,2)
+    legs2=[]
+    resid = makeHiEresid() # make a set of resid histos
+    zeros=[]
+    
+    for i in range(0,8):
+        canv2.cd(i+1)
+        ylegstart = 0.88
+        ylegend = (ylegstart-(0.05))
+        leg = TLegend(0.55, ylegend, 0.94, ylegstart)
+        legs2.append(leg)
+        legs2[i].SetFillColor(0)
+        legs2[i].SetBorderSize(0)
+        lopt = 'LPE'
+        
+        resid[i].Add(data[i],tot[i],1,-1)
+        resid[i].SetXTitle("Energy keV")
+        resid[i].SetYTitle("counts / keV")
+        resid[i].SetAxisRange(-100,100,"y")
+        resid[i].Draw()
+        
+        zero = TLine(par[1],0,par[2],0)
+        zeros.append(zero)
+        zeros[i].SetLineColor(kRed)
+        zeros[i].SetLineWidth(1)
+        zeros[i].Draw()
+        
+        legs2[i].AddEntry(resid[i],"data-MC residual",lopt)
+        legs2[i].Draw()
+
+    canv2.Update()
+    canv2.Print('testing-hi-energy-fit-resid.png')
+    #-----------------------------------------------------------------
+    
+    if not batch:
+        raw_input("[Enter] to quit \n")
 
 
+
+######################################################################
 ######################################################################
 
 
@@ -256,6 +408,30 @@ def getLoEdata(rootfiles=['data/dryRun/*.root']):
         dat.SetLineWidth(1)
         data.append(dat)
     return data
+
+
+def makeHiEtotal():
+    total = []
+    par = hiEhistparam()
+    for i in range(0,8):
+        tot = TH1F("tot", longNames(i), par[0], par[1], par[2])
+        tot.SetLineColor(kGray+1)
+        tot.SetMarkerColor(kGray+1)
+        tot.SetLineWidth(1)
+        total.append(tot)
+    return total
+
+
+def makeHiEresid():
+    resid = []
+    par = hiEhistparam()
+    for i in range(0,8):
+        res = TH1F("res", longNames(i), par[0], par[1], par[2])
+        res.SetLineColor(kBlack)
+        res.SetMarkerColor(kBlack)
+        res.SetLineWidth(1)
+        resid.append(res)
+    return resid
 
 
 def calib(i):
@@ -381,7 +557,8 @@ def hiEhistparam():
     
     hmin = 0
     hmax = 3000
-    bins = (hmax-hmin)/4
+    # fit energy needs to be normalized to bins???
+    bins = (hmax-hmin)
     return [bins, hmin, hmax]
 
 
