@@ -1,16 +1,24 @@
 #!/usr/bin/env python
 
 ######################################################################
-# 10-mc-func-fit.py
+# 11-fit-hi-lo.py
 #
-# Fit the MC to data!
+# Fit hi and lo energy together!
 # Note: This version and higher will use the funcs.py!
 # 
-# version: 2016-11-01
+# version: 2016-11-15
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# ~ residual should be data/MC not data-MC
+# + add more lists for total,resid,legs,zeros so they have their
+#   own memory space and aren't lost when modifying the canvases
 # ~ resolution function should be divided by 2 (see funcs.py)
+#   I generated a new joined rootfile with the MC reso / 2
+# + added TFractionFitter weight histo but it doesn't work? line 289
+#   Still need to fix that. Don't understand why that doesn't work.
+# + plot both loE and hiE histos that are scaled from the multi-fit
+# + combine loE and hiE histos into 1 histo for fitting
 # + need copy.copy or copy.deepcopy when reading histos from rootfile
 #   and adding to a list or dict. Going to use deepcopy just to be sure.
 # ~ now use buildMC() to get your MC
@@ -103,10 +111,11 @@ from funcs import *
 
 ### user inputs
 #================================================================
-reuse   = 0   ### use joined rootfile data?
-energy  = 0   ### 0 = low-energy  -- 1 = high-energy
-scale   = 1   ### pre scale the MC?
-weight  = 1   ### set MC weights?
+reuse     = 1   ### use joined rootfile data?
+energy    = 0   ### 0 = low-energy  -- 1 = high-energy
+mcscale   = 1   ### pre scale the MC?
+mcweight  = 1   ### set MC weights?
+fitweight = 0   ### set fit weights?
 #================================================================
 
 
@@ -136,9 +145,13 @@ def _myself_(argv):
     
     
     if reuse:
-        rootfile = "/home/mkauer/COSINE/CUP/mc-fitting/root-join-read/joined-master.root"
-        #rootfile = "/home/mkauer/COSINE/CUP/mc-fitting/root-join-read/join-test.root"
-        data, mc, locs, isos = readROOT(rootfile, energy)
+        if local:
+            rootfile = "/home/mkauer/COSINE/CUP/mc-fitting/root-join-read/joined-master.root"
+            #rootfile = "/home/mkauer/COSINE/CUP/mc-fitting/root-join-read/join-test.root"
+        else:
+            rootfile = "/home/mkauer/mc-fitting/root-join-read/joined-master.root"
+        dataLo, mcLo, locs, isos = readROOT(rootfile, 0)
+        dataHi, mcHi, locs, isos = readROOT(rootfile, 1)
     else:
         if local: path = "/home/mkauer/COSINE/CUP/mc-fitting/data/phys/"
         else:     path = "/home/mkauer/temp/"
@@ -148,13 +161,25 @@ def _myself_(argv):
         locs = ['internal','pmt']
         isos = ['K40','U238','Th232']
         mc = buildMC(locs, isos, energy)
+
+    
+    ### just for testing and making sure plotting still works
+    #if energy:
+    #    data = dataHi
+    #    mc = mcHi
+    #else:
+    #    data = dataLo
+    #    mc = mcLo
+    
     
     # maintain the same fitting order and what not?
     # will need to FIX this eventually...
-    locs = ['internal','pmt']
+    # seems the order you load the MC into the fit object effects things greatly
+    #locs = ['internal','pmt']
+    #isos = ['K40','U238','Th232']
+    locs = ['internal']
     isos = ['K40','U238','Th232']
-    #locs = ['pmt','internal']
-    #isos = ['Th232','U238','K40']
+    
     
     # create a color scheme for MC
     # color list and indexes
@@ -167,23 +192,76 @@ def _myself_(argv):
     ### fit the MC to data
     #=================================================================
     #=================================================================
-    if energy:
-        fmin = 100  # fit min E window
-        fmax = 3000 # fit max E window
-    else:
-        fmin = 15   # fit min E window
-        fmax = 100  # fit max E window
-        
-    fmc = []
+
+    fLo = [15, 90]
+    fLoBins = fLo[1]-fLo[0]
+
+    fHi = [500, 2500]
+    fHiBins = fHi[1]-fHi[0]
+
+    fbins = fLoBins+fHiBins
+    
+    fmin=0
+    fmax=fbins
+    
+    mcObj = []
     fit = []
     results = []
+
+    ##############################################
+    ### create the multi-chan histos for fitting
+
+    fitdata = []
+    fitmc = {}
+    
+    ### init new fitmc dict
+    for loc in locs:
+        fitmc[loc] = {}
+        for iso in isos:
+            fitmc[loc][iso] = {}
+            fitmc[loc][iso]["hist"] = []
+            fitmc[loc][iso]["weight"] = []
+    ### fill fitdata and fitmc
     for i in range(8):
-        fmc.append(TObjArray(Nmc)) # number of MC to fit to
-        dat_int = data[i].Integral(fmin,fmax) # data integral to normalize to
-        #print i,'dat_int =',dat_int
+        fdata = TH1F('fdata'+str(i),'muli-chan-data',fbins,0,fbins)
+        ### low energy hists
+        for n in range(fLoBins):
+            fdata.SetBinContent(n, dataLo[i].GetBinContent(fLo[0]+n))
+            fdata.SetBinError(n, dataLo[i].GetBinError(fLo[0]+n))
+            fitdata.append(fdata)
+            for loc in locs:
+                for iso in isos:
+                    key = loc+'_'+iso+'_'+str(i)
+                    fmc = TH1F(key,key,fbins,0,fbins)
+                    fmc.SetBinContent(n, mcLo[loc][iso]['hist'][i].GetBinContent(fLo[0]+n))
+                    fitmc[loc][iso]["hist"].append(fmc)
+        ### high energy hists
+        for n in range(fLoBins,fbins):
+            fitdata[i].SetBinContent(fLoBins+n, dataHi[i].GetBinContent(fHi[0]+n))
+            fitdata[i].SetBinError(fLoBins+n, dataHi[i].GetBinError(fHi[0]+n))
+            #fitdata[i].Sumw2()
+            for loc in locs:
+                for iso in isos:
+                    fitmc[loc][iso]["hist"][i].SetBinContent(fLoBins+n, mcHi[loc][iso]['hist'][i].GetBinContent(fHi[0]+n))
+    
+    ### make weights histo
+    ### testing with TFracFit
+    weights = TH1F('weights','weights',fbins,0,fbins)
+    for n in range(0,fbins):
+        weights.SetBinContent(n, 1)
+    weights.Sumw2()
+    ##############################################
+    
+    for i in range(8):
+        
+        mcObj.append(TObjArray(Nmc)) # number of MC to fit to
+        
+        fitdata[i].Sumw2()
+        dat_int = fitdata[i].Integral(fmin,fmax) # data integral to normalize to
+
         for loc in locs:
             for iso in isos:
-                mc_int = mc[loc][iso]["hist"][i].Integral(fmin,fmax) # MC integral
+                mc_int = fitmc[loc][iso]["hist"][i].Integral(fmin,fmax) # MC integral
                 #print iso,loc,'mc_int =',mc_int
                 
                 
@@ -192,25 +270,31 @@ def _myself_(argv):
                 ########################################################################
                 
                 ### to scale or not to scale...
-                if scale:
-                    mc[loc][iso]["hist"][i].Scale(dat_int/mc_int) # scale to data integral
-                
+                if mcscale:
+                    fitmc[loc][iso]["hist"][i].Scale(dat_int/mc_int) # scale to data integral
+                    mcLo[loc][iso]["hist"][i].Scale(dat_int/mc_int) # make sure MC is scaled too
+                    mcHi[loc][iso]["hist"][i].Scale(dat_int/mc_int) # make sure MC is scaled too
+                    
                 ### to weight or not to weight...
-                if weight:
-                    mc[loc][iso]["hist"][i].Sumw2() # set stat weights
+                if mcweight:
+                    fitmc[loc][iso]["hist"][i].Sumw2() # set stat weights
                 
                 ########################################################################
                 #=======================================================================
                 #-----------------------------------------------------------------------
                 
                 
-                fmc[i].Add(mc[loc][iso]["hist"][i]) # add to the TFractionFitter object
+                mcObj[i].Add(fitmc[loc][iso]["hist"][i]) # add to the TFractionFitter object
                 
-        fit.append(TFractionFitter(data[i], fmc[i])) # create the TFF data and MC objects
+        fit.append(TFractionFitter(fitdata[i], mcObj[i])) # create the TFF data and MC objects
         
         for l in range(Nmc):
-            # set bounds on the MC put into fmc TObject
+            # set bounds on the MC put into mcObj TObject
             fit[i].Constrain(l, 0.0001, 10.0)
+            # set fit weights to 1
+            if fitweight:
+                fit[i].SetWeight(l, weights)
+                #fit[i].SetWeight(l, 1)
         
         fit[i].SetRangeX(fmin, fmax) # set global range, should be the same as fmin and fmax?
         
@@ -241,7 +325,7 @@ def _myself_(argv):
         results.append("NaI-C"+str(i+1)+" fit completed")
         results.append("chi2/ndf = "+str(round(chi2,2))+"/"+str(ndf)+" = "+str(round(chi2/float(ndf),2)))
         results.append('p-value = '+str(pval))
-
+        
         count = 0
         for loc in locs:
             for iso in isos:
@@ -252,155 +336,202 @@ def _myself_(argv):
                 fit[i].GetResult(count, value, error)
                 #print iso,loc,'=',value,' +/- ',error
                 results.append(str(loc)+' '+str(iso)+' = '+str(round(value,4))+' +/- '+str(round(error,4)))
-                mc[loc][iso]["hist"][i].Scale(value)
+                fitmc[loc][iso]["hist"][i].Scale(value)
+                mcLo[loc][iso]["hist"][i].Scale(value)
+                mcHi[loc][iso]["hist"][i].Scale(value)
                 count += 1
         results.append('\n')
 
     print '\n\n'
     for line in results:
         print line
+    
     #=================================================================
     #=================================================================
+    # plot the lo and hi energy histograms
     
-    # have the plotting be seperated out from the loop
-    canv = TCanvas('canv', 'canv', 0, 0, 1400, 900)
-    canv.Divide(4,2)
-    toppad=[]
-    botpad=[]
-    legs=[]
-    legs2=[]
-    zeros=[]
+    canvs=[None for x in range(2)]
+    data=[None for x in range(2)]
     
-    font=63
-    size=13
+    #mc=[]
     
-    tot = makeTotal(energy) # make a set of total MC histos
-    resid = makeResid(energy) # make a set of resid histos
+    total=[None for x in range(2)]
+    resid=[None for x in range(2)]
     
-    for i in range(8):
-        canv.cd(i+1)
-        #canv.cd(i+1).SetLogy()
+    legs=[None for x in range(2)]
+    legs2=[None for x in range(2)]
+    zeros=[None for x in range(2)]
+    
+    for E in range(2):
         
-        fraction = 0.3
-        pad1 = TPad("pad1","pad1",0,fraction,1,1)
-        toppad.append(pad1)
-        pad2 = TPad("pad2","pad2",0,0,1,fraction)
-        botpad.append(pad2)
-        toppad[i].SetBottomMargin(0.01)
-        toppad[i].SetBorderMode(0)
-        toppad[i].SetLogy()
-        botpad[i].SetTopMargin(0.05)
-        botpad[i].SetBottomMargin(0.3)
-        botpad[i].SetBorderMode(0)
-        toppad[i].Draw()
-        botpad[i].Draw()
-        toppad[i].cd()
+        legs[E]=[]
+        legs2[E]=[]
+        zeros[E]=[]
         
-        ylegstart = 0.88
-        ylegend = (ylegstart-(Nlg*0.06))
-        space = '  '
-        leg = TLegend(0.65, ylegend, 0.94, ylegstart)
-        legs.append(leg)
-        legs[i].SetFillColor(0)
-        legs[i].SetBorderSize(0)
-        lopt = 'LPE'
-        
-        if local and not reuse:
-            data[i].SetAxisRange(1,1000,"y")
+        if E:
+            data[E] = dataHi
+            #mc.append(mcHi)
+            mc = mcHi
         else:
-            data[i].SetAxisRange(1,1000000,"y")
+            data[E] = dataLo
+            #mc.append(mcLo)
+            mc = mcLo
+            
+        #total = makeTotal(E) # make a set of total MC histos
+        #resid = makeResid(E) # make a set of resid histos
+        total[E] = makeTotal(E)
+        resid[E] = makeResid(E)
         
-        data[i].GetYaxis().SetTitle('arb. counts (for now)')
-        data[i].GetYaxis().SetTitleFont(font)
-        data[i].GetYaxis().SetTitleSize(size)
-        data[i].GetYaxis().SetTitleOffset(4.2)
-        data[i].GetYaxis().SetLabelFont(font)
-        data[i].GetYaxis().SetLabelSize(size)
-        data[i].GetYaxis().SetLabelOffset(0.01)
-        #data[i].GetXaxis().SetTitle('Energy (keV)')
-        #data[i].GetXaxis().SetLabelFont(font)
-        #data[i].GetXaxis().SetLabelSize(size)
-        data[i].Draw()
-        legs[i].AddEntry(data[i], space+'data', lopt)
+        # have the plotting be seperated out from the loop
+        canvs[E] = TCanvas('canv'+str(E), 'canv'+str(E), 0, 0, 1400, 900)
+        #canvs.append(canv)
+        canvs[E].Divide(4,2)
         
-        color = 0
-        for loc in locs:
-            for iso in isos:
-                ### set mc colors
-                mc[loc][iso]["hist"][i].SetMarkerColor(cis[color])
-                mc[loc][iso]["hist"][i].SetLineColor(cis[color])
-                color += 1
-                
-                mc[loc][iso]["hist"][i].SetAxisRange(1,1000,"y")
-                
-                ### temp - don't draw MC if you just want to show data
-                mc[loc][iso]["hist"][i].Draw("same")
-                
-                ### add MC to total MC hist
-                tot[i].Add(mc[loc][iso]["hist"][i])
-                
-                ### create the legend entry for MC
-                legs[i].AddEntry(mc[loc][iso]["hist"][i], space+loc+'-'+iso, lopt)
-        
-        tot[i].Sumw2()
-        tot[i].Draw("same")
-        legs[i].AddEntry(tot[i], space+'Total MC', lopt)
-        legs[i].Draw("same")
-        
-        
-        ### try to get the residuals in!
-        #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        botpad[i].cd()
-        leg = TLegend(0.72, 0.78, 0.94, 0.94)
-        legs2.append(leg)
-        legs2[i].SetFillColor(0)
-        legs2[i].SetBorderSize(0)
-        lopt = 'LPE'
-        
-        resid[i].Add(data[i],tot[i],1,-1)
-        resid[i].SetTitle('')
-        resid[i].SetXTitle("Energy (keVee)")
-        resid[i].GetXaxis().SetTitleFont(font)
-        resid[i].GetXaxis().SetTitleSize(size)
-        resid[i].GetXaxis().SetLabelFont(font)
-        resid[i].GetXaxis().SetLabelSize(size)
-        resid[i].GetXaxis().SetLabelOffset(0.03)
-        resid[i].GetXaxis().SetTitleOffset(8)
-        #resid[i].SetYTitle("counts / keV")
-        resid[i].GetYaxis().SetLabelFont(font)
-        resid[i].GetYaxis().SetLabelSize(size)
-        resid[i].GetYaxis().SetLabelOffset(0.01)
-        resid[i].GetYaxis().SetNdivisions(505) # '5' secondary and '05' primary
-        
-        if local and not reuse:
-            resid[i].SetAxisRange(-100,100,"y")
-        else:
-            resid[i].SetAxisRange(-400,400,"y")
-        
-        resid[i].Draw()
+        toppad=[]
+        botpad=[]
+        #legs=[]
+        #legs2=[]
+        #zeros=[]
 
-        par = histparam(energy)
-        zero = TLine(par[1],0,par[2],0)
-        zeros.append(zero)
-        zeros[i].SetLineColor(kRed)
-        zeros[i].SetLineWidth(1)
-        zeros[i].Draw()
+        font=63
+        size=13
+
+        for i in range(8):
+            canvs[E].cd(i+1)
+            #canvs[E].cd(i+1).SetLogy()
+
+            fraction = 0.3
+            pad1 = TPad("pad1","pad1",0,fraction,1,1)
+            toppad.append(pad1)
+            pad2 = TPad("pad2","pad2",0,0,1,fraction)
+            botpad.append(pad2)
+            toppad[i].SetBottomMargin(0.01)
+            toppad[i].SetBorderMode(0)
+            toppad[i].SetLogy()
+            botpad[i].SetTopMargin(0.05)
+            botpad[i].SetBottomMargin(0.3)
+            botpad[i].SetBorderMode(0)
+            botpad[i].SetLogy()
+            toppad[i].Draw()
+            botpad[i].Draw()
+            toppad[i].cd()
+
+            ylegstart = 0.88
+            ylegend = (ylegstart-(Nlg*0.06))
+            space = '  '
+            leg = TLegend(0.65, ylegend, 0.94, ylegstart)
+            legs[E].append(leg)
+            legs[E][i].SetFillColor(0)
+            legs[E][i].SetBorderSize(0)
+            lopt = 'LPE'
+
+            if local and not reuse:
+                data[E][i].SetAxisRange(1,1000,"y")
+            else:
+                data[E][i].SetAxisRange(1,1000000,"y")
+
+            #data[E][i].SetLineColor(kBlack)
+            #data[E][i].SetMarkerColor(kBlack)
+            #data[E][i].SetLineWidth(1)
+            data[E][i].GetYaxis().SetTitle('arb. counts (for now)')
+            data[E][i].GetYaxis().SetTitleFont(font)
+            data[E][i].GetYaxis().SetTitleSize(size)
+            data[E][i].GetYaxis().SetTitleOffset(4.2)
+            data[E][i].GetYaxis().SetLabelFont(font)
+            data[E][i].GetYaxis().SetLabelSize(size)
+            data[E][i].GetYaxis().SetLabelOffset(0.01)
+            #data[E][i].GetXaxis().SetTitle('Energy (keV)')
+            #data[E][i].GetXaxis().SetLabelFont(font)
+            #data[E][i].GetXaxis().SetLabelSize(size)
+            data[E][i].Draw()
+            legs[E][i].AddEntry(data[E][i], space+'data', lopt)
+
+            color = 0
+            for loc in locs:
+                for iso in isos:
+                    ### set mc colors
+                    mc[loc][iso]["hist"][i].SetMarkerColor(cis[color])
+                    mc[loc][iso]["hist"][i].SetLineColor(cis[color])
+                    color += 1
+
+                    mc[loc][iso]["hist"][i].SetAxisRange(1,1000,"y")
+
+                    ### temp - don't draw MC if you just want to show data
+                    mc[loc][iso]["hist"][i].Draw("same")
+
+                    ### add MC to total MC hist
+                    total[E][i].Add(mc[loc][iso]["hist"][i])
+
+                    ### create the legend entry for MC
+                    legs[E][i].AddEntry(mc[loc][iso]["hist"][i], space+loc+'-'+iso, lopt)
+
+            total[E][i].Sumw2()
+            total[E][i].Draw("same")
+            legs[E][i].AddEntry(total[E][i], space+'Total MC', lopt)
+            legs[E][i].Draw("same")
+
+
+            ### try to get the residuals in!
+            #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            botpad[i].cd()
+            leg = TLegend(0.72, 0.78, 0.94, 0.94)
+            legs2[E].append(leg)
+            legs2[E][i].SetFillColor(0)
+            legs2[E][i].SetBorderSize(0)
+            lopt = 'LPE'
+
+            #resid[E][i].Sumw2()
+            #resid[E][i].Add(data[E][i], total[E][i],1,-1)
+            resid[E][i].Divide(data[E][i], total[E][i])
+                        
+            resid[E][i].SetTitle('')
+            resid[E][i].SetXTitle("Energy (keVee)")
+            resid[E][i].GetXaxis().SetTitleFont(font)
+            resid[E][i].GetXaxis().SetTitleSize(size)
+            resid[E][i].GetXaxis().SetLabelFont(font)
+            resid[E][i].GetXaxis().SetLabelSize(size)
+            resid[E][i].GetXaxis().SetLabelOffset(0.03)
+            resid[E][i].GetXaxis().SetTitleOffset(8)
+            #resid[E][i].SetYTitle("counts / keV")
+            resid[E][i].GetYaxis().SetLabelFont(font)
+            resid[E][i].GetYaxis().SetLabelSize(size)
+            resid[E][i].GetYaxis().SetLabelOffset(0.01)
+            resid[E][i].GetYaxis().SetNdivisions(505) # '5' secondary and '05' primary
+
+            resid[E][i].SetAxisRange(0.1,10,"y")
+            #if local and not reuse:
+            #    resid[E][i].SetAxisRange(-100,100,"y")
+            #else:
+            #    resid[E][i].SetAxisRange(-400,400,"y")
+            
+            resid[E][i].Draw()
+            
+            par = histparam(E)
+            # set my line to "1"
+            zero = TLine(par[1], 1, par[2], 1)
+            zeros[E].append(zero)
+            zeros[E][i].SetLineColor(kRed)
+            zeros[E][i].SetLineWidth(1)
+            zeros[E][i].Draw()
+
+            legs2[E][i].AddEntry(resid[E][i],space+"residual",lopt)
+            legs2[E][i].Draw()
+            #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+        save = ''
+        if local:     save += 'local'
+        else:         save += 'cup'
+        if E:    save += '_hiE'
+        else:         save += '_loE'
+        save += '_fit-'+str(int(fLo[0]))+'-'+str(int(fLo[1]))
+        save += '_fit-'+str(int(fHi[0]))+'-'+str(int(fHi[1]))
+        if mcscale:   save += '_mcscale'
+        if mcweight:  save += '_mcweight'
+        if fitweight: save+= '_fitweight'
         
-        legs2[i].AddEntry(resid[i],space+"residual",lopt)
-        legs2[i].Draw()
-        #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        
-    save = ''
-    if local:  save += 'local'
-    else:      save += 'cup'
-    save += '_fit-'+str(int(fmin))+'-'+str(int(fmax))
-    #if energy: save += '_hi-energy'
-    #else:      save += '_lo-energy'
-    if scale:  save += '_scaled'
-    if weight: save += '_weighted'
-    canv.Update()
-    canv.Print(save+'.png')
-    
+        canvs[E].Update()
+        canvs[E].Print(save+'.png')
+
     if not batch:
         raw_input("[Enter] to quit \n")
 
