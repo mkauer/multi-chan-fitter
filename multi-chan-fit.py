@@ -1,15 +1,19 @@
 #!/usr/bin/env python
 
 ######################################################################
+# Matt Kauer - mkauer@physics.wisc.edu
+######################################################################
 # 13-data-dru.py
 #
 # Scale data to dru so the fit results show real physics numbers
 # Still need to convert MC to uBq or ppb
 #
-# version: 2016-11-22
+# version: 2016-11-23
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #=====================================================================
+# ~ changed variable 'rebin' to 'hiEfitRebin'
+# ~ changed variable 'hiErebin' to 'hiEplotRebin'
 # + write the fit results to a text file
 # ~ cleaned up outdated code and comments
 # ~ scale the total-mc histo error by dru scaling
@@ -110,8 +114,18 @@
 # + histos as a python list
 # + hacking at multi-plot-test.py
 # + hacking at plot-test.py
+######################################################################
 #
-# email me: mkauer@physics.wisc.edu
+# The FIX list!
+#---------------------------------------------------------------------
+# something is wonky with the fit rebinning
+# ah! probably need to scale the fit result by the fit rebinning factor
+# nope, looks like the hiE plotting rebinning is the problem
+# nope, the error bars were clouding things
+# back to the fit rebinning looking like the problem
+# i don't understand...
+# i bet root isn't handling the errors correctly....
+# 
 ######################################################################
 #
 # Where is MC?
@@ -145,9 +159,11 @@ dru2       = 1   ### convert data and mc to dru after fit? [0,1]
 # dru safty check...
 if dru2: dru1 = 0
 
-hiErebin   = 10  ### rebin the hi-E final plots [1,inf]
+hiEplotRebin  = 10  ### rebin the hi-E final plots [1,inf]
 
-rebin      = 10  ### rebin the hi-E histo for fitting [1,inf]
+# something weird with the fit rebinning - need to FIX this ASAP!
+# use rebin=1 for now
+hiEfitRebin   = 1   ### rebin the hi-E histo for fitting [1,10]
 
 reuse      = 1   ### use joined rootfile data? [0,1]
 energy     = 0   ### [0] = low-energy -- [1] = high-energy
@@ -155,10 +171,10 @@ mcscale    = 1   ### pre scale the MC? [0,1]
 mcweight   = 1   ### set MC weights? [0,1]
 fitweight  = 0   ### set fit weights? [0,1]
 
-### still working on this - I don't understand why this is
-### effecting the fit so much - rebinscale=0 seems to be
-### the right thing to do at this time...
-rebinscale = 0   ### scale hi-E hist to 1/rebin factor? [0,1]
+# still working on this - I don't understand why this is
+# effecting the fit so much - rebinscale=0 seems to be
+# the right thing to do at this time...
+rebinscale = 0   ### scale data and mc hi-E hists to 1/hiEfitRebin factor? [0,1]
 #================================================================
 
 
@@ -235,11 +251,11 @@ def _myself_(argv):
     
     ### rebinning the hi-E part to have close to equal bins as the lo-E
     ### part will help to weight both parts more equally - I think...
-    ### rebin variable is now at the top
+    ### hiEfitRebin variable is now at the top
     
     fHiE = [400, 2000]
-    #fHi = [400/rebin, 2000/rebin]
-    fHi = [fHiE[0]/rebin, fHiE[1]/rebin]
+    #fHi = [400/hiEfitRebin, 2000/hiEfitRebin]
+    fHi = [fHiE[0]/hiEfitRebin, fHiE[1]/hiEfitRebin]
     fHiBins = fHi[1]-fHi[0]
     
     print '!!!',fLo,fHi
@@ -325,22 +341,22 @@ def _myself_(argv):
                 #print 'filling lo-E with',key
                 
         rdata.append(copy.deepcopy(dataHi[i]))
-        rdata[i].Rebin(rebin)
+        rdata[i].Rebin(hiEfitRebin)
         
-        ### I think we need to scale the counts by rebin factor
+        ### I think we need to scale the counts by hiEfitRebin factor
         ### not sure that's true anymore...
-        if rebinscale: rdata[i].Scale(1./rebin)
+        if rebinscale: rdata[i].Scale(1./hiEfitRebin)
         for n in range(fLoBins,fbins):
             fitdata[i].SetBinContent(n, rdata[i].GetBinContent(fHi[0]+n))
             fitdata[i].SetBinError(n, rdata[i].GetBinError(fHi[0]+n))
         for loc in locs:
             for iso in isos:
                 rmc[loc][iso]['hist'].append(copy.deepcopy(mcHi[loc][iso]['hist'][i]))
-                rmc[loc][iso]['hist'][i].Rebin(rebin)
+                rmc[loc][iso]['hist'][i].Rebin(hiEfitRebin)
 
-                ### I think we need to scale the counts by rebin factor
+                ### I think we need to scale the counts by hiEfitRebin factor
                 ### not sure that's true anymore...
-                if rebinscale: rmc[loc][iso]['hist'][i].Scale(1./rebin)
+                if rebinscale: rmc[loc][iso]['hist'][i].Scale(1./hiEfitRebin)
                 for n in range(fLoBins,fbins):
                     fitmc[loc][iso]["hist"][i].SetBinContent(n, rmc[loc][iso]['hist'][i].GetBinContent(fHi[0]+n))
                 #print 'filling hi-E with',key
@@ -452,6 +468,10 @@ def _myself_(argv):
                 fitmc[loc][iso]["hist"][i].Scale(value)
                 mcLo[loc][iso]["hist"][i].Scale(value)
                 mcHi[loc][iso]["hist"][i].Scale(value)
+                ### need to scale the hiE back by the hiEfitRebinning factor?
+                #mcHi[loc][iso]["hist"][i].Scale(1./hiEfitRebin)
+                #mcHi[loc][iso]["hist"][i].Scale(hiEfitRebin)
+                
                 count += 1
         fitresults.append('\n')
 
@@ -464,16 +484,16 @@ def _myself_(argv):
     if local:      save += 'local'
     else:          save += 'cup'
     save += '_Nchan-fit'
-    save += '_fit-'+str(int(fLo[0]))+'-'+str(int(fLo[1]))
-    save += '_fit-'+str(int(fHiE[0]))+'-'+str(int(fHiE[1]))
-    save += '_rebin-'+str(rebin)
+    save += '_loEfit-'+str(int(fLo[0]))+'-'+str(int(fLo[1]))
+    save += '_hiEfit-'+str(int(fHiE[0]))+'-'+str(int(fHiE[1]))
+    save += '_hiEfitRebin-'+str(hiEfitRebin)
     if rebinscale: save += '_rebinscale'
     if mcscale:    save += '_mcscale'
     if mcweight:   save += '_mcweight'
     if fitweight:  save += '_fitweight'
     if dru1:       save += '_dru1'
     if dru2:       save += '_dru2'
-    if hiErebin:   save += '_hiErebin-'+str(hiErebin)
+    if hiEplotRebin:   save += '_hiEplotRebin-'+str(hiEplotRebin)
     
     outfile = open(save+'_fit-results.txt', 'w')
     for line in fitresults:
@@ -627,16 +647,16 @@ def _myself_(argv):
     if local:      save += 'local'
     else:          save += 'cup'
     save += '_Nchan-fit'
-    save += '_fit-'+str(int(fLo[0]))+'-'+str(int(fLo[1]))
-    save += '_fit-'+str(int(fHiE[0]))+'-'+str(int(fHiE[1]))
-    save += '_rebin-'+str(rebin)
+    save += '_loEfit-'+str(int(fLo[0]))+'-'+str(int(fLo[1]))
+    save += '_hiEfit-'+str(int(fHiE[0]))+'-'+str(int(fHiE[1]))
+    save += '_hiEfitRebin-'+str(hiEfitRebin)
     if rebinscale: save += '_rebinscale'
     if mcscale:    save += '_mcscale'
     if mcweight:   save += '_mcweight'
     if fitweight:  save += '_fitweight'
     if dru1:       save += '_dru1'
     if dru2:       save += '_dru2'
-    if hiErebin:   save += '_hiErebin-'+str(hiErebin)
+    if hiEplotRebin:   save += '_hiEplotRebin-'+str(hiEplotRebin)
     """
     fcanv.Update()
     fcanv.Print(save+'.png')
@@ -748,18 +768,18 @@ def _myself_(argv):
                             
             #---------------------------------------------------------
             #---------------------------------------------------------
-            if E and hiErebin:
-                data[E][i].Rebin(hiErebin)
-                data[E][i].Scale(1./hiErebin)
+            if E and hiEplotRebin:
+                data[E][i].Rebin(hiEplotRebin)
+                data[E][i].Scale(1./float(hiEplotRebin))
                 #data[E][i].Sumw2()
                 data[E][i].SetAxisRange(.1, 10, "y")
                 
-                total[E][i].Rebin(hiErebin)
-                total[E][i].Scale(1./hiErebin)
+                total[E][i].Rebin(hiEplotRebin)
+                total[E][i].Scale(1./float(hiEplotRebin))
                 #total[E][i].Sumw2()
                 
-                resid[E][i].Rebin(hiErebin)
-                resid[E][i].Scale(1./hiErebin)
+                resid[E][i].Rebin(hiEplotRebin)
+                resid[E][i].Scale(1./float(hiEplotRebin))
                 #resid[E][i].Sumw2()
             #---------------------------------------------------------
             #---------------------------------------------------------
@@ -788,9 +808,9 @@ def _myself_(argv):
                     if dru2:
                         mc[E][loc][iso]["hist"][i].Scale(scales[E][i])
 
-                    if E and hiErebin:
-                        mc[E][loc][iso]["hist"][i].Rebin(hiErebin)
-                        mc[E][loc][iso]["hist"][i].Scale(1./hiErebin)
+                    if E and hiEplotRebin:
+                        mc[E][loc][iso]["hist"][i].Rebin(hiEplotRebin)
+                        mc[E][loc][iso]["hist"][i].Scale(1./float(hiEplotRebin))
                         #mc[E][loc][iso]["hist"][i].Sumw2()
                     
                     ### set range
@@ -834,9 +854,9 @@ def _myself_(argv):
 
             #---------------------------------------------------------
             #---------------------------------------------------------
-            #if E and hiErebin:
-                #resid[E][i].Rebin(hiErebin)
-                #resid[E][i].Scale(1./hiErebin)
+            #if E and hiEplotRebin:
+                #resid[E][i].Rebin(hiEplotRebin)
+                #resid[E][i].Scale(1./hiEplotRebin)
                 #resid[E][i].Sumw2()
             #---------------------------------------------------------
             #---------------------------------------------------------
@@ -880,16 +900,16 @@ def _myself_(argv):
         else:          save += 'cup'
         if E:          save += '_hiE'
         else:          save += '_loE'
-        save += '_fit-'+str(int(fLo[0]))+'-'+str(int(fLo[1]))
-        save += '_fit-'+str(int(fHiE[0]))+'-'+str(int(fHiE[1]))
-        save += '_rebin-'+str(rebin)
+        save += '_loEfit-'+str(int(fLo[0]))+'-'+str(int(fLo[1]))
+        save += '_hiEfit-'+str(int(fHiE[0]))+'-'+str(int(fHiE[1]))
+        save += '_hiEfitRebin-'+str(hiEfitRebin)
         if rebinscale: save += '_rebinscale'
         if mcscale:    save += '_mcscale'
         if mcweight:   save += '_mcweight'
         if fitweight:  save += '_fitweight'
         if dru1:       save += '_dru1'
         if dru2:       save += '_dru2'
-        if hiErebin:   save += '_hiErebin-'+str(hiErebin)
+        if hiEplotRebin:   save += '_hiEplotRebin-'+str(hiEplotRebin)
         
         canvs[E].Update()
         canvs[E].Print(save+'.png')
