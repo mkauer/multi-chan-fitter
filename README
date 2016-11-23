@@ -1,0 +1,13 @@
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+--- multi-chan-fitter ---
+
+mkauer@physics.wisc.edu
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+I know have this code in gitlab...
+But this is still very preliminary
+
+There are many paths that are specific to my environment for testing purposes
+Many bits of code that are commented out for testing purposes
+It's pretty messy, I know, sorry
+
