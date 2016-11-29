@@ -188,11 +188,11 @@ def dataDRU(data, nfiles=78):
     # each subrun-file is 2 hours long
     # estella says the 1324 runs are 1 hour subruns...
     subrun = float(1) # in hours
-    days = (subrun*nfiles)/24.
+    days = float((subrun*nfiles)/24.)
 
     scales = []
     for i in range(8):
-        scale = 1./(days*cmass(i)*keVperBin)
+        scale = float(1./(days*cmass(i)*keVperBin))
         data[i].Scale(scale)
         scales.append(scale)
         

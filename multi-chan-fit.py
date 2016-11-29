@@ -8,14 +8,14 @@
 # Scale data to dru so the fit results show real physics numbers
 # Still need to convert MC to uBq or ppb
 #
-# version: 2016-11-23
+# version: 2016-11-28
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #=====================================================================
 # ~ changed variable 'rebin' to 'hiEfitRebin'
 # ~ changed variable 'hiErebin' to 'hiEplotRebin'
 # + write the fit results to a text file
-# ~ cleaned up outdated code and comments
+# - removed/cleaned up a bunch of outdated code and comments
 # ~ scale the total-mc histo error by dru scaling
 # + add dru2 which scales the data and mc after the fit
 # ~ dru1 scales the data before the fit
@@ -125,7 +125,18 @@
 # back to the fit rebinning looking like the problem
 # i don't understand...
 # i bet root isn't handling the errors correctly....
-# 
+
+# 2016-11-28
+# i wonder if i'm off by one bin when i fill fitmc and fitdata?
+
+
+# ~ change joined-master.root path to be relative
+# + add dru1 histos now have the total mc errors being scaled to dru
+# ~ fix fitdata and fitmc histo filling needs to start at bin 1
+#   because bin 0 is the underflow bin - this was a small effect
+#   but now it is correct
+
+
 ######################################################################
 #
 # Where is MC?
@@ -165,10 +176,20 @@ hiEplotRebin  = 10  ### rebin the hi-E final plots [1,inf]
 # use rebin=1 for now
 hiEfitRebin   = 1   ### rebin the hi-E histo for fitting [1,10]
 
+# fill the fitdata and fitmc starting with n plus number?
+# i think this should be 1 because bin 0 is underflows right?
+# yes, just checked, this should be 1
+np = 1
+
 reuse      = 1   ### use joined rootfile data? [0,1]
+
+# this 'energy' variable doesn't matter anymore...
 energy     = 0   ### [0] = low-energy -- [1] = high-energy
+
 mcscale    = 1   ### pre scale the MC? [0,1]
 mcweight   = 1   ### set MC weights? [0,1]
+
+# this doesn't work at all, not sure why...
 fitweight  = 0   ### set fit weights? [0,1]
 
 # still working on this - I don't understand why this is
@@ -204,11 +225,12 @@ def _myself_(argv):
     
     
     if reuse:
-        if local:
-            rootfile = "/home/mkauer/COSINE/CUP/mc-fitting/root-join-read/joined-master.root"
+        rootfile = "./root-join-read/joined-master.root"
+        #if local:
+        #    rootfile = "/home/mkauer/COSINE/CUP/mc-fitting/root-join-read/joined-master.root"
             #rootfile = "/home/mkauer/COSINE/CUP/mc-fitting/root-join-read/join-test.root"
-        else:
-            rootfile = "/home/mkauer/mc-fitting/root-join-read/joined-master.root"
+        #else:
+        #    rootfile = "/home/mkauer/mc-fitting/root-join-read/joined-master.root"
         dataLo, mcLo, locs, isos = readROOT(rootfile, 0)
         dataHi, mcHi, locs, isos = readROOT(rootfile, 1)
         
@@ -225,8 +247,13 @@ def _myself_(argv):
         mcHi = buildMC(locs, isos, 1)
 
     if dru1:
-        dataLo, scales = dataDRU(dataLo)
-        dataHi, scales = dataDRU(dataHi)
+        dataLo, scalesLo = dataDRU(dataLo)
+        dataHi, scalesHi = dataDRU(dataHi)
+
+        ### this should be the same factor...
+        ### checked, it is the same factor!!
+        #print scalesLo
+        #print scalesHi
     
     
     ### set the order the color of the histos is consistent
@@ -309,7 +336,6 @@ def _myself_(argv):
     for i in range(8):
         
         fdata = TH1F('fdata'+str(i), cnames(i)+' - multi-chan fit', fbins,0,fbins)
-        #fdata = TH1F('fdata'+str(i), longNames(i)+' - multi-chan fit', fbins,0,fbins)
         fitdata.append(fdata)
         
         tot = TH1F('ftotal'+str(i), longNames(i), fbins,0,fbins)
@@ -317,17 +343,20 @@ def _myself_(argv):
         tot.SetMarkerColor(kGray+1)
         tot.SetLineWidth(1)
         ftotal.append(tot)
-
+        
         res = TH1F('fresid'+str(i), longNames(i), fbins,0,fbins)
         res.SetLineColor(kBlack)
         res.SetMarkerColor(kBlack)
         res.SetLineWidth(1)
         fresid.append(res)
         
-        ### low energy hists
+        #------------------------------------------------
+        # fill the low energy part
+        #------------------------------------------------
         for n in range(fLoBins):
-            fitdata[i].SetBinContent(n, dataLo[i].GetBinContent(fLo[0]+n))
-            fitdata[i].SetBinError(n, dataLo[i].GetBinError(fLo[0]+n))
+        #for n in range(1, fLoBins+1):
+            fitdata[i].SetBinContent(n+np, dataLo[i].GetBinContent(fLo[0]+n))
+            fitdata[i].SetBinError(n+np, dataLo[i].GetBinError(fLo[0]+n))
             #fitdata.append(fdata)
         for loc in locs:
             for iso in isos:
@@ -337,9 +366,14 @@ def _myself_(argv):
                 #fmc = TH1F(key, longNames(i), fbins, 0, fbins)
                 fitmc[loc][iso]["hist"].append(fmc)
                 for n in range(fLoBins):
-                    fitmc[loc][iso]["hist"][i].SetBinContent(n, mcLo[loc][iso]['hist'][i].GetBinContent(fLo[0]+n))
+                #for n in range(1, fLoBins+1):
+                    fitmc[loc][iso]["hist"][i].SetBinContent(n+np, mcLo[loc][iso]['hist'][i].GetBinContent(fLo[0]+n))
                 #print 'filling lo-E with',key
-                
+        
+        #------------------------------------------------
+        # fill the high energy part
+        #------------------------------------------------
+        
         rdata.append(copy.deepcopy(dataHi[i]))
         rdata[i].Rebin(hiEfitRebin)
         
@@ -347,8 +381,9 @@ def _myself_(argv):
         ### not sure that's true anymore...
         if rebinscale: rdata[i].Scale(1./hiEfitRebin)
         for n in range(fLoBins,fbins):
-            fitdata[i].SetBinContent(n, rdata[i].GetBinContent(fHi[0]+n))
-            fitdata[i].SetBinError(n, rdata[i].GetBinError(fHi[0]+n))
+        #for n in range(fLoBins+1, fbins+1):
+            fitdata[i].SetBinContent(n+np, rdata[i].GetBinContent(fHi[0]+n))
+            fitdata[i].SetBinError(n+np, rdata[i].GetBinError(fHi[0]+n))
         for loc in locs:
             for iso in isos:
                 rmc[loc][iso]['hist'].append(copy.deepcopy(mcHi[loc][iso]['hist'][i]))
@@ -358,7 +393,8 @@ def _myself_(argv):
                 ### not sure that's true anymore...
                 if rebinscale: rmc[loc][iso]['hist'][i].Scale(1./hiEfitRebin)
                 for n in range(fLoBins,fbins):
-                    fitmc[loc][iso]["hist"][i].SetBinContent(n, rmc[loc][iso]['hist'][i].GetBinContent(fHi[0]+n))
+                #for n in range(fLoBins+1, fbins+1):
+                    fitmc[loc][iso]["hist"][i].SetBinContent(n+np, rmc[loc][iso]['hist'][i].GetBinContent(fHi[0]+n))
                 #print 'filling hi-E with',key
                 
     ### make weights histo
@@ -479,7 +515,8 @@ def _myself_(argv):
     for line in fitresults:
         print line
     
-    ### write fit results to file
+    ### write fit results to text file
+    #--------------------------------------------------------
     save = ''
     if local:      save += 'local'
     else:          save += 'cup'
@@ -578,7 +615,7 @@ def _myself_(argv):
                 fitmc[loc][iso]["hist"][i].SetLineColor(cis[color])
                 color += 1
 
-                fitmc[loc][iso]["hist"][i].SetAxisRange(1,1000,"y")
+                #fitmc[loc][iso]["hist"][i].SetAxisRange(1,1000,"y")
 
                 ### temp - don't draw MC if you just want to show data
                 fitmc[loc][iso]["hist"][i].Draw("same")
@@ -618,6 +655,7 @@ def _myself_(argv):
         fresid[i].GetXaxis().SetLabelOffset(0.03)
         fresid[i].GetXaxis().SetTitleOffset(8)
         #fresid[i].SetYTitle("counts / keV")
+        fresid[i].SetYTitle("data / MC")
         fresid[i].GetYaxis().SetLabelFont(font)
         fresid[i].GetYaxis().SetLabelSize(size)
         fresid[i].GetYaxis().SetLabelOffset(0.01)
@@ -640,7 +678,7 @@ def _myself_(argv):
         fzeros[i].Draw()
 
         flegs2[i].AddEntry(fresid[i],space+"data / MC",lopt)
-        flegs2[i].Draw()
+        #flegs2[i].Draw()
         #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     """
     save = ''
@@ -805,9 +843,12 @@ def _myself_(argv):
                     color += 1
 
                     # scale to dru
+                    # dru1 is already scaled... (don't scale it again)
+                    #if dru1:
+                    #    mc[E][loc][iso]["hist"][i].Scale(scalesHi[i])
                     if dru2:
                         mc[E][loc][iso]["hist"][i].Scale(scales[E][i])
-
+                    
                     if E and hiEplotRebin:
                         mc[E][loc][iso]["hist"][i].Rebin(hiEplotRebin)
                         mc[E][loc][iso]["hist"][i].Scale(1./float(hiEplotRebin))
@@ -829,6 +870,10 @@ def _myself_(argv):
             total[E][i].Sumw2()
             
             ### you need to scale the error by the dru scaling
+            #if dru2:
+            if dru1:
+                for n in range(total[E][i].GetNbinsX()):
+                    total[E][i].SetBinError(n, total[E][i].GetBinError(n)*scalesHi[i])
             if dru2:
                 for n in range(total[E][i].GetNbinsX()):
                     total[E][i].SetBinError(n, total[E][i].GetBinError(n)*scales[E][i])
