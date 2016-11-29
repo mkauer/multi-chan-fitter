@@ -38,33 +38,33 @@ import copy
 
 ### user inputs
 #================================================================
-dru1       = 0   ### convert data to dru before fit? [0,1]
-dru2       = 1   ### convert data and mc to dru after fit? [0,1]
+dru1 = 0   ### convert data to dru before fit? [0,1]
+dru2 = 1   ### convert data and mc to dru after fit? [0,1]
 
 # dru safty check...
 if dru2: dru1 = 0
 
-hiEplotRebin  = 10  ### rebin the hi-E final plots [1,inf]
+hiEplotRebin = 10  ### rebin the hi-E final plots [1,inf]
 
 # something weird with the fit rebinning - need to FIX this ASAP!
 # use rebin=1 for now
-hiEfitRebin   = 1   ### rebin the hi-E histo for fitting [1,10]
+hiEfitRebin = 1   ### rebin the hi-E histo for fitting [1,10]
 
 # fill the fitdata and fitmc starting with n plus number?
 # i think this should be 1 because bin 0 is underflows right?
 # yes, just checked, this should be 1
 np = 1
 
-reuse      = 1   ### use joined rootfile data? [0,1]
+reuse = 1   ### use joined rootfile data? [0,1]
 
 # this 'energy' variable doesn't matter anymore...
-energy     = 0   ### [0] = low-energy -- [1] = high-energy
+energy = 0   ### [0] = low-energy -- [1] = high-energy
 
-mcscale    = 1   ### pre scale the MC? [0,1]
-mcweight   = 1   ### set MC weights? [0,1]
+mcscale = 1   ### pre scale the MC? [0,1]
+mcweight = 1   ### set MC weights? [0,1]
 
 # this doesn't work at all, not sure why...
-fitweight  = 0   ### set fit weights? [0,1]
+fitweight = 0   ### set fit weights? [0,1]
 
 # still working on this - I don't understand why this is
 # effecting the fit so much - rebinscale=0 seems to be
@@ -392,19 +392,19 @@ def _myself_(argv):
     ### write fit results to text file
     #--------------------------------------------------------
     save = ''
-    if local:      save += 'local'
-    else:          save += 'cup'
+    if local:        save += 'local'
+    else:            save += 'cup'
     save += '_Nchan-fit'
     save += '_loEfit-'+str(int(fLo[0]))+'-'+str(int(fLo[1]))
     save += '_hiEfit-'+str(int(fHiE[0]))+'-'+str(int(fHiE[1]))
     save += '_hiEfitRebin-'+str(hiEfitRebin)
-    if rebinscale: save += '_rebinscale'
-    if mcscale:    save += '_mcscale'
-    if mcweight:   save += '_mcweight'
-    if fitweight:  save += '_fitweight'
-    if dru1:       save += '_dru1'
-    if dru2:       save += '_dru2'
-    if hiEplotRebin:   save += '_hiEplotRebin-'+str(hiEplotRebin)
+    if rebinscale:   save += '_rebinscale'
+    if mcscale:      save += '_mcscale'
+    if mcweight:     save += '_mcweight'
+    if fitweight:    save += '_fitweight'
+    if dru1:         save += '_dru1'
+    if dru2:         save += '_dru2'
+    if hiEplotRebin: save += '_hiEplotRebin-'+str(hiEplotRebin)
     
     outfile = open(save+'_fit-results.txt', 'w')
     for line in fitresults:
@@ -429,7 +429,8 @@ def _myself_(argv):
     
     font=63
     size=13
-
+    yoff=4.2
+    
     for i in range(8):
         fcanv.cd(i+1)
         
@@ -471,7 +472,7 @@ def _myself_(argv):
         fitdata[i].GetYaxis().SetTitle('arb. counts')
         fitdata[i].GetYaxis().SetTitleFont(font)
         fitdata[i].GetYaxis().SetTitleSize(size)
-        fitdata[i].GetYaxis().SetTitleOffset(4.2)
+        fitdata[i].GetYaxis().SetTitleOffset(yoff)
         fitdata[i].GetYaxis().SetLabelFont(font)
         fitdata[i].GetYaxis().SetLabelSize(size)
         fitdata[i].GetYaxis().SetLabelOffset(0.01)
@@ -524,12 +525,15 @@ def _myself_(argv):
         fresid[i].SetXTitle("fit bins")
         fresid[i].GetXaxis().SetTitleFont(font)
         fresid[i].GetXaxis().SetTitleSize(size)
+        fresid[i].GetXaxis().SetTitleOffset(8)
         fresid[i].GetXaxis().SetLabelFont(font)
         fresid[i].GetXaxis().SetLabelSize(size)
         fresid[i].GetXaxis().SetLabelOffset(0.03)
-        fresid[i].GetXaxis().SetTitleOffset(8)
         #fresid[i].SetYTitle("counts / keV")
         fresid[i].SetYTitle("data / MC")
+        fresid[i].GetYaxis().SetTitleFont(font)
+        fresid[i].GetYaxis().SetTitleSize(size)
+        fresid[i].GetYaxis().SetTitleOffset(yoff)
         fresid[i].GetYaxis().SetLabelFont(font)
         fresid[i].GetYaxis().SetLabelSize(size)
         fresid[i].GetYaxis().SetLabelOffset(0.01)
@@ -698,7 +702,7 @@ def _myself_(argv):
             
             data[E][i].GetYaxis().SetTitleFont(font)
             data[E][i].GetYaxis().SetTitleSize(size)
-            data[E][i].GetYaxis().SetTitleOffset(4.2)
+            data[E][i].GetYaxis().SetTitleOffset(yoff)
             data[E][i].GetYaxis().SetLabelFont(font)
             data[E][i].GetYaxis().SetLabelSize(size)
             data[E][i].GetYaxis().SetLabelOffset(0.01)
@@ -789,6 +793,10 @@ def _myself_(argv):
             resid[E][i].GetXaxis().SetLabelOffset(0.03)
             resid[E][i].GetXaxis().SetTitleOffset(8)
             #resid[E][i].SetYTitle("counts / keV")
+            resid[E][i].SetYTitle("data / MC")
+            resid[E][i].GetYaxis().SetTitleFont(font)
+            resid[E][i].GetYaxis().SetTitleSize(size)
+            resid[E][i].GetYaxis().SetTitleOffset(yoff)
             resid[E][i].GetYaxis().SetLabelFont(font)
             resid[E][i].GetYaxis().SetLabelSize(size)
             resid[E][i].GetYaxis().SetLabelOffset(0.01)
@@ -810,25 +818,25 @@ def _myself_(argv):
             zeros[E][i].SetLineWidth(1)
             zeros[E][i].Draw()
 
-            legs2[E][i].AddEntry(resid[E][i],space+"data / MC",lopt)
-            legs2[E][i].Draw()
+            #legs2[E][i].AddEntry(resid[E][i],space+"data / MC",lopt)
+            #legs2[E][i].Draw()
             #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
         save = ''
-        if local:      save += 'local'
-        else:          save += 'cup'
-        if E:          save += '_hiE'
-        else:          save += '_loE'
+        if local:        save += 'local'
+        else:            save += 'cup'
+        if E:            save += '_hiE'
+        else:            save += '_loE'
         save += '_loEfit-'+str(int(fLo[0]))+'-'+str(int(fLo[1]))
         save += '_hiEfit-'+str(int(fHiE[0]))+'-'+str(int(fHiE[1]))
         save += '_hiEfitRebin-'+str(hiEfitRebin)
-        if rebinscale: save += '_rebinscale'
-        if mcscale:    save += '_mcscale'
-        if mcweight:   save += '_mcweight'
-        if fitweight:  save += '_fitweight'
-        if dru1:       save += '_dru1'
-        if dru2:       save += '_dru2'
-        if hiEplotRebin:   save += '_hiEplotRebin-'+str(hiEplotRebin)
+        if rebinscale:   save += '_rebinscale'
+        if mcscale:      save += '_mcscale'
+        if mcweight:     save += '_mcweight'
+        if fitweight:    save += '_fitweight'
+        if dru1:         save += '_dru1'
+        if dru2:         save += '_dru2'
+        if hiEplotRebin: save += '_hiEplotRebin-'+str(hiEplotRebin)
         
         canvs[E].Update()
         canvs[E].Print(save+'.png')

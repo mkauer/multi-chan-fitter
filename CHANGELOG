@@ -12,9 +12,11 @@
 
 # 2016-11-28
 # --------------------------------------------------------------------
-# ~ change joined-master.root path to be relative
-# + add dru1 histos now have the total mc errors being scaled to dru
-# ~ fix fitdata and fitmc histo filling needs to start at bin 1
+# + added y-axis title to resid plots
+# - removed legend from resid plots
+# ~ changed joined-master.root path to be relative
+# + added dru1 histos now have the total mc errors being scaled to dru
+# ~ fixed 'fitdata' and 'fitmc' histo filling needs to start at bin 1
 #   because bin 0 is the underflow bin - this was a small effect
 #   but now it is correct
 
