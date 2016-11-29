@@ -1,0 +1,104 @@
+# Change Log (key == [+] added, [-] removed, [~] changed)
+#=====================================================================
+# ~ changed variable 'rebin' to 'hiEfitRebin'
+# ~ changed variable 'hiErebin' to 'hiEplotRebin'
+# + write the fit results to a text file
+# - removed/cleaned up a bunch of outdated code and comments
+# ~ scale the total-mc histo error by dru scaling
+# + add dru2 which scales the data and mc after the fit
+# ~ dru1 scales the data before the fit
+# + have to also scale by 1/rebinning factor
+# ~ have to use deepcopy when doing mc[E]=deepcopy(mcHi)
+# + have to create a seperate mc[E] dict when rebinning
+# + add rebinning to the hi-E plots
+# + add dru2 which scales the data and mc after the fit
+# ~ dru1 scales the data before the fit
+# + all data and mc needs seperate dict to preserve memory space
+# + the canvas pads need different names to preserve memory space
+# ~ fixed some major plotting bugs, nothing physics related,
+#   just root plotting maddness
+# + dru conversion is working i think...
+# + rebinning of the hi-E is working i think...
+# ~ I'm probably missing another factor here but it acutally seems
+#   that by NOT scaling the rebinned data/mc by 1/rebin, the fit
+#   does a better job - I don't understand this yet...
+# + scale the data and mc by 1/rebin factor or the lo-E to hi-E scale
+#   will bias the higher stats from the rebinned histos
+# + I kinda fixed the rebinning bug. still needs more testing...
+#   The fit still freaks out sometimes with some rebin factors
+#   Not sure why but I need to investigate that more...
+# + fixed another big bug with the combined fit histo gap
+# + fixed a major bug with the filling of the fit-histos
+# ~ let's make the residual show data/MC not data-MC
+# + add more lists for total,resid,legs,zeros so they have their
+#   own memory space and aren't lost when modifying the canvases
+# ~ resolution function should be divided by 2 (see funcs.py)
+#   I generated a new joined rootfile with the MC reso / 2
+# + added TFractionFitter weight histo but it doesn't work? 
+#   Still need to work on that. Don't understand why that doesn't work.
+# + plot both loE and hiE histos that are scaled from the multi-fit
+# + combine loE and hiE histos into 1 histo for fitting
+# + need copy.copy or copy.deepcopy when reading histos from rootfile
+#   and adding to a list or dict. Going to use deepcopy just to be sure.
+# ~ now use buildMC() to get your MC
+# ~ all histograms should have a unique key
+# ~ fixed hostname selection
+# + NOTE: The funcs.py import will only work for 10-mc-fit.py and later!!!
+# + I guess importing other personal python modules now works
+#   with the cup cluster? It didn't work in the past. Weird.
+#   Well okay, now I have a seperate funcs.py to import and it seems
+#   to be working with the cup cluster as well. 
+# ~ big re-write - set mc as mc[loc][iso] - just seems more logical
+#   just to be clear - it was mc[iso][loc] - now it's mc[loc][iso]
+# ~ shit! fixed a bug with enumerate [iso][loc] j+k thing
+#   that doesn't work!!
+#   that also effected the mc scaling and plotting... 
+# + get p-value from fit - doesn't seem right?
+# ~ tweaked the plotting cosmetics a bit to make it look better,
+#   good grief, what a bitch...
+# + put residuals on the same canvas! awesome!
+# ~ add options to scale and/or weight the MC
+# ~ change plot names if generated on CUP or not
+# ~ low energy fit needs to be >= 5keV? not 0keV!
+# ~ that was a lot of if-else statements... good grief...
+# + option for CUP testing - just 1 root file for testing
+# + option for hi/lo energy fitting
+# ~ tweak for low energy fit
+# ~ fixed mc+data+tot+resid length issue
+# + another canvas showing the residuals
+# + show the total mc in gray after the fit
+# + get hostname and select data path based off hostname
+# + try to fit high energy stuff - based off my dm17 fitting code
+# ~ tweak legend size to make a little more consistent,
+#   but it's still not quite right, i don't know why..
+# ~ plot low energy things - ah, use pmtXX.qc5 not qc_5 - oops
+# + added low energy calib and resolution functions
+# ~ use assumption that res~srqt(E) with intercept=0
+# + working on resolution params, but need at least a linear
+#   fit to the resolution points to get anything reasonable
+# + working on hiE parameters
+# + shit! finally got colors to work. What a pain in the ass.
+#   The color index can't be too big > 10,000 and you have to
+#   save the list of colors and indexes or they get dumped
+#   out of memory and then it doesn't work right.
+# + urgh... finally got hists into dictionary
+#   hist name must be same as hist var-name (don't know why)
+# + start adding in external backgrounds too
+# ~ use Pushpa's data calibrations - wrong but a start
+# ~ just use this as the default so I don't have multiple
+#   versions of scripts around
+# ~ for some weird reason importing my "funcs.py" doesn't work
+#   on the cup cluster? Very weird. So I've put all the extra
+#   functions in this script and now it works on CUP. ???
+# ~ moved sim stuff to under CUP
+# ~ tweaked spacings and labels on the canvas
+# + got legends working for the plots
+# ~ tweaked the layout to be 4x2 as real layout
+# + seperate funcs.py import for extra functions
+# + adding in U238 with K40
+# + functionized some things in prep for the future fitting
+# + ROOT batch settings [0 or 1]
+# + canvas as a python list
+# + histos as a python list
+# + hacking at multi-plot-test.py
+# + hacking at plot-test.py
