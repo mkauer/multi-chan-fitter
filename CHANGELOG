@@ -1,13 +1,39 @@
-# Change Log (key == [+] added, [-] removed, [~] changed)
+# -*- sh -*-
+
+#-------------------------------------------------
+# CHANGELOG - multi-chan-fit.py
+#-------------------------------------------------
+
+# Key is:
+# [+] added
+# [-] removed
+# [~] fix/change
 #=====================================================================
+
+# 2016-11-28
+# --------------------------------------------------------------------
+# ~ change joined-master.root path to be relative
+# + add dru1 histos now have the total mc errors being scaled to dru
+# ~ fix fitdata and fitmc histo filling needs to start at bin 1
+#   because bin 0 is the underflow bin - this was a small effect
+#   but now it is correct
+
+# 2016-11-23
+#---------------------------------------------------------------------
 # ~ changed variable 'rebin' to 'hiEfitRebin'
 # ~ changed variable 'hiErebin' to 'hiEplotRebin'
 # + write the fit results to a text file
 # - removed/cleaned up a bunch of outdated code and comments
+
+# 2016-11-22
+# --------------------------------------------------------------------
 # ~ scale the total-mc histo error by dru scaling
 # + add dru2 which scales the data and mc after the fit
 # ~ dru1 scales the data before the fit
 # + have to also scale by 1/rebinning factor
+
+# Older - I didn't have dates for these
+# --------------------------------------------------------------------
 # ~ have to use deepcopy when doing mc[E]=deepcopy(mcHi)
 # + have to create a seperate mc[E] dict when rebinning
 # + add rebinning to the hi-E plots
@@ -34,7 +60,7 @@
 #   own memory space and aren't lost when modifying the canvases
 # ~ resolution function should be divided by 2 (see funcs.py)
 #   I generated a new joined rootfile with the MC reso / 2
-# + added TFractionFitter weight histo but it doesn't work? 
+# + added TFractionFitter weight histo but it doesn't work?
 #   Still need to work on that. Don't understand why that doesn't work.
 # + plot both loE and hiE histos that are scaled from the multi-fit
 # + combine loE and hiE histos into 1 histo for fitting
@@ -47,12 +73,12 @@
 # + I guess importing other personal python modules now works
 #   with the cup cluster? It didn't work in the past. Weird.
 #   Well okay, now I have a seperate funcs.py to import and it seems
-#   to be working with the cup cluster as well. 
+#   to be working with the cup cluster as well.
 # ~ big re-write - set mc as mc[loc][iso] - just seems more logical
 #   just to be clear - it was mc[iso][loc] - now it's mc[loc][iso]
 # ~ shit! fixed a bug with enumerate [iso][loc] j+k thing
 #   that doesn't work!!
-#   that also effected the mc scaling and plotting... 
+#   that also effected the mc scaling and plotting...
 # + get p-value from fit - doesn't seem right?
 # ~ tweaked the plotting cosmetics a bit to make it look better,
 #   good grief, what a bitch...
@@ -102,3 +128,4 @@
 # + histos as a python list
 # + hacking at multi-plot-test.py
 # + hacking at plot-test.py
+
