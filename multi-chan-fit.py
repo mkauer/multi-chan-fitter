@@ -3,10 +3,9 @@
 ######################################################################
 # Matt Kauer - mkauer@physics.wisc.edu
 ######################################################################
-# 13-data-dru.py
+# 14-set-bkg-activity.py
 #
-# Scale data to dru so the fit results show real physics numbers
-# Still need to convert MC to uBq or ppb
+# Scale some MC to a fixed activity
 #
 # version: 2016-11-29
 # 
