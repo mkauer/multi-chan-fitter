@@ -8,7 +8,7 @@
 # Scale data to dru so the fit results show real physics numbers
 # Still need to convert MC to uBq or ppb
 #
-# version: 2016-11-28
+# version: 2016-11-29
 # 
 # see CHANGELOG for changes
 ######################################################################
@@ -665,8 +665,8 @@ def _myself_(argv):
             legs[E][i].SetBorderSize(0)
             lopt = 'LPE'
             
-            if dru1 or dru2:
-                data[E][i].SetAxisRange(.1, 100, "y")
+            #if dru1 or dru2:
+            #    data[E][i].SetAxisRange(.1, 100, "y")
             
             """
             if local and not reuse:
@@ -688,7 +688,7 @@ def _myself_(argv):
                 data[E][i].Rebin(hiEplotRebin)
                 data[E][i].Scale(1./float(hiEplotRebin))
                 #data[E][i].Sumw2()
-                data[E][i].SetAxisRange(.1, 10, "y")
+                #data[E][i].SetAxisRange(.1, 10, "y")
                 
                 total[E][i].Rebin(hiEplotRebin)
                 total[E][i].Scale(1./float(hiEplotRebin))
