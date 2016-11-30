@@ -12,6 +12,7 @@
 
 # 2016-11-29
 # --------------------------------------------------------------------
+# + cut a release based off of 13-data-dru.py
 # - remove the y axis scaling for easier comparison amoung variations
 
 
@@ -25,6 +26,7 @@
 #   because bin 0 is the underflow bin - this was a small effect
 #   but now it is correct
 
+
 # 2016-11-23
 #---------------------------------------------------------------------
 # ~ changed variable 'rebin' to 'hiEfitRebin'
@@ -32,12 +34,14 @@
 # + write the fit results to a text file
 # - removed/cleaned up a bunch of outdated code and comments
 
+
 # 2016-11-22
 # --------------------------------------------------------------------
 # ~ scale the total-mc histo error by dru scaling
 # + add dru2 which scales the data and mc after the fit
 # ~ dru1 scales the data before the fit
 # + have to also scale by 1/rebinning factor
+
 
 # Older - I didn't have dates for these
 # --------------------------------------------------------------------
