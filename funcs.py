@@ -4,15 +4,12 @@
 # Works with "10-mc-fit.py" and later versions, local and CUP
 # Trying to make sure this stays backwards compitable
 #
-# version: 2016-11-21
+# version: 2016-11-29
 #
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #=====================================================================
 
-#---------------------------------------------------------------------
-# should hists be filled and saved as key,key or key,longName?
-#---------------------------------------------------------------------
-
+# + added mc[loc][iso]['act'] = -1 by default in readROOT()
 # + added return of scalings to dataDRU()
 # + added dataDRU() to scale data into dru units
 # + added cmass() to get crystal mass in kg
@@ -493,7 +490,14 @@ def readROOT(rootfile, energy=0):
         
         try: mc[loc][iso]['hist']
         except: mc[loc][iso]['hist'] = [0 for i in range(8)]
-                
+
+        #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        try: mc[loc][iso]['act']
+        except: mc[loc][iso]['act'] = [-1 for i in range(8)]
+        #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        
         histo = TH1F(rfile.Get(name))
         mc[loc][iso]['hist'][xtal] = copy.deepcopy(histo)
         #mc[loc][iso]['hist'][xtal] = copy.copy(histo)

@@ -10,9 +10,23 @@
 # [~] fix/change
 # ====================================================================
 
+
 # 2016-11-29
 # --------------------------------------------------------------------
-# + cut a release based off of 13-data-dru.py
+# + scale non dur1/dru2 rebinned errors by the rebinning/sqrt(2)
+#   I'm not sure if this is physics right, but it looks about right
+#   in the plots. I'll need to check this again...
+# + many additions to set the internal K40 activity, it
+#   seems to be working? I'm sure I'll find some bugs...
+# + set internal k40 as a fixed activity background
+# ~ tweaked funcs.py to have mc[loc][iso]['act'] = -1 by default
+#   in readROOT()
+# + switch to 14-set-bkg-activity.py
+
+
+# 2016-11-29
+# --------------------------------------------------------------------
+# + cut a release v1.0 based off of 13-data-dru.py
 # - remove the y axis scaling for easier comparison amoung variations
 
 

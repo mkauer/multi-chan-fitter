@@ -3,9 +3,9 @@
 ######################################################################
 # Matt Kauer - mkauer@physics.wisc.edu
 ######################################################################
-# 13-data-dru.py
+# 14-set-bkg-activity.py
 #
-# Scale data to dru so the fit results show real physics numbers
+# Scale some MC to a fixed activity
 #
 # version: 2016-11-29
 # 
@@ -33,10 +33,14 @@ import ROOT
 import funcs
 from funcs import *
 import copy
+import math
 
 
 ### user inputs
 #================================================================
+### I'm pretty sure you want to convert to dru after the fit
+### More stats for the fit will give bettet errors
+### ie use dru2 option!!
 dru1 = 0   ### convert data to dru before fit? [0,1]
 dru2 = 1   ### convert data and mc to dru after fit? [0,1]
 
@@ -132,8 +136,18 @@ def _myself_(argv):
     ### set the order the color of the histos is consistent
     locs = ['internal','pmt']
     isos = ['K40','U238','Th232']
-        
-        
+
+    #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    scaletest=0.005
+    for i in range(8):
+        mcLo['internal']['K40']['act'][i] = scaletest
+        mcLo['internal']['K40']['hist'][i].Scale(scaletest)
+        mcHi['internal']['K40']['act'][i] = scaletest
+        mcHi['internal']['K40']['hist'][i].Scale(scaletest)
+    #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    
     # create a color scheme for MC
     # color list and indexes
     Nmc = int((len(locs)*len(isos)))
@@ -143,8 +157,7 @@ def _myself_(argv):
     Nlg = Nmc+2
     
     ### fit the MC to data
-    #=================================================================
-    #=================================================================
+    #-----------------------------------------------------------------
     
     fLo = [10, 100]
     fLoBins = fLo[1]-fLo[0]
@@ -154,7 +167,6 @@ def _myself_(argv):
     ### hiEfitRebin variable is now at the top
     
     fHiE = [400, 2000]
-    #fHi = [400/hiEfitRebin, 2000/hiEfitRebin]
     fHi = [fHiE[0]/hiEfitRebin, fHiE[1]/hiEfitRebin]
     fHiBins = fHi[1]-fHi[0]
     
@@ -171,7 +183,7 @@ def _myself_(argv):
     fit = []
     fitresults = []
     
-    ##############################################
+    #-----------------------------------------------------------------
     ### create the multi-chan histos for fitting
 
     fitdata = []
@@ -188,7 +200,7 @@ def _myself_(argv):
             
     ### need seperate dicts for rebinned data and MC for plotting to
     ### to work right - they need their own memory space
-    #=================================================================
+    #-----------------------------------------------------------------
     ### init dict for rebinned data
     rdata = []
 
@@ -200,11 +212,11 @@ def _myself_(argv):
             rmc[loc][iso] = {}
             rmc[loc][iso]["hist"] = []
             #rmc[loc][iso]["weight"] = []
-    #=================================================================
+    #-----------------------------------------------------------------
     
-    
-    ftotal=[]
-    fresid=[]
+    fmcsum=[] # sum of the fixed activity MC
+    ftotal=[] # total of fixed MC plus fit MC
+    fresid=[] # residual of the data/total
     ### fill fitdata and fitmc
     for i in range(8):
         
@@ -223,7 +235,17 @@ def _myself_(argv):
         res.SetLineWidth(1)
         fresid.append(res)
         
-        #------------------------------------------------
+        #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        mcsum = TH1F('fmcsum'+str(i), longNames(i), fbins,0,fbins)
+        mcsum.SetLineColor(kBlack)
+        mcsum.SetMarkerColor(kBlack)
+        mcsum.SetLineWidth(1)
+        fmcsum.append(mcsum)
+        #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                
+
         # fill the low energy part
         #------------------------------------------------
         for n in range(fLoBins):
@@ -233,19 +255,31 @@ def _myself_(argv):
             #fitdata.append(fdata)
         for loc in locs:
             for iso in isos:
-                key = loc+'_'+iso+'_'+str(i)
-                #key = 'fmc'+loc+'_'+iso+'_'+str(i)
-                fmc = TH1F(key, key, fbins, 0, fbins)
-                #fmc = TH1F(key, longNames(i), fbins, 0, fbins)
-                fitmc[loc][iso]["hist"].append(fmc)
-                for n in range(fLoBins):
-                #for n in range(1, fLoBins+1):
-                    fitmc[loc][iso]["hist"][i].SetBinContent(n+np, mcLo[loc][iso]['hist'][i].GetBinContent(fLo[0]+n))
-                #print 'filling lo-E with',key
+                
+                #+++++++++++++++++++++++++++++++++++++++++++++++++++++
+                #+++++++++++++++++++++++++++++++++++++++++++++++++++++
+                if mcLo[loc][iso]['act'][i] > 0:
+                    for n in range(fLoBins):
+                    #for n in range(1, fLoBins+1):
+                        #fmcsum[i].SetBinContent(n+np, mcLo[loc][iso]['hist'][i].GetBinContent(fLo[0]+n)*mcLo[loc][iso]['act'][i])
+                        fmcsum[i].SetBinContent(n+np, mcLo[loc][iso]['hist'][i].GetBinContent(fLo[0]+n))
+                #+++++++++++++++++++++++++++++++++++++++++++++++++++++
+                #+++++++++++++++++++++++++++++++++++++++++++++++++++++
+                
+                else:
+                    key = loc+'_'+iso+'_'+str(i)
+                    #key = 'fmc'+loc+'_'+iso+'_'+str(i)
+                    fmc = TH1F(key, key, fbins, 0, fbins)
+                    #fmc = TH1F(key, longNames(i), fbins, 0, fbins)
+                    fitmc[loc][iso]["hist"].append(fmc)
+                    for n in range(fLoBins):
+                    #for n in range(1, fLoBins+1):
+                        fitmc[loc][iso]["hist"][i].SetBinContent(n+np, mcLo[loc][iso]['hist'][i].GetBinContent(fLo[0]+n))
+                    #print 'filling lo-E with',key
         
-        #------------------------------------------------
+
         # fill the high energy part
-        #------------------------------------------------
+        #-------------------------------------------------------------
         
         rdata.append(copy.deepcopy(dataHi[i]))
         rdata[i].Rebin(hiEfitRebin)
@@ -265,11 +299,32 @@ def _myself_(argv):
                 ### I think we need to scale the counts by hiEfitRebin factor
                 ### not sure that's true anymore...
                 if rebinscale: rmc[loc][iso]['hist'][i].Scale(1./hiEfitRebin)
-                for n in range(fLoBins,fbins):
-                #for n in range(fLoBins+1, fbins+1):
-                    fitmc[loc][iso]["hist"][i].SetBinContent(n+np, rmc[loc][iso]['hist'][i].GetBinContent(fHi[0]+n))
-                #print 'filling hi-E with',key
+
+                #+++++++++++++++++++++++++++++++++++++++++++++++++++++
+                #+++++++++++++++++++++++++++++++++++++++++++++++++++++
+                if mcHi[loc][iso]['act'][i] > 0:
+                    for n in range(fLoBins):
+                    #for n in range(1, fLoBins+1):
+                        #fmcsum[i].SetBinContent(n+np, rmc[loc][iso]['hist'][i].GetBinContent(fHi[0]+n)*mcHi[loc][iso]['act'][i])
+                        fmcsum[i].SetBinContent(n+np, rmc[loc][iso]['hist'][i].GetBinContent(fHi[0]+n))
+                #+++++++++++++++++++++++++++++++++++++++++++++++++++++
+                #+++++++++++++++++++++++++++++++++++++++++++++++++++++
                 
+                else:
+                    for n in range(fLoBins,fbins):
+                    #for n in range(fLoBins+1, fbins+1):
+                        fitmc[loc][iso]["hist"][i].SetBinContent(n+np, rmc[loc][iso]['hist'][i].GetBinContent(fHi[0]+n))
+                    #print 'filling hi-E with',key
+
+        ### subtract fixed MC from data
+        #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        ### this works I think, but then this plots the data-fixedMC
+        fitdata[i].Add(fmcsum[i], -1)
+        #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        
+        
     ### make weights histo
     ### testing with TFractionFitter
     ### this doesn't seem to work yet...
@@ -277,7 +332,7 @@ def _myself_(argv):
     for n in range(0,fbins):
         weights.SetBinContent(n, 1)
     weights.Sumw2()
-    ##############################################
+    #-----------------------------------------------------------------
     
     for i in range(8):
         
@@ -288,14 +343,17 @@ def _myself_(argv):
 
         for loc in locs:
             for iso in isos:
+                
+                #+++++++++++++++++++++++++++++++++++++++++++++++++++++
+                #+++++++++++++++++++++++++++++++++++++++++++++++++++++
+                if mcHi[loc][iso]['act'][i] > 0: continue
+                #+++++++++++++++++++++++++++++++++++++++++++++++++++++
+                #+++++++++++++++++++++++++++++++++++++++++++++++++++++
+                
                 mc_int = fitmc[loc][iso]["hist"][i].Integral(fmin,fmax) # MC integral
                 #print iso,loc,'mc_int =',mc_int
                 
                 
-                #-----------------------------------------------------------------------
-                #=======================================================================
-                ########################################################################
-
                 ### to weight or not to weight...
                 # what if you weight first?
                 if mcweight:
@@ -308,11 +366,6 @@ def _myself_(argv):
                     mcHi[loc][iso]["hist"][i].Scale(dat_int/mc_int) # make sure MC is scaled too
                     
                                 
-                ########################################################################
-                #=======================================================================
-                #-----------------------------------------------------------------------
-                
-                
                 mcObj[i].Add(fitmc[loc][iso]["hist"][i]) # add to the TFractionFitter object
                 
         fit.append(TFractionFitter(fitdata[i], mcObj[i])) # create the TFF data and MC objects
@@ -367,6 +420,13 @@ def _myself_(argv):
         count = 0
         for loc in locs:
             for iso in isos:
+                
+                #+++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                #+++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                if mcHi[loc][iso]['act'][i] > 0: continue
+                #+++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                #+++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                
                 value = ROOT.Double(0.0)
                 error = ROOT.Double(0.0)
                 #l = j+k
@@ -389,7 +449,7 @@ def _myself_(argv):
         print line
     
     ### write fit results to text file
-    #--------------------------------------------------------
+    #-----------------------------------------------------------------
     save = ''
     if local:        save += 'local'
     else:            save += 'cup'
@@ -412,7 +472,6 @@ def _myself_(argv):
     
     
     
-    #=================================================================
     # plot the multi-chan fit results
     #=================================================================
     
@@ -484,6 +543,13 @@ def _myself_(argv):
         color = 0
         for loc in locs:
             for iso in isos:
+                
+                #+++++++++++++++++++++++++++++++++++++++++++++++++++++
+                #+++++++++++++++++++++++++++++++++++++++++++++++++++++
+                if mcHi[loc][iso]['act'][i] > 0: continue
+                #+++++++++++++++++++++++++++++++++++++++++++++++++++++
+                #+++++++++++++++++++++++++++++++++++++++++++++++++++++
+                
                 ### set mc colors
                 fitmc[loc][iso]["hist"][i].SetMarkerColor(cis[color])
                 fitmc[loc][iso]["hist"][i].SetLineColor(cis[color])
@@ -506,7 +572,7 @@ def _myself_(argv):
 
         
         ### fit residuals plots
-        #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        #-------------------------------------------------------------
         fbotpad[i].cd()
         leg = TLegend(0.72, 0.78, 0.94, 0.94)
         flegs2.append(leg)
@@ -556,7 +622,7 @@ def _myself_(argv):
 
         flegs2[i].AddEntry(fresid[i],space+"data / MC",lopt)
         #flegs2[i].Draw()
-        #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        #-------------------------------------------------------------
     """
     save = ''
     if local:      save += 'local'
@@ -577,7 +643,6 @@ def _myself_(argv):
     fcanv.Print(save+'.png')
 
     
-    #=================================================================
     # plot the lo and hi energy histograms
     #=================================================================
     
@@ -682,7 +747,6 @@ def _myself_(argv):
                 data[E][i].GetYaxis().SetTitle('counts / day / kg / keV  (dru)')
                             
             #---------------------------------------------------------
-            #---------------------------------------------------------
             if E and hiEplotRebin:
                 data[E][i].Rebin(hiEplotRebin)
                 data[E][i].Scale(1./float(hiEplotRebin))
@@ -696,7 +760,6 @@ def _myself_(argv):
                 resid[E][i].Rebin(hiEplotRebin)
                 resid[E][i].Scale(1./float(hiEplotRebin))
                 #resid[E][i].Sumw2()
-            #---------------------------------------------------------
             #---------------------------------------------------------
             
             data[E][i].GetYaxis().SetTitleFont(font)
@@ -745,15 +808,23 @@ def _myself_(argv):
 
             
             total[E][i].Sumw2()
+
             
-            ### you need to scale the error by the dru scaling
-            #if dru2:
+            ### you need to scale the error by the dru scaling and/or the rebinning
+            #-----------------------------------------------------------------------------
+            if not dru1 and not dru2:
+                for n in range(total[E][i].GetNbinsX()):
+                    #total[E][i].SetBinError(n, total[E][i].GetBinError(n)/float(hiEplotRebin))
+                    #total[E][i].SetBinError(n, total[E][i].GetBinError(n)/np.sqrt(float(hiEplotRebin)))
+                    #total[E][i].SetBinError(n, total[E][i].GetBinError(n)/math.sqrt(float(hiEplotRebin)))
+                    total[E][i].SetBinError(n, total[E][i].GetBinError(n)/(float(hiEplotRebin)/math.sqrt(2.)))
             if dru1:
                 for n in range(total[E][i].GetNbinsX()):
                     total[E][i].SetBinError(n, total[E][i].GetBinError(n)*scalesHi[i])
             if dru2:
                 for n in range(total[E][i].GetNbinsX()):
                     total[E][i].SetBinError(n, total[E][i].GetBinError(n)*scales[E][i])
+            #-----------------------------------------------------------------------------
                     
                     
             total[E][i].Draw("same")
@@ -762,7 +833,7 @@ def _myself_(argv):
 
 
             ### try to get the residuals in!
-            #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            #---------------------------------------------------------
             botpad[i].cd()
             leg = TLegend(0.72, 0.78, 0.94, 0.94)
             legs2[E].append(leg)
@@ -775,12 +846,10 @@ def _myself_(argv):
             resid[E][i].Divide(data[E][i], total[E][i])
 
             #---------------------------------------------------------
-            #---------------------------------------------------------
             #if E and hiEplotRebin:
                 #resid[E][i].Rebin(hiEplotRebin)
                 #resid[E][i].Scale(1./hiEplotRebin)
                 #resid[E][i].Sumw2()
-            #---------------------------------------------------------
             #---------------------------------------------------------
             
             resid[E][i].SetTitle('')
@@ -819,7 +888,7 @@ def _myself_(argv):
 
             #legs2[E][i].AddEntry(resid[E][i],space+"data / MC",lopt)
             #legs2[E][i].Draw()
-            #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            #---------------------------------------------------------
 
         save = ''
         if local:        save += 'local'
