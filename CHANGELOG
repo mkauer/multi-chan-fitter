@@ -11,6 +11,28 @@
 # ====================================================================
 
 
+# 2016-12-06
+# --------------------------------------------------------------------
+# ~ it's working! v14 vs v20 is basically identical! Woo Hoo!!
+# ~ hacked a bunch of stuff in 20-global-input-file.py to get this
+#   working - I'm sure there's some bugs yet to fix
+# ~ fixed dataDRU2()
+# ~ the set bkgs activities are now plotted seperatly
+# ~ changed a bunch of stuff in 20-global-input-file.py to allow for
+#   the new text list based format
+
+
+# 2016-12-05
+# --------------------------------------------------------------------
+# ~ applied same fix "range(fLoBins,fbins)" to 20-global-input-file.py
+# ~ fixed a bug in 14-set-bkg-activity.py...
+#   line 307 should be "range(fLoBins,fbins)" and not
+#   "range(fLoBins)" - didn't make much difference in the fitting
+#   results? I don't understand that, but a bug none the less.
+# + added new dataDRU2() function
+# + use funcs2.py with buildMC2(), getData2(), and readROOT2()
+
+
 # 2016-11-29
 # --------------------------------------------------------------------
 # + scale non dur1/dru2 rebinned errors by the rebinning/sqrt(2)

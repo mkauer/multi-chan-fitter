@@ -4,10 +4,12 @@
 # Matt Kauer - mkauer@physics.wisc.edu
 ######################################################################
 # 14-set-bkg-activity.py
-#
+
+V = 'v14'
+
 # Scale some MC to a fixed activity
 #
-# version: 2016-11-29
+# version: 2016-12-06
 # 
 # see CHANGELOG for changes
 ######################################################################
@@ -133,10 +135,10 @@ def _myself_(argv):
         #print scalesHi
     
     
-    ### set the order the color of the histos is consistent
+    ### set the order so the color of the histos is consistent
     locs = ['internal','pmt']
-    isos = ['K40','U238','Th232']
-
+    isos = ['K40','Th232','U238']
+    
     #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     scaletest=0.005
@@ -244,8 +246,8 @@ def _myself_(argv):
         fmcsum.append(mcsum)
         #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-                
-
+        
+        
         # fill the low energy part
         #------------------------------------------------
         for n in range(fLoBins):
@@ -303,8 +305,10 @@ def _myself_(argv):
                 #+++++++++++++++++++++++++++++++++++++++++++++++++++++
                 #+++++++++++++++++++++++++++++++++++++++++++++++++++++
                 if mcHi[loc][iso]['act'][i] > 0:
-                    for n in range(fLoBins):
-                    #for n in range(1, fLoBins+1):
+                    #for n in range(fLoBins): # was this
+                    for n in range(fLoBins,fbins): # fixed 2016-12-05
+                        # doesn't seem to make much difference in the fit...
+                    #for n in range(fLoBins+1, fbins+1):
                         #fmcsum[i].SetBinContent(n+np, rmc[loc][iso]['hist'][i].GetBinContent(fHi[0]+n)*mcHi[loc][iso]['act'][i])
                         fmcsum[i].SetBinContent(n+np, rmc[loc][iso]['hist'][i].GetBinContent(fHi[0]+n))
                 #+++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -464,6 +468,7 @@ def _myself_(argv):
     if dru1:         save += '_dru1'
     if dru2:         save += '_dru2'
     if hiEplotRebin: save += '_hiEplotRebin-'+str(hiEplotRebin)
+    save += '_'+V
     
     outfile = open(save+'_fit-results.txt', 'w')
     for line in fitresults:
@@ -905,6 +910,7 @@ def _myself_(argv):
         if dru1:         save += '_dru1'
         if dru2:         save += '_dru2'
         if hiEplotRebin: save += '_hiEplotRebin-'+str(hiEplotRebin)
+        save += '_'+V
         
         canvs[E].Update()
         canvs[E].Print(save+'.png')
