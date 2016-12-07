@@ -13,6 +13,7 @@
 
 # 2016-12-06
 # --------------------------------------------------------------------
+# + cut release v1.1 based off of 14-set-bkg-activity.py
 # ~ it's working! v14 vs v20 is basically identical! Woo Hoo!!
 # ~ hacked a bunch of stuff in 20-global-input-file.py to get this
 #   working - I'm sure there's some bugs yet to fix
@@ -48,7 +49,7 @@
 
 # 2016-11-29
 # --------------------------------------------------------------------
-# + cut a release v1.0 based off of 13-data-dru.py
+# + cut release v1.0 based off of 13-data-dru.py
 # - remove the y axis scaling for easier comparison amoung variations
 
 
