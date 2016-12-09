@@ -13,6 +13,7 @@
 
 # 2016-12-09
 # --------------------------------------------------------------------
+# + cut a v2.0 release now that the fit rebinning is fixed
 # ~ fixed the rebinscale to work with new v20 format but I still
 #   don't understand why it effects the fit results so much
 # + applied rebin bug fix to v14 and v20
