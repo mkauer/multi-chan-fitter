@@ -251,10 +251,9 @@ def _myself_(argv):
         # fill the low energy part
         #------------------------------------------------
         for n in range(fLoBins):
-        #for n in range(1, fLoBins+1):
             fitdata[i].SetBinContent(n+np, dataLo[i].GetBinContent(fLo[0]+n))
             fitdata[i].SetBinError(n+np, dataLo[i].GetBinError(fLo[0]+n))
-            #fitdata.append(fdata)
+            
         for loc in locs:
             for iso in isos:
                 
@@ -262,8 +261,6 @@ def _myself_(argv):
                 #+++++++++++++++++++++++++++++++++++++++++++++++++++++
                 if mcLo[loc][iso]['act'][i] > 0:
                     for n in range(fLoBins):
-                    #for n in range(1, fLoBins+1):
-                        #fmcsum[i].SetBinContent(n+np, mcLo[loc][iso]['hist'][i].GetBinContent(fLo[0]+n)*mcLo[loc][iso]['act'][i])
                         fmcsum[i].SetBinContent(n+np, mcLo[loc][iso]['hist'][i].GetBinContent(fLo[0]+n))
                 #+++++++++++++++++++++++++++++++++++++++++++++++++++++
                 #+++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -275,10 +272,8 @@ def _myself_(argv):
                     #fmc = TH1F(key, longNames(i), fbins, 0, fbins)
                     fitmc[loc][iso]["hist"].append(fmc)
                     for n in range(fLoBins):
-                    #for n in range(1, fLoBins+1):
                         fitmc[loc][iso]["hist"][i].SetBinContent(n+np, mcLo[loc][iso]['hist'][i].GetBinContent(fLo[0]+n))
-                    #print 'filling lo-E with',key
-        
+                
 
         # fill the high energy part
         #-------------------------------------------------------------
@@ -289,10 +284,12 @@ def _myself_(argv):
         ### I think we need to scale the counts by hiEfitRebin factor
         ### not sure that's true anymore...
         if rebinscale: rdata[i].Scale(1./hiEfitRebin)
+        r=0
         for n in range(fLoBins,fbins):
-        #for n in range(fLoBins+1, fbins+1):
-            fitdata[i].SetBinContent(n+np, rdata[i].GetBinContent(fHi[0]+n))
-            fitdata[i].SetBinError(n+np, rdata[i].GetBinError(fHi[0]+n))
+            fitdata[i].SetBinContent(n+np, rdata[i].GetBinContent(fHi[0]+r))
+            fitdata[i].SetBinError(n+np, rdata[i].GetBinError(fHi[0]+r))
+            r+=1
+        
         for loc in locs:
             for iso in isos:
                 rmc[loc][iso]['hist'].append(copy.deepcopy(mcHi[loc][iso]['hist'][i]))
@@ -305,21 +302,20 @@ def _myself_(argv):
                 #+++++++++++++++++++++++++++++++++++++++++++++++++++++
                 #+++++++++++++++++++++++++++++++++++++++++++++++++++++
                 if mcHi[loc][iso]['act'][i] > 0:
-                    #for n in range(fLoBins): # was this
+                    r=0
                     for n in range(fLoBins,fbins): # fixed 2016-12-05
-                        # doesn't seem to make much difference in the fit...
-                    #for n in range(fLoBins+1, fbins+1):
-                        #fmcsum[i].SetBinContent(n+np, rmc[loc][iso]['hist'][i].GetBinContent(fHi[0]+n)*mcHi[loc][iso]['act'][i])
-                        fmcsum[i].SetBinContent(n+np, rmc[loc][iso]['hist'][i].GetBinContent(fHi[0]+n))
+                        fmcsum[i].SetBinContent(n+np, rmc[loc][iso]['hist'][i].GetBinContent(fHi[0]+r))
+                        r+=1
                 #+++++++++++++++++++++++++++++++++++++++++++++++++++++
                 #+++++++++++++++++++++++++++++++++++++++++++++++++++++
                 
                 else:
+                    r=0
                     for n in range(fLoBins,fbins):
-                    #for n in range(fLoBins+1, fbins+1):
-                        fitmc[loc][iso]["hist"][i].SetBinContent(n+np, rmc[loc][iso]['hist'][i].GetBinContent(fHi[0]+n))
-                    #print 'filling hi-E with',key
+                        fitmc[loc][iso]["hist"][i].SetBinContent(n+np, rmc[loc][iso]['hist'][i].GetBinContent(fHi[0]+r))
+                        r+=1
 
+        
         ### subtract fixed MC from data
         #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

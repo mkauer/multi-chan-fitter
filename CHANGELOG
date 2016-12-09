@@ -11,8 +11,20 @@
 # ====================================================================
 
 
+# 2016-12-09
+# --------------------------------------------------------------------
+# ~ fixed the rebinscale to work with new v20 format but I still
+#   don't understand why it effects the fit results so much
+# + applied rebin bug fix to v14 and v20
+# ~ FINALLY fixed the fit rebinning issue! I was selecting the wrong
+#   subset of bins in the HiE filling section. It needs to look like:
+#   hist.SetBinContent(n+np, rsigs[key]['hist'].GetBinContent(fHi[0]+r))
+
+
 # 2016-12-06
 # --------------------------------------------------------------------
+# ~ 20-global-input-file.py is the new standard
+# ~ cleaned up the comments a bit in 20-global-input-file.py
 # + cut release v1.1 based off of 14-set-bkg-activity.py
 # ~ it's working! v14 vs v20 is basically identical! Woo Hoo!!
 # ~ hacked a bunch of stuff in 20-global-input-file.py to get this

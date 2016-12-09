@@ -4,11 +4,13 @@
 # Works with "10-mc-fit.py" and later versions, local and CUP
 # Trying to make sure this stays backwards compitable
 #
-# version: 2016-11-29
+# version: 2016-12-07
 #
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #=====================================================================
 
+# ~ updated crystal masses in cmass() and carried it over into
+#   longNames()
 # + added mc[loc][iso]['act'] = -1 by default in readROOT()
 # + added return of scalings to dataDRU()
 # + added dataDRU() to scale data into dru units
@@ -348,38 +350,38 @@ def cnames(i):
     return crystals[int(i)]
 
 
-def longNames(i):
-    """
-    Full name and specs for the crystal
-    """
-    crystals = [
-        'C1  NaI-001  Sample-B  8.3kg',
-        'C2  NaI-002  Sample-C  9.2kg',
-        'C3  NaI-007  WimpScint-2  9.2kg',
-        'C4  AS-3  WimpScint-2  18.5kg',
-        'C5  AS-1  Sample-C  18.5kg',
-        'C6  NaI-011  WimpScint-3  12.5kg',
-        'C7  NaI-012  WimpScint-3  12.5kg',
-        'C8  AS-2  Sample-C  18.5kg'
-    ]
-    return crystals[int(i)]
-
-
 def cmass(i):
     """
     crystal masses in kg
     """
     mass = [
-        8.3,
-        9.2,
-        9.2,
-        18.5,
-        18.5,
-        12.5,
-        12.5,
-        18.5
+         8.26,
+         9.15,
+         9.16,
+        18.01,
+        18.28,
+        12.50,
+        12.50,
+        18.28
         ]
     return mass[int(i)]
+
+
+def longNames(i):
+    """
+    Full name and specs for the crystal
+    """
+    crystals = [
+        cnames(i)+'  NaI-001  Sample-B  '+str(cmass(i))+'kg',
+        cnames(i)+'  NaI-002  Sample-C  '+str(cmass(i))+'kg',
+        cnames(i)+'  NaI-007  WimpScint-2  '+str(cmass(i))+'kg',
+        cnames(i)+'  AS-3  WimpScint-2  '+str(cmass(i))+'kg',
+        cnames(i)+'  AS-1  Sample-C  '+str(cmass(i))+'kg',
+        cnames(i)+'  NaI-011  WimpScint-3  '+str(cmass(i))+'kg',
+        cnames(i)+'  NaI-012  WimpScint-3  '+str(cmass(i))+'kg',
+        cnames(i)+'  AS-2  Sample-C  '+str(cmass(i))+'kg'
+    ]
+    return crystals[int(i)]
 
 
 def volumeNames(i):
