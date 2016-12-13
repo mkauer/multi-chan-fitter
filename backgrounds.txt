@@ -11,12 +11,12 @@
 # isot = background isotope
 # acti = background activity (mBq)
 # erro = error on the activity
-# cstnL = fit contrain low
-# cstnH = fit contrain high
+# Lbnd = lower fit bound
+# Hbnd = upper fit bound
 #------------------------------------------------------------
 
 
-# bsdr  xstl     loca       isot      acti     erro      cstnL     cstnH
+# bsdr  xstl     loca       isot      acti     erro       Lbnd      Hbnd
 # ----  ----    --------   ------    ------   --------   -------   -------
 D       1       data
 D       2       data
@@ -27,14 +27,14 @@ D       6       data
 D       7       data
 D       8       data
 
-B       1       internal    K40      0.005     0.0001     0.001     10.0
-B       2       internal    K40      0.005     0.0001     0.001     10.0
-B       3       internal    K40      0.005     0.0001     0.001     10.0
-B       4       internal    K40      0.005     0.0001     0.001     10.0
-B       5       internal    K40      0.005     0.0001     0.001     10.0
-B       6       internal    K40      0.005     0.0001     0.001     10.0
-B       7       internal    K40      0.005     0.0001     0.001     10.0
-B       8       internal    K40      0.005     0.0001     0.001     10.0
+B       1       internal    K40      0.0001    0.0001     0.001     10.0
+B       2       internal    K40      0.0001    0.0001     0.001     10.0
+B       3       internal    K40      0.0001    0.0001     0.001     10.0
+B       4       internal    K40      0.0001    0.0001     0.001     10.0
+B       5       internal    K40      0.0001    0.0001     0.001     10.0
+B       6       internal    K40      0.0001    0.0001     0.001     10.0
+B       7       internal    K40      0.0001    0.0001     0.001     10.0
+B       8       internal    K40      0.0001    0.0001     0.001     10.0
 
 S       1       internal    U238     0.005     0.0001     0.001     10.0
 S       2       internal    U238     0.005     0.0001     0.001     10.0

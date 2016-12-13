@@ -4,11 +4,13 @@
 # Works with "10-mc-fit.py" and later versions, local and CUP
 # Trying to make sure this stays backwards compitable
 #
-# version: 2016-12-07
+# version: 2016-12-12
 #
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #=====================================================================
-
+# 
+# + init/set  mc[loc][iso]['act'] = [] and mc[loc][iso]["act"].append(-1)
+#   by default, and this works for local data using v14
 # ~ updated crystal masses in cmass() and carried it over into
 #   longNames()
 # + added mc[loc][iso]['act'] = -1 by default in readROOT()
@@ -89,11 +91,13 @@ def buildMC(locs=['internal'], isos=['K40'], energy=0):
                 print nfiles,'files found for',loc,iso
                 mc[loc][iso]["chain"] = chain
                 mc[loc][iso]["hist"] = []
+                mc[loc][iso]["act"] = []
             else:
                 print 'Warning:', loc, iso, 'not found...'
                 mc[loc][iso]["chain"] = None
                 mc[loc][iso]["hist"] = None
-    
+                mc[loc][iso]["act"] = None
+                
     # get histogram parameters for MC
     par = histparam(energy)
     
@@ -129,11 +133,12 @@ def buildMC(locs=['internal'], isos=['K40'], energy=0):
                 #mc[loc][iso]["chain"].Draw('(edep['+str(i)+']*1000.) + (sigma*edep['+str(i)+']*1000.*rng) >> histo', cut1+cut2)
                 mc[loc][iso]["chain"].Draw('(edep['+str(i)+']*1000.) + (sigma*edep['+str(i)+']*1000.*rng) >> '+key, cut1+cut2)
                 ###-------------------------------------------------------------------------------
-
+                
                 histo.SetLineColor(kBlack)
                 histo.SetMarkerColor(kBlack)
                 histo.SetLineWidth(1)
                 mc[loc][iso]["hist"].append(histo)
+                mc[loc][iso]["act"].append(-1)
                 
     return mc
 

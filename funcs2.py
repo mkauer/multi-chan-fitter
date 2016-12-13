@@ -3,10 +3,11 @@
 # Import old funcs.py but now add more for reading in the
 # universal backgrounds file.
 #
-# version: 2016-12-06
+# version: 2016-12-12
 #
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# ~ use data run 1544
 # ~ fixed dataDRU2() for the new data key format
 # + added sortKeys2()
 # + added dataDRU2()
@@ -18,18 +19,21 @@
 #
 # email me: mkauer@physics.wisc.edu
 ######################################################################
-#
+# 
 # Where is MC?
 # /data/MC/KIMS-NaI/user-scratch/sim/processed/K40/set2
 # /data/MC/KIMS-NaI/user-scratch/sim/processed/U238/set2
 # /data/MC/KIMS-NaI/user-scratch/sim/processed/Th232/set2
-#
+# 
 # Where is raw data?
-# /data/KIMS/COSINE/PHY_RUN
-#
-# My processed data is currently in
-# /home/mkauer/temp
-#
+# /data/COSINE/PHYS
+# But just use the processed data...
+# 
+# Where is the processed data?
+# Right now it's in:
+# /data/COSINE/NTP/phys/V00-00-02
+# Currently I'm using run 1544
+# 
 ######################################################################
 
 import os,sys
@@ -149,7 +153,7 @@ def buildMC2(fileName='backgrounds.txt'):
     return bkgs, sigs
 
 
-def getData2(run=1324):
+def getData2(runNum=1544):
     """
     Build histograms of the data from all crystals
     """
@@ -161,10 +165,13 @@ def getData2(run=1324):
     chain = TChain("ntp","")
     nfiles=0
     if local:
-        nfiles = chain.Add('/home/mkauer/COSINE/CUP/mc-fitting/data/phys/*'+str(run)+'*root*')
+        nfiles = chain.Add('/home/mkauer/COSINE/CUP/mc-fitting/data/phys/ntp_I*'+str(runNum)+'*root*')
     else:
-        nfiles = chain.Add('/home/mkauer/temp/*'+str(run)+'*root*')
-    
+        #nfiles = chain.Add('/home/mkauer/temp/*'+str(runNum)+'*root*')
+        ### testing...
+        #nfiles = chain.Add('/data/COSINE/NTP/phys/V00-00-02/ntp_I001544.root.001')
+        nfiles = chain.Add('/data/COSINE/NTP/phys/V00-00-02/ntp_I*'+str(runNum)+'*root*')
+        
     if nfiles > 0:
         print nfiles,'data files found'
         for energy in range(2):

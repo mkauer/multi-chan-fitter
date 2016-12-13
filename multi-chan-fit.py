@@ -9,22 +9,9 @@ V = 'v20'
 
 # Use a global input file
 #
-# version: 2016-12-09
+# version: 2016-12-13
 # 
 # see CHANGELOG for changes
-######################################################################
-#
-# Where is the MC I'm using?
-# /data/MC/KIMS-NaI/user-scratch/sim/processed/K40/set2
-# /data/MC/KIMS-NaI/user-scratch/sim/processed/U238/set2
-# /data/MC/KIMS-NaI/user-scratch/sim/processed/Th232/set2
-#
-# Where is raw data I'm using?
-# /data/KIMS/COSINE/PHY_RUN
-#
-# My processed data is currently in
-# /home/mkauer/temp
-#
 ######################################################################
 
 import os,sys
@@ -43,8 +30,8 @@ import math
 ### More stats for the fit will give bettet errors
 ### ie use dru2 option!!
 ### dru1 has some bugs still... the fits won't converge
-dru1 = 0   ### convert data to dru before fit? [0,1]
-dru2 = 1   ### convert data and mc to dru after fit? [0,1]
+dru1 = 1   ### convert data to dru before fit? [0,1]
+dru2 = 0   ### convert data and mc to dru after fit? [0,1]
 
 # dru safty check...
 if dru2: dru1 = 0
@@ -60,7 +47,7 @@ hiEfitRebin = 10   ### rebin the hi-E histo for fitting
 # yes, just checked, this should be 1
 np = 1
 
-reuse = 1   ### use joined rootfile data? [0,1]
+reuse = 0   ### use joined rootfile data? [0,1]
 
 mcscale = 1   ### pre scale the MC? [0,1]
 mcweight = 1  ### set MC weights? [0,1]
@@ -90,23 +77,26 @@ gROOT.SetBatch(batch)
 def _myself_(argv):
 
     gROOT.Reset()
-    gStyle.SetPalette(1)
-    gStyle.SetOptStat('')
-    gStyle.SetOptFit(0)
+    gStyle.SetPalette (1)
+    gStyle.SetOptStat ('')
+    gStyle.SetOptFit  (0)
     
-    gStyle.SetPadBottomMargin(0.12)
-    gStyle.SetPadLeftMargin  (0.12)
-    gStyle.SetPadRightMargin (0.05)
+    gStyle.SetPadBottomMargin (0.12)
+    gStyle.SetPadLeftMargin   (0.12)
+    gStyle.SetPadRightMargin  (0.05)
     
+    #runNum = 1324
+    runNum = 1544
+    mcfile = 'backgrounds.txt'
     
     if reuse:
-        rootfile = './root-join-read/joined2-master.root'
-        data, bkgs, sigs = readROOT2(rootfile)
-        
+        rootfile = './root-join-read/join2-'+str(runNum)+'-master.root'
+        data, bkgs, sigs = readROOT2(rootfile, mcfile)
+    
     else:
-        data = getData2()
-        bkgs, sigs = buildMC2()
-        
+        data = getData2(runNum)
+        bkgs, sigs = buildMC2(mcfile)
+    
     datkeys, bakkeys, sigkeys = sortKeys2(data, bkgs, sigs)
     
     if dru1:
@@ -167,6 +157,12 @@ def _myself_(argv):
         rsigs[key] = {}
 
     #-----------------------------------------------------------------
+    
+    
+    # pre-scale all backgrounds for testing purposes
+    for key in bakkeys:
+        bkgs[key]['hist'].Scale(0.001)
+    
     
     fitdata = []
     fitsigs = {}
@@ -350,9 +346,13 @@ def _myself_(argv):
                 #fit[i].SetWeight(l, 1)
         
         fit[i].SetRangeX(fmin, fmax) # set global range, should be the same as fmin and fmax?
+
         
-        status = fit[i].Fit() # do the fit!
-        
+        ### try doing the fit
+        #------------------------------
+        status = fit[i].Fit()
+        #------------------------------
+
         
         chi2 = fit[i].GetChisquare()
         ndf  = fit[i].GetNDF()
@@ -390,6 +390,7 @@ def _myself_(argv):
     save = ''
     if local:        save += 'local'
     else:            save += 'cup'
+    save += '_'+str(runNum)
     save += '_Nchan-fit'
     save += '_loEfit-'+str(int(fLo[0]))+'-'+str(int(fLo[1]))
     save += '_hiEfit-'+str(int(fHiE[0]))+'-'+str(int(fHiE[1]))
@@ -401,6 +402,7 @@ def _myself_(argv):
     if dru1:         save += '_dru1'
     if dru2:         save += '_dru2'
     if hiEplotRebin: save += '_hiEplotRebin-'+str(hiEplotRebin)
+    if reuse:        save += '_reuse'
     save += '_'+V
     
     outfile = open(save+'_fit-results.txt', 'w')
@@ -454,18 +456,21 @@ def _myself_(argv):
         flegs[i].SetFillColor(0)
         flegs[i].SetBorderSize(0)
         lopt = 'LPE'
-
-        """
-        if local and not reuse:
-            fitdata[i].SetAxisRange(1,1000,'y')
+        
+        if dru1:
+            fitdata[i].SetAxisRange(10**-1, 10**2, 'y')
         else:
-            fitdata[i].SetAxisRange(1,1000000,'y')
-        """
+            fitdata[i].SetAxisRange(10**1, 10**4, 'y')
         
         fitdata[i].SetLineColor(kBlack)
         fitdata[i].SetMarkerColor(kBlack)
         fitdata[i].SetLineWidth(1)
-        fitdata[i].GetYaxis().SetTitle('arb. counts')
+        
+        if dru1:
+            fitdata[i].GetYaxis().SetTitle('counts / day / kg / keV  (dru)')
+        else:
+            fitdata[i].GetYaxis().SetTitle('arb. counts')
+        
         fitdata[i].GetYaxis().SetTitleFont(font)
         fitdata[i].GetYaxis().SetTitleSize(size)
         fitdata[i].GetYaxis().SetTitleOffset(yoff)
@@ -671,9 +676,16 @@ def _myself_(argv):
                     #data[key]['hist'].GetXaxis().SetTitle('Energy (keV)')
                     #data[key]['hist'].GetXaxis().SetLabelFont(font)
                     #data[key]['hist'].GetXaxis().SetLabelSize(size)
+                    
+                    if dru1 or dru2:
+                        if not E:
+                            data[key]['hist'].SetAxisRange(10**-1, 10**3, 'y')
+                        else:
+                            data[key]['hist'].SetAxisRange(10**-2, 10**2, 'y')
+                    
                     data[key]['hist'].Draw()
                     legs[E][i].AddEntry(data[key]['hist'], space+'data', lopt)
-            
+                    
             color = 0
             for key in bakkeys:
                 if 'x'+str(i+1) in key and '-e'+str(E) in key:
@@ -682,7 +694,8 @@ def _myself_(argv):
                     bkgs[key]['hist'].SetLineColor(cis[color])
                     color += 1
                     
-                    druScale = data['x'+str(i+1)+'-data'+'-e'+str(E)]['druScale']
+                    if dru1 or dru2:
+                        druScale = data['x'+str(i+1)+'-data'+'-e'+str(E)]['druScale']
                     if dru2:
                         bkgs[key]['hist'].Scale(druScale)
                     
@@ -707,7 +720,8 @@ def _myself_(argv):
                     sigs[key]['hist'].SetLineColor(cis[color])
                     color += 1
                     
-                    druScale = data['x'+str(i+1)+'-data'+'-e'+str(E)]['druScale']
+                    if dru1 or dru2:
+                        druScale = data['x'+str(i+1)+'-data'+'-e'+str(E)]['druScale']
                     if dru2:
                         sigs[key]['hist'].Scale(druScale)
                     
@@ -800,6 +814,7 @@ def _myself_(argv):
         save = ''
         if local:        save += 'local'
         else:            save += 'cup'
+        save += '_'+str(runNum)
         if E:            save += '_hiE'
         else:            save += '_loE'
         save += '_loEfit-'+str(int(fLo[0]))+'-'+str(int(fLo[1]))
@@ -812,6 +827,7 @@ def _myself_(argv):
         if dru1:         save += '_dru1'
         if dru2:         save += '_dru2'
         if hiEplotRebin: save += '_hiEplotRebin-'+str(hiEplotRebin)
+        if reuse:        save += '_reuse'
         save += '_'+V
         
         canvs[E].Update()

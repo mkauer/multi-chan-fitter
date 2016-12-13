@@ -22,16 +22,17 @@
 # email me: mkauer@physics.wisc.edu
 ######################################################################
 #
-# Where is MC?
+# Where is the MC?
 # /data/MC/KIMS-NaI/user-scratch/sim/processed/K40/set2
 # /data/MC/KIMS-NaI/user-scratch/sim/processed/U238/set2
 # /data/MC/KIMS-NaI/user-scratch/sim/processed/Th232/set2
 #
-# Where is raw data?
-# /data/KIMS/COSINE/PHY_RUN
+# Where is the raw data?
+# /data/COSINE/PHYS
 #
-# My processed data is currently in
-# /home/mkauer/temp
+# Where is the proccessed data?
+# It's currently in:
+# /data/COSINE/NTP/phys/V00-00-02
 #
 ######################################################################
 
@@ -53,7 +54,7 @@ def _myself_(argv):
         #print eng
         
         if local: path = "/home/mkauer/COSINE/CUP/mc-fitting/data/phys/"
-        else:     path = "/home/mkauer/temp/"
+        else:     path = "/home/mkauer/data/1324/"
         
         data = getData([path+"*1324*root*"], eng)
         

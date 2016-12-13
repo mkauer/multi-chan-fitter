@@ -5,10 +5,12 @@
 # hi/lo energy data should be calibrated
 # hi/lo energy MC should be resolution smeared
 #
-# version: 2016-12-02
+# version: 2016-12-12
 #
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# ~ use data run 1544
+# ~ new paths for raw data and processed data
 # ~ using the new version of building data and mc from backgrounds file
 # + added resolution/2 to funcs.py - see my toy mc
 # ~ needed absolute paths here
@@ -21,19 +23,6 @@
 # + hacking away at it
 #
 # email me: mkauer@physics.wisc.edu
-######################################################################
-#
-# Where is MC?
-# /data/MC/KIMS-NaI/user-scratch/sim/processed/K40/set2
-# /data/MC/KIMS-NaI/user-scratch/sim/processed/U238/set2
-# /data/MC/KIMS-NaI/user-scratch/sim/processed/Th232/set2
-#
-# Where is raw data?
-# /data/KIMS/COSINE/PHY_RUN
-#
-# My processed data is currently in
-# /home/mkauer/temp
-#
 ######################################################################
 
 import os,sys
@@ -48,10 +37,15 @@ gROOT.SetBatch(1)
 
 
 def _myself_(argv):
-    
-    rfile = TFile("join2-test.root","RECREATE")
-    
-    data = getData2()
+
+    runNum = 1544
+
+    rootfile = 'join2-test-'+str(runNum)+'.root'
+
+    rfile = TFile(rootfile, 'RECREATE')
+    print 'creating rootfile',rootfile
+
+    data = getData2(runNum)
     bkgs, sigs = buildMC2()
     
     rfile.Write()
