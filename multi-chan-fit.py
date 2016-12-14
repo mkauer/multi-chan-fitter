@@ -3,11 +3,11 @@
 ######################################################################
 # Matt Kauer - mkauer@physics.wisc.edu
 ######################################################################
-# 20-global-input-file.py
+# 21-get-activity-values.py
 
-V = 'v20'
+V = 'v21'
 
-# Use a global input file
+# Scale the MC by real activity values
 #
 # version: 2016-12-13
 # 

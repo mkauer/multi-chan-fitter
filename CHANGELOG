@@ -13,6 +13,7 @@
 
 # 2016-12-13
 # --------------------------------------------------------------------
+# ~ switch to 21-get-activity-values.py as main/master script
 # ~ program now skips the fitting bit if no signals [S] are specified
 # ~ program works if there are no backgrounds [B] specified
 # ~ add 'reuse' tag to the saved plot names
