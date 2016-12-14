@@ -13,6 +13,7 @@
 
 # 2016-12-13
 # --------------------------------------------------------------------
+# ~ switching to 22-pushpa-calib.py to get calib and reso functions in
 # ~ cut a v2.1 release now that internal background activity scaling
 #   is working as expected
 # ~ looks like scaling is working for internal K40 at least

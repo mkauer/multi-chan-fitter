@@ -3,11 +3,11 @@
 ######################################################################
 # Matt Kauer - mkauer@physics.wisc.edu
 ######################################################################
-# 21-get-activity-values.py
+# 22-pushpa-calib.py
 
-V = 'v21'
+V = 'v22'
 
-# Scale the MC by real activity values
+# Get Pushpa's calib and resol functions in
 #
 # version: 2016-12-13
 # 
