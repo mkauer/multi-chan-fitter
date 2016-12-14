@@ -13,6 +13,8 @@
 
 # 2016-12-13
 # --------------------------------------------------------------------
+# ~ cut a v2.1 release now that internal background activity scaling
+#   is working as expected
 # ~ looks like scaling is working for internal K40 at least
 # + added scaleBkgs() to funcs2.py to scale into real mBq/kg units
 # + added key data[key]['runtime'] to dataDRU2()
