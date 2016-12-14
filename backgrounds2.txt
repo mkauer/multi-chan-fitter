@@ -1,0 +1,83 @@
+# -*- sh -*-
+
+# version 2016-12-13
+
+# Now using real activities for internal K40 mBq/kg (from Estella)
+
+#------------------------------------------------------------
+# bsdr = [B]ackground, [S]ignal, or [D]ata and [R]euse
+# xstl = crystal number 1-8
+# loca = location
+# isot = background isotope
+# acti = background activity (mBq/kg)
+# erro = error on the activity
+# Lbnd = lower fit bound
+# Hbnd = upper fit bound
+#------------------------------------------------------------
+
+
+# bsdr  xstl     loca       isot      acti     erro       Lbnd      Hbnd
+# ----  ----    --------   ------    ------   --------   -------   -------
+D       1       data
+D       2       data
+D       3       data
+D       4       data
+D       5       data
+D       6       data
+D       7       data
+D       8       data
+
+B       1       internal    K40      1.34      0.0001     0.001     10.0
+B       2       internal    K40      2.56      0.0001     0.001     10.0
+B       3       internal    K40      1.27      0.0001     0.001     10.0
+B       4       internal    K40      1.22      0.0001     0.001     10.0
+B       5       internal    K40      2.69      0.0001     0.001     10.0
+B       6       internal    K40      0.38      0.0001     0.001     10.0
+B       7       internal    K40      0.58      0.0001     0.001     10.0
+B       8       internal    K40      1.74      0.0001     0.001     10.0
+
+S       1       internal    U238     0.005     0.0001     0.001     10.0
+S       2       internal    U238     0.005     0.0001     0.001     10.0
+S       3       internal    U238     0.005     0.0001     0.001     10.0
+S       4       internal    U238     0.005     0.0001     0.001     10.0
+S       5       internal    U238     0.005     0.0001     0.001     10.0
+S       6       internal    U238     0.005     0.0001     0.001     10.0
+S       7       internal    U238     0.005     0.0001     0.001     10.0
+S       8       internal    U238     0.005     0.0001     0.001     10.0
+
+S       1       internal    Th232    0.005     0.0001     0.001     10.0
+S       2       internal    Th232    0.005     0.0001     0.001     10.0
+S       3       internal    Th232    0.005     0.0001     0.001     10.0
+S       4       internal    Th232    0.005     0.0001     0.001     10.0
+S       5       internal    Th232    0.005     0.0001     0.001     10.0
+S       6       internal    Th232    0.005     0.0001     0.001     10.0
+S       7       internal    Th232    0.005     0.0001     0.001     10.0
+S       8       internal    Th232    0.005     0.0001     0.001     10.0
+
+S       1       pmt         K40      0.005     0.0001     0.001     10.0
+S       2       pmt         K40      0.005     0.0001     0.001     10.0
+S       3       pmt         K40      0.005     0.0001     0.001     10.0
+S       4       pmt         K40      0.005     0.0001     0.001     10.0
+S       5       pmt         K40      0.005     0.0001     0.001     10.0
+S       6       pmt         K40      0.005     0.0001     0.001     10.0
+S       7       pmt         K40      0.005     0.0001     0.001     10.0
+S       8       pmt         K40      0.005     0.0001     0.001     10.0
+
+S       1       pmt         U238     0.005     0.0001     0.001     10.0
+S       2       pmt         U238     0.005     0.0001     0.001     10.0
+S       3       pmt         U238     0.005     0.0001     0.001     10.0
+S       4       pmt         U238     0.005     0.0001     0.001     10.0
+S       5       pmt         U238     0.005     0.0001     0.001     10.0
+S       6       pmt         U238     0.005     0.0001     0.001     10.0
+S       7       pmt         U238     0.005     0.0001     0.001     10.0
+S       8       pmt         U238     0.005     0.0001     0.001     10.0
+
+S       1       pmt         Th232    0.005     0.0001     0.001     10.0
+S       2       pmt         Th232    0.005     0.0001     0.001     10.0
+S       3       pmt         Th232    0.005     0.0001     0.001     10.0
+S       4       pmt         Th232    0.005     0.0001     0.001     10.0
+S       5       pmt         Th232    0.005     0.0001     0.001     10.0
+S       6       pmt         Th232    0.005     0.0001     0.001     10.0
+S       7       pmt         Th232    0.005     0.0001     0.001     10.0
+S       8       pmt         Th232    0.005     0.0001     0.001     10.0
+
