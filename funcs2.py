@@ -3,10 +3,15 @@
 # Import old funcs.py but now add more for reading in the
 # universal backgrounds file.
 #
-# version: 2016-12-12
+# version: 2016-12-13
 #
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# + added key data[key]['runtime'] to dataDRU2()
+# + added scaleBkgs() to scale into real mBq/kg units
+# ~ use backgrounds2.txt for v21
+# ~ don't use bkgs scaling in readROOT2() for v21
+# ~ run 1544 has 2 hour subruns
 # ~ use data run 1544
 # ~ fixed dataDRU2() for the new data key format
 # + added sortKeys2()
@@ -69,7 +74,7 @@ def buildMC2(fileName='backgrounds.txt'):
             isot = str(bits[3])
             acti = float(bits[4])
             erro = float(bits[5])
-            cstn = [float(bits[6]), float(bits[7])]
+            fbnd = [float(bits[6]), float(bits[7])]
             
             chain = TChain("MC","")
             nfiles=0
@@ -142,7 +147,7 @@ def buildMC2(fileName='backgrounds.txt'):
                         sigs[key] = {}
                         sigs[key]['hist'] = histo
                         sigs[key]['generated'] = temp
-                        sigs[key]['cstn'] = cstn
+                        sigs[key]['fbnd'] = fbnd
                         
                     
             else:
@@ -212,12 +217,12 @@ def getData2(runNum=1544):
                 data[key]['subruns'] = temp
                 
     else:
-        print 'Warning:', loc, iso, 'not found...'
+        print 'Warning: no data files found...'
     
     return data
 
 
-def readROOT2(rootfile, fileName='backgrounds.txt'):
+def readROOT2(rootfile, fileName='backgrounds.txt', scale=0):
     
     if not os.path.exists(rootfile):
         print 'rootfile [',rootfile,'] file not found'
@@ -279,22 +284,26 @@ def readROOT2(rootfile, fileName='backgrounds.txt'):
                     bkgs[name]['generated'] = deepcopy(TH1F(rfile.Get(name+'_generated')))
                     bkgs[name]['acti'] = acti
                     bkgs[name]['erro'] = erro
+
                     ### scale the bkgs right away?
-                    bkgs[name]['hist'].Scale(acti)
+                    # I think scaling should be a seperate function
+                    # Keep this in for v20 comparison
+                    if scale:
+                        bkgs[name]['hist'].Scale(acti)
                     
                     
             if 'S' in bsdr:
                 xstl = int(bits[1])
                 loca = str(bits[2])
                 isot = str(bits[3])
-                cstn = [float(bits[6]), float(bits[7])]
+                fbnd = [float(bits[6]), float(bits[7])]
                 
                 for e in range(2):
                     name = 'x'+str(xstl)+'-'+loca+'-'+isot+'-e'+str(e)
                     sigs[name] = {}
                     sigs[name]['hist'] = deepcopy(TH1F(rfile.Get(name)))
                     sigs[name]['generated'] = deepcopy(TH1F(rfile.Get(name+'_generated')))
-                    sigs[name]['cstn'] = cstn
+                    sigs[name]['fbnd'] = fbnd
     
     rfile.Close()
     infile.close()
@@ -307,30 +316,78 @@ def dataDRU2(data):
     Scale data into DRU
     """
         
-    #nfiles = float(nfiles)
-    # FIX - will eventually need to count the runs or add the run times 
-    
     # this will have to get fixed eventually if we want finer binning in the lo-E region
     # or more coarse binning in the hi-E
     keVperBin = float(1)
     
-    # each subrun-file is 2 hours long
-    # estella says the 1324 runs are 1 hour subruns...
-    subrun = float(1) # in hours
+    # run 1324 has 1 hour subruns
+    # run 1544 has 2 hour subruns
+    subrunTime = float(2) # in hours
     
-    #days = float((subrun*nfiles)/24.)
-    
-    scales = []
+    #scales = []
     for key in data:
     #for i in range(8):
+
         i = int(key.split('-')[0].split('x')[-1]) - 1
         nfiles = data[key]['subruns'].GetEntries()
-        days = float((subrun*nfiles)/24.)
+        days = float((subrunTime*nfiles)/24.)
         scale = float(1./(days*cmass(i)*keVperBin))
+
         data[key]['hist'].Scale(scale)
+
+        # runtime is in sec
+        data[key]['runtime'] = nfiles*subrunTime*60*60
+
         data[key]['druScale'] = scale
         
     return data
+
+
+def scaleBkgs(bkgs, data):
+
+    ### only works for internal backgrounds at this point
+    
+    for name in bkgs:
+        x = name.split('-')[0]
+        e = name.split('-')[-1]
+        dru = data[x+'-data-'+e]['druScale']
+        print 'dru = ',dru
+        
+        runtime = data[x+'-data-'+e]['runtime']
+        print 'runtime = ',runtime
+        
+        mbqkg = bkgs[name]['acti']
+        kg = cmass(int(x[-1])-1)
+        mbq = mbqkg/kg
+        bq = mbq / 1000.0
+        print 'bq = ',bq
+
+        generated = float(bkgs[name]['generated'].GetEntries())
+        print 'generated = ',generated
+        
+        detected = float(bkgs[name]['hist'].GetEntries())
+        print 'detected = ',detected
+        
+        eff = detected/generated
+        print 'eff = ',eff
+
+        # number of events needed from MC
+        events = bq * runtime * eff
+        print 'events = ',events
+
+        # dru is in days, mBq is in mSec - so we need that conversion constant
+        conversion = bq*60*60*24
+        
+        
+        #scale = mbqkg*0.0001
+        scale = events / generated
+        print 'scale = ',scale
+        
+        bkgs[name]['hist'].Scale(scale)
+
+        #sys.exit()
+        
+    return bkgs
 
 
 def sortKeys2(data, bkgs, sigs):

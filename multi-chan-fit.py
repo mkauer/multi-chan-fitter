@@ -87,8 +87,9 @@ def _myself_(argv):
     
     #runNum = 1324
     runNum = 1544
-    mcfile = 'backgrounds.txt'
-    
+    mcfile = 'backgrounds2.txt'
+
+
     if reuse:
         rootfile = './root-join-read/join2-'+str(runNum)+'-master.root'
         data, bkgs, sigs = readROOT2(rootfile, mcfile)
@@ -98,11 +99,13 @@ def _myself_(argv):
         bkgs, sigs = buildMC2(mcfile)
     
     datkeys, bakkeys, sigkeys = sortKeys2(data, bkgs, sigs)
+
     
     if dru1:
         data = dataDRU2(data)
-            
-    
+        bkgs = scaleBkgs(bkgs, data)
+        
+        
     # create a color scheme for MC
     # color list and indexes
     # divide by 2 because e0 and e1 of same component

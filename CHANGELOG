@@ -13,6 +13,12 @@
 
 # 2016-12-13
 # --------------------------------------------------------------------
+# ~ looks like scaling is working for internal K40 at least
+# + added scaleBkgs() to funcs2.py to scale into real mBq/kg units
+# + added key data[key]['runtime'] to dataDRU2()
+# ~ use backgrounds2.txt for v21
+# ~ don't use bkgs scaling in readROOT2() for v21
+# ~ oops, run 1544 has 2 hour subruns - changed in dataDRU2()
 # ~ switch to 21-get-activity-values.py as main/master script
 # ~ program now skips the fitting bit if no signals [S] are specified
 # ~ program works if there are no backgrounds [B] specified
