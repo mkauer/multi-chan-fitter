@@ -10,8 +10,11 @@
 # [~] fix/change
 # ====================================================================
 
+
 # 2016-12-13
 # --------------------------------------------------------------------
+# ~ program now skips the fitting bit if no signals [S] are specified
+# ~ program works if there are no backgrounds [B] specified
 # ~ add 'reuse' tag to the saved plot names
 # ~ dru1 and dru2 with "reuse" now return the exact same results!
 # ~ AH! dru1 fitting fails if the fixed K40 scaling is too high
