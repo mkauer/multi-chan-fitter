@@ -8,8 +8,8 @@
 V = 'v22'
 
 # Get Pushpa's calib and resol functions in
-#
-# version: 2016-12-13
+# 
+# version: 2016-12-15
 # 
 # see CHANGELOG for changes
 ######################################################################
@@ -47,7 +47,7 @@ hiEfitRebin = 10   ### rebin the hi-E histo for fitting
 # yes, just checked, this should be 1
 np = 1
 
-reuse = 0   ### use joined rootfile data? [0,1]
+reuse = 1   ### use joined rootfile data? [0,1]
 
 mcscale = 1   ### pre scale the MC? [0,1]
 mcweight = 1  ### set MC weights? [0,1]
@@ -87,18 +87,19 @@ def _myself_(argv):
     
     #runNum = 1324
     runNum = 1544
-    #mcfile = 'backgrounds2.txt'
-    mcfile = 'backgrounds-just-data.txt'
+    mcfile = 'backgrounds2.txt'
+    #mcfile = 'backgrounds-just-data.txt'
     
     
     if reuse:
-        rootfile = './root-join-read/join2-'+str(runNum)+'-master.root'
+        rootfile = './root-join-read/join22-test-'+str(runNum)+'.root'
+        #rootfile = './root-join-read/join2-'+str(runNum)+'-master.root'
         data, bkgs, sigs = readROOT2(rootfile, mcfile)
     
     else:
         #data = getData2(runNum)
         data = getData22(runNum)
-        bkgs, sigs = buildMC2(mcfile)
+        bkgs, sigs = buildMC2(mcfile, 2)
     
     datkeys, bakkeys, sigkeys = sortKeys2(data, bkgs, sigs)
 

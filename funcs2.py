@@ -2,11 +2,15 @@
 ######################################################################
 # Import old funcs.py but now add more for reading in the
 # universal backgrounds file.
-#
-# version: 2016-12-13
-#
+# 
+# version: 2016-12-15
+# 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# ~ tweaked buildMC2() to select either resol() or resol2()
+# + added resol2() and Pushpa's resols
+# + added getData22() to use new root branches for calib22()
+# + added calib22() and Pushpa's calibs
 # + added key data[key]['runtime'] to dataDRU2()
 # + added scaleBkgs() to scale into real mBq/kg units
 # ~ use backgrounds2.txt for v21
@@ -48,7 +52,7 @@ import ROOT
 from funcs import *
 
 
-def buildMC2(fileName='backgrounds.txt'):
+def buildMC2(fileName='backgrounds.txt', version=1):
     """
     Build the mega MC dictionary!
     """
@@ -86,7 +90,7 @@ def buildMC2(fileName='backgrounds.txt'):
             
             if nfiles > 0:
                 print nfiles,'files found for',loca,isot
-                for energy in range(2):
+                for E in range(2):
                     
                     i = xstl-1
                     
@@ -94,10 +98,10 @@ def buildMC2(fileName='backgrounds.txt'):
                     key  = 'x'+str(xstl)
                     key += '-'+loca
                     key += '-'+isot
-                    key += '-e'+str(energy)
+                    key += '-e'+str(E)
                     
                                       
-                    par = histparam(energy)
+                    par = histparam(E)
                     #histo = TH1F(key, key, par[0], par[1], par[2])
                     #histo = TH1F(key, longNames(i), par[0], par[1], par[2])
                     histo = TH1F(key, longNames(i), par[0], par[1], par[2])
@@ -119,11 +123,17 @@ def buildMC2(fileName='backgrounds.txt'):
                     #mc[loc][iso]["chain"].SetAlias('rng','sin(2.*pi*rndm)*sqrt(-2.*log(rndm))')
                     chain.SetAlias('rng','sin(2.*pi*rndm)*sqrt(-2.*log(rndm))')
                     
-                    ### set the resolution function - right now it's linear with intercept of 0
-                    #mc[loc][iso]["chain"].SetAlias('sigma', str(resol(i,energy))+' / sqrt(edep['+str(i)+']*1000.)')
-                    chain.SetAlias('sigma', str(resol(i,energy))+' / sqrt(edep['+str(i)+']*1000.)')
-                    
-                    ### then draw the shit
+                    ### set the resolution function
+                    if version == 2:
+                        ### assume reso = p0/sqrt(energy) + p1
+                        p0, p1 = resol2(i,E)
+                        chain.SetAlias('sigma', str(p0)+'/sqrt(edep['+str(i)+']*1000.) + '+str(p1))
+                    else:
+                        ### assume reso = p0/sqrt(energy)
+                        p0 = resol(i,E)
+                        chain.SetAlias('sigma', str(p0)+'/sqrt(edep['+str(i)+']*1000.)')
+
+                    ### then draw the chain
                     #mc[loc][iso]["chain"].Draw('(edep['+str(i)+']*1000.) + (sigma*edep['+str(i)+']*1000.*rng) >> histo', cut1+cut2)
                     #mc[loc][iso]["chain"].Draw('(edep['+str(i)+']*1000.) + (sigma*edep['+str(i)+']*1000.*rng) >> '+key, cut1+cut2)
                     chain.Draw('(edep['+str(i)+']*1000.) + (sigma*edep['+str(i)+']*1000.*rng) >> '+key, cut1+cut2)
@@ -179,27 +189,27 @@ def getData2(runNum=1544):
         
     if nfiles > 0:
         print nfiles,'data files found'
-        for energy in range(2):
+        for E in range(2):
 
             ### use pmtXX.rqcD1_5 for high energy
             ### use pmtXX.qc5 for low energy
-            if energy:
+            if E:
                 edep = 'rqcD1_5'
             else:
                 edep = 'qc5'
             
-            par = histparam(energy)
+            par = histparam(E)
             for i in range(8):
                 key  = 'x'+str(i+1)
                 key += '-data'
-                key += '-e'+str(energy)
+                key += '-e'+str(E)
                 
                 data[key] = {}
                 
                 #histo = TH1F(key, key, par[0], par[1], par[2])
                 histo = TH1F(key, longNames(i), par[0], par[1], par[2])
-                chain.Draw('(pmt'+str(i+1)+'1.'+str(edep)+'*'+str(calib(i,0,energy))
-                           +' + pmt'+str(i+1)+'2.'+str(edep)+'*'+str(calib(i,1,energy))+')/2.'
+                chain.Draw('(pmt'+str(i+1)+'1.'+str(edep)+'*'+str(calib(i,0,E))
+                           +' + pmt'+str(i+1)+'2.'+str(edep)+'*'+str(calib(i,1,E))+')/2.'
                            +' >> '+str(key))
                 
                 histo.Sumw2()
@@ -405,9 +415,9 @@ def sortKeys2(data, bkgs, sigs):
     return datkeys, bakkeys, sigkeys
 
 
-def calib22(i, energy=0):
+def calib22(i, E=0):
     """
-    Return the calibrations for the crystals
+    Return the crystal calibrations
     """
     # from Pushpa
     # (i) is the crystal 
@@ -431,7 +441,7 @@ def calib22(i, energy=0):
 	1.11900e-4,
 	3.84263e-4
         ]
-    if energy:
+    if E:
         return hiEcalib[int(i)]
     else:
         return loEcalib[int(i)]
@@ -458,33 +468,29 @@ def getData22(runNum=1544):
         
     if nfiles > 0:
         print nfiles,'data files found'
-        for energy in range(2):
+        for E in range(2):
 
-            ### use pmtXX.rqcD1_5 for high energy
-            ### use pmtXX.qc5 for low energy
-            
-            ### use crystalX.rqc for high energy?
-            ### use crystalX.qc5 for low energy?
-            if energy:
-                #edep = 'rqcD1_5'
+            ### use crystalX.energyD for high energy
+            ### use crystalX.qc5 for low energy
+            if E:
                 edep = 'energyD'
             else:
                 edep = 'qc5'
             
-            par = histparam(energy)
+            par = histparam(E)
             for i in range(8):
                 key  = 'x'+str(i+1)
                 key += '-data'
-                key += '-e'+str(energy)
+                key += '-e'+str(E)
                 
                 data[key] = {}
                 
                 #histo = TH1F(key, key, par[0], par[1], par[2])
                 histo = TH1F(key, longNames(i), par[0], par[1], par[2])
-                #chain.Draw('(pmt'+str(i+1)+'1.'+str(edep)+'*'+str(calib(i,0,energy))
-                #           +' + pmt'+str(i+1)+'2.'+str(edep)+'*'+str(calib(i,1,energy))+')/2.'
+                #chain.Draw('(pmt'+str(i+1)+'1.'+str(edep)+'*'+str(calib(i,0,E))
+                #           +' + pmt'+str(i+1)+'2.'+str(edep)+'*'+str(calib(i,1,E))+')/2.'
                 #           +' >> '+str(key))
-                chain.Draw('crystal'+str(i+1)+'.'+str(edep)+'*'+str(calib22(i,energy))
+                chain.Draw('crystal'+str(i+1)+'.'+str(edep)+'*'+str(calib22(i,E))
                            +' >> '+str(key))
                 
                 histo.Sumw2()
@@ -507,17 +513,39 @@ def getData22(runNum=1544):
     return data
 
 
-
-# OldSpeckledHen calibrations - assume AS2-A is the same as AS1-B for now...
-# cal = [lambda x: 3.57549429112e-8*(x**2) + 0.0108209679143*x + 67.8382116377,
-#        lambda x: 2.74259966083e-7*(x**2) + 0.0230687094921*x + 115.656953637,
-#        lambda x: 2.74259966083e-7*(x**2) + 0.0230687094921*x + 115.656953637,
-#        lambda x: 1.77079681339e-8*(x**2) + 0.0159487210163*x + 18.7602488855];
-
-# using new quadratic calib for OldSpeckledHen
-# ax[1,0].set_title(str(int(round(cal[0](integralA[ch1][event]),0)))+" keV", fontsize=14, fontweight='bold');
-# ax[1,1].set_title(str(int(round(cal[1](integralA[ch2][event]),0)))+" keV", fontsize=14, fontweight='bold');
-# ax[2,0].set_title(str(int(round(cal[2](integralA[ch3][event]),0)))+" keV", fontsize=14, fontweight='bold');
-# ax[2,1].set_title(str(int(round(cal[3](integralA[ch4][event]),0)))+" keV", fontsize=14, fontweight='bold');
-
+def resol2(i, E=0):
+    """
+    Return the crystal resolutions
+    """
+    # from Pushpa
+    # (i) is the crystal
+    # res = p[0]/sqrt(x) + p[1]
+    hiEresol = [
+        [0.7127, 0.004879],
+	[0.7127, 0.004879],
+	[0.7127, 0.004879],
+	[0.7127, 0.004879],
+	[0.7127, 0.004879],
+	[0.7127, 0.004879],
+	[0.7127, 0.004879],
+	[0.7127, 0.004879]
+    ]
+    
+    # C5 = C8 == C4
+    # C6 = C7 == C1
+    loEresol = [
+        [0.2349,  0.018600],
+	[0.2699,  0.014920],
+	[0.2459,  0.015020],
+	[0.3797, -0.003919],
+	[0.3797, -0.003919],
+	[0.2349,  0.018600],
+	[0.2349,  0.018600],
+	[0.3797, -0.003919]
+    ]
+    
+    if E:
+        return hiEresol[int(i)]
+    else:
+        return loEresol[int(i)]
 

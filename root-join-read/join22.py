@@ -4,12 +4,12 @@
 # Pack all needed histos into one root file
 # hi/lo energy data should be calibrated
 # hi/lo energy MC should be resolution smeared
-#
+# 
 # version: 2016-12-15
-#
+# 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
-# ~ specify the mcfile to use for buildMC2()
+# + implement Pushpa's calib and resol functions
 # ~ use data run 1544
 # ~ new paths for raw data and processed data
 # ~ using the new version of building data and mc from backgrounds file
@@ -42,13 +42,13 @@ def _myself_(argv):
     runNum = 1544
     mcfile = 'backgrounds2.txt'
     
-    rootfile = 'join2-test-'+str(runNum)+'.root'
+    rootfile = 'join22-test-'+str(runNum)+'.root'
 
     rfile = TFile(rootfile, 'RECREATE')
     print 'creating rootfile',rootfile
 
-    data = getData2(runNum)
-    bkgs, sigs = buildMC2(mcfile)
+    data = getData22(runNum)
+    bkgs, sigs = buildMC2(mcfile, 2)
     
     rfile.Write()
     rfile.Close()

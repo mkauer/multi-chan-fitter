@@ -11,6 +11,17 @@
 # ====================================================================
 
 
+# 2016-12-15
+# --------------------------------------------------------------------
+# ~ tweaked v21 to plot just data for comparison to v22
+# ~ tweaked v22 to use new calibs and resols
+# + added join22.py to use new calibs and resols
+# ~ tweak join2.py to use a specified mcfile in buildMC2()
+# ~ tweaked buildMC2() to select either resol() or resol2()
+# + added resol2() and Pushpa's resols
+# ~ changed root branches in calib22() to use energyD for hi-E
+
+
 # 2016-12-14
 # --------------------------------------------------------------------
 # + added calib22() and getData22() for the new calibrations
@@ -170,8 +181,7 @@
 #   to be working with the cup cluster as well.
 # ~ big re-write - set mc as mc[loc][iso] - just seems more logical
 #   just to be clear - it was mc[iso][loc] - now it's mc[loc][iso]
-# ~ shit! fixed a bug with enumerate [iso][loc] j+k thing
-#   that doesn't work!!
+# ~ fixed a bug with enumerate [iso][loc] j+k thing that doesn't work!!
 #   that also effected the mc scaling and plotting...
 # + get p-value from fit - doesn't seem right?
 # ~ tweaked the plotting cosmetics a bit to make it look better,
@@ -197,7 +207,7 @@
 # + working on resolution params, but need at least a linear
 #   fit to the resolution points to get anything reasonable
 # + working on hiE parameters
-# + shit! finally got colors to work. What a pain in the ass.
+# + finally got colors to work. What a pain in the ass.
 #   The color index can't be too big > 10,000 and you have to
 #   save the list of colors and indexes or they get dumped
 #   out of memory and then it doesn't work right.
@@ -222,3 +232,4 @@
 # + histos as a python list
 # + hacking at multi-plot-test.py
 # + hacking at plot-test.py
+
