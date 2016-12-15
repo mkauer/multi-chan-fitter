@@ -47,7 +47,7 @@ hiEfitRebin = 10   ### rebin the hi-E histo for fitting
 # yes, just checked, this should be 1
 np = 1
 
-reuse = 1   ### use joined rootfile data? [0,1]
+reuse = 0   ### use joined rootfile data? [0,1]
 
 mcscale = 1   ### pre scale the MC? [0,1]
 mcweight = 1  ### set MC weights? [0,1]
@@ -87,15 +87,17 @@ def _myself_(argv):
     
     #runNum = 1324
     runNum = 1544
-    mcfile = 'backgrounds2.txt'
-
-
+    #mcfile = 'backgrounds2.txt'
+    mcfile = 'backgrounds-just-data.txt'
+    
+    
     if reuse:
         rootfile = './root-join-read/join2-'+str(runNum)+'-master.root'
         data, bkgs, sigs = readROOT2(rootfile, mcfile)
     
     else:
-        data = getData2(runNum)
+        #data = getData2(runNum)
+        data = getData22(runNum)
         bkgs, sigs = buildMC2(mcfile)
     
     datkeys, bakkeys, sigkeys = sortKeys2(data, bkgs, sigs)
@@ -678,6 +680,10 @@ def _myself_(argv):
             #---------------------------------------------------------
             for key in datkeys:
                 if 'x'+str(i+1) in key and '-e'+str(E) in key:
+                    
+                    if dru1 or dru2:
+                        druScale = data['x'+str(i+1)+'-data'+'-e'+str(E)]['druScale']
+                    
                     data[key]['hist'].GetYaxis().SetTitleFont(font)
                     data[key]['hist'].GetYaxis().SetTitleSize(size)
                     data[key]['hist'].GetYaxis().SetTitleOffset(yoff)
@@ -687,7 +693,7 @@ def _myself_(argv):
                     #data[key]['hist'].GetXaxis().SetTitle('Energy (keV)')
                     #data[key]['hist'].GetXaxis().SetLabelFont(font)
                     #data[key]['hist'].GetXaxis().SetLabelSize(size)
-                    
+
                     if dru1 or dru2:
                         if not E:
                             data[key]['hist'].SetAxisRange(10**-1, 10**3, 'y')
@@ -762,6 +768,7 @@ def _myself_(argv):
             if not dru1 and not dru2:
                 for n in range(total[E][i].GetNbinsX()):
                     total[E][i].SetBinError(n, total[E][i].GetBinError(n)/(float(hiEplotRebin)/math.sqrt(2.)))
+
             if dru1:
                 for n in range(total[E][i].GetNbinsX()):
                     total[E][i].SetBinError(n, total[E][i].GetBinError(n)*druScale)
@@ -772,12 +779,13 @@ def _myself_(argv):
                     
             #-----------------------------------------------------------------------------
                     
-                    
-            total[E][i].Draw('same')
-            legs[E][i].AddEntry(total[E][i], space+'Total MC', lopt)
+            if len(bkgs) + len(sigs) > 0:        
+                total[E][i].Draw('same')
+                legs[E][i].AddEntry(total[E][i], space+'Total MC', lopt)
+            
             legs[E][i].Draw('same')
-
-
+            
+            
             ### try to get the residuals in!
             #---------------------------------------------------------
             botpad[i].cd()

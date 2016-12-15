@@ -11,6 +11,12 @@
 # ====================================================================
 
 
+# 2016-12-14
+# --------------------------------------------------------------------
+# + added calib22() and getData22() for the new calibrations
+# + a couple tweaks so you can just plot data! 
+
+
 # 2016-12-13
 # --------------------------------------------------------------------
 # ~ switching to 22-pushpa-calib.py to get calib and reso functions in

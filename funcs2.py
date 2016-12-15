@@ -344,7 +344,7 @@ def dataDRU2(data):
 
 
 def scaleBkgs(bkgs, data):
-
+    
     ### only works for internal backgrounds at this point
     
     for name in bkgs:
@@ -361,7 +361,7 @@ def scaleBkgs(bkgs, data):
         mbq = mbqkg/kg
         bq = mbq / 1000.0
         print 'bq = ',bq
-
+        
         generated = float(bkgs[name]['generated'].GetEntries())
         print 'generated = ',generated
         
@@ -370,21 +370,16 @@ def scaleBkgs(bkgs, data):
         
         eff = detected/generated
         print 'eff = ',eff
-
+        
         # number of events needed from MC
         events = bq * runtime * eff
         print 'events = ',events
-
-        # dru is in days, mBq is in mSec - so we need that conversion constant
-        conversion = bq*60*60*24
         
-        
-        #scale = mbqkg*0.0001
         scale = events / generated
         print 'scale = ',scale
         
         bkgs[name]['hist'].Scale(scale)
-
+        
         #sys.exit()
         
     return bkgs
@@ -408,5 +403,121 @@ def sortKeys2(data, bkgs, sigs):
     sigkeys.sort()
 
     return datkeys, bakkeys, sigkeys
+
+
+def calib22(i, energy=0):
+    """
+    Return the calibrations for the crystals
+    """
+    # from Pushpa
+    # (i) is the crystal 
+    hiEcalib = [
+        1.000,
+	0.992,
+	1.000,
+	1.000,
+	0.966,
+	1.014,
+	0.984,
+	1.000
+        ]
+    loEcalib = [
+        1.06000e-4,
+	1.05676e-4,
+	1.15900e-4,
+	1.12700e-4,
+	2.86907e-4,
+	1.17634e-4,
+	1.11900e-4,
+	3.84263e-4
+        ]
+    if energy:
+        return hiEcalib[int(i)]
+    else:
+        return loEcalib[int(i)]
+
+
+def getData22(runNum=1544):
+    """
+    Build histograms of the data from all crystals
+    """
+    
+    local = amLocal()
+    
+    data = {}
+    
+    chain = TChain("ntp","")
+    nfiles=0
+    if local:
+        nfiles = chain.Add('/home/mkauer/COSINE/CUP/mc-fitting/data/phys/ntp_I*'+str(runNum)+'*root*')
+    else:
+        #nfiles = chain.Add('/home/mkauer/temp/*'+str(runNum)+'*root*')
+        ### testing...
+        #nfiles = chain.Add('/data/COSINE/NTP/phys/V00-00-02/ntp_I001544.root.001')
+        nfiles = chain.Add('/data/COSINE/NTP/phys/V00-00-02/ntp_I*'+str(runNum)+'*root*')
+        
+    if nfiles > 0:
+        print nfiles,'data files found'
+        for energy in range(2):
+
+            ### use pmtXX.rqcD1_5 for high energy
+            ### use pmtXX.qc5 for low energy
+            
+            ### use crystalX.rqc for high energy?
+            ### use crystalX.qc5 for low energy?
+            if energy:
+                #edep = 'rqcD1_5'
+                edep = 'energyD'
+            else:
+                edep = 'qc5'
+            
+            par = histparam(energy)
+            for i in range(8):
+                key  = 'x'+str(i+1)
+                key += '-data'
+                key += '-e'+str(energy)
+                
+                data[key] = {}
+                
+                #histo = TH1F(key, key, par[0], par[1], par[2])
+                histo = TH1F(key, longNames(i), par[0], par[1], par[2])
+                #chain.Draw('(pmt'+str(i+1)+'1.'+str(edep)+'*'+str(calib(i,0,energy))
+                #           +' + pmt'+str(i+1)+'2.'+str(edep)+'*'+str(calib(i,1,energy))+')/2.'
+                #           +' >> '+str(key))
+                chain.Draw('crystal'+str(i+1)+'.'+str(edep)+'*'+str(calib22(i,energy))
+                           +' >> '+str(key))
+                
+                histo.Sumw2()
+                histo.SetLineColor(kBlack)
+                histo.SetMarkerColor(kBlack)
+                histo.SetLineWidth(1)
+                
+                data[key]['hist'] = histo
+                
+                key2 = key+'_subruns'
+                temp = TH1F(key2,'subruns',1,0,1)
+                #temp.SetBinContent(0, nfiles)
+                for i in range(nfiles):
+                    temp.Fill(0.5)
+                data[key]['subruns'] = temp
+                
+    else:
+        print 'Warning: no data files found...'
+    
+    return data
+
+
+
+# OldSpeckledHen calibrations - assume AS2-A is the same as AS1-B for now...
+# cal = [lambda x: 3.57549429112e-8*(x**2) + 0.0108209679143*x + 67.8382116377,
+#        lambda x: 2.74259966083e-7*(x**2) + 0.0230687094921*x + 115.656953637,
+#        lambda x: 2.74259966083e-7*(x**2) + 0.0230687094921*x + 115.656953637,
+#        lambda x: 1.77079681339e-8*(x**2) + 0.0159487210163*x + 18.7602488855];
+
+# using new quadratic calib for OldSpeckledHen
+# ax[1,0].set_title(str(int(round(cal[0](integralA[ch1][event]),0)))+" keV", fontsize=14, fontweight='bold');
+# ax[1,1].set_title(str(int(round(cal[1](integralA[ch2][event]),0)))+" keV", fontsize=14, fontweight='bold');
+# ax[2,0].set_title(str(int(round(cal[2](integralA[ch3][event]),0)))+" keV", fontsize=14, fontweight='bold');
+# ax[2,1].set_title(str(int(round(cal[3](integralA[ch4][event]),0)))+" keV", fontsize=14, fontweight='bold');
 
 
