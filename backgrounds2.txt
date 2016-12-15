@@ -1,15 +1,16 @@
 # -*- sh -*-
 
-# version 2016-12-13
+# version 2016-12-15
 
-# Now using real activities for internal K40 mBq/kg (from Estella)
+# + use real pmt K40 activities in mBq/pmt (from Estella)
+# + use real internal K40 activities in mBq/kg (from Estella)
 
 #------------------------------------------------------------
 # bsdr = [B]ackground, [S]ignal, or [D]ata and [R]euse
 # xstl = crystal number 1-8
 # loca = location
 # isot = background isotope
-# acti = background activity (mBq/kg)
+# acti = background activity (mBq/kg) (mBq/pmt)
 # erro = error on the activity
 # Lbnd = lower fit bound
 # Hbnd = upper fit bound
@@ -54,14 +55,14 @@ S       6       internal    Th232    0.005     0.0001     0.001     10.0
 S       7       internal    Th232    0.005     0.0001     0.001     10.0
 S       8       internal    Th232    0.005     0.0001     0.001     10.0
 
-S       1       pmt         K40      0.005     0.0001     0.001     10.0
-S       2       pmt         K40      0.005     0.0001     0.001     10.0
-S       3       pmt         K40      0.005     0.0001     0.001     10.0
-S       4       pmt         K40      0.005     0.0001     0.001     10.0
-S       5       pmt         K40      0.005     0.0001     0.001     10.0
-S       6       pmt         K40      0.005     0.0001     0.001     10.0
-S       7       pmt         K40      0.005     0.0001     0.001     10.0
-S       8       pmt         K40      0.005     0.0001     0.001     10.0
+B       1       pmt         K40      58.0      0.0001     0.001     10.0
+B       2       pmt         K40      58.0      0.0001     0.001     10.0
+B       3       pmt         K40      58.0      0.0001     0.001     10.0
+B       4       pmt         K40      58.0      0.0001     0.001     10.0
+B       5       pmt         K40      58.0      0.0001     0.001     10.0
+B       6       pmt         K40      58.0      0.0001     0.001     10.0
+B       7       pmt         K40      58.0      0.0001     0.001     10.0
+B       8       pmt         K40      58.0      0.0001     0.001     10.0
 
 S       1       pmt         U238     0.005     0.0001     0.001     10.0
 S       2       pmt         U238     0.005     0.0001     0.001     10.0

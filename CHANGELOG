@@ -13,6 +13,15 @@
 
 # 2016-12-15
 # --------------------------------------------------------------------
+# ~ updates the backgrounds2.txt file with PMT K40 activities
+# + I have a new joined rootfile with Pushpa's calibs and resols
+#   called join22-1544-master.root
+# ~ ah, and was forgetting to scale by the dru factor - internal K40
+#   looks correct again - now back to work on the pmt scalings...
+# ~ shoot, i had mbqkg/kg and that should be mbqkg*kg!!!
+# + start working on pmt scaling
+# ~ i think the internal scaling should be events/detected
+#   which becomes bq * runtime * (1./generated)
 # ~ tweaked v21 to plot just data for comparison to v22
 # ~ tweaked v22 to use new calibs and resols
 # + added join22.py to use new calibs and resols

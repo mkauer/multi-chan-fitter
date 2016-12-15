@@ -359,37 +359,91 @@ def scaleBkgs(bkgs, data):
     
     for name in bkgs:
         x = name.split('-')[0]
+        loca = name.split('-')[1]
         e = name.split('-')[-1]
-        dru = data[x+'-data-'+e]['druScale']
-        print 'dru = ',dru
-        
+        druscale = data[x+'-data-'+e]['druScale']
+        print name,'druscale = ',druscale
         runtime = data[x+'-data-'+e]['runtime']
-        print 'runtime = ',runtime
-        
-        mbqkg = bkgs[name]['acti']
-        kg = cmass(int(x[-1])-1)
-        mbq = mbqkg/kg
-        bq = mbq / 1000.0
-        print 'bq = ',bq
-        
-        generated = float(bkgs[name]['generated'].GetEntries())
-        print 'generated = ',generated
-        
-        detected = float(bkgs[name]['hist'].GetEntries())
-        print 'detected = ',detected
-        
-        eff = detected/generated
-        print 'eff = ',eff
-        
-        # number of events needed from MC
-        events = bq * runtime * eff
-        print 'events = ',events
-        
-        scale = events / generated
-        print 'scale = ',scale
-        
-        bkgs[name]['hist'].Scale(scale)
-        
+        #print 'runtime = ',runtime
+
+        if loca == 'internal':
+            mbqkg = bkgs[name]['acti']
+            kgs = cmass(int(x[-1])-1)
+            mbq = mbqkg*kgs
+            bq = mbq / 1000.0
+            print name,'bq = ',bq
+            
+            generated = float(bkgs[name]['generated'].GetEntries())
+            #print 'generated = ',generated
+            
+            detected = float(bkgs[name]['hist'].GetEntries())
+            #print 'detected = ',detected
+            
+            eff = detected / generated
+            #print 'eff = ',eff
+            
+            # number of events needed from MC
+            events = bq * runtime * eff
+            #print 'events = ',events
+            
+            ### my first thought
+            #scale = events / generated
+            ### i think this should be normalized to the number of detected events
+            ### because the eff scaling is already included...
+            #scale = events / detected
+            ### which then becomes
+            #scale = bq * runtime * (1./generated)
+            
+            ### not making sence, just try some things
+            #scale = (events / generated) * druscale
+            
+            ### 2016-12-15
+            ### this looks about right compared Estella's plots
+            ### slightly lower because of resol smearing
+            scale = (events / detected) * druscale
+            ### same as doing
+            #scale = bq * runtime * (1./generated) * druscale
+            print name,'scale = ',scale
+            
+            bkgs[name]['hist'].Scale(scale)
+            
+        if loca == 'pmt':
+            mbqpmt = bkgs[name]['acti']
+            # not sure what to do for pmts
+            pmts = 8*2
+            mbq = mbqpmt*pmts
+            bq = mbq / 1000.0
+            print name,'bq = ',bq
+            
+            generated = float(bkgs[name]['generated'].GetEntries())
+            #print 'generated = ',generated
+            
+            detected = float(bkgs[name]['hist'].GetEntries())
+            #print 'detected = ',detected
+            
+            eff = detected / generated
+            #print 'eff = ',eff
+            
+            # number of events needed from MC
+            events = bq * runtime * eff
+            #print 'events = ',events
+            
+            ### my first thought
+            #scale = events / generated
+            
+            ### i think this should be normalized to the number of detected events
+            ### because the eff scaling is already included...
+            #scale = events / detected
+            ### which then becomes
+            #scale = bq * runtime * (1./generated)
+            
+            ### not making sence, just try some things
+            #scale = (events / generated) * druscale
+            scale = (events / detected) * druscale
+            print name,'scale = ',scale
+            
+            bkgs[name]['hist'].Scale(scale)
+            
         #sys.exit()
         
     return bkgs

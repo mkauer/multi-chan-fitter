@@ -87,13 +87,14 @@ def _myself_(argv):
     
     #runNum = 1324
     runNum = 1544
-    mcfile = 'backgrounds2.txt'
+    #mcfile = 'backgrounds2.txt'
     #mcfile = 'backgrounds-just-data.txt'
+    mcfile = 'backgrounds-no-sigs.txt'
     
     
     if reuse:
-        rootfile = './root-join-read/join22-test-'+str(runNum)+'.root'
-        #rootfile = './root-join-read/join2-'+str(runNum)+'-master.root'
+        #rootfile = './root-join-read/join22-test-'+str(runNum)+'.root'
+        rootfile = './root-join-read/join22-'+str(runNum)+'-master.root'
         data, bkgs, sigs = readROOT2(rootfile, mcfile)
     
     else:
