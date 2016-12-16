@@ -7,12 +7,13 @@
 # Key is:
 # [+] added
 # [-] removed
-# [~] fix/change
+# [~] changed/fixed
 # ====================================================================
 
 
 # 2016-12-15
 # --------------------------------------------------------------------
+# ~ played around with the activity scalings - I think I'm close
 # ~ updates the backgrounds2.txt file with PMT K40 activities
 # + I have a new joined rootfile with Pushpa's calibs and resols
 #   called join22-1544-master.root

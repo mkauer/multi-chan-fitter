@@ -7,6 +7,7 @@
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# ~ played around with the activity scalings - I think I'm close
 # ~ tweaked buildMC2() to select either resol() or resol2()
 # + added resol2() and Pushpa's resols
 # + added getData22() to use new root branches for calib22()
@@ -124,15 +125,17 @@ def buildMC2(fileName='backgrounds.txt', version=1):
                     chain.SetAlias('rng','sin(2.*pi*rndm)*sqrt(-2.*log(rndm))')
                     
                     ### set the resolution function
-                    if version == 2:
-                        ### assume reso = p0/sqrt(energy) + p1
-                        p0, p1 = resol2(i,E)
-                        chain.SetAlias('sigma', str(p0)+'/sqrt(edep['+str(i)+']*1000.) + '+str(p1))
-                    else:
+                    if version == 1:
+                        ### from Estella
                         ### assume reso = p0/sqrt(energy)
                         p0 = resol(i,E)
                         chain.SetAlias('sigma', str(p0)+'/sqrt(edep['+str(i)+']*1000.)')
-
+                    if version == 2:
+                        ### from Pushpa
+                        ### assume reso = p0/sqrt(energy) + p1
+                        p0, p1 = resol2(i,E)
+                        chain.SetAlias('sigma', str(p0)+'/sqrt(edep['+str(i)+']*1000.) + '+str(p1))
+                    
                     ### then draw the chain
                     #mc[loc][iso]["chain"].Draw('(edep['+str(i)+']*1000.) + (sigma*edep['+str(i)+']*1000.*rng) >> histo', cut1+cut2)
                     #mc[loc][iso]["chain"].Draw('(edep['+str(i)+']*1000.) + (sigma*edep['+str(i)+']*1000.*rng) >> '+key, cut1+cut2)
@@ -353,102 +356,6 @@ def dataDRU2(data):
     return data
 
 
-def scaleBkgs(bkgs, data):
-    
-    ### only works for internal backgrounds at this point
-    
-    for name in bkgs:
-        x = name.split('-')[0]
-        loca = name.split('-')[1]
-        e = name.split('-')[-1]
-        druscale = data[x+'-data-'+e]['druScale']
-        print name,'druscale = ',druscale
-        runtime = data[x+'-data-'+e]['runtime']
-        #print 'runtime = ',runtime
-
-        if loca == 'internal':
-            mbqkg = bkgs[name]['acti']
-            kgs = cmass(int(x[-1])-1)
-            mbq = mbqkg*kgs
-            bq = mbq / 1000.0
-            print name,'bq = ',bq
-            
-            generated = float(bkgs[name]['generated'].GetEntries())
-            #print 'generated = ',generated
-            
-            detected = float(bkgs[name]['hist'].GetEntries())
-            #print 'detected = ',detected
-            
-            eff = detected / generated
-            #print 'eff = ',eff
-            
-            # number of events needed from MC
-            events = bq * runtime * eff
-            #print 'events = ',events
-            
-            ### my first thought
-            #scale = events / generated
-            ### i think this should be normalized to the number of detected events
-            ### because the eff scaling is already included...
-            #scale = events / detected
-            ### which then becomes
-            #scale = bq * runtime * (1./generated)
-            
-            ### not making sence, just try some things
-            #scale = (events / generated) * druscale
-            
-            ### 2016-12-15
-            ### this looks about right compared Estella's plots
-            ### slightly lower because of resol smearing
-            scale = (events / detected) * druscale
-            ### same as doing
-            #scale = bq * runtime * (1./generated) * druscale
-            print name,'scale = ',scale
-            
-            bkgs[name]['hist'].Scale(scale)
-            
-        if loca == 'pmt':
-            mbqpmt = bkgs[name]['acti']
-            # not sure what to do for pmts
-            pmts = 8*2
-            mbq = mbqpmt*pmts
-            bq = mbq / 1000.0
-            print name,'bq = ',bq
-            
-            generated = float(bkgs[name]['generated'].GetEntries())
-            #print 'generated = ',generated
-            
-            detected = float(bkgs[name]['hist'].GetEntries())
-            #print 'detected = ',detected
-            
-            eff = detected / generated
-            #print 'eff = ',eff
-            
-            # number of events needed from MC
-            events = bq * runtime * eff
-            #print 'events = ',events
-            
-            ### my first thought
-            #scale = events / generated
-            
-            ### i think this should be normalized to the number of detected events
-            ### because the eff scaling is already included...
-            #scale = events / detected
-            ### which then becomes
-            #scale = bq * runtime * (1./generated)
-            
-            ### not making sence, just try some things
-            #scale = (events / generated) * druscale
-            scale = (events / detected) * druscale
-            print name,'scale = ',scale
-            
-            bkgs[name]['hist'].Scale(scale)
-            
-        #sys.exit()
-        
-    return bkgs
-
-
 def sortKeys2(data, bkgs, sigs):
     datkeys=[]
     bakkeys=[]
@@ -602,4 +509,85 @@ def resol2(i, E=0):
         return hiEresol[int(i)]
     else:
         return loEresol[int(i)]
+
+
+def scaleBkgs(bkgs, data):
+    
+    ### only works for internal backgrounds at this point
+    
+    for name in bkgs:
+        x = name.split('-')[0]
+        loca = name.split('-')[1]
+        e = name.split('-')[-1]
+        druscale = data[x+'-data-'+e]['druScale']
+        print name,'druscale = ',druscale
+        runtime = data[x+'-data-'+e]['runtime']
+        #print 'runtime = ',runtime
+
+        if loca == 'internal':
+            mbqkg = bkgs[name]['acti']
+            kgs = cmass(int(x[-1])-1)
+            mbq = mbqkg*kgs
+            bq = mbq / 1000.0
+            #print name,'bq = ',bq
+            
+            generated = float(bkgs[name]['generated'].GetEntries())
+            #print 'generated = ',generated
+            
+            detected = float(bkgs[name]['hist'].GetEntries())
+            #print 'detected = ',detected
+            
+            eff = detected / generated
+            #print 'eff = ',eff
+            
+            # number of events needed from MC
+            events = bq * runtime * eff
+            #print 'events = ',events
+            
+            ### 2016-12-15
+            ### this looks about right compared Estella's plots
+            ### slightly lower because of resol smearing
+            ### this is easier to read and understand
+            scale = (events / detected) * druscale
+            ### but is the same as doing
+            #scale = bq * runtime * (1./generated) * druscale
+            #print name,'scale = ',scale
+            
+            bkgs[name]['hist'].Scale(scale)
+            
+        if loca == 'pmt':
+            mbqpmt = bkgs[name]['acti']
+            # not sure what to do for pmts
+            pmts = 8.*2.
+            mbq = mbqpmt*pmts
+            bq = mbq / 1000.0
+            #print name,'bq = ',bq
+            
+            generated = float(bkgs[name]['generated'].GetEntries())
+            #print 'generated = ',generated
+            
+            detected = float(bkgs[name]['hist'].GetEntries())
+            #print 'detected = ',detected
+            
+            eff = detected / generated
+            #print 'eff = ',eff
+            
+            # number of events needed from MC
+            events = bq * runtime * eff
+            #print 'events = ',events
+
+            ### 2016-12-15
+            ### this seems to make the most sense right now
+            ### this is easier to read and understand
+            scale = (events / detected) * druscale
+            ### but is the same as doing
+            #scale = bq * runtime * (1./generated) * druscale
+            #print name,'scale = ',scale
+            
+            bkgs[name]['hist'].Scale(scale)
+            
+        #sys.exit()
+        
+    return bkgs
+
 
