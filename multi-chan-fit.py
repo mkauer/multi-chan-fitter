@@ -9,7 +9,7 @@ V = 'v22'
 
 # Get Pushpa's calib and resol functions in
 # 
-# version: 2016-12-15
+# version: 2016-12-16
 # 
 # see CHANGELOG for changes
 ######################################################################
@@ -93,8 +93,10 @@ def _myself_(argv):
     
     
     if reuse:
-        #rootfile = './root-join-read/join22-test-'+str(runNum)+'.root'
-        rootfile = './root-join-read/join22-'+str(runNum)+'-master.root'
+        # Estella's calib and resol
+        rootfile = './root-join-read/join2-'+str(runNum)+'-master.root'
+        # Pushpa's calib and resol
+        #rootfile = './root-join-read/join22-'+str(runNum)+'-master.root'
         data, bkgs, sigs = readROOT2(rootfile, mcfile)
     
     else:
@@ -103,8 +105,19 @@ def _myself_(argv):
         bkgs, sigs = buildMC2(mcfile, 2)
     
     datkeys, bakkeys, sigkeys = sortKeys2(data, bkgs, sigs)
-
     
+    
+    ### find unique names for color scheme?
+    """
+    uniqAll = []
+    for key in bakkeys:
+        uniqAll.append(key.split('-')[1]+'-'+key.split('-')[2])
+    for key in sigkeys:
+        uniqAll.append(key.split('-')[1]+'-'+key.split('-')[2])
+    uniqAll = sorted(list(set(uniqAll)))
+    print uniqAll
+    """
+
     if dru1:
         data = dataDRU2(data)
         bkgs = scaleBkgs(bkgs, data)
@@ -118,12 +131,13 @@ def _myself_(argv):
     Nsigs = len(sigs)/2/8
     # number of colors
     Nc = Nbkgs + Nsigs
+    #Nc = len(uniqAll)
     print 'number of bkgs and sigs =',Nc
     colors, cis = rainbow(Nc)
     
     # legend length = MC + data + total
     Nlg = Nc+2
-    
+
     ### fit the MC to data
     #-----------------------------------------------------------------
     
@@ -315,28 +329,39 @@ def _myself_(argv):
         ### set up the fitting object for TFractionFitter
         for i in range(8):
 
+            ### so a per crystal unique to see how many signal channels each
+            ### crystal will have
+            """
+            uniqSig = []
+            for key in sigkeys:
+                uniqSig.append(key.split('-')[1]+'-'+key.split('-')[2])
+            uniqSig = sorted(list(set(uniqSig)))
+            print uniqSig
+            """
+            
             sigObj.append(TObjArray(Nsigs)) # number of MC to fit to
-
+            #sigObj.append(TObjArray(len(uniqSig))) # number of MC to fit to
+            
             fitdata[i].Sumw2()
             dat_int = fitdata[i].Integral(fmin,fmax) # data integral to normalize to
 
             for fskey in fsigkeys:
                 if 'x'+str(i+1) in fskey:
-
+                    
                     mc_int = fitsigs[fskey]['hist'].Integral(fmin,fmax) # MC integral
-
+                    
                     ### to weight or not to weight...
                     # what if you weight first?
                     if mcweight:
                         fitsigs[fskey]['hist'].Sumw2() # set stat weights
-
+                    
                     ### to scale or not to scale...
                     if mcscale:
                         fitsigs[fskey]['hist'].Scale(dat_int/mc_int) # scale to data integral
                         sigs[fskey+'-e0']['hist'].Scale(dat_int/mc_int) # make sure MC is scaled too
                         sigs[fskey+'-e1']['hist'].Scale(dat_int/mc_int) # make sure MC is scaled too
-
-
+                    
+                    
                     sigObj[i].Add(fitsigs[fskey]['hist']) # add to the TFractionFitter object
 
             fit.append(TFractionFitter(fitdata[i], sigObj[i])) # create the TFF data and MC objects

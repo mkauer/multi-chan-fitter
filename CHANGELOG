@@ -8,7 +8,15 @@
 # [+] added
 # [-] removed
 # [~] changed/fixed
+# [V] version change
 # ====================================================================
+
+
+# 2016-12-16
+# --------------------------------------------------------------------
+# + add uniqSig to get unigue sig names and lenght for fitter object
+# + add uniqAll to get unique names of bkgs and sigs for color scheme
+# V switch to 23-separate-sig-bkg.py
 
 
 # 2016-12-15
@@ -40,7 +48,7 @@
 
 # 2016-12-13
 # --------------------------------------------------------------------
-# ~ switching to 22-pushpa-calib.py to get calib and reso functions in
+# V switching to 22-pushpa-calib.py to get calib and reso functions in
 # ~ cut a v2.1 release now that internal background activity scaling
 #   is working as expected
 # ~ looks like scaling is working for internal K40 at least
@@ -49,7 +57,7 @@
 # ~ use backgrounds2.txt for v21
 # ~ don't use bkgs scaling in readROOT2() for v21
 # ~ oops, run 1544 has 2 hour subruns - changed in dataDRU2()
-# ~ switch to 21-get-activity-values.py as main/master script
+# V switch to 21-get-activity-values.py as main/master script
 # ~ program now skips the fitting bit if no signals [S] are specified
 # ~ program works if there are no backgrounds [B] specified
 # ~ add 'reuse' tag to the saved plot names
@@ -78,7 +86,7 @@
 
 # 2016-12-06
 # --------------------------------------------------------------------
-# ~ 20-global-input-file.py is the new standard
+# V 20-global-input-file.py is the new standard
 # ~ cleaned up the comments a bit in 20-global-input-file.py
 # + cut release v1.1 based off of 14-set-bkg-activity.py
 # ~ it's working! v14 vs v20 is basically identical! Woo Hoo!!
@@ -111,7 +119,7 @@
 # + set internal k40 as a fixed activity background
 # ~ tweaked funcs.py to have mc[loc][iso]['act'] = -1 by default
 #   in readROOT()
-# + switch to 14-set-bkg-activity.py
+# V switch to 14-set-bkg-activity.py
 
 
 # 2016-11-29
