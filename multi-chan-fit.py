@@ -329,14 +329,13 @@ def _myself_(argv):
         ### set up the fitting object for TFractionFitter
         for i in range(8):
 
-            ### so a per crystal unique to see how many signal channels each
-            ### crystal will have
+            ### Do a per crystal unique of the signals to see how many
+            ### signal channels each crystal fit will have
             uniqSig = []
             for key in sigkeys:
                 uniqSig.append(key.split('-')[1]+'-'+key.split('-')[2])
             uniqSig = sorted(list(set(uniqSig)))
             print uniqSig
-            
             
             #sigObj.append(TObjArray(Nsigs)) # number of MC to fit to
             sigObj.append(TObjArray(len(uniqSig))) # number of MC to fit to
