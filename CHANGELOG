@@ -14,7 +14,7 @@
 
 # 2016-12-16
 # --------------------------------------------------------------------
-# + add uniqSig to get unigue sig names and lenght for fitter object
+# + add uniqSig to get unigue sig names and length for fitter object
 # + add uniqAll to get unique names of bkgs and sigs for color scheme
 # V switch to 23-separate-sig-bkg.py
 

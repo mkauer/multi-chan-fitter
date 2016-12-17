@@ -3,11 +3,11 @@
 ######################################################################
 # Matt Kauer - mkauer@physics.wisc.edu
 ######################################################################
-# 22-pushpa-calib.py
+# 23-separate-sig-bkg.py
 
-V = 'v22'
+V = 'v23'
 
-# Get Pushpa's calib and resol functions in
+# Try to separate sig and bkg in the backgrounds file
 # 
 # version: 2016-12-16
 # 
@@ -87,7 +87,8 @@ def _myself_(argv):
     
     #runNum = 1324
     runNum = 1544
-    mcfile = 'backgrounds2.txt'
+    #mcfile = 'backgrounds2.txt'
+    mcfile = 'backgrounds-separate.txt'
     #mcfile = 'backgrounds-just-data.txt'
     #mcfile = 'backgrounds-no-sigs.txt'
     
@@ -108,7 +109,6 @@ def _myself_(argv):
     
     
     ### find unique names for color scheme?
-    """
     uniqAll = []
     for key in bakkeys:
         uniqAll.append(key.split('-')[1]+'-'+key.split('-')[2])
@@ -116,7 +116,7 @@ def _myself_(argv):
         uniqAll.append(key.split('-')[1]+'-'+key.split('-')[2])
     uniqAll = sorted(list(set(uniqAll)))
     print uniqAll
-    """
+    
 
     if dru1:
         data = dataDRU2(data)
@@ -130,8 +130,8 @@ def _myself_(argv):
     Nbkgs = len(bkgs)/2/8
     Nsigs = len(sigs)/2/8
     # number of colors
-    Nc = Nbkgs + Nsigs
-    #Nc = len(uniqAll)
+    #Nc = Nbkgs + Nsigs
+    Nc = len(uniqAll)
     print 'number of bkgs and sigs =',Nc
     colors, cis = rainbow(Nc)
     
@@ -182,10 +182,10 @@ def _myself_(argv):
     
     # pre-scale all backgrounds for testing purposes
     # generally needed if not using tons of data
-    if not reuse:
-        for key in bakkeys:
-            bkgs[key]['hist'].Scale(0.001)
-
+    #if not reuse:
+    #    for key in bakkeys:
+    #        bkgs[key]['hist'].Scale(0.001)
+    
     
     ### only do the fit if you have signals!
     if len(sigs) > 0:
@@ -331,16 +331,15 @@ def _myself_(argv):
 
             ### so a per crystal unique to see how many signal channels each
             ### crystal will have
-            """
             uniqSig = []
             for key in sigkeys:
                 uniqSig.append(key.split('-')[1]+'-'+key.split('-')[2])
             uniqSig = sorted(list(set(uniqSig)))
             print uniqSig
-            """
             
-            sigObj.append(TObjArray(Nsigs)) # number of MC to fit to
-            #sigObj.append(TObjArray(len(uniqSig))) # number of MC to fit to
+            
+            #sigObj.append(TObjArray(Nsigs)) # number of MC to fit to
+            sigObj.append(TObjArray(len(uniqSig))) # number of MC to fit to
             
             fitdata[i].Sumw2()
             dat_int = fitdata[i].Integral(fmin,fmax) # data integral to normalize to
