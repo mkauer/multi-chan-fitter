@@ -9,7 +9,7 @@ V = 'v23'
 
 # Try to separate sig and bkg in the backgrounds file
 # 
-# version: 2016-12-16
+# version: 2016-12-17
 # 
 # see CHANGELOG for changes
 ######################################################################
@@ -94,21 +94,29 @@ def _myself_(argv):
     
     
     if reuse:
-        # Estella's calib and resol
-        rootfile = './root-join-read/join2-'+str(runNum)+'-master.root'
-        # Pushpa's calib and resol
-        #rootfile = './root-join-read/join22-'+str(runNum)+'-master.root'
+        ### uses Estella's calib and resol
+        #rootfile = './root-join-read/join2-'+str(runNum)+'-master.root'
+
+        ### uses Pushpa's calib and resol
+        rootfile = './root-join-read/join22-'+str(runNum)+'-master.root'
+
         data, bkgs, sigs = readROOT2(rootfile, mcfile)
     
     else:
+        ### uses Estella's calib and resol
         #data = getData2(runNum)
+        #bkgs, sigs = buildMC2(mcfile, 1)
+
+        ### uses Pushpa's calib and resol
         data = getData22(runNum)
         bkgs, sigs = buildMC2(mcfile, 2)
+
     
     datkeys, bakkeys, sigkeys = sortKeys2(data, bkgs, sigs)
     
     
     ### find unique names for color scheme?
+    ### "internal-K40" for example
     uniqAll = []
     for key in bakkeys:
         uniqAll.append(key.split('-')[1]+'-'+key.split('-')[2])
@@ -127,13 +135,19 @@ def _myself_(argv):
     # color list and indexes
     # divide by 2 because e0 and e1 of same component
     # divide by 8 because there's 8 crystals
-    Nbkgs = len(bkgs)/2/8
-    Nsigs = len(sigs)/2/8
+    #Nbkgs = len(bkgs)/2/8
+    #Nsigs = len(sigs)/2/8
+
     # number of colors
     #Nc = Nbkgs + Nsigs
     Nc = len(uniqAll)
     print 'number of bkgs and sigs =',Nc
     colors, cis = rainbow(Nc)
+
+    # create color dict for unique simulations
+    uniqColor = {}
+    for i,key in enumerate(uniqAll):
+        uniqColor[key] = cis[i]
     
     # legend length = MC + data + total
     Nlg = Nc+2
@@ -185,8 +199,11 @@ def _myself_(argv):
     #if not reuse:
     #    for key in bakkeys:
     #        bkgs[key]['hist'].Scale(0.001)
+
+
     
-    
+    ### here's the fitting part!!!
+    ##################################################################
     ### only do the fit if you have signals!
     if len(sigs) > 0:
         
@@ -370,7 +387,7 @@ def _myself_(argv):
             fitresults.append('NaI-C'+str(i+1)+' fit results')
             fitresults.append('MC fit constrained to 0.0001 - 10.0')
 
-            for l in range(Nsigs):
+            for l in range(len(uniqSig)):
                 # set fit constraints on the MC put into sigObj TObject
                 fit[i].Constrain(l, 0.0001, 10.0)
 
@@ -518,16 +535,21 @@ def _myself_(argv):
             fitdata[i].Draw()
             flegs[i].AddEntry(fitdata[i], space+'data', lopt)
 
-            color = 0
+            #color = 0
             #for loc in locs:
             #    for iso in isos:
             for fbkey in fbakkeys:
                 if 'x'+str(i+1) in fbkey:
-
+                    
+                    # find the unique name for color and set color
+                    cname = fbkey.split('-')[1]+'-'+fbkey.split('-')[2]
+                    fitbkgs[fbkey]['hist'].SetMarkerColor(uniqColor[cname])
+                    fitbkgs[fbkey]['hist'].SetLineColor(uniqColor[cname])
+                    
                     ### set bak colors
-                    fitbkgs[fbkey]['hist'].SetMarkerColor(cis[color])
-                    fitbkgs[fbkey]['hist'].SetLineColor(cis[color])
-                    color += 1
+                    #fitbkgs[fbkey]['hist'].SetMarkerColor(cis[color])
+                    #fitbkgs[fbkey]['hist'].SetLineColor(cis[color])
+                    #color += 1
 
                     #fitsigs[loc][iso]['hist'][i].SetAxisRange(1,1000,'y')
 
@@ -538,17 +560,22 @@ def _myself_(argv):
                     ftotal[i].Add(fitbkgs[fbkey]['hist'])
 
                     ### create the legend entry for MC
-                    flegs[i].AddEntry(fitbkgs[fbkey]['hist'], space+fbkey, lopt)
+                    #flegs[i].AddEntry(fitbkgs[fbkey]['hist'], space+fbkey, lopt)
 
-            color = Nbkgs
+            #color = Nbkgs
             for fskey in fsigkeys:
                 if 'x'+str(i+1) in fskey:
 
+                    # find the unique name for color and set color
+                    cname = fskey.split('-')[1]+'-'+fskey.split('-')[2]
+                    fitsigs[fskey]['hist'].SetMarkerColor(uniqColor[cname])
+                    fitsigs[fskey]['hist'].SetLineColor(uniqColor[cname])
+                    
                     ### set mc colors
-                    fitsigs[fskey]['hist'].SetMarkerColor(cis[color])
-                    fitsigs[fskey]['hist'].SetLineColor(cis[color])
-                    color += 1
-
+                    #fitsigs[fskey]['hist'].SetMarkerColor(cis[color])
+                    #fitsigs[fskey]['hist'].SetLineColor(cis[color])
+                    #color += 1
+                                        
                     #fitsigs[loc][iso]['hist'][i].SetAxisRange(1,1000,'y')
 
                     ### draw the sigs
@@ -558,8 +585,19 @@ def _myself_(argv):
                     ftotal[i].Add(fitsigs[fskey]['hist'])
 
                     ### create the legend entry for MC
-                    flegs[i].AddEntry(fitsigs[fskey]['hist'], space+fskey, lopt)
+                    #flegs[i].AddEntry(fitsigs[fskey]['hist'], space+fskey, lopt)
 
+            
+            # add legend entries in order
+            for name in uniqAll:
+                for fbkey in fbakkeys:
+                    if name in fbkey and 'x'+str(i+1) in fbkey:
+                        flegs[i].AddEntry(fitbkgs[fbkey]['hist'], space+fbkey, lopt)
+                for fskey in fsigkeys:
+                    if name in fskey and 'x'+str(i+1) in fskey:
+                        flegs[i].AddEntry(fitsigs[fskey]['hist'], space+fskey, lopt)
+            
+            
             ftotal[i].Draw('same')
             flegs[i].AddEntry(ftotal[i], space+'Total MC', lopt)
             flegs[i].Draw('same')
@@ -639,10 +677,10 @@ def _myself_(argv):
         legs[E]=[]
         legs2[E]=[]
         zeros[E]=[]
-
+        
         total[E] = makeTotal(E)
         resid[E] = makeResid(E)
-                    
+        
         # have the plotting be seperated out from the loop
         canvs[E] = TCanvas('canv'+str(E), 'canv'+str(E), 0, 0, 1400, 900)
         canvs[E].Divide(4,2)
@@ -728,13 +766,19 @@ def _myself_(argv):
                     data[key]['hist'].Draw()
                     legs[E][i].AddEntry(data[key]['hist'], space+'data', lopt)
                     
-            color = 0
+            #color = 0
             for key in bakkeys:
                 if 'x'+str(i+1) in key and '-e'+str(E) in key:
+                    
+                    # find the unique name for color and set color
+                    cname = key.split('-')[1]+'-'+key.split('-')[2]
+                    bkgs[key]['hist'].SetMarkerColor(uniqColor[cname])
+                    bkgs[key]['hist'].SetLineColor(uniqColor[cname])
+                    
                     ### set mc colors
-                    bkgs[key]['hist'].SetMarkerColor(cis[color])
-                    bkgs[key]['hist'].SetLineColor(cis[color])
-                    color += 1
+                    #bkgs[key]['hist'].SetMarkerColor(cis[color])
+                    #bkgs[key]['hist'].SetLineColor(cis[color])
+                    #color += 1
                     
                     if dru1 or dru2:
                         druScale = data['x'+str(i+1)+'-data'+'-e'+str(E)]['druScale']
@@ -748,19 +792,25 @@ def _myself_(argv):
                     
                     ### temp - don't draw MC if you just want to show data
                     bkgs[key]['hist'].Draw('same')
-
+                    
                     ### add MC to total MC hist
                     total[E][i].Add(bkgs[key]['hist'])
                     
                     ### create the legend entry for MC
-                    legs[E][i].AddEntry(bkgs[key]['hist'], space+key, lopt)
-
+                    #legs[E][i].AddEntry(bkgs[key]['hist'], space+key, lopt)
+                    
             for key in sigkeys:
                 if 'x'+str(i+1) in key and '-e'+str(E) in key:
+                    
+                    # find the unique name for color and set color
+                    cname = key.split('-')[1]+'-'+key.split('-')[2]
+                    sigs[key]['hist'].SetMarkerColor(uniqColor[cname])
+                    sigs[key]['hist'].SetLineColor(uniqColor[cname])
+                                        
                     ### set mc colors
-                    sigs[key]['hist'].SetMarkerColor(cis[color])
-                    sigs[key]['hist'].SetLineColor(cis[color])
-                    color += 1
+                    #sigs[key]['hist'].SetMarkerColor(cis[color])
+                    #sigs[key]['hist'].SetLineColor(cis[color])
+                    #color += 1
                     
                     if dru1 or dru2:
                         druScale = data['x'+str(i+1)+'-data'+'-e'+str(E)]['druScale']
@@ -774,34 +824,42 @@ def _myself_(argv):
                     
                     ### set range
                     #sigs[key]['hist'].SetAxisRange(1,1000,'y')
-
+                    
                     ### draw sigs
                     sigs[key]['hist'].Draw('same')
-
+                    
                     ### add MC to total MC hist
                     total[E][i].Add(sigs[key]['hist'])
                     
                     ### create the legend entry for MC
-                    legs[E][i].AddEntry(sigs[key]['hist'], space+key, lopt)
-
+                    #legs[E][i].AddEntry(sigs[key]['hist'], space+key, lopt)
+                    
             
-            total[E][i].Sumw2()
-
+            # add legend entries in order
+            for name in uniqAll:
+                for key in bakkeys:
+                    if name in key and 'x'+str(i+1) in key and '-e'+str(E) in key:
+                        legs[E][i].AddEntry(bkgs[key]['hist'], space+key, lopt)
+                for key in sigkeys:
+                    if name in key and 'x'+str(i+1) in key and '-e'+str(E) in key:
+                        legs[E][i].AddEntry(sigs[key]['hist'], space+key, lopt)
+            
             
             ### you need to scale the error by the dru scaling and/or the rebinning
             #-----------------------------------------------------------------------------
+            total[E][i].Sumw2()
             if not dru1 and not dru2:
                 for n in range(total[E][i].GetNbinsX()):
                     total[E][i].SetBinError(n, total[E][i].GetBinError(n)/(float(hiEplotRebin)/math.sqrt(2.)))
-
+            
             if dru1:
                 for n in range(total[E][i].GetNbinsX()):
                     total[E][i].SetBinError(n, total[E][i].GetBinError(n)*druScale)
-                    
+            
             if dru2:
                 for n in range(total[E][i].GetNbinsX()):
                     total[E][i].SetBinError(n, total[E][i].GetBinError(n)*druScale)
-                    
+            
             #-----------------------------------------------------------------------------
                     
             if len(bkgs) + len(sigs) > 0:        

@@ -12,6 +12,13 @@
 # ====================================================================
 
 
+# 2016-12-17
+# --------------------------------------------------------------------
+# ~ can now arbitrarily set backgrounds and signals per crystal
+# + unique colors now working for the legends too
+# + add uniqColor so each location and isotope has the same color
+
+
 # 2016-12-16
 # --------------------------------------------------------------------
 # + add uniqSig to get unigue sig names and length for fitter object
