@@ -1,12 +1,12 @@
 # -*- sh -*-
 
-# version 2016-12-16
+# version 2016-12-20
 
 # + add in some internal U238 and Th232 from Pushpa slides (for testing)
 # + use real pmt K40 activities in mBq/pmt (from Estella)
 # + use real internal K40 activities in mBq/kg (from Estella)
 
-#------------------------------------------------------------
+#---------------------------------------------------------------------
 # bsdr = [B]ackground, [S]ignal, or [D]ata and [R]euse
 # xstl = crystal number 1-8
 # loca = location
@@ -15,11 +15,16 @@
 # erro = error on the activity
 # Lbnd = lower fit bound
 # Hbnd = upper fit bound
-#------------------------------------------------------------
+#---------------------------------------------------------------------
+
+
+# NOTE: you need at least 2 signals for a crystal to have
+#       TFractionFitter converge on a result.
 
 
 # bsdr  xstl     loca       isot      acti     erro       Lbnd      Hbnd
 # ----  ----    --------   ------    ------   --------   -------   -------
+
 D       1       data
 D       2       data
 D       3       data

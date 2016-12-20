@@ -9,7 +9,7 @@ V = 'v23'
 
 # Try to separate sig and bkg in the backgrounds file
 # 
-# version: 2016-12-17
+# version: 2016-12-20
 # 
 # see CHANGELOG for changes
 ######################################################################
@@ -40,7 +40,7 @@ hiEplotRebin = 10  ### rebin the hi-E final plots [1,inf]
 
 # something weird with the fit rebinning - need to FIX this ASAP!
 # use rebin=1 for now
-hiEfitRebin = 10   ### rebin the hi-E histo for fitting
+hiEfitRebin = 20   ### rebin the hi-E histo for fitting
 
 # fill the fitdata and fitmc starting with n plus number?
 # i think this should be 1 because bin 0 is underflows right?
@@ -87,8 +87,8 @@ def _myself_(argv):
     
     #runNum = 1324
     runNum = 1544
-    #mcfile = 'backgrounds2.txt'
-    mcfile = 'backgrounds-separate.txt'
+    mcfile = 'backgrounds2.txt'
+    #mcfile = 'backgrounds-separate.txt'
     #mcfile = 'backgrounds-just-data.txt'
     #mcfile = 'backgrounds-no-sigs.txt'
     
@@ -125,7 +125,7 @@ def _myself_(argv):
     uniqAll = sorted(list(set(uniqAll)))
     print uniqAll
     
-
+    
     if dru1:
         data = dataDRU2(data)
         bkgs = scaleBkgs(bkgs, data)
@@ -141,7 +141,7 @@ def _myself_(argv):
     # number of colors
     #Nc = Nbkgs + Nsigs
     Nc = len(uniqAll)
-    print 'number of bkgs and sigs =',Nc
+    print 'total number of unique bkgs and sigs =',Nc
     colors, cis = rainbow(Nc)
 
     # create color dict for unique simulations
@@ -204,7 +204,7 @@ def _myself_(argv):
     
     ### here's the fitting part!!!
     ##################################################################
-    ### only do the fit if you have signals!
+    ### only do the fit if you have signals and data!
     if len(sigs) > 0:
         
         fitdata = []
@@ -212,12 +212,13 @@ def _myself_(argv):
         fitbkgs = {}
         ftotal = [] # total of fixed MC plus fit MC
         fresid = [] # residual of the data/total
+        
         ### fill fitdata and fitsigs
         for i in range(8):
-
+            
             fdata = TH1F('fdata'+str(i), cnames(i)+' - multi-chan fit', fbins,0,fbins)
             fitdata.append(fdata)
-
+            
             tot = TH1F('ftotal'+str(i), longNames(i), fbins,0,fbins)
             tot.SetLineColor(kGray+1)
             tot.SetMarkerColor(kGray+1)
@@ -349,10 +350,15 @@ def _myself_(argv):
             ### Do a per crystal unique of the signals to see how many
             ### signal channels each crystal fit will have
             uniqSig = []
-            for key in sigkeys:
-                uniqSig.append(key.split('-')[1]+'-'+key.split('-')[2])
+            for fskey in fsigkeys:
+                if 'x'+str(i+1) in fskey:
+                    uniqSig.append(fskey.split('-')[1]+'-'+fskey.split('-')[2])
             uniqSig = sorted(list(set(uniqSig)))
-            print uniqSig
+            ### only fit a crystal that has signals
+            ### TFF wants at least 2 MC to converge the fit
+            if len(uniqSig) < 2: continue
+            print 'fitting',uniqSig
+            
             
             #sigObj.append(TObjArray(Nsigs)) # number of MC to fit to
             sigObj.append(TObjArray(len(uniqSig))) # number of MC to fit to
@@ -377,38 +383,46 @@ def _myself_(argv):
                         sigs[fskey+'-e1']['hist'].Scale(dat_int/mc_int) # make sure MC is scaled too
                     
                     
-                    sigObj[i].Add(fitsigs[fskey]['hist']) # add to the TFractionFitter object
-
-            fit.append(TFractionFitter(fitdata[i], sigObj[i])) # create the TFF data and MC objects
-
+                    #sigObj[i].Add(fitsigs[fskey]['hist']) # add to the TFractionFitter object
+                    sigObj[-1].Add(fitsigs[fskey]['hist']) # add to the TFractionFitter object
+            
+            #fit.append(TFractionFitter(fitdata[i], sigObj[i])) # create the TFF data and MC objects
+            fit.append(TFractionFitter(fitdata[i], sigObj[-1])) # create the TFF data and MC objects
+            
             ### for some reason on CUP the fit status gets returned as a pointer
             ### like <ROOT.TFitResultPtr object at 0x37246c0>
             #fitresults.append('NaI-C'+str(i+1)+' fit completed with status '+str(status))
             fitresults.append('NaI-C'+str(i+1)+' fit results')
             fitresults.append('MC fit constrained to 0.0001 - 10.0')
-
+            
             for l in range(len(uniqSig)):
                 # set fit constraints on the MC put into sigObj TObject
-                fit[i].Constrain(l, 0.0001, 10.0)
+                #fit[i].Constrain(l, 0.0001, 10.0)
+                fit[-1].Constrain(l, 0.0001, 10.0)
 
                 # set fit weights to 1
                 # this doesn't work yet, not sure why, on the to-do list...
                 if fitweight:
-                    fit[i].SetWeight(l, weights)
-                    #fit[i].SetWeight(l, 1)
-
-            fit[i].SetRangeX(fmin, fmax) # set global range, should be the same as fmin and fmax?
+                    #fit[i].SetWeight(l, weights)
+                    fit[-1].SetWeight(l, weights)
+                    
+            #fit[i].SetRangeX(fmin, fmax) # set global range, should be the same as fmin and fmax?
+            fit[-1].SetRangeX(fmin, fmax) # set global range, should be the same as fmin and fmax?
 
 
             ### try doing the fit
             #------------------------------
-            status = fit[i].Fit()
+            #status = fit[i].Fit()
+            status = fit[-1].Fit()
             #------------------------------
 
 
-            chi2 = fit[i].GetChisquare()
-            ndf  = fit[i].GetNDF()
-            pval = fit[i].GetProb()
+            #chi2 = fit[i].GetChisquare()
+            #ndf  = fit[i].GetNDF()
+            #pval = fit[i].GetProb()
+            chi2 = fit[-1].GetChisquare()
+            ndf  = fit[-1].GetNDF()
+            pval = fit[-1].GetProb()
 
             ### for some reason on CUP the fit status gets returned as a pointer
             ### like <ROOT.TFitResultPtr object at 0x37246c0>
@@ -423,7 +437,8 @@ def _myself_(argv):
 
                     value = ROOT.Double(0.0)
                     error = ROOT.Double(0.0)
-                    fit[i].GetResult(count, value, error)
+                    #fit[i].GetResult(count, value, error)
+                    fit[-1].GetResult(count, value, error)
                     fitresults.append(fskey+' = '+str(round(value,4))+' +/- '+str(round(error,4)))
                     fitsigs[fskey]['hist'].Scale(value)
                     sigs[fskey+'-e0']['hist'].Scale(value)
@@ -436,7 +451,7 @@ def _myself_(argv):
         print '\n\n'
         for line in fitresults:
             print line
-
+        
         ### write fit results to text file
         #-----------------------------------------------------------------
         save = ''
@@ -456,14 +471,14 @@ def _myself_(argv):
         if hiEplotRebin: save += '_hiEplotRebin-'+str(hiEplotRebin)
         if reuse:        save += '_reuse'
         save += '_'+V
-
+        
         outfile = open(save+'_fit-results.txt', 'w')
         for line in fitresults:
             outfile.write(str(line)+'\n')
         outfile.close()    
-
-
-
+        
+        
+        
         # plot the multi-chan fit results
         #=================================================================
 
@@ -476,14 +491,14 @@ def _myself_(argv):
 
         ftoppad=[]
         fbotpad=[]
-
+        
         font=63
         size=13
         yoff=4.2
-
+        
         for i in range(8):
             fcanv.cd(i+1)
-
+            
             fraction = 0.3
             pad1 = TPad('pad1','pad1',0,fraction,1,1)
             ftoppad.append(pad1)
@@ -499,7 +514,14 @@ def _myself_(argv):
             ftoppad[i].Draw()
             fbotpad[i].Draw()
             ftoppad[i].cd()
-
+            
+            ### not quite that easy because of indexing
+            #scount=0
+            #for fskey in fsigkeys:
+            #    if 'x'+str(i+1) in fskey:
+            #        scount+=1
+            #if scount < 2: continue
+            
             ylegstart = 0.88
             ylegend = (ylegstart-(Nlg*0.035))
             space = '  '
@@ -533,11 +555,12 @@ def _myself_(argv):
             #fitdata[i].GetXaxis().SetLabelFont(font)
             #fitdata[i].GetXaxis().SetLabelSize(size)
             fitdata[i].Draw()
-            flegs[i].AddEntry(fitdata[i], space+'data', lopt)
+            flegs[i].AddEntry(fitdata[i], space+'data - bkgs', lopt)
 
-            #color = 0
-            #for loc in locs:
-            #    for iso in isos:
+
+            ### fitdata[i] is already background subtracted
+            ### not sure if I should even show the background data here
+            """
             for fbkey in fbakkeys:
                 if 'x'+str(i+1) in fbkey:
                     
@@ -546,23 +569,14 @@ def _myself_(argv):
                     fitbkgs[fbkey]['hist'].SetMarkerColor(uniqColor[cname])
                     fitbkgs[fbkey]['hist'].SetLineColor(uniqColor[cname])
                     
-                    ### set bak colors
-                    #fitbkgs[fbkey]['hist'].SetMarkerColor(cis[color])
-                    #fitbkgs[fbkey]['hist'].SetLineColor(cis[color])
-                    #color += 1
-
-                    #fitsigs[loc][iso]['hist'][i].SetAxisRange(1,1000,'y')
-
                     ### draw the bkgs
                     fitbkgs[fbkey]['hist'].Draw('same')
 
-                    ### add MC to total MC hist
-                    ftotal[i].Add(fitbkgs[fbkey]['hist'])
+                    ### add MC to total MC hist - NO!!!!
+                    #ftotal[i].Add(fitbkgs[fbkey]['hist'])
 
-                    ### create the legend entry for MC
-                    #flegs[i].AddEntry(fitbkgs[fbkey]['hist'], space+fbkey, lopt)
-
-            #color = Nbkgs
+            """
+            
             for fskey in fsigkeys:
                 if 'x'+str(i+1) in fskey:
 
@@ -571,35 +585,25 @@ def _myself_(argv):
                     fitsigs[fskey]['hist'].SetMarkerColor(uniqColor[cname])
                     fitsigs[fskey]['hist'].SetLineColor(uniqColor[cname])
                     
-                    ### set mc colors
-                    #fitsigs[fskey]['hist'].SetMarkerColor(cis[color])
-                    #fitsigs[fskey]['hist'].SetLineColor(cis[color])
-                    #color += 1
-                                        
-                    #fitsigs[loc][iso]['hist'][i].SetAxisRange(1,1000,'y')
-
                     ### draw the sigs
                     fitsigs[fskey]['hist'].Draw('same')
 
                     ### add MC to total MC hist
                     ftotal[i].Add(fitsigs[fskey]['hist'])
 
-                    ### create the legend entry for MC
-                    #flegs[i].AddEntry(fitsigs[fskey]['hist'], space+fskey, lopt)
-
             
             # add legend entries in order
             for name in uniqAll:
-                for fbkey in fbakkeys:
-                    if name in fbkey and 'x'+str(i+1) in fbkey:
-                        flegs[i].AddEntry(fitbkgs[fbkey]['hist'], space+fbkey, lopt)
+                #for fbkey in fbakkeys:
+                #    if name in fbkey and 'x'+str(i+1) in fbkey:
+                #        flegs[i].AddEntry(fitbkgs[fbkey]['hist'], space+fbkey, lopt)
                 for fskey in fsigkeys:
                     if name in fskey and 'x'+str(i+1) in fskey:
                         flegs[i].AddEntry(fitsigs[fskey]['hist'], space+fskey, lopt)
             
             
             ftotal[i].Draw('same')
-            flegs[i].AddEntry(ftotal[i], space+'Total MC', lopt)
+            flegs[i].AddEntry(ftotal[i], space+'Fit Total', lopt)
             flegs[i].Draw('same')
 
 
@@ -612,10 +616,8 @@ def _myself_(argv):
             flegs2[i].SetBorderSize(0)
             lopt = 'LPE'
 
-            ### subtract total-mc from data
-            #fresid[i].Add(data[E][i], total[E][i], 1, -1)
-            ### divide data by total-mc
             fresid[i].Divide(fitdata[i], ftotal[i])
+            #fresid[i].Divide(ftotal[i], fitdata[i])
 
             fresid[i].SetTitle('')
             #fresid[i].SetXTitle('Energy (keVee)')
@@ -628,6 +630,7 @@ def _myself_(argv):
             fresid[i].GetXaxis().SetLabelOffset(0.03)
             #fresid[i].SetYTitle('counts / keV')
             fresid[i].SetYTitle('data / MC')
+            #fresid[i].SetYTitle('MC / data')
             fresid[i].GetYaxis().SetTitleFont(font)
             fresid[i].GetYaxis().SetTitleSize(size)
             fresid[i].GetYaxis().SetTitleOffset(yoff)
@@ -635,10 +638,10 @@ def _myself_(argv):
             fresid[i].GetYaxis().SetLabelSize(size)
             fresid[i].GetYaxis().SetLabelOffset(0.01)
             fresid[i].GetYaxis().SetNdivisions(505) # '5' secondary and '05' primary
-
+            
             fresid[i].SetAxisRange(0.1,10,'y')
             fresid[i].Draw()
-
+            
             ### set my line to '1'
             zero = TLine(fmin, 1, fmax, 1)
             fzeros.append(zero)
@@ -879,7 +882,8 @@ def _myself_(argv):
             lopt = 'LPE'
 
             resid[E][i].Divide(data['x'+str(i+1)+'-data'+'-e'+str(E)]['hist'], total[E][i])
-
+            #resid[E][i].Divide(total[E][i], data['x'+str(i+1)+'-data'+'-e'+str(E)]['hist'])
+            
             resid[E][i].SetTitle('')
             resid[E][i].SetXTitle('Energy (keVee)')
             resid[E][i].GetXaxis().SetTitleFont(font)
@@ -890,6 +894,7 @@ def _myself_(argv):
             resid[E][i].GetXaxis().SetTitleOffset(8)
             #resid[E][i].SetYTitle('counts / keV')
             resid[E][i].SetYTitle('data / MC')
+            #resid[E][i].SetYTitle('MC / data')
             resid[E][i].GetYaxis().SetTitleFont(font)
             resid[E][i].GetYaxis().SetTitleSize(size)
             resid[E][i].GetYaxis().SetTitleOffset(yoff)
@@ -897,7 +902,7 @@ def _myself_(argv):
             resid[E][i].GetYaxis().SetLabelSize(size)
             resid[E][i].GetYaxis().SetLabelOffset(0.01)
             resid[E][i].GetYaxis().SetNdivisions(505) # '5' secondary and '05' primary
-
+            
             resid[E][i].SetAxisRange(0.1,10,'y')
             resid[E][i].Draw()
             
