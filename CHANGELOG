@@ -14,7 +14,7 @@
 
 # 2016-12-20
 # --------------------------------------------------------------------
-# 
+# V switch to v24-broken-chain.py
 # + now only crystals with 2 or more signals get TFractionFitter
 # + need at least 2 MC for TFractionFitter to work
 # - do not add the bkgs to the total MC from the fit - the data is
