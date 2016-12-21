@@ -8,7 +8,7 @@
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
-# + v3 for broken chain support
+# + funcs3.py for broken chain support
 #
 # email me: mkauer@physics.wisc.edu
 ######################################################################
