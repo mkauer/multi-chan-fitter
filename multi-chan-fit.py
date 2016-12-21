@@ -40,7 +40,7 @@ hiEplotRebin = 10  ### rebin the hi-E final plots [1,inf]
 
 # something weird with the fit rebinning - need to FIX this ASAP!
 # use rebin=1 for now
-hiEfitRebin = 20   ### rebin the hi-E histo for fitting
+hiEfitRebin = 10   ### rebin the hi-E histo for fitting
 
 # fill the fitdata and fitmc starting with n plus number?
 # i think this should be 1 because bin 0 is underflows right?
