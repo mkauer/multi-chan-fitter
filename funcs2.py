@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 ######################################################################
-# Import old funcs.py but now add more for reading in the
+# Import funcs.py but now adding support for reading in the
 # universal backgrounds file.
-# 
+#
+# Works with v20 and later versions
+#
 # version: 2016-12-15
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)

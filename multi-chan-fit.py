@@ -3,11 +3,11 @@
 ######################################################################
 # Matt Kauer - mkauer@physics.wisc.edu
 ######################################################################
-# 24-broken-chain.py
+# 23-separate-sig-bkg.py
 
-V = 'v24'
+V = 'v23'
 
-# Implement broken chain for U238 and Pb210
+# Try to separate sig and bkg in the backgrounds file
 # 
 # version: 2016-12-20
 # 

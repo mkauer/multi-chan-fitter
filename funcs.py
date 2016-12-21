@@ -1,14 +1,13 @@
 #!/usr/bin/env python
 ######################################################################
-# Bunch of functions to use
-# Works with "10-mc-fit.py" and later versions, local and CUP
-# Trying to make sure this stays backwards compitable
+# A default set of functions to use
+#
+# Works with v10 and later versions
 #
 # version: 2016-12-12
 #
 # Change Log (key == [+] added, [-] removed, [~] changed)
-#=====================================================================
-# 
+#---------------------------------------------------------------------
 # + init/set  mc[loc][iso]['act'] = [] and mc[loc][iso]["act"].append(-1)
 #   by default, and this works for local data using v14
 # ~ updated crystal masses in cmass() and carried it over into
