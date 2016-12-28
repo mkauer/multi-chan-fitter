@@ -4,7 +4,7 @@
 #
 # Works with v10 and later versions
 #
-# version: 2016-12-12
+# version: 2016-12-27
 #
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
