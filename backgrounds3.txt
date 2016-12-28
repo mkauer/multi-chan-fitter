@@ -52,7 +52,7 @@ B       6       internal    K40       K40       K40      3.78e-1   0.0001     0.
 B       7       internal    K40       K40       K40      5.82e-1   0.0001     0.001     10.0
 B       8       internal    K40       K40       K40      1.74e0    0.0001     0.001     10.0
 
-S       1       internal    U238      U238      Rn222    2.47e-3   0.0001     0.001     10.0S
+S       1       internal    U238      U238      Rn222    2.47e-3   0.0001     0.001     10.0
 S       2       internal    U238      U238      Rn222    1.28e-2   0.0001     0.001     10.0
 S       3       internal    U238      U238      Rn222    4.94e-4   0.0001     0.001     10.0
 S       4       internal    U238      U238      Rn222    0.005     0.0001     0.001     10.0
