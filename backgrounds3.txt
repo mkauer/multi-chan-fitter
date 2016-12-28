@@ -1,21 +1,29 @@
 # -*- sh -*-
 
-# version 2016-12-20
+# version 2016-12-27
 
+# + can now comment out lines with """
+# + add in broken chain isotopes and 2 new columns for broken chain
+#   start and stop isotopes
 # + v3 - add support for broken chains
-# + add in some internal U238 and Th232 from Pushpa slides (for testing)
+# + add in some internal U238 and Th232 activities from Pushpa slides
+#   (this is for testing)
 # + use real pmt K40 activities in mBq/pmt (from Estella)
 # + use real internal K40 activities in mBq/kg (from Estella)
+# + can comment out lines with #
+
 
 #---------------------------------------------------------------------
-# bsdr = [B]ackground, [S]ignal, or [D]ata and [R]euse
-# xstl = crystal number 1-8
-# loca = location
-# isot = background isotope
-# acti = background activity (mBq/kg) (mBq/pmt)
-# erro = error on the activity
-# Lbnd = lower fit bound
-# Hbnd = upper fit bound
+# bsdr  =  [B]ackground, [S]ignal, [D]ata, and/or [R]euse
+# xstl  =  crystal number 1-8
+# loca  =  location of background
+# isof  =  isotope simulation file (top level, ie Pb210 has isof = U238)
+# chst  =  isof chain breaking start
+# chsp  =  isof chain breaking stop
+# acti  =  background activity (mBq/kg) or (mBq/pmt)
+# erro  =  error on the activity
+# lbnd  =  lower fit bound
+# hbnd  =  upper fit bound
 #---------------------------------------------------------------------
 
 
@@ -23,8 +31,8 @@
 #       TFractionFitter converge on a result.
 
 
-# bsdr  xstl     loca       isot      acti     erro       Lbnd      Hbnd
-# ----  ----    --------   ------    ------   --------   -------   -------
+# bsdr  xstl     loca       isof      chst      chsp      acti       erro      lbnd      hbnd
+# ----  ----    --------   ------    ------    ------    --------   -------   -------   ------
 
 D       1       data
 D       2       data
@@ -35,66 +43,66 @@ D       6       data
 D       7       data
 D       8       data
 
-B       1       internal    K40      1.34e0    0.0001     0.001     10.0
-B       2       internal    K40      2.56e0    0.0001     0.001     10.0
-B       3       internal    K40      1.27e0    0.0001     0.001     10.0
-B       4       internal    K40      1.22e0    0.0001     0.001     10.0
-B       5       internal    K40      2.69e0    0.0001     0.001     10.0
-B       6       internal    K40      3.78e-1   0.0001     0.001     10.0
-B       7       internal    K40      5.82e-1   0.0001     0.001     10.0
-B       8       internal    K40      1.74e0    0.0001     0.001     10.0
+B       1       internal    K40       K40       K40      1.34e0    0.0001     0.001     10.0
+B       2       internal    K40       K40       K40      2.56e0    0.0001     0.001     10.0
+B       3       internal    K40       K40       K40      1.27e0    0.0001     0.001     10.0
+B       4       internal    K40       K40       K40      1.22e0    0.0001     0.001     10.0
+B       5       internal    K40       K40       K40      2.69e0    0.0001     0.001     10.0
+B       6       internal    K40       K40       K40      3.78e-1   0.0001     0.001     10.0
+B       7       internal    K40       K40       K40      5.82e-1   0.0001     0.001     10.0
+B       8       internal    K40       K40       K40      1.74e0    0.0001     0.001     10.0
 
-S       1       internal    U238     2.47e-3   0.0001     0.001     10.0
-S       2       internal    U238     1.28e-2   0.0001     0.001     10.0
-S       3       internal    U238     4.94e-4   0.0001     0.001     10.0
-S       4       internal    U238     0.005     0.0001     0.001     10.0
-S       5       internal    U238     0.005     0.0001     0.001     10.0
-S       6       internal    U238     0.005     0.0001     0.001     10.0
-S       7       internal    U238     0.005     0.0001     0.001     10.0
-S       8       internal    U238     0.005     0.0001     0.001     10.0
+S       1       internal    U238      U238      Rn222    2.47e-3   0.0001     0.001     10.0S
+S       2       internal    U238      U238      Rn222    1.28e-2   0.0001     0.001     10.0
+S       3       internal    U238      U238      Rn222    4.94e-4   0.0001     0.001     10.0
+S       4       internal    U238      U238      Rn222    0.005     0.0001     0.001     10.0
+S       5       internal    U238      U238      Rn222    0.005     0.0001     0.001     10.0
+S       6       internal    U238      U238      Rn222    0.005     0.0001     0.001     10.0
+S       7       internal    U238      U238      Rn222    0.005     0.0001     0.001     10.0
+S       8       internal    U238      U238      Rn222    0.005     0.0001     0.001     10.0
 
-#S       1       internal    Pb210    0.005     0.0001     0.001     10.0
-#S       2       internal    Pb210    0.005     0.0001     0.001     10.0
-#S       3       internal    Pb210    0.005     0.0001     0.001     10.0
-#S       4       internal    Pb210    0.005     0.0001     0.001     10.0
-#S       5       internal    Pb210    0.005     0.0001     0.001     10.0
-#S       6       internal    Pb210    0.005     0.0001     0.001     10.0
-#S       7       internal    Pb210    0.005     0.0001     0.001     10.0
-#S       8       internal    Pb210    0.005     0.0001     0.001     10.0
+S       1       internal    U238      Pb210     Pb210    0.005     0.0001     0.001     10.0
+S       2       internal    U238      Pb210     Pb210    0.005     0.0001     0.001     10.0
+S       3       internal    U238      Pb210     Pb210    0.005     0.0001     0.001     10.0
+S       4       internal    U238      Pb210     Pb210    0.005     0.0001     0.001     10.0
+S       5       internal    U238      Pb210     Pb210    0.005     0.0001     0.001     10.0
+S       6       internal    U238      Pb210     Pb210    0.005     0.0001     0.001     10.0
+S       7       internal    U238      Pb210     Pb210    0.005     0.0001     0.001     10.0
+S       8       internal    U238      Pb210     Pb210    0.005     0.0001     0.001     10.0
 
-S       1       internal    Th232    1.29e-2   0.0001     0.001     10.0
-S       2       internal    Th232    1.95e-3   0.0001     0.001     10.0
-S       3       internal    Th232    7.72e-4   0.0001     0.001     10.0
-S       4       internal    Th232    0.005     0.0001     0.001     10.0
-S       5       internal    Th232    0.005     0.0001     0.001     10.0
-S       6       internal    Th232    0.005     0.0001     0.001     10.0
-S       7       internal    Th232    0.005     0.0001     0.001     10.0
-S       8       internal    Th232    0.005     0.0001     0.001     10.0
+S       1       internal    Th232     Th232     Th232    1.29e-2   0.0001     0.001     10.0
+S       2       internal    Th232     Th232     Th232    1.95e-3   0.0001     0.001     10.0
+S       3       internal    Th232     Th232     Th232    7.72e-4   0.0001     0.001     10.0
+S       4       internal    Th232     Th232     Th232    0.005     0.0001     0.001     10.0
+S       5       internal    Th232     Th232     Th232    0.005     0.0001     0.001     10.0
+S       6       internal    Th232     Th232     Th232    0.005     0.0001     0.001     10.0
+S       7       internal    Th232     Th232     Th232    0.005     0.0001     0.001     10.0
+S       8       internal    Th232     Th232     Th232    0.005     0.0001     0.001     10.0
 
-B       1       pmt         K40      58.0      0.0001     0.001     10.0
-B       2       pmt         K40      58.0      0.0001     0.001     10.0
-B       3       pmt         K40      58.0      0.0001     0.001     10.0
-B       4       pmt         K40      58.0      0.0001     0.001     10.0
-B       5       pmt         K40      58.0      0.0001     0.001     10.0
-B       6       pmt         K40      58.0      0.0001     0.001     10.0
-B       7       pmt         K40      58.0      0.0001     0.001     10.0
-B       8       pmt         K40      58.0      0.0001     0.001     10.0
+B       1       pmt         K40       K40       K40      58.0      0.0001     0.001     10.0
+B       2       pmt         K40       K40       K40      58.0      0.0001     0.001     10.0
+B       3       pmt         K40       K40       K40      58.0      0.0001     0.001     10.0
+B       4       pmt         K40       K40       K40      58.0      0.0001     0.001     10.0
+B       5       pmt         K40       K40       K40      58.0      0.0001     0.001     10.0
+B       6       pmt         K40       K40       K40      58.0      0.0001     0.001     10.0
+B       7       pmt         K40       K40       K40      58.0      0.0001     0.001     10.0
+B       8       pmt         K40       K40       K40      58.0      0.0001     0.001     10.0
 
-S       1       pmt         U238     0.005     0.0001     0.001     10.0
-S       2       pmt         U238     0.005     0.0001     0.001     10.0
-S       3       pmt         U238     0.005     0.0001     0.001     10.0
-S       4       pmt         U238     0.005     0.0001     0.001     10.0
-S       5       pmt         U238     0.005     0.0001     0.001     10.0
-S       6       pmt         U238     0.005     0.0001     0.001     10.0
-S       7       pmt         U238     0.005     0.0001     0.001     10.0
-S       8       pmt         U238     0.005     0.0001     0.001     10.0
+S       1       pmt         U238      U238      U238     100.0     0.0001     0.001     10.0
+S       2       pmt         U238      U238      U238     100.0     0.0001     0.001     10.0
+S       3       pmt         U238      U238      U238     100.0     0.0001     0.001     10.0
+S       4       pmt         U238      U238      U238     100.0     0.0001     0.001     10.0
+S       5       pmt         U238      U238      U238     100.0     0.0001     0.001     10.0
+S       6       pmt         U238      U238      U238     100.0     0.0001     0.001     10.0
+S       7       pmt         U238      U238      U238     100.0     0.0001     0.001     10.0
+S       8       pmt         U238      U238      U238     100.0     0.0001     0.001     10.0
 
-S       1       pmt         Th232    0.005     0.0001     0.001     10.0
-S       2       pmt         Th232    0.005     0.0001     0.001     10.0
-S       3       pmt         Th232    0.005     0.0001     0.001     10.0
-S       4       pmt         Th232    0.005     0.0001     0.001     10.0
-S       5       pmt         Th232    0.005     0.0001     0.001     10.0
-S       6       pmt         Th232    0.005     0.0001     0.001     10.0
-S       7       pmt         Th232    0.005     0.0001     0.001     10.0
-S       8       pmt         Th232    0.005     0.0001     0.001     10.0
+S       1       pmt         Th232     Th232     Th232    100.0     0.0001     0.001     10.0
+S       2       pmt         Th232     Th232     Th232    100.0     0.0001     0.001     10.0
+S       3       pmt         Th232     Th232     Th232    100.0     0.0001     0.001     10.0
+S       4       pmt         Th232     Th232     Th232    100.0     0.0001     0.001     10.0
+S       5       pmt         Th232     Th232     Th232    100.0     0.0001     0.001     10.0
+S       6       pmt         Th232     Th232     Th232    100.0     0.0001     0.001     10.0
+S       7       pmt         Th232     Th232     Th232    100.0     0.0001     0.001     10.0
+S       8       pmt         Th232     Th232     Th232    100.0     0.0001     0.001     10.0
 

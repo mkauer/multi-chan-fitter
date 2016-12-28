@@ -5,10 +5,11 @@
 #
 # Works with v30 and later versions
 # 
-# version: 2016-12-20
+# version: 2016-12-27
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# ~ import funcs3.py and use buildMC3()
 # + implement Pushpa's calib and resol functions
 # ~ use data run 1544
 # ~ new paths for raw data and processed data
@@ -28,34 +29,34 @@
 
 import os,sys
 import numpy as np
-from ROOT import *
 import ROOT
-#import funcs2
-from funcs2 import *
+from ROOT import *
+
+from funcs3 import *
 
 local = amLocal()
 gROOT.SetBatch(1)
 
 
 def _myself_(argv):
-
+    
     runNum = 1544
     mcfile = 'backgrounds3.txt'
     
-    rootfile = 'join3-test-'+str(runNum)+'.root'
-
+    rootfile = 'join3-'+str(runNum)+'-test.root'
+    
     rfile = TFile(rootfile, 'RECREATE')
     print 'creating rootfile',rootfile
-
+    
     data = getData22(runNum)
-    bkgs, sigs = buildMC2(mcfile, 2)
+    bkgs, sigs = buildMC3(mcfile, 2)
     
     rfile.Write()
     rfile.Close()
     
     print "\nDONE\n"
     
-
+    
 if __name__ == "__main__":
     _myself_(sys.argv[1:])
 

@@ -12,6 +12,29 @@
 # ====================================================================
 
 
+# 2016-12-27
+# --------------------------------------------------------------------
+# + created a new join3-1544-master.root with the U238 chain breaking
+# + found and fixed a big bug with the TPad memory allocation 
+# + added readROOT3() to funcs3.py
+# + backgrounds3.txt now has a new format for broken chain handling
+# ~ tweaked join3.py for new format
+# + delete signal keys that aren't being fit ie if there is not 2 or
+#   more signals, then the plotting just shows what was actually fit
+# + skip fitting if not 2 or more signals for a crystal
+# + can now skip all lines in backgrounds file enclosed with """
+# + add readFile() function to read in the backgrounds file
+
+
+# 2016-12-26
+# --------------------------------------------------------------------
+# ~ did not need to change anything in v30 to get this working
+#   except replacing buildMC2() with buildMC3()
+# + first attempt at getting broken chain Pb210 in the mix in funcs3.py
+# + added new chain breaking variables to backgrounds3.txt 
+# ~ using local U238 data for broken chain testing
+
+
 # 2016-12-20
 # --------------------------------------------------------------------
 # ~ testing v30 with local data right now...
