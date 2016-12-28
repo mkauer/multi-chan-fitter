@@ -5,7 +5,7 @@
 #
 # Works with v20 and later versions
 #
-# version: 2016-12-15
+# version: 2016-12-27
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
@@ -55,7 +55,7 @@ import ROOT
 from funcs import *
 
 
-def buildMC2(fileName='backgrounds.txt', version=1):
+def buildMC2(fileName='backgrounds.txt', calib=1):
     """
     Build the mega MC dictionary!
     """
@@ -127,12 +127,12 @@ def buildMC2(fileName='backgrounds.txt', version=1):
                     chain.SetAlias('rng','sin(2.*pi*rndm)*sqrt(-2.*log(rndm))')
                     
                     ### set the resolution function
-                    if version == 1:
+                    if calib == 1:
                         ### from Estella
                         ### assume reso = p0/sqrt(energy)
                         p0 = resol(i,E)
                         chain.SetAlias('sigma', str(p0)+'/sqrt(edep['+str(i)+']*1000.)')
-                    if version == 2:
+                    if calib == 2:
                         ### from Pushpa
                         ### assume reso = p0/sqrt(energy) + p1
                         p0, p1 = resol2(i,E)
@@ -166,7 +166,7 @@ def buildMC2(fileName='backgrounds.txt', version=1):
                         
                     
             else:
-                print 'Warning:', loc, iso, 'not found...'
+                print 'Warning:', loca, isot, 'not found...'
     
     infile.close()
     
@@ -301,8 +301,8 @@ def readROOT2(rootfile, fileName='backgrounds.txt', scale=0):
                     bkgs[name]['erro'] = erro
 
                     ### scale the bkgs right away?
-                    # I think scaling should be a seperate function
-                    # Keep this in for v20 comparison
+                    # v20 needs the scaling here
+                    # all other versions do not!
                     if scale:
                         bkgs[name]['hist'].Scale(acti)
                     
@@ -515,14 +515,14 @@ def resol2(i, E=0):
 
 def scaleBkgs(bkgs, data):
     
-    ### only works for internal backgrounds at this point
+    ### only works for internal and pmt backgrounds at this point
     
     for name in bkgs:
         x = name.split('-')[0]
         loca = name.split('-')[1]
         e = name.split('-')[-1]
         druscale = data[x+'-data-'+e]['druScale']
-        print name,'druscale = ',druscale
+        #print name,'druscale = ',druscale
         runtime = data[x+'-data-'+e]['runtime']
         #print 'runtime = ',runtime
 
