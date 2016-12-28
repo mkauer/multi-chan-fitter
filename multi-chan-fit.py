@@ -9,7 +9,7 @@ V = 'v30'
 
 # Implement broken chain for U238 and Pb210
 # 
-# version: 2016-12-27
+# version: 2016-12-28
 # 
 # see CHANGELOG for changes
 ######################################################################
@@ -544,19 +544,14 @@ def _myself_(argv):
             flegs[i].SetBorderSize(0)
             lopt = 'LPE'
 
-            if dru1:
-                fitdata[i].SetAxisRange(10**-1, 10**2, 'y')
-            else:
-                fitdata[i].SetAxisRange(10**1, 10**4, 'y')
-
+            if dru1: fitdata[i].SetAxisRange(2e-2, 3e2, 'y')
+            
             fitdata[i].SetLineColor(kBlack)
             fitdata[i].SetMarkerColor(kBlack)
             fitdata[i].SetLineWidth(1)
 
-            if dru1:
-                fitdata[i].GetYaxis().SetTitle('counts / day / kg / keV  (dru)')
-            else:
-                fitdata[i].GetYaxis().SetTitle('arb. counts')
+            if dru1: fitdata[i].GetYaxis().SetTitle('counts / day / kg / keV  (dru)')
+            else: fitdata[i].GetYaxis().SetTitle('arb. counts')
 
             fitdata[i].GetYaxis().SetTitleFont(font)
             fitdata[i].GetYaxis().SetTitleSize(size)
@@ -779,11 +774,9 @@ def _myself_(argv):
                     #data[key]['hist'].GetXaxis().SetLabelSize(size)
 
                     if dru1 or dru2:
-                        if not E:
-                            data[key]['hist'].SetAxisRange(10**-1, 10**3, 'y')
-                        else:
-                            data[key]['hist'].SetAxisRange(10**-2, 10**2, 'y')
-                    
+                        if E: data[key]['hist'].SetAxisRange(2e-2, 2e1, 'y')
+                        else: data[key]['hist'].SetAxisRange(2e-1, 3e2, 'y')
+                        
                     data[key]['hist'].Draw()
                     legs[E][i].AddEntry(data[key]['hist'], space+'data', lopt)
                     
