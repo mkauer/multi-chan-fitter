@@ -14,6 +14,7 @@
 
 # 2016-12-27
 # --------------------------------------------------------------------
+# + cut a gitlab release v3.0 here at this point
 # + created a new join3-1544-master.root with the U238 chain breaking
 # + found and fixed a big bug with the TPad memory allocation 
 # + added readROOT3() to funcs3.py
