@@ -851,17 +851,18 @@ def _myself_(argv):
             ### you need to scale the error by the dru scaling and/or the rebinning
             #-----------------------------------------------------------------------------
             total[E][i].Sumw2()
+            bp = 1
             if not dru1 and not dru2:
                 for n in range(total[E][i].GetNbinsX()):
-                    total[E][i].SetBinError(n, total[E][i].GetBinError(n)/(float(hiEplotRebin)/math.sqrt(2.)))
+                    total[E][i].SetBinError(n+bp, total[E][i].GetBinError(n+bp)/(float(hiEplotRebin)/math.sqrt(2.)))
             
             if dru1:
                 for n in range(total[E][i].GetNbinsX()):
-                    total[E][i].SetBinError(n, total[E][i].GetBinError(n)*druScale)
+                    total[E][i].SetBinError(n+bp, total[E][i].GetBinError(n+bp)*druScale)
             
             if dru2:
                 for n in range(total[E][i].GetNbinsX()):
-                    total[E][i].SetBinError(n, total[E][i].GetBinError(n)*druScale)
+                    total[E][i].SetBinError(n+bp, total[E][i].GetBinError(n+bp)*druScale)
             
             #-----------------------------------------------------------------------------
                     
