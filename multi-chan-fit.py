@@ -3,25 +3,25 @@
 ######################################################################
 # Matt Kauer - mkauer@physics.wisc.edu
 ######################################################################
-# 23-separate-sig-bkg.py
+# 30-broken-chain.py
 
-V = 'v23'
+V = 'v30'
 
-# Try to separate sig and bkg in the backgrounds file
+# Implement broken chain for U238 and Pb210
 # 
-# version: 2016-12-20
+# version: 2016-12-27
 # 
 # see CHANGELOG for changes
 ######################################################################
 
 import os,sys
 import socket
-import numpy as np
-from ROOT import *
-import ROOT
-from funcs2 import *
 import copy
 import math
+import numpy as np
+import ROOT
+from ROOT import *
+from funcs3 import *
 
 
 ### user inputs
@@ -33,18 +33,18 @@ import math
 dru1 = 1   ### convert data to dru before fit? [0,1]
 dru2 = 0   ### convert data and mc to dru after fit? [0,1]
 
-# dru safty check...
+### dru safty check...
 if dru2: dru1 = 0
 
 hiEplotRebin = 10  ### rebin the hi-E final plots [1,inf]
 
-# something weird with the fit rebinning - need to FIX this ASAP!
-# use rebin=1 for now
-hiEfitRebin = 10   ### rebin the hi-E histo for fitting
+### something weird with the fit rebinning - need to FIX this ASAP!
+### use rebin=1 for now
+hiEfitRebin = 10   ### rebin the hi-E histo for fitting [1,inf]
 
-# fill the fitdata and fitmc starting with n plus number?
-# i think this should be 1 because bin 0 is underflows right?
-# yes, just checked, this should be 1
+### fill the fitdata and fitmc starting with n plus number?
+### i think this should be 1 because bin 0 is underflows right?
+### yes, just checked, this should be 1
 np = 1
 
 reuse = 1   ### use joined rootfile data? [0,1]
@@ -52,11 +52,11 @@ reuse = 1   ### use joined rootfile data? [0,1]
 mcscale = 1   ### pre scale the MC? [0,1]
 mcweight = 1  ### set MC weights? [0,1]
 
-# this doesn't work at all, not sure why...
+### this doesn't work at all, not sure why...
 fitweight = 0   ### set fit weights? [0,1]
 
-# still working on this - I don't understand why
-# this is effecting the fit so much
+### still working on this - I don't understand why
+### this is effecting the fit so much
 fitRebinScale = 0   ### scale data and mc hi-E hists to 1/hiEfitRebin factor? [0,1]
 #================================================================
 
@@ -87,29 +87,25 @@ def _myself_(argv):
     
     #runNum = 1324
     runNum = 1544
-    mcfile = 'backgrounds2.txt'
-    #mcfile = 'backgrounds-separate.txt'
-    #mcfile = 'backgrounds-just-data.txt'
-    #mcfile = 'backgrounds-no-sigs.txt'
-    
+    mcfile = 'backgrounds3.txt'
     
     if reuse:
         ### uses Estella's calib and resol
         #rootfile = './root-join-read/join2-'+str(runNum)+'-master.root'
 
         ### uses Pushpa's calib and resol
-        rootfile = './root-join-read/join22-'+str(runNum)+'-master.root'
+        rootfile = './root-join-read/join3-'+str(runNum)+'-master.root'
 
-        data, bkgs, sigs = readROOT2(rootfile, mcfile)
+        data, bkgs, sigs = readROOT3(rootfile, mcfile)
     
     else:
         ### uses Estella's calib and resol
         #data = getData2(runNum)
-        #bkgs, sigs = buildMC2(mcfile, 1)
+        #bkgs, sigs = buildMC23(mcfile, 1)
 
         ### uses Pushpa's calib and resol
         data = getData22(runNum)
-        bkgs, sigs = buildMC2(mcfile, 2)
+        bkgs, sigs = buildMC3(mcfile, 2)
 
     
     datkeys, bakkeys, sigkeys = sortKeys2(data, bkgs, sigs)
@@ -123,35 +119,28 @@ def _myself_(argv):
     for key in sigkeys:
         uniqAll.append(key.split('-')[1]+'-'+key.split('-')[2])
     uniqAll = sorted(list(set(uniqAll)))
-    print uniqAll
+    print 'Unique bkgs and sigs =',uniqAll
     
     
     if dru1:
         data = dataDRU2(data)
         bkgs = scaleBkgs(bkgs, data)
         
-        
-    # create a color scheme for MC
-    # color list and indexes
-    # divide by 2 because e0 and e1 of same component
-    # divide by 8 because there's 8 crystals
-    #Nbkgs = len(bkgs)/2/8
-    #Nsigs = len(sigs)/2/8
 
-    # number of colors
-    #Nc = Nbkgs + Nsigs
+    ### Number of colors
     Nc = len(uniqAll)
-    print 'total number of unique bkgs and sigs =',Nc
+    print 'Total number of unique bkgs and sigs =',Nc
     colors, cis = rainbow(Nc)
 
-    # create color dict for unique simulations
+    ### Create color dict for unique simulations
     uniqColor = {}
     for i,key in enumerate(uniqAll):
         uniqColor[key] = cis[i]
-    
-    # legend length = MC + data + total
+        
+    ### legend length = MC + data + total
     Nlg = Nc+2
-
+    
+    
     ### fit the MC to data
     #-----------------------------------------------------------------
     
@@ -161,8 +150,8 @@ def _myself_(argv):
     fHiE = [400, 2000]
     fHi = [fHiE[0]/hiEfitRebin, fHiE[1]/hiEfitRebin]
     fHiBins = fHi[1]-fHi[0]
-    print fHi
-    print fHiBins
+    #print fHi
+    #print fHiBins
     
     fbins = fLoBins+fHiBins
     
@@ -354,10 +343,34 @@ def _myself_(argv):
                 if 'x'+str(i+1) in fskey:
                     uniqSig.append(fskey.split('-')[1]+'-'+fskey.split('-')[2])
             uniqSig = sorted(list(set(uniqSig)))
-            ### only fit a crystal that has signals
+
+            ### only fit a crystal that has 2 or more signals
             ### TFF wants at least 2 MC to converge the fit
-            if len(uniqSig) < 2: continue
-            print 'fitting',uniqSig
+            if len(uniqSig) < 2:
+                print "\nWARNING: TFractionFitter needs at least 2 MC to converge"
+                print   "         Skipping fit to crystal",str(i+1)
+
+                ### delete the key out of fsigkeys so it does
+                ### not get plotted in the fit histos!
+                ### go in reverse to preserve index
+                L = len(fsigkeys)-1
+                for k,fskey in enumerate(reversed(fsigkeys)):
+                    if 'x'+str(i+1) in fskey:
+                        print 'INFO: deleting fit key',fsigkeys[L-k]
+                        del fsigkeys[L-k]
+                        
+                ### and delete it out of sigs so it does not
+                ### get plotted in the lo-E and hi-E histos
+                ### go in reverse to preserve index
+                L = len(sigkeys)-1
+                for k,skey in enumerate(reversed(sigkeys)):
+                    if 'x'+str(i+1) in skey:
+                        print 'INFO: deleting signal key',sigkeys[L-k]
+                        del sigkeys[L-k]
+                        
+                continue
+            
+            print '\nINFO: Fitting crystal',str(i+1),'with',uniqSig,'\n'
             
             
             #sigObj.append(TObjArray(Nsigs)) # number of MC to fit to
@@ -482,16 +495,16 @@ def _myself_(argv):
         # plot the multi-chan fit results
         #=================================================================
 
-        flegs=[]
-        flegs2=[]
-        fzeros=[]
-
         fcanv = TCanvas('fcanv', 'fcanv', 0, 0, 1400, 900)
         fcanv.Divide(4,2)
 
         ftoppad=[]
         fbotpad=[]
-        
+
+        flegs=[]
+        flegs2=[]
+        fzeros=[]
+
         font=63
         size=13
         yoff=4.2
@@ -661,36 +674,40 @@ def _myself_(argv):
     
     # plot the lo and hi energy histograms
     #=================================================================
-    
-    canvs  = [None for x in range(2)]
+
     if dru2:
         data = dataDRU2(data)
+        bkgs = scaleBkgs(bkgs, data)
     
-    total  = [None for x in range(2)]
-    resid  = [None for x in range(2)]
-    
-    legs   = [None for x in range(2)]
-    legs2  = [None for x in range(2)]
-    zeros  = [None for x in range(2)]
+    canvs  = [[] for x in range(2)]
 
+    ### seperate memory space for the pads is key!!!!
+    toppad = [[] for x in range(2)]
+    botpad = [[] for x in range(2)]
 
+    legs   = [[] for x in range(2)]
+    legs2  = [[] for x in range(2)]
+    zeros  = [[] for x in range(2)]
+
+    total  = [[] for x in range(2)]
+    resid  = [[] for x in range(2)]
     
     for E in range(2):
-        
-        legs[E]=[]
-        legs2[E]=[]
-        zeros[E]=[]
-        
-        total[E] = makeTotal(E)
-        resid[E] = makeResid(E)
-        
+
         # have the plotting be seperated out from the loop
         canvs[E] = TCanvas('canv'+str(E), 'canv'+str(E), 0, 0, 1400, 900)
         canvs[E].Divide(4,2)
         
-        toppad=[]
-        botpad=[]
-
+        toppad[E] = []
+        botpad[E] = []
+        
+        legs[E]   = []
+        legs2[E]  = []
+        zeros[E]  = []
+        
+        total[E]  = makeTotal(E)
+        resid[E]  = makeResid(E)
+        
         font=63
         size=13
         yoff=4.2
@@ -700,20 +717,21 @@ def _myself_(argv):
 
             fraction = 0.3
             pad1 = TPad('pad1','pad1',0,fraction,1,1)
-            toppad.append(pad1)
+            toppad[E].append(pad1)
             pad2 = TPad('pad2','pad2',0,0,1,fraction)
-            botpad.append(pad2)
-            toppad[i].SetBottomMargin(0.01)
-            toppad[i].SetBorderMode(0)
-            toppad[i].SetLogy()
-            botpad[i].SetTopMargin(0.05)
-            botpad[i].SetBottomMargin(0.3)
-            botpad[i].SetBorderMode(0)
-            botpad[i].SetLogy()
-            toppad[i].Draw()
-            botpad[i].Draw()
-            toppad[i].cd()
-
+            botpad[E].append(pad2)
+                        
+            toppad[E][i].SetBottomMargin(0.01)
+            toppad[E][i].SetBorderMode(0)
+            toppad[E][i].SetLogy()
+            botpad[E][i].SetTopMargin(0.05)
+            botpad[E][i].SetBottomMargin(0.3)
+            botpad[E][i].SetBorderMode(0)
+            botpad[E][i].SetLogy()
+            toppad[E][i].Draw()
+            botpad[E][i].Draw()
+            toppad[E][i].cd()
+            
             ylegstart = 0.88
             ylegend = (ylegstart-(Nlg*0.035))
             space = '  '
@@ -728,14 +746,14 @@ def _myself_(argv):
                     data[key]['hist'].GetYaxis().SetTitle('arb. counts')
                     if dru1 or dru2:
                         data[key]['hist'].GetYaxis().SetTitle('counts / day / kg / keV  (dru)')
-                            
+                        
             #---------------------------------------------------------
             if E and hiEplotRebin:
                 for key in datkeys:
                     if 'x'+str(i+1) in key and '-e'+str(E) in key:
                         data[key]['hist'].Rebin(hiEplotRebin)
                         data[key]['hist'].Scale(1./float(hiEplotRebin))
-                                        
+                        
                 total[E][i].Rebin(hiEplotRebin)
                 total[E][i].Scale(1./float(hiEplotRebin))
                 #total[E][i].Sumw2()
@@ -769,7 +787,6 @@ def _myself_(argv):
                     data[key]['hist'].Draw()
                     legs[E][i].AddEntry(data[key]['hist'], space+'data', lopt)
                     
-            #color = 0
             for key in bakkeys:
                 if 'x'+str(i+1) in key and '-e'+str(E) in key:
                     
@@ -777,11 +794,6 @@ def _myself_(argv):
                     cname = key.split('-')[1]+'-'+key.split('-')[2]
                     bkgs[key]['hist'].SetMarkerColor(uniqColor[cname])
                     bkgs[key]['hist'].SetLineColor(uniqColor[cname])
-                    
-                    ### set mc colors
-                    #bkgs[key]['hist'].SetMarkerColor(cis[color])
-                    #bkgs[key]['hist'].SetLineColor(cis[color])
-                    #color += 1
                     
                     if dru1 or dru2:
                         druScale = data['x'+str(i+1)+'-data'+'-e'+str(E)]['druScale']
@@ -804,17 +816,12 @@ def _myself_(argv):
                     
             for key in sigkeys:
                 if 'x'+str(i+1) in key and '-e'+str(E) in key:
-                    
+                                        
                     # find the unique name for color and set color
                     cname = key.split('-')[1]+'-'+key.split('-')[2]
                     sigs[key]['hist'].SetMarkerColor(uniqColor[cname])
                     sigs[key]['hist'].SetLineColor(uniqColor[cname])
                                         
-                    ### set mc colors
-                    #sigs[key]['hist'].SetMarkerColor(cis[color])
-                    #sigs[key]['hist'].SetLineColor(cis[color])
-                    #color += 1
-                    
                     if dru1 or dru2:
                         druScale = data['x'+str(i+1)+'-data'+'-e'+str(E)]['druScale']
                     if dru2:
@@ -840,12 +847,12 @@ def _myself_(argv):
             
             # add legend entries in order
             for name in uniqAll:
-                for key in bakkeys:
-                    if name in key and 'x'+str(i+1) in key and '-e'+str(E) in key:
-                        legs[E][i].AddEntry(bkgs[key]['hist'], space+key, lopt)
-                for key in sigkeys:
-                    if name in key and 'x'+str(i+1) in key and '-e'+str(E) in key:
-                        legs[E][i].AddEntry(sigs[key]['hist'], space+key, lopt)
+                for bkey in bakkeys:
+                    if name in bkey and 'x'+str(i+1) in bkey and '-e'+str(E) in bkey:
+                        legs[E][i].AddEntry(bkgs[bkey]['hist'], space+bkey, lopt)
+                for skey in sigkeys:
+                    if name in skey and 'x'+str(i+1) in skey and '-e'+str(E) in skey:
+                        legs[E][i].AddEntry(sigs[skey]['hist'], space+skey, lopt)
             
             
             ### you need to scale the error by the dru scaling and/or the rebinning
@@ -874,7 +881,7 @@ def _myself_(argv):
             
             ### try to get the residuals in!
             #---------------------------------------------------------
-            botpad[i].cd()
+            botpad[E][i].cd()
             leg = TLegend(0.72, 0.78, 0.94, 0.94)
             legs2[E].append(leg)
             legs2[E][i].SetFillColor(0)
