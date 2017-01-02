@@ -3,13 +3,13 @@
 ######################################################################
 # Matt Kauer - mkauer@physics.wisc.edu
 ######################################################################
-# 30-broken-chain.py
+# 31-fit-activity.py
 
-V = 'v30'
+V = 'v31'
 
-# Implement broken chain for U238 and Pb210
+# Calc activity from the fit results
 # 
-# version: 2016-12-28
+# version: 2017-01-02
 # 
 # see CHANGELOG for changes
 ######################################################################
