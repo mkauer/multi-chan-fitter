@@ -1,0 +1,111 @@
+# -*- sh -*-
+
+# version 2017-01-17
+
+# + can now specify a file to use/reuse
+# + add some more activities for pmt backgrounds
+# + can now comment out lines with """
+# + add in broken chain isotopes and 2 new columns for broken chain
+#   start and stop isotopes
+# + v3 - add support for broken chains
+# + add in some internal U238 and Th232 activities from Pushpa slides
+#   (this is for testing)
+# + use real pmt K40 activities in mBq/pmt (from Estella)
+# + use real internal K40 activities in mBq/kg (from Estella)
+# + can comment out lines with #
+
+
+#---------------------------------------------------------------------
+# bsdr  =  [B]ackground, [S]ignal, [D]ata, and/or [R]euse
+# xstl  =  crystal number 1-8
+# loca  =  location of background
+# isof  =  isotope simulation file (top level, ie Pb210 has isof = U238)
+# chst  =  isof chain breaking start
+# chsp  =  isof chain breaking stop
+# acti  =  background activity (mBq/kg) or (mBq/pmt)
+# erro  =  error on the activity
+# lbnd  =  lower fit bound
+# hbnd  =  upper fit bound
+# file  =  reuse file name
+#---------------------------------------------------------------------
+
+
+# NOTE: you need at least 2 signals for a crystal to have
+#       TFractionFitter converge on a result.
+
+
+# bsdr  xstl     loca       isof      chst      chsp      acti       erro      lbnd      hbnd        file
+# ----  ----    --------   ------    ------    ------    --------   -------   -------   ------      --------
+
+D       1       data        ./root-join-read/join32-1546-master.root
+D       2       data        ./root-join-read/join32-1546-master.root
+D       3       data        ./root-join-read/join32-1546-master.root
+D       4       data        ./root-join-read/join32-1546-master.root
+D       5       data        ./root-join-read/join32-1546-master.root
+D       6       data        ./root-join-read/join32-1546-master.root
+D       7       data        ./root-join-read/join32-1546-master.root
+D       8       data        ./root-join-read/join32-1546-master.root
+
+B       1       internal    K40       K40       K40      1.34e0    0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       2       internal    K40       K40       K40      2.56e0    0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       3       internal    K40       K40       K40      1.27e0    0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       4       internal    K40       K40       K40      1.22e0    0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       5       internal    K40       K40       K40      2.69e0    0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       6       internal    K40       K40       K40      3.78e-1   0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       7       internal    K40       K40       K40      5.82e-1   0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       8       internal    K40       K40       K40      1.74e0    0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+
+S       1       internal    U238      U238      Rn222    24.99     0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+S       2       internal    U238      U238      Rn222    0.005     0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+S       3       internal    U238      U238      Rn222    0.005     0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+S       4       internal    U238      U238      Rn222    0.005     0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+S       5       internal    U238      U238      Rn222    0.005     0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+S       6       internal    U238      U238      Rn222    0.005     0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+S       7       internal    U238      U238      Rn222    0.005     0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+S       8       internal    U238      U238      Rn222    0.005     0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+
+S       1       internal    U238      Pb210     Pb210    12.75     0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+S       2       internal    U238      Pb210     Pb210    7.031     0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+S       3       internal    U238      Pb210     Pb210    3.059     0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+S       4       internal    U238      Pb210     Pb210    3.510     0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+S       5       internal    U238      Pb210     Pb210    9.663     0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+S       6       internal    U238      Pb210     Pb210    7.357     0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+S       7       internal    U238      Pb210     Pb210    6.784     0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+S       8       internal    U238      Pb210     Pb210    9.043     0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+
+S       1       internal    Th232     Th232     Th232    0.005     0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+S       2       internal    Th232     Th232     Th232    0.005     0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+S       3       internal    Th232     Th232     Th232    0.005     0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+S       4       internal    Th232     Th232     Th232    0.005     0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+S       5       internal    Th232     Th232     Th232    0.005     0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+S       6       internal    Th232     Th232     Th232    0.005     0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+S       7       internal    Th232     Th232     Th232    0.005     0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+S       8       internal    Th232     Th232     Th232    0.005     0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+
+B       1       pmt         K40       K40       K40      58.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       2       pmt         K40       K40       K40      58.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       3       pmt         K40       K40       K40      58.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       4       pmt         K40       K40       K40      58.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       5       pmt         K40       K40       K40      58.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       6       pmt         K40       K40       K40      58.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       7       pmt         K40       K40       K40      58.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       8       pmt         K40       K40       K40      58.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+
+S       1       pmt         U238      U238      U238     60.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+S       2       pmt         U238      U238      U238     60.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+S       3       pmt         U238      U238      U238     60.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+S       4       pmt         U238      U238      U238     60.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+S       5       pmt         U238      U238      U238     60.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+S       6       pmt         U238      U238      U238     60.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+S       7       pmt         U238      U238      U238     60.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+S       8       pmt         U238      U238      U238     60.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+
+B       1       pmt         Th232     Th232     Th232    12.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       2       pmt         Th232     Th232     Th232    12.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       3       pmt         Th232     Th232     Th232    12.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       4       pmt         Th232     Th232     Th232    12.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       5       pmt         Th232     Th232     Th232    12.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       6       pmt         Th232     Th232     Th232    12.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       7       pmt         Th232     Th232     Th232    12.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       8       pmt         Th232     Th232     Th232    12.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+
