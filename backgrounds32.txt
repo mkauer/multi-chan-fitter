@@ -1,7 +1,8 @@
 # -*- sh -*-
 
-# version 2017-01-17
+# version 2017-01-18
 
+# + added in the mother load of external bkgs
 # + can now specify a file to use/reuse
 # + add some more activities for pmt backgrounds
 # + can now comment out lines with """
@@ -30,8 +31,8 @@
 #---------------------------------------------------------------------
 
 
-# NOTE: you need at least 2 signals for a crystal to have
-#       TFractionFitter converge on a result.
+### NOTE: You need at least 2 signals for a crystal to have
+###       TFractionFitter converge on a result.
 
 
 # bsdr  xstl     loca       isof      chst      chsp      acti       erro      lbnd      hbnd        file
@@ -108,4 +109,85 @@ B       5       pmt         Th232     Th232     Th232    12.0      0.0001     0.
 B       6       pmt         Th232     Th232     Th232    12.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
 B       7       pmt         Th232     Th232     Th232    12.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
 B       8       pmt         Th232     Th232     Th232    12.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+
+B       1       lsveto      K40       K40       K40      1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       2       lsveto      K40       K40       K40      1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       3       lsveto      K40       K40       K40      1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       4       lsveto      K40       K40       K40      1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       5       lsveto      K40       K40       K40      1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       6       lsveto      K40       K40       K40      1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       7       lsveto      K40       K40       K40      1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       8       lsveto      K40       K40       K40      1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+
+B       1       lsveto      U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       2       lsveto      U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       3       lsveto      U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       4       lsveto      U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       5       lsveto      U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       6       lsveto      U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       7       lsveto      U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       8       lsveto      U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+
+B       1       lsveto      Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       2       lsveto      Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       3       lsveto      Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       4       lsveto      Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       5       lsveto      Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       6       lsveto      Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       7       lsveto      Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       8       lsveto      Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+
+B       1       lsvetoair   U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       2       lsvetoair   U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       3       lsvetoair   U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       4       lsvetoair   U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       5       lsvetoair   U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       6       lsvetoair   U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       7       lsvetoair   U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       8       lsvetoair   U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+
+B       1       lsvetoair   Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       2       lsvetoair   Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       3       lsvetoair   Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       4       lsvetoair   Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       5       lsvetoair   Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       6       lsvetoair   Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       7       lsvetoair   Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       8       lsvetoair   Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+
+B       1       airshield   U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       2       airshield   U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       3       airshield   U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       4       airshield   U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       5       airshield   U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       6       airshield   U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       7       airshield   U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       8       airshield   U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+
+B       1       airshield   Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       2       airshield   Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       3       airshield   Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       4       airshield   Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       5       airshield   Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       6       airshield   Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       7       airshield   Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       8       airshield   Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+
+B       1       steel       U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       2       steel       U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       3       steel       U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       4       steel       U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       5       steel       U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       6       steel       U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       7       steel       U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       8       steel       U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+
+B       1       steel       Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       2       steel       Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       3       steel       Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       4       steel       Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       5       steel       Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       6       steel       Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       7       steel       Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
+B       8       steel       Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-1546-master.root
 

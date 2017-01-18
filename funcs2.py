@@ -5,10 +5,11 @@
 #
 # Works with v20 and later versions
 #
-# version: 2017-01-11
+# version: 2017-01-18
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# + add more bkg scalings for the externals in scaleBkgs()
 # ~ simplified internal and pmt bkgs scaling
 # ~ played around with the activity scalings - I think I'm close
 # ~ tweaked buildMC2() to select either resol() or resol2()
@@ -506,6 +507,7 @@ def resol2(i, E=0):
 	[0.3797, -0.003919],
 	[0.2349,  0.018600],
 	[0.2349,  0.018600],
+        # tweaking resolution on C8
 	#[0.3797, -0.003919]
         [1.1797, -0.003919]
     ]
@@ -527,29 +529,58 @@ def scaleBkgs(bkgs, data):
         runtime = data[x+'-data-'+e]['runtime']
         
         if loca == 'internal':
-            
             kgs = cmass(int(x[-1])-1)
             generated = float(bkgs[name]['generated'].GetEntries())
             detected = float(bkgs[name]['hist'].GetEntries())
             eff = detected / generated
-            
-            ### 2017-01-11
             scale = bkgs[name]['acti'] * (kgs) * (1./1000) * (runtime) * (1./generated) * (druscale)
-            
             bkgs[name]['hist'].Scale(scale)
             
-        if loca == 'pmt':
-            
+        elif loca == 'pmt':
             pmts = 16.
             generated = float(bkgs[name]['generated'].GetEntries())
             detected = float(bkgs[name]['hist'].GetEntries())
             eff = detected / generated
-                        
-            ### 2017-01-11
             scale = bkgs[name]['acti'] * (pmts) * (1./1000) * (runtime) * (1./generated) * (druscale)
-            
+            bkgs[name]['hist'].Scale(scale)
+        
+        elif loca == 'lsveto':
+            kgs = 1.
+            generated = float(bkgs[name]['generated'].GetEntries())
+            detected = float(bkgs[name]['hist'].GetEntries())
+            eff = detected / generated
+            scale = bkgs[name]['acti'] * (kgs) * (1./1000) * (runtime) * (1./generated) * (druscale)
+            bkgs[name]['hist'].Scale(scale)
+
+        elif loca == 'lsvetoair':
+            kgs = 1.
+            generated = float(bkgs[name]['generated'].GetEntries())
+            detected = float(bkgs[name]['hist'].GetEntries())
+            eff = detected / generated
+            scale = bkgs[name]['acti'] * (kgs) * (1./1000) * (runtime) * (1./generated) * (druscale)
+            bkgs[name]['hist'].Scale(scale)
+
+        elif loca == 'airshield':
+            kgs = 1.
+            generated = float(bkgs[name]['generated'].GetEntries())
+            detected = float(bkgs[name]['hist'].GetEntries())
+            eff = detected / generated
+            scale = bkgs[name]['acti'] * (kgs) * (1./1000) * (runtime) * (1./generated) * (druscale)
+            bkgs[name]['hist'].Scale(scale)
+
+        elif loca == 'steel':
+            kgs = 1.
+            generated = float(bkgs[name]['generated'].GetEntries())
+            detected = float(bkgs[name]['hist'].GetEntries())
+            eff = detected / generated
+            scale = bkgs[name]['acti'] * (kgs) * (1./1000) * (runtime) * (1./generated) * (druscale)
             bkgs[name]['hist'].Scale(scale)
             
+        else:
+            print "WARNING: No background scaling for  --> ", loca
+            continue
+
+
     return bkgs
 
 

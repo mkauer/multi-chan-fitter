@@ -33,7 +33,7 @@ dru2 = 0   ### convert data and mc to dru after fit? [0,1]
 if dru2: dru1 = 0 ### dru safty check...
 
 ### use joined rootfile data? [0,1]
-reuse = 1
+reuse = 0
 
 ### rebin the hi-E final plots [1,inf]
 hiEplotRebin = 10
@@ -96,7 +96,7 @@ def _myself_(argv):
 
         ### uses Pushpa's calib and resol
         #rootfile = './root-join-read/join3-'+str(runNum)+'-master.root'
-        rootfile = './root-join-read/join32-'+str(runNum)+'-master.root'
+        #rootfile = './root-join-read/join32-'+str(runNum)+'-master.root'
 
         #data, bkgs, sigs = readROOT3(rootfile, mcfile)
         data, bkgs, sigs = readROOT32(mcfile)

@@ -4,10 +4,11 @@
 #
 # Works with v30 and later versions
 #
-# version: 2017-01-11
+# version: 2017-01-18
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# + add more sig fit scalings for the externals in scaleSigs()
 # ~ simplified internal and pmt bkgs scaling
 # ~ fixed the pmt signal scaling
 # + added scaleSigs()
@@ -313,31 +314,63 @@ def scaleSigs(sigkeys, sigs, data):
         druscale = data[x+'-data-'+e]['druScale']
         runtime = data[x+'-data-'+e]['runtime']
 
+        # verbose?
+        v = 1
+        
         if loca == 'internal':
-            
             kgs = cmass(int(x[-1])-1)
             generated = float(sigs[name]['generated'].GetEntries())
             detected = float(sigs[name]['hist'].GetEntries())
             eff = detected / generated
-            
-            ### 2017-01-11
             fitActivity = sigs[name]['fitscale'] * (1./kgs) * (1000.) * (1./runtime) * (generated) * (1./druscale)
-            
             sigs[name]['acti'] = fitActivity
-            print '!!!!', name, sigs[name]['acti'],'mBq/kg'
-            
+            if v: print '!!!!', name, sigs[name]['acti'],'mBq/kg'
+
         if loca == 'pmt':
-            
             pmts = 16.
             generated = float(sigs[name]['generated'].GetEntries())
             detected = float(sigs[name]['hist'].GetEntries())
             eff = detected / generated
-
-            ### 2017-01-11
             fitActivity = sigs[name]['fitscale'] * (1./pmts) * (1000.) * (1./runtime) * (generated) * (1./druscale)
-            
             sigs[name]['acti'] = fitActivity
-            print '!!!!', name, sigs[name]['acti'],'mBq/pmt'
-            
+            if v: print '!!!!', name, sigs[name]['acti'],'mBq/pmt'
+
+        if loca == 'lsveto':
+            kgs = 1.
+            generated = float(sigs[name]['generated'].GetEntries())
+            detected = float(sigs[name]['hist'].GetEntries())
+            eff = detected / generated
+            fitActivity = sigs[name]['fitscale'] * (1./kgs) * (1000.) * (1./runtime) * (generated) * (1./druscale)
+            sigs[name]['acti'] = fitActivity
+            if v: print '!!!!', name, sigs[name]['acti'],'mBq/pmt'
+
+        if loca == 'lsvetoair':
+            kgs = 1.
+            generated = float(sigs[name]['generated'].GetEntries())
+            detected = float(sigs[name]['hist'].GetEntries())
+            eff = detected / generated
+            fitActivity = sigs[name]['fitscale'] * (1./kgs) * (1000.) * (1./runtime) * (generated) * (1./druscale)
+            sigs[name]['acti'] = fitActivity
+            if v: print '!!!!', name, sigs[name]['acti'],'mBq/pmt'
+
+        if loca == 'airshield':
+            kgs = 1.
+            generated = float(sigs[name]['generated'].GetEntries())
+            detected = float(sigs[name]['hist'].GetEntries())
+            eff = detected / generated
+            fitActivity = sigs[name]['fitscale'] * (1./kgs) * (1000.) * (1./runtime) * (generated) * (1./druscale)
+            sigs[name]['acti'] = fitActivity
+            if v: print '!!!!', name, sigs[name]['acti'],'mBq/pmt'
+
+        if loca == 'steel':
+            kgs = 1.
+            generated = float(sigs[name]['generated'].GetEntries())
+            detected = float(sigs[name]['hist'].GetEntries())
+            eff = detected / generated
+            fitActivity = sigs[name]['fitscale'] * (1./kgs) * (1000.) * (1./runtime) * (generated) * (1./druscale)
+            sigs[name]['acti'] = fitActivity
+            if v: print '!!!!', name, sigs[name]['acti'],'mBq/pmt'
+
+
     return sigs
 

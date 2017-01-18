@@ -4,10 +4,11 @@
 #
 # Works with v32 and later versions
 #
-# version: 2017-01-17
+# version: 2017-01-18
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# + add more selection criteria for the extra bkgs in buildMC32()
 # + readROOT32() to read in rootfiles dynamically 
 # ~ run 1546 data is under /data/COSINE/NTP/phys/V00-02-00
 # + funcs32.py for newGeometry simulation and run 1546
@@ -74,7 +75,6 @@ def buildMC32(fileName='backgrounds3.txt', calib=2):
         nfiles=0
         if local:
             nfiles = chain.Add('/home/mkauer/COSINE/CUP/mc-fitting/sim/newGeometry/'+isof+'/set2/'+'*'+loca+'*root')
-            
         else:
             nfiles = chain.Add('/data/MC/KIMS-NaI/user-scratch/sim/processed/newGeometry/'+isof+'/set2/'+'*'+loca+'*root')
 
@@ -100,9 +100,21 @@ def buildMC32(fileName='backgrounds3.txt', calib=2):
 
                 if loca == 'internal':
                     cut2 = TCut('primVolumeName == "'+volumeNames(i)+'"')
-                if loca == 'pmt':
+                elif loca == 'pmt':
                     cut2 = TCut('primVolumeName == "phys_pmt"')
-
+                elif loca == 'lsveto':
+                    cut2 = TCut('primVolumeName == "lsveto"')
+                elif loca == 'lsvetoair':
+                    cut2 = TCut('(primVolumeName == "DetPMTCover") || (primVolumeName == "DetPMTEnvelope")')
+                elif loca == 'airshield':
+                    cut2 = TCut('primVolumeName == "LSVetoAirRoom"')
+                elif loca == 'steel':
+                    # not sure this works the way I think it should?
+                    cut2 = TCut('primVolumeName != ""')
+                else:
+                    print "WARNING: No selection criteria for  --> ", loca
+                    continue
+                
                 cut3 = 0
                 if chst == 'U238' and chsp == 'Rn222':
                     cut3 = TCut('(groupNo >= 11) && (groupNo <= 14)')
@@ -229,13 +241,13 @@ def getData32(runNum=1546, build='V00-02-00'):
                 data[key]['subruns'] = temp
                 
     else:
-        print 'ERROR: no data files found... quitting...'
+        print 'ERROR: No data files found... quitting...'
         sys.exit()
     
     return data
 
 
-def readROOT32(fileName='backgrounds3.txt'):
+def readROOT32(fileName='backgrounds32.txt'):
     
     #if not os.path.exists(rootfile):
     #    print 'rootfile [',rootfile,'] file not found'

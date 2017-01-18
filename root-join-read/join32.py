@@ -5,7 +5,7 @@
 #
 # Works with v32 and later versions
 # 
-# version: 2017-01-17
+# version: 2017-01-18
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
@@ -44,7 +44,7 @@ gROOT.SetBatch(1)
 def _myself_(argv):
     
     runNum = 1546
-    mcfile = 'backgrounds3.txt'
+    mcfile = 'backgrounds32.txt'
     
     rootfile = 'join32-'+str(runNum)+'-test.root'
     
