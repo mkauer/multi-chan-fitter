@@ -5,10 +5,11 @@
 #
 # Works with v20 and later versions
 #
-# version: 2016-12-27
+# version: 2017-01-11
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# ~ simplified internal and pmt bkgs scaling
 # ~ played around with the activity scalings - I think I'm close
 # ~ tweaked buildMC2() to select either resol() or resol2()
 # + added resol2() and Pushpa's resols
@@ -232,7 +233,8 @@ def getData2(runNum=1544):
                 data[key]['subruns'] = temp
                 
     else:
-        print 'Warning: no data files found...'
+        print 'ERROR: no data files found... quitting...'
+        sys.exit()
     
     return data
 
@@ -504,7 +506,8 @@ def resol2(i, E=0):
 	[0.3797, -0.003919],
 	[0.2349,  0.018600],
 	[0.2349,  0.018600],
-	[0.3797, -0.003919]
+	#[0.3797, -0.003919]
+        [1.1797, -0.003919]
     ]
     
     if E:
@@ -515,81 +518,38 @@ def resol2(i, E=0):
 
 def scaleBkgs(bkgs, data):
     
-    ### only works for internal and pmt backgrounds at this point
-    
     for name in bkgs:
         x = name.split('-')[0]
         loca = name.split('-')[1]
         e = name.split('-')[-1]
+        
         druscale = data[x+'-data-'+e]['druScale']
-        #print name,'druscale = ',druscale
         runtime = data[x+'-data-'+e]['runtime']
-        #print 'runtime = ',runtime
-
+        
         if loca == 'internal':
-            mbqkg = bkgs[name]['acti']
+            
             kgs = cmass(int(x[-1])-1)
-            mbq = mbqkg*kgs
-            bq = mbq / 1000.0
-            #print name,'bq = ',bq
-            
             generated = float(bkgs[name]['generated'].GetEntries())
-            #print 'generated = ',generated
-            
             detected = float(bkgs[name]['hist'].GetEntries())
-            #print 'detected = ',detected
-            
             eff = detected / generated
-            #print 'eff = ',eff
             
-            # number of events needed from MC
-            events = bq * runtime * eff
-            #print 'events = ',events
-            
-            ### 2016-12-15
-            ### this looks about right compared Estella's plots
-            ### slightly lower because of resol smearing
-            ### this is easier to read and understand
-            scale = (events / detected) * druscale
-            ### but is the same as doing
-            #scale = bq * runtime * (1./generated) * druscale
-            #print name,'scale = ',scale
+            ### 2017-01-11
+            scale = bkgs[name]['acti'] * (kgs) * (1./1000) * (runtime) * (1./generated) * (druscale)
             
             bkgs[name]['hist'].Scale(scale)
             
         if loca == 'pmt':
-            mbqpmt = bkgs[name]['acti']
-            # not sure what to do for pmts
-            pmts = 8.*2.
-            mbq = mbqpmt*pmts
-            bq = mbq / 1000.0
-            #print name,'bq = ',bq
             
+            pmts = 16.
             generated = float(bkgs[name]['generated'].GetEntries())
-            #print 'generated = ',generated
-            
             detected = float(bkgs[name]['hist'].GetEntries())
-            #print 'detected = ',detected
-            
             eff = detected / generated
-            #print 'eff = ',eff
-            
-            # number of events needed from MC
-            events = bq * runtime * eff
-            #print 'events = ',events
-
-            ### 2016-12-15
-            ### this seems to make the most sense right now
-            ### this is easier to read and understand
-            scale = (events / detected) * druscale
-            ### but is the same as doing
-            #scale = bq * runtime * (1./generated) * druscale
-            #print name,'scale = ',scale
+                        
+            ### 2017-01-11
+            scale = bkgs[name]['acti'] * (pmts) * (1./1000) * (runtime) * (1./generated) * (druscale)
             
             bkgs[name]['hist'].Scale(scale)
             
-        #sys.exit()
-        
     return bkgs
 
 

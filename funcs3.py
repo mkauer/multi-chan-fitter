@@ -4,10 +4,13 @@
 #
 # Works with v30 and later versions
 #
-# version: 2016-12-27
+# version: 2017-01-11
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# ~ simplified internal and pmt bkgs scaling
+# ~ fixed the pmt signal scaling
+# + added scaleSigs()
 # + added readROOT3()
 # + can now skip lines enclosed with """
 # + add readFile() function to read in the backgrounds file
@@ -214,7 +217,15 @@ def buildMC3(fileName='backgrounds3.txt', calib=1):
                 
                 key2 = key+'_generated'
                 temp = TH1F(key2, 'generated',1,0,1)
-                chain.Draw('primVolumeName >> '+key2, cut2)
+
+                ### v31 - maybe need cut3 for generated events
+                ### to get the eff/normalization right?
+                #chain.Draw('primVolumeName >> '+key2, cut2)
+                if cut3:
+                    chain.Draw('primVolumeName >> '+key2, cut2+cut3)
+                else:
+                    chain.Draw('primVolumeName >> '+key2, cut2)
+                    
                 generated = temp.GetEntries()
 
                 ### test out resolution smearing
@@ -290,4 +301,43 @@ def readFile(fileName="backgrounds3.txt"):
             lines.append(line)
     mcfile.close()
     return lines
+
+
+def scaleSigs(sigkeys, sigs, data):
+
+    for name in sigkeys:
+        x = name.split('-')[0]
+        loca = name.split('-')[1]
+        e = name.split('-')[-1]
+        
+        druscale = data[x+'-data-'+e]['druScale']
+        runtime = data[x+'-data-'+e]['runtime']
+
+        if loca == 'internal':
+            
+            kgs = cmass(int(x[-1])-1)
+            generated = float(sigs[name]['generated'].GetEntries())
+            detected = float(sigs[name]['hist'].GetEntries())
+            eff = detected / generated
+            
+            ### 2017-01-11
+            fitActivity = sigs[name]['fitscale'] * (1./kgs) * (1000.) * (1./runtime) * (generated) * (1./druscale)
+            
+            sigs[name]['acti'] = fitActivity
+            print '!!!!', name, sigs[name]['acti'],'mBq/kg'
+            
+        if loca == 'pmt':
+            
+            pmts = 16.
+            generated = float(sigs[name]['generated'].GetEntries())
+            detected = float(sigs[name]['hist'].GetEntries())
+            eff = detected / generated
+
+            ### 2017-01-11
+            fitActivity = sigs[name]['fitscale'] * (1./pmts) * (1000.) * (1./runtime) * (generated) * (1./druscale)
+            
+            sigs[name]['acti'] = fitActivity
+            print '!!!!', name, sigs[name]['acti'],'mBq/pmt'
+            
+    return sigs
 

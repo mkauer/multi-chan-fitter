@@ -12,10 +12,42 @@
 # ====================================================================
 
 
+# 2017-01-17
+# --------------------------------------------------------------------
+
+# + readROOT32() now reads in the file name from backgrounds.txt
+# + global input file now has reuse file name specified
+# + funcs32 has getData32() with build variable option
+
+
+# 2017-01-16
+# --------------------------------------------------------------------
+# ~ join32.py has tweaked paths for MC and Data
+# ~ comparison of run 1546 to run 1544 looks good
+# ~ use newGeometry sim and phys run 1546
+# + funcs32.py has buildMC32()
+# V changed to 32-new-geometry-sim.py
+
+
+# 2017-01-11
+# --------------------------------------------------------------------
+# ~ added more activities the backgrounds file
+# ~ simplified the bkgs and sigs scalings
+# ~ fixed the sigs scalings from the fit
+# ~ cleaned up v31 a little bit
+
+
+# 2017-01-02
+# --------------------------------------------------------------------
+# + add scaleSigs() to funcs3.py
+# + fit scaling to dict, ie sigs['key']['scale']
+
+
 # 2016-12-28
 # --------------------------------------------------------------------
 # ~ fixed issue with last bin Total MC error being large
 # ~ minor tweaks to the axis ranges
+# V changed to 31-fit-activity.py
 
 
 # 2016-12-27

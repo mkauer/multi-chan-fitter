@@ -3,13 +3,13 @@
 ######################################################################
 # Matt Kauer - mkauer@physics.wisc.edu
 ######################################################################
-# 31-fit-activity.py
+# 32-new-geometry-sim.py
 
-V = 'v31'
+V = 'v32'
 
-# Calc activity from the fit results
+# Use newGeometry simulation and run 1546 V00-02-00
 # 
-# version: 2017-01-02
+# version: 2017-01-17
 # 
 # see CHANGELOG for changes
 ######################################################################
@@ -21,36 +21,35 @@ import math
 import numpy as np
 import ROOT
 from ROOT import *
-from funcs3 import *
+
+from funcs32 import *
 
 
 ### user inputs
 #================================================================
-### I'm pretty sure you want to convert to dru after the fit
-### More stats for the fit will give bettet errors
-### ie use dru2 option!!
-### dru1 has some bugs still... the fits won't converge
+### Better to convert to DRU before the fit
 dru1 = 1   ### convert data to dru before fit? [0,1]
 dru2 = 0   ### convert data and mc to dru after fit? [0,1]
+if dru2: dru1 = 0 ### dru safty check...
 
-### dru safty check...
-if dru2: dru1 = 0
+### use joined rootfile data? [0,1]
+reuse = 1
 
-hiEplotRebin = 10  ### rebin the hi-E final plots [1,inf]
+### rebin the hi-E final plots [1,inf]
+hiEplotRebin = 10
 
-### something weird with the fit rebinning - need to FIX this ASAP!
-### use rebin=1 for now
-hiEfitRebin = 10   ### rebin the hi-E histo for fitting [1,inf]
+### rebin the hi-E histo for fitting [1,inf]
+hiEfitRebin = 10
 
 ### fill the fitdata and fitmc starting with n plus number?
 ### i think this should be 1 because bin 0 is underflows right?
 ### yes, just checked, this should be 1
 np = 1
 
-reuse = 1   ### use joined rootfile data? [0,1]
-
-mcscale = 1   ### pre scale the MC? [0,1]
-mcweight = 1  ### set MC weights? [0,1]
+### pre scale the MC? [0,1]
+mcscale = 1
+### set MC weights? [0,1]
+mcweight = 1
 
 ### this doesn't work at all, not sure why...
 fitweight = 0   ### set fit weights? [0,1]
@@ -85,8 +84,7 @@ def _myself_(argv):
     gStyle.SetPadLeftMargin   (0.12)
     gStyle.SetPadRightMargin  (0.05)
     
-    #runNum = 1324
-    runNum = 1544
+    runNum = 1546
     mcfile = 'backgrounds3.txt'
     
     if reuse:
@@ -94,18 +92,20 @@ def _myself_(argv):
         #rootfile = './root-join-read/join2-'+str(runNum)+'-master.root'
 
         ### uses Pushpa's calib and resol
-        rootfile = './root-join-read/join3-'+str(runNum)+'-master.root'
+        #rootfile = './root-join-read/join3-'+str(runNum)+'-master.root'
+        rootfile = './root-join-read/join32-'+str(runNum)+'-master.root'
 
-        data, bkgs, sigs = readROOT3(rootfile, mcfile)
-    
+        #data, bkgs, sigs = readROOT3(rootfile, mcfile)
+        data, bkgs, sigs = readROOT32(mcfile)
+        
     else:
         ### uses Estella's calib and resol
         #data = getData2(runNum)
         #bkgs, sigs = buildMC23(mcfile, 1)
 
         ### uses Pushpa's calib and resol
-        data = getData22(runNum)
-        bkgs, sigs = buildMC3(mcfile, 2)
+        data = getData32(runNum, 'V00-02-00')
+        bkgs, sigs = buildMC32(mcfile, 2)
 
     
     datkeys, bakkeys, sigkeys = sortKeys2(data, bkgs, sigs)
@@ -394,8 +394,11 @@ def _myself_(argv):
                         fitsigs[fskey]['hist'].Scale(dat_int/mc_int) # scale to data integral
                         sigs[fskey+'-e0']['hist'].Scale(dat_int/mc_int) # make sure MC is scaled too
                         sigs[fskey+'-e1']['hist'].Scale(dat_int/mc_int) # make sure MC is scaled too
-                    
-                    
+
+                        ### v31 - save the scaling factors so you can convert to mBq/kg later
+                        sigs[fskey+'-e0']['fitscale'] = dat_int/mc_int
+                        sigs[fskey+'-e1']['fitscale'] = dat_int/mc_int
+                        
                     #sigObj[i].Add(fitsigs[fskey]['hist']) # add to the TFractionFitter object
                     sigObj[-1].Add(fitsigs[fskey]['hist']) # add to the TFractionFitter object
             
@@ -448,19 +451,28 @@ def _myself_(argv):
             for fskey in fsigkeys:
                 if 'x'+str(i+1) in fskey:
 
-                    value = ROOT.Double(0.0)
-                    error = ROOT.Double(0.0)
-                    #fit[i].GetResult(count, value, error)
-                    fit[-1].GetResult(count, value, error)
-                    fitresults.append(fskey+' = '+str(round(value,4))+' +/- '+str(round(error,4)))
-                    fitsigs[fskey]['hist'].Scale(value)
-                    sigs[fskey+'-e0']['hist'].Scale(value)
-                    sigs[fskey+'-e1']['hist'].Scale(value)
-
+                    fscale = ROOT.Double(0.0)
+                    ferror = ROOT.Double(0.0)
+                    #fit[i].GetResult(count, fscale, ferror)
+                    fit[-1].GetResult(count, fscale, ferror)
+                    fitresults.append(fskey+' = '+str(round(fscale,4))+' +/- '+str(round(ferror,4)))
+                    fitsigs[fskey]['hist'].Scale(fscale)
+                    sigs[fskey+'-e0']['hist'].Scale(fscale)
+                    sigs[fskey+'-e1']['hist'].Scale(fscale)
+                    
+                    ### v31 - save the scaling factors so you can convert to mBq/kg later
+                    sigs[fskey+'-e0']['fitscale'] = sigs[fskey+'-e0']['fitscale'] * fscale
+                    sigs[fskey+'-e1']['fitscale'] = sigs[fskey+'-e1']['fitscale'] * fscale
+                    
                     count += 1
 
             fitresults.append('\n')
 
+
+        ### v31 - try to scale the signals to mBq/kg to be used as bkgs
+        sigs = scaleSigs(sigkeys, sigs, data)
+        
+        
         print '\n\n'
         for line in fitresults:
             print line
