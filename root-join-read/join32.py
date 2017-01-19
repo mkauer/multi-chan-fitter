@@ -9,6 +9,7 @@
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# + command line arg for the input file
 # ~ use getData32() for new V00-02-00 location
 # ~ also using tweaked resolution funtion for C8
 # ~ import funcs32.py and use buildMC32() and use run 1546
@@ -42,16 +43,23 @@ local = amLocal()
 gROOT.SetBatch(1)
 
 def _myself_(argv):
-    
+
+    if len(sys.argv)>1:
+        mcfile = str(sys.argv[1])
+    else:
+        mcfile = 'backgrounds32.txt'
+
     runNum = 1546
-    mcfile = 'backgrounds32.txt'
+    #mcfile = 'backgrounds32.txt'
     
-    rootfile = 'join32-'+str(runNum)+'-test.root'
+    #rootfile = 'join32-'+str(runNum)+'-test.root'
+    fname = mcfile.split('/')[-1].split('.')[0]
+    rootfile = 'join32-'+fname+'-master.root'
     
     rfile = TFile(rootfile, 'RECREATE')
     print 'creating rootfile',rootfile
     
-    data = getData32(runNum, 'V00-02-00')
+    #data = getData32(runNum, 'V00-02-00')
     bkgs, sigs = buildMC32(mcfile, 2)
     
     rfile.Write()

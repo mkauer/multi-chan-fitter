@@ -14,6 +14,8 @@
 
 # 2017-01-18
 # --------------------------------------------------------------------
+# + command line arg for the input file in join32.py
+# + add run num to backgrounds file for data items
 # + add more sig fit scalings for the externals in scaleSigs()
 # + add more bkg scalings for the externals in scaleBkgs()
 # + add more selection criteria for the extra bkgs in buildMC32()
