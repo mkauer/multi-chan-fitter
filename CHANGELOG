@@ -12,6 +12,28 @@
 # ====================================================================
 
 
+# 2017-01-24
+# --------------------------------------------------------------------
+# ~ rebuilt all backgrounds with primParticleName cut
+# ~ cleaned up scaleSigs32() and scaleBkgs32() 
+# ~ v32 now using scaleSigs32() and scaleBkgs32()
+# + add scaleSigs32() and doesn't need data input anymore
+# + add scaleBkgs32() and doesn't need data input anymore
+# ~ cleaned up scaleBkgs()
+# + TCut on primParticleName! This was critial to get generated
+#   event count correct.
+
+
+# 2017-01-23
+# --------------------------------------------------------------------
+# + add full path to funcs.py files so things work on the cluster
+#   mainly for join.py files
+# ~ throw a warning in readROOT32() if the histo isn't found
+# + added in all Estella's internal bkgs numbers from spreadsheet
+# + assume 1800 kg of lsveto
+# + 7ppt U238 and 4ppt Th232 to backgrounds file
+
+
 # 2017-01-18
 # --------------------------------------------------------------------
 # + command line arg for the input file in join32.py

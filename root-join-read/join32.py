@@ -5,7 +5,7 @@
 #
 # Works with v32 and later versions
 # 
-# version: 2017-01-18
+# version: 2017-01-21
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
@@ -36,6 +36,8 @@ import numpy as np
 import ROOT
 from ROOT import *
 
+sys.path.append("/home/mkauer/COSINE/CUP/mc-fitting/")
+sys.path.append("/home/mkauer/mc-fitting/")
 from funcs32 import *
 
 
@@ -43,24 +45,30 @@ local = amLocal()
 gROOT.SetBatch(1)
 
 def _myself_(argv):
-
+    
     if len(sys.argv)>1:
         mcfile = str(sys.argv[1])
     else:
-        mcfile = 'backgrounds32.txt'
-
-    runNum = 1546
-    #mcfile = 'backgrounds32.txt'
+        print "ERROR: specify a backgrounds file or 'data' for data"
+        return
     
-    #rootfile = 'join32-'+str(runNum)+'-test.root'
-    fname = mcfile.split('/')[-1].split('.')[0]
-    rootfile = 'join32-'+fname+'-master.root'
+    if local:
+        path="/home/mkauer/COSINE/CUP/mc-fitting/root-join-read/"
+    else:
+        path="/home/mkauer/mc-fitting/root-join-read/"
     
-    rfile = TFile(rootfile, 'RECREATE')
-    print 'creating rootfile',rootfile
-    
-    #data = getData32(runNum, 'V00-02-00')
-    bkgs, sigs = buildMC32(mcfile, 2)
+    if 'data' in mcfile:
+        runNum = 1546
+        rootfile = 'join32-data-'+str(runNum)+'-test.root'
+        rfile = TFile(path+rootfile, 'RECREATE')
+        print 'creating rootfile',rootfile
+        data = getData32(runNum, 'V00-02-00')
+    else:
+        fname = mcfile.split('/')[-1].split('.')[0]
+        rootfile = 'join32-'+fname+'-test.root'
+        rfile = TFile(path+rootfile, 'RECREATE')
+        print 'creating rootfile',rootfile
+        bkgs, sigs = buildMC32(mcfile, 2)
     
     rfile.Write()
     rfile.Close()

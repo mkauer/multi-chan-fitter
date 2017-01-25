@@ -4,10 +4,16 @@
 #
 # Works with v32 and later versions
 #
-# version: 2017-01-18
+# version: 2017-01-24
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# ~ cleaned up scaleSigs32() and scaleBkgs32() 
+# + add scaleSigs32() and doesn't need data input anymore
+# + add scaleBkgs32() and doesn't need data input anymore
+# + TCut on primParticleName! This was critial to get generated
+#   event count correct.
+# ~ throw a warning in readROOT32() if the histo isn't found
 # + add more selection criteria for the extra bkgs in buildMC32()
 # + readROOT32() to read in rootfiles dynamically 
 # ~ run 1546 data is under /data/COSINE/NTP/phys/V00-02-00
@@ -31,10 +37,12 @@ import numpy as np
 from ROOT import *
 import ROOT
 
+sys.path.append("/home/mkauer/COSINE/CUP/mc-fitting/")
+sys.path.append("/home/mkauer/mc-fitting/")
 from funcs3 import *
 
 
-def buildMC32(fileName='backgrounds3.txt', calib=2):
+def buildMC32(fileName='backgrounds32.txt', calib=2):
     """
     Build the mega MC dictionary!
     calib=1 is Estella's calib and resol
@@ -115,25 +123,35 @@ def buildMC32(fileName='backgrounds3.txt', calib=2):
                     print "WARNING: No selection criteria for  --> ", loca
                     continue
                 
-                cut3 = 0
+                ### this is needed to get the generated event numbers right!
+                cut3 = TCut('primParticleName == "'+chst+'"')
+                
+                ### this is needed? to cut out crap events
+                ### (event_info.Type) is new
+                ### (evt_Type) is old
+                #cut4 = TCut('(event_info.Type > 10) || (evt_Type > 10)')
+                cut4 = TCut('event_info.Type > 10')
+                
+                cut100 = 0
                 if chst == 'U238' and chsp == 'Rn222':
-                    cut3 = TCut('(groupNo >= 11) && (groupNo <= 14)')
+                    cut100 = TCut('(groupNo >= 11) && (groupNo <= 14)')
                 if chst == 'Pb210' and chsp == 'Pb210':
-                    cut3 = TCut('groupNo == 15')
+                    cut100 = TCut('groupNo == 15')
                 
                 key2 = key+'_generated'
                 temp = TH1F(key2, 'generated',1,0,1)
-
-                ### v31 - maybe need cut3 for generated events
+                
+                ### v31 - maybe need cut100 for generated events
                 ### to get the eff/normalization right?
                 #chain.Draw('primVolumeName >> '+key2, cut2)
-                if cut3:
+                if cut100:
+                    #chain.Draw('primVolumeName >> '+key2, cut2+cut3+cut100)
                     chain.Draw('primVolumeName >> '+key2, cut2+cut3)
                 else:
-                    chain.Draw('primVolumeName >> '+key2, cut2)
-                    
+                    chain.Draw('primVolumeName >> '+key2, cut2+cut3)
+                
                 generated = temp.GetEntries()
-
+                
                 ### test out resolution smearing
                 ###-------------------------------------------------------------------------------
                 ### using Box-Muller? method here for "rng" alias
@@ -151,10 +169,10 @@ def buildMC32(fileName='backgrounds3.txt', calib=2):
                     p0, p1 = resol2(i,E)
                     chain.SetAlias('sigma', str(p0)+'/sqrt(edep['+str(i)+']*1000.) + '+str(p1))
 
-                if cut3:
-                    chain.Draw('(edep['+str(i)+']*1000.) + (sigma*edep['+str(i)+']*1000.*rng) >> '+key, cut1+cut2+cut3)
+                if cut100:
+                    chain.Draw('(edep['+str(i)+']*1000.) + (sigma*edep['+str(i)+']*1000.*rng) >> '+key, cut1+cut2+cut4+cut100)
                 else:
-                    chain.Draw('(edep['+str(i)+']*1000.) + (sigma*edep['+str(i)+']*1000.*rng) >> '+key, cut1+cut2)
+                    chain.Draw('(edep['+str(i)+']*1000.) + (sigma*edep['+str(i)+']*1000.*rng) >> '+key, cut1+cut2+cut4)
 
                 detected = histo.GetEntries()
                 ###-------------------------------------------------------------------------------
@@ -295,10 +313,16 @@ def readROOT32(fileName='backgrounds32.txt'):
 
             for e in range(2):
                 key = 'x'+str(xstl)+'-'+loca+'-e'+str(e)
-                data[key] = {}
-                data[key]['hist'] = deepcopy(TH1F(rfile.Get(key)))
-                data[key]['subruns'] = deepcopy(TH1F(rfile.Get(key+'_subruns')))
 
+                try:
+                    data[key] = {}
+                    data[key]['hist'] = deepcopy(TH1F(rfile.Get(key)))
+                    data[key]['subruns'] = deepcopy(TH1F(rfile.Get(key+'_subruns')))
+                except:
+                    del data[key]
+                    print "WARNING: could not find hist -->",key
+                    continue
+                
         if 'B' in bsdr:
             xstl = int(bits[1])
             loca = str(bits[2])
@@ -315,12 +339,17 @@ def readROOT32(fileName='backgrounds32.txt'):
                 else: key += '-'+chst+'_'+chsp
                 key += '-e'+str(E)
 
-                bkgs[key] = {}
-                bkgs[key]['hist'] = deepcopy(TH1F(rfile.Get(key)))
-                bkgs[key]['generated'] = deepcopy(TH1F(rfile.Get(key+'_generated')))
-                bkgs[key]['acti'] = acti
-                bkgs[key]['erro'] = erro
-
+                try:
+                    bkgs[key] = {}
+                    bkgs[key]['hist'] = deepcopy(TH1F(rfile.Get(key)))
+                    bkgs[key]['generated'] = deepcopy(TH1F(rfile.Get(key+'_generated')))
+                    bkgs[key]['acti'] = acti
+                    bkgs[key]['erro'] = erro
+                except:
+                    del bkgs[key]
+                    print "WARNING: could not find histo -->",key
+                    continue
+                
 
         if 'S' in bsdr:
             xstl = int(bits[1])
@@ -336,13 +365,133 @@ def readROOT32(fileName='backgrounds32.txt'):
                 if chst == chsp: key += '-'+chst
                 else: key += '-'+chst+'_'+chsp
                 key += '-e'+str(E)
-
-                sigs[key] = {}
-                sigs[key]['hist'] = deepcopy(TH1F(rfile.Get(key)))
-                sigs[key]['generated'] = deepcopy(TH1F(rfile.Get(key+'_generated')))
-                sigs[key]['fbnd'] = fbnd
-
+                
+                try:
+                    sigs[key] = {}
+                    sigs[key]['hist'] = deepcopy(TH1F(rfile.Get(key)))
+                    sigs[key]['generated'] = deepcopy(TH1F(rfile.Get(key+'_generated')))
+                    sigs[key]['fbnd'] = fbnd
+                except:
+                    del sigs[key]
+                    print "WARNING: could not find histo -->",key
+                    continue
+        
         rfile.Close()
     
     return data, bkgs, sigs
+
+
+def scaleBkgs32(bkgs):
+    
+    for name in bkgs:
+        x = name.split('-')[0]
+        loca = name.split('-')[1]
+        e = name.split('-')[-1]
+        
+        #druscale = data[x+'-data-'+e]['druScale']
+        #runtime  = data[x+'-data-'+e]['runtime']
+        
+        kev  = 1.     # keV/bin
+        day  = 86400. # in seconds
+        
+        xkgs = cmass(int(x[-1])-1)
+        pmts = 16.
+        lskg = 1800.
+        
+        generated = float(bkgs[name]['generated'].GetEntries())
+        if generated < 1:
+            print "WARNING: 0 events generated for -->", name
+            continue
+        
+        if loca == 'internal':
+            #scale = bkgs[name]['acti'] * (xkgs) * (1./1000) * (runtime) * (1./generated) * (druscale)
+            scale = bkgs[name]['acti'] * (xkgs) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./kev)
+            bkgs[name]['hist'].Scale(scale)
+        elif loca == 'pmt':
+            #scale = bkgs[name]['acti'] * (pmts) * (1./1000) * (runtime) * (1./generated) * (druscale)
+            scale = bkgs[name]['acti'] * (pmts) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./kev)
+            bkgs[name]['hist'].Scale(scale)
+        elif loca == 'lsveto':
+            #scale = bkgs[name]['acti'] * (lskg) * (1./1000) * (runtime) * (1./generated) * (druscale)
+            scale = bkgs[name]['acti'] * (lskg) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./kev)
+            bkgs[name]['hist'].Scale(scale)
+        elif loca == 'lsvetoair':
+            #scale = bkgs[name]['acti'] * (xkgs) * (1./1000) * (runtime) * (1./generated) * (druscale)
+            scale = bkgs[name]['acti'] * (xkgs) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./kev)
+            bkgs[name]['hist'].Scale(scale)
+        elif loca == 'airshield':
+            #scale = bkgs[name]['acti'] * (xkgs) * (1./1000) * (runtime) * (1./generated) * (druscale)
+            scale = bkgs[name]['acti'] * (xkgs) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./kev)
+            bkgs[name]['hist'].Scale(scale)
+        elif loca == 'steel':
+            #scale = bkgs[name]['acti'] * (xkgs) * (1./1000) * (runtime) * (1./generated) * (druscale)
+            scale = bkgs[name]['acti'] * (xkgs) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./kev)
+            bkgs[name]['hist'].Scale(scale)
+        else:
+            print "WARNING: No background scaling for  --> ", loca
+            continue
+
+
+    return bkgs
+
+
+def scaleSigs32(sigkeys, sigs):
+
+    for name in sigkeys:
+        x = name.split('-')[0]
+        loca = name.split('-')[1]
+        e = name.split('-')[-1]
+        
+        #druscale = data[x+'-data-'+e]['druScale']
+        #runtime = data[x+'-data-'+e]['runtime']
+
+        kev  = 1.     # keV/bin
+        day  = 86400. # in seconds
+        
+        xkgs = cmass(int(x[-1])-1)
+        pmts = 16.
+        lskg = 1800.
+        
+        generated = float(sigs[name]['generated'].GetEntries())
+        if generated < 1:
+            print "WARNING: 0 events generated for -->", name
+            continue
+        
+        # verbose?
+        V = 1
+        E = int(e[-1])
+        
+        if loca == 'internal':
+            #fitActivity = sigs[name]['fitscale'] * (1./kgs) * (1000.) * (1./runtime) * (generated) * (1./druscale)
+            fitActivity = sigs[name]['fitscale'] * (1./xkgs) * (1000.) * (generated) * (1./day) * (xkgs) * (kev)
+            sigs[name]['acti'] = fitActivity
+            if V and E: print '!!!!', name, sigs[name]['acti'],'mBq/kg'
+        if loca == 'pmt':
+            #fitActivity = sigs[name]['fitscale'] * (1./pmts) * (1000.) * (1./runtime) * (generated) * (1./druscale)
+            fitActivity = sigs[name]['fitscale'] * (1./pmts) * (1000.) * (generated) * (1./day) * (xkgs) * (kev)
+            sigs[name]['acti'] = fitActivity
+            if V and E: print '!!!!', name, sigs[name]['acti'],'mBq/pmt'
+        if loca == 'lsveto':
+            #fitActivity = sigs[name]['fitscale'] * (1./kgs) * (1000.) * (1./runtime) * (generated) * (1./druscale)
+            fitActivity = sigs[name]['fitscale'] * (1./lskg) * (1000.) * (generated) * (1./day) * (xkgs) * (kev)
+            sigs[name]['acti'] = fitActivity
+            if V and E: print '!!!!', name, sigs[name]['acti'],'mBq/pmt'
+        if loca == 'lsvetoair':
+            #fitActivity = sigs[name]['fitscale'] * (1./kgs) * (1000.) * (1./runtime) * (generated) * (1./druscale)
+            fitActivity = sigs[name]['fitscale'] * (1./xkgs) * (1000.) * (generated) * (1./day) * (xkgs) * (kev)
+            sigs[name]['acti'] = fitActivity
+            if V and E: print '!!!!', name, sigs[name]['acti'],'mBq/pmt'
+        if loca == 'airshield':
+            #fitActivity = sigs[name]['fitscale'] * (1./kgs) * (1000.) * (1./runtime) * (generated) * (1./druscale)
+            fitActivity = sigs[name]['fitscale'] * (1./xkgs) * (1000.) * (generated) * (1./day) * (xkgs) * (kev)
+            sigs[name]['acti'] = fitActivity
+            if V and E: print '!!!!', name, sigs[name]['acti'],'mBq/pmt'
+        if loca == 'steel':
+            #fitActivity = sigs[name]['fitscale'] * (1./kgs) * (1000.) * (1./runtime) * (generated) * (1./druscale)
+            fitActivity = sigs[name]['fitscale'] * (1./xkgs) * (1000.) * (generated) * (1./day) * (xkgs) * (kev)
+            sigs[name]['acti'] = fitActivity
+            if V and E: print '!!!!', name, sigs[name]['acti'],'mBq/pmt'
+
+
+    return sigs
 

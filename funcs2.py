@@ -5,10 +5,11 @@
 #
 # Works with v20 and later versions
 #
-# version: 2017-01-18
+# version: 2017-01-23
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# ~ cleaned up scaleBkgs()
 # + add more bkg scalings for the externals in scaleBkgs()
 # ~ simplified internal and pmt bkgs scaling
 # ~ played around with the activity scalings - I think I'm close
@@ -54,6 +55,9 @@ import os,sys
 import numpy as np
 from ROOT import *
 import ROOT
+
+sys.path.append("/home/mkauer/COSINE/CUP/mc-fitting/")
+sys.path.append("/home/mkauer/mc-fitting/")
 from funcs import *
 
 
@@ -336,26 +340,28 @@ def dataDRU2(data):
         
     # this will have to get fixed eventually if we want finer binning in the lo-E region
     # or more coarse binning in the hi-E
-    keVperBin = float(1)
+    keVperBin = float(1.)
     
     # run 1324 has 1 hour subruns
     # run 1544 has 2 hour subruns
-    subrunTime = float(2) # in hours
+    # run 1546 has 2 hour subruns
+    subrunTime = float(2.) # in hours
     
     #scales = []
     for key in data:
     #for i in range(8):
-
+        
         i = int(key.split('-')[0].split('x')[-1]) - 1
-        nfiles = data[key]['subruns'].GetEntries()
+        nfiles = float(data[key]['subruns'].GetEntries())
         days = float((subrunTime*nfiles)/24.)
-        scale = float(1./(days*cmass(i)*keVperBin))
-
+        kgs = float(cmass(i))
+        scale = float(1./(days*kgs*keVperBin))
+        
         data[key]['hist'].Scale(scale)
-
-        # runtime is in sec
-        data[key]['runtime'] = nfiles*subrunTime*60*60
-
+        
+        # runtime is in seconds - used for MC normalization
+        data[key]['runtime'] = nfiles*subrunTime*60.*60.
+        
         data[key]['druScale'] = scale
         
     return data
@@ -526,56 +532,42 @@ def scaleBkgs(bkgs, data):
         e = name.split('-')[-1]
         
         druscale = data[x+'-data-'+e]['druScale']
-        runtime = data[x+'-data-'+e]['runtime']
+        runtime  = data[x+'-data-'+e]['runtime']
+        
+        kev  = 1.     # keV/bin
+        day  = 86400. # in seconds
+        
+        xkgs = cmass(int(x[-1])-1)
+        pmts = 16.
+        lskg = 1800.
+        
+        generated = float(bkgs[name]['generated'].GetEntries())
+        if generated < 1:
+            print "WARNING: 0 events generated for -->", name
+            continue
         
         if loca == 'internal':
-            kgs = cmass(int(x[-1])-1)
-            generated = float(bkgs[name]['generated'].GetEntries())
-            detected = float(bkgs[name]['hist'].GetEntries())
-            eff = detected / generated
-            scale = bkgs[name]['acti'] * (kgs) * (1./1000) * (runtime) * (1./generated) * (druscale)
+            #scale = bkgs[name]['acti'] * (xkgs) * (1./1000) * (runtime) * (1./generated) * (druscale)
+            # is the same as reduced...
+            scale = bkgs[name]['acti'] * (xkgs) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./kev)
             bkgs[name]['hist'].Scale(scale)
-            
         elif loca == 'pmt':
-            pmts = 16.
-            generated = float(bkgs[name]['generated'].GetEntries())
-            detected = float(bkgs[name]['hist'].GetEntries())
-            eff = detected / generated
-            scale = bkgs[name]['acti'] * (pmts) * (1./1000) * (runtime) * (1./generated) * (druscale)
+            #scale = bkgs[name]['acti'] * (pmts) * (1./1000) * (runtime) * (1./generated) * (druscale)
+            # is the same as reduced...
+            scale = bkgs[name]['acti'] * (pmts) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./kev)
             bkgs[name]['hist'].Scale(scale)
-        
         elif loca == 'lsveto':
-            kgs = 1.
-            generated = float(bkgs[name]['generated'].GetEntries())
-            detected = float(bkgs[name]['hist'].GetEntries())
-            eff = detected / generated
-            scale = bkgs[name]['acti'] * (kgs) * (1./1000) * (runtime) * (1./generated) * (druscale)
+            scale = bkgs[name]['acti'] * (lskg) * (1./1000) * (runtime) * (1./generated) * (druscale)
             bkgs[name]['hist'].Scale(scale)
-
         elif loca == 'lsvetoair':
-            kgs = 1.
-            generated = float(bkgs[name]['generated'].GetEntries())
-            detected = float(bkgs[name]['hist'].GetEntries())
-            eff = detected / generated
-            scale = bkgs[name]['acti'] * (kgs) * (1./1000) * (runtime) * (1./generated) * (druscale)
+            scale = bkgs[name]['acti'] * (xkgs) * (1./1000) * (runtime) * (1./generated) * (druscale)
             bkgs[name]['hist'].Scale(scale)
-
         elif loca == 'airshield':
-            kgs = 1.
-            generated = float(bkgs[name]['generated'].GetEntries())
-            detected = float(bkgs[name]['hist'].GetEntries())
-            eff = detected / generated
-            scale = bkgs[name]['acti'] * (kgs) * (1./1000) * (runtime) * (1./generated) * (druscale)
+            scale = bkgs[name]['acti'] * (xkgs) * (1./1000) * (runtime) * (1./generated) * (druscale)
             bkgs[name]['hist'].Scale(scale)
-
         elif loca == 'steel':
-            kgs = 1.
-            generated = float(bkgs[name]['generated'].GetEntries())
-            detected = float(bkgs[name]['hist'].GetEntries())
-            eff = detected / generated
-            scale = bkgs[name]['acti'] * (kgs) * (1./1000) * (runtime) * (1./generated) * (druscale)
+            scale = bkgs[name]['acti'] * (xkgs) * (1./1000) * (runtime) * (1./generated) * (druscale)
             bkgs[name]['hist'].Scale(scale)
-            
         else:
             print "WARNING: No background scaling for  --> ", loca
             continue

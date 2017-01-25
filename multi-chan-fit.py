@@ -9,7 +9,7 @@ V = 'v32'
 
 # Use newGeometry simulation and run 1546 V00-02-00
 # 
-# version: 2017-01-17
+# version: 2017-01-24
 # 
 # see CHANGELOG for changes
 ######################################################################
@@ -33,7 +33,7 @@ dru2 = 0   ### convert data and mc to dru after fit? [0,1]
 if dru2: dru1 = 0 ### dru safty check...
 
 ### use joined rootfile data? [0,1]
-reuse = 0
+reuse = 1
 
 ### rebin the hi-E final plots [1,inf]
 hiEplotRebin = 10
@@ -83,7 +83,7 @@ def _myself_(argv):
     gStyle.SetPadBottomMargin (0.12)
     gStyle.SetPadLeftMargin   (0.12)
     gStyle.SetPadRightMargin  (0.05)
-    
+
     #runNum = 1544
     #mcfile = 'backgrounds3.txt'
     
@@ -101,6 +101,7 @@ def _myself_(argv):
         #data, bkgs, sigs = readROOT3(rootfile, mcfile)
         data, bkgs, sigs = readROOT32(mcfile)
         
+        
     else:
         ### uses Estella's calib and resol
         #data = getData2(runNum)
@@ -109,7 +110,7 @@ def _myself_(argv):
         ### uses Pushpa's calib and resol
         data = getData32(runNum, 'V00-02-00')
         bkgs, sigs = buildMC32(mcfile, 2)
-
+        
     
     datkeys, bakkeys, sigkeys = sortKeys2(data, bkgs, sigs)
     
@@ -122,17 +123,18 @@ def _myself_(argv):
     for key in sigkeys:
         uniqAll.append(key.split('-')[1]+'-'+key.split('-')[2])
     uniqAll = sorted(list(set(uniqAll)))
-    print 'Unique bkgs and sigs =',uniqAll
-    
+    print 'INFO: Unique bkgs and sigs =',uniqAll
+
     
     if dru1:
         data = dataDRU2(data)
-        bkgs = scaleBkgs(bkgs, data)
+        #bkgs = scaleBkgs(bkgs, data)
+        bkgs = scaleBkgs32(bkgs)
         
 
     ### Number of colors
     Nc = len(uniqAll)
-    print 'Total number of unique bkgs and sigs =',Nc
+    print 'INFO: Total number of unique bkgs and sigs =',Nc
     colors, cis = rainbow(Nc)
 
     ### Create color dict for unique simulations
@@ -161,7 +163,7 @@ def _myself_(argv):
     fmin=0
     fmax=fbins
 
-        
+
     ### need seperate dicts for rebinned data and MC for plotting to
     ### to work right - they need their own memory space
     #-----------------------------------------------------------------
@@ -307,7 +309,7 @@ def _myself_(argv):
                     fitdata[i].Add(fitbkgs[key]['hist'], -1)
             #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
+            
 
         ### sort all the fbakkeys
         fbakkeys=[]
@@ -470,10 +472,12 @@ def _myself_(argv):
                     count += 1
 
             fitresults.append('\n')
-
-
+            
+            
+        
         ### v31 - try to scale the signals to mBq/kg to be used as bkgs
-        sigs = scaleSigs(sigkeys, sigs, data)
+        #sigs = scaleSigs(sigkeys, sigs, data)
+        sigs = scaleSigs32(sigkeys, sigs)
         
         
         print '\n\n'
@@ -675,10 +679,11 @@ def _myself_(argv):
             flegs2[i].AddEntry(fresid[i],space+'data / MC',lopt)
             #flegs2[i].Draw()
             #-------------------------------------------------------------
-
+            
+            
         fcanv.Update()
         fcanv.Print(save+'.png')
-
+        
     ### end of fitting bit if you have signals
     
     
@@ -687,7 +692,8 @@ def _myself_(argv):
 
     if dru2:
         data = dataDRU2(data)
-        bkgs = scaleBkgs(bkgs, data)
+        #bkgs = scaleBkgs(bkgs, data)
+        bkgs = scaleBkgs32(bkgs)
     
     canvs  = [[] for x in range(2)]
 
@@ -933,7 +939,9 @@ def _myself_(argv):
             #legs2[E][i].AddEntry(resid[E][i],space+'data / MC',lopt)
             #legs2[E][i].Draw()
             #---------------------------------------------------------
-
+            
+        
+        
         save = ''
         if local:        save += 'local'
         else:            save += 'cup'
@@ -955,7 +963,8 @@ def _myself_(argv):
         
         canvs[E].Update()
         canvs[E].Print(save+'.png')
-
+        
+        
     if not batch:
         raw_input('[Enter] to quit \n')
 

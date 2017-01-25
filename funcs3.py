@@ -4,10 +4,12 @@
 #
 # Works with v30 and later versions
 #
-# version: 2017-01-18
+# version: 2017-01-23
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# + lsveto is 1800 kgs
+# ~ only print scaleSigs for one energy range
 # + add more sig fit scalings for the externals in scaleSigs()
 # ~ simplified internal and pmt bkgs scaling
 # ~ fixed the pmt signal scaling
@@ -42,6 +44,9 @@ import os,sys
 import numpy as np
 from ROOT import *
 import ROOT
+
+sys.path.append("/home/mkauer/COSINE/CUP/mc-fitting/")
+sys.path.append("/home/mkauer/mc-fitting/")
 from funcs2 import *
 
 
@@ -315,7 +320,8 @@ def scaleSigs(sigkeys, sigs, data):
         runtime = data[x+'-data-'+e]['runtime']
 
         # verbose?
-        v = 1
+        V = 1
+        E = int(e[-1])
         
         if loca == 'internal':
             kgs = cmass(int(x[-1])-1)
@@ -324,7 +330,7 @@ def scaleSigs(sigkeys, sigs, data):
             eff = detected / generated
             fitActivity = sigs[name]['fitscale'] * (1./kgs) * (1000.) * (1./runtime) * (generated) * (1./druscale)
             sigs[name]['acti'] = fitActivity
-            if v: print '!!!!', name, sigs[name]['acti'],'mBq/kg'
+            if V and E: print '!!!!', name, sigs[name]['acti'],'mBq/kg'
 
         if loca == 'pmt':
             pmts = 16.
@@ -333,16 +339,16 @@ def scaleSigs(sigkeys, sigs, data):
             eff = detected / generated
             fitActivity = sigs[name]['fitscale'] * (1./pmts) * (1000.) * (1./runtime) * (generated) * (1./druscale)
             sigs[name]['acti'] = fitActivity
-            if v: print '!!!!', name, sigs[name]['acti'],'mBq/pmt'
+            if V and E: print '!!!!', name, sigs[name]['acti'],'mBq/pmt'
 
         if loca == 'lsveto':
-            kgs = 1.
+            kgs = 1800.
             generated = float(sigs[name]['generated'].GetEntries())
             detected = float(sigs[name]['hist'].GetEntries())
             eff = detected / generated
             fitActivity = sigs[name]['fitscale'] * (1./kgs) * (1000.) * (1./runtime) * (generated) * (1./druscale)
             sigs[name]['acti'] = fitActivity
-            if v: print '!!!!', name, sigs[name]['acti'],'mBq/pmt'
+            if V and E: print '!!!!', name, sigs[name]['acti'],'mBq/pmt'
 
         if loca == 'lsvetoair':
             kgs = 1.
@@ -351,7 +357,7 @@ def scaleSigs(sigkeys, sigs, data):
             eff = detected / generated
             fitActivity = sigs[name]['fitscale'] * (1./kgs) * (1000.) * (1./runtime) * (generated) * (1./druscale)
             sigs[name]['acti'] = fitActivity
-            if v: print '!!!!', name, sigs[name]['acti'],'mBq/pmt'
+            if V and E: print '!!!!', name, sigs[name]['acti'],'mBq/pmt'
 
         if loca == 'airshield':
             kgs = 1.
@@ -360,7 +366,7 @@ def scaleSigs(sigkeys, sigs, data):
             eff = detected / generated
             fitActivity = sigs[name]['fitscale'] * (1./kgs) * (1000.) * (1./runtime) * (generated) * (1./druscale)
             sigs[name]['acti'] = fitActivity
-            if v: print '!!!!', name, sigs[name]['acti'],'mBq/pmt'
+            if V and E: print '!!!!', name, sigs[name]['acti'],'mBq/pmt'
 
         if loca == 'steel':
             kgs = 1.
@@ -369,7 +375,7 @@ def scaleSigs(sigkeys, sigs, data):
             eff = detected / generated
             fitActivity = sigs[name]['fitscale'] * (1./kgs) * (1000.) * (1./runtime) * (generated) * (1./druscale)
             sigs[name]['acti'] = fitActivity
-            if v: print '!!!!', name, sigs[name]['acti'],'mBq/pmt'
+            if V and E: print '!!!!', name, sigs[name]['acti'],'mBq/pmt'
 
 
     return sigs
