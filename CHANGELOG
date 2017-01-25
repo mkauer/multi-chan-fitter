@@ -14,6 +14,7 @@
 
 # 2017-01-25
 # --------------------------------------------------------------------
+# V switching to 33-separate-plots.py
 # + cut a new release v3.2 since things are in good shape right now
 # + print bkgs and sigs activities in the legend
 

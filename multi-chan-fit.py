@@ -3,13 +3,14 @@
 ######################################################################
 # Matt Kauer - mkauer@physics.wisc.edu
 ######################################################################
-# 32-new-geometry-sim.py
+# 33-separate-plots.py
 
-V = 'v32'
+V = 'v33'
 
 # Use newGeometry simulation and run 1546 V00-02-00
+# Add option to create separate plots for the crystals
 # 
-# version: 2017-01-24
+# version: 2017-01-25
 # 
 # see CHANGELOG for changes
 ######################################################################
