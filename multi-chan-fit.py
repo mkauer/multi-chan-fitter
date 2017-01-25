@@ -627,8 +627,10 @@ def _myself_(argv):
                 for fskey in fsigkeys:
                     if name in fskey and 'x'+str(i+1) in fskey:
                         flegs[i].AddEntry(fitsigs[fskey]['hist'], space+fskey, lopt)
-            
-            
+                        #activ = ' ('+str(sigs[name]['acti'])+')  '
+                        #flegs[i].AddEntry(fitsigs[fskey]['hist'], activ+fskey, lopt)
+                        
+                        
             ftotal[i].Draw('same')
             flegs[i].AddEntry(ftotal[i], space+'Fit Total', lopt)
             flegs[i].Draw('same')
@@ -863,10 +865,14 @@ def _myself_(argv):
             for name in uniqAll:
                 for bkey in bakkeys:
                     if name in bkey and 'x'+str(i+1) in bkey and '-e'+str(E) in bkey:
-                        legs[E][i].AddEntry(bkgs[bkey]['hist'], space+bkey, lopt)
+                        #legs[E][i].AddEntry(bkgs[bkey]['hist'], space+bkey, lopt)
+                        activ = '('+str(bkgs[bkey]['acti'])+') '
+                        legs[E][i].AddEntry(bkgs[bkey]['hist'], activ+bkey, lopt)
                 for skey in sigkeys:
                     if name in skey and 'x'+str(i+1) in skey and '-e'+str(E) in skey:
-                        legs[E][i].AddEntry(sigs[skey]['hist'], space+skey, lopt)
+                        #legs[E][i].AddEntry(sigs[skey]['hist'], space+skey, lopt)
+                        activ = '('+str(sigs[skey]['acti'])+') '
+                        legs[E][i].AddEntry(sigs[skey]['hist'], activ+skey, lopt)
             
             
             ### you need to scale the error by the dru scaling and/or the rebinning
