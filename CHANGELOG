@@ -14,7 +14,12 @@
 
 # 2017-01-25
 # --------------------------------------------------------------------
-# + print chi2/ndf of the total mc compared to data
+# + have both options for fit chi2/ndf and fit Chi2TestX() but the
+#   numbers don't agree... but the Chi2TestX() number looks
+#   more reseanable I think?
+# + added the number of days to 'data' in the hi-e and lo-e plots
+# + added chi2/ndf to the total mc fit results plots
+# + print chi2/ndf of the total mc compared to data...
 #   it will need some tweaking later one...
 # + now save plots to ./plots and make dir if doesn't exist
 # + separate/individual plotting now works for all things!

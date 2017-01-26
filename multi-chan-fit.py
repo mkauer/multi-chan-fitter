@@ -343,7 +343,8 @@ def _myself_(argv):
         sigObj = []
         fit = []
         fitresults = []
-
+        fitchi2ndf = []
+        
         ### set up the fitting object for TFractionFitter
         for i in range(8):
 
@@ -455,12 +456,14 @@ def _myself_(argv):
             ndf  = fit[-1].GetNDF()
             pval = fit[-1].GetProb()
 
+            fitchi2ndf.append(chi2/ndf)
+
             ### for some reason on CUP the fit status gets returned as a pointer
             ### like <ROOT.TFitResultPtr object at 0x37246c0>
             fitresults.append('chi2/ndf = '+str(round(chi2,2))+'/'+str(ndf)+' = '+str(round(chi2/float(ndf),2)))
 
             ### p-val is always 0 - need to look into this
-            #fitresults.append('p-value = '+str(pval))
+            fitresults.append('p-value = '+str(pval))
 
             count = 0
             for fskey in fsigkeys:
@@ -639,12 +642,27 @@ def _myself_(argv):
                         flegs[i].AddEntry(fitsigs[fskey]['hist'], space+fskey, lopt)
                         #activ = ' ('+str(sigs[name]['acti'])+')  '
                         #flegs[i].AddEntry(fitsigs[fskey]['hist'], activ+fskey, lopt)
-                        
-                        
-            ftotal[i].Draw('same')
-            flegs[i].AddEntry(ftotal[i], space+'Fit Total', lopt)
-            flegs[i].Draw('same')
 
+            
+            ### get the chi2 of the total fit mc compared to data
+            #---------------------------------------------------------
+            chi2  = ROOT.Double(0.0)
+            ndf   = ROOT.Long(0)
+            igood = ROOT.Long(0)
+            pval  = fitdata[i].Chi2TestX(ftotal[i], chi2, ndf, igood, "WW")
+            print 'INFO:','fit = crystal-'+str(i+1),'pval =',pval,'chi2 =',chi2,'ndf =',ndf,'igood =',igood
+            fitchi2ndfv2=chi2/ndf
+            #---------------------------------------------------------
+
+            
+            ftotal[i].Draw('same')
+            #flegs[i].AddEntry(ftotal[i], space+'Fit Total', lopt)
+            ### chi2/ndf from the fit results
+            #flegs[i].AddEntry(ftotal[i], space+'Fit Total (chi2/ndf = '+str(round(fitchi2ndf[i],2))+')', lopt)
+            ### chi2/ndf from the Chi2TestX function
+            flegs[i].AddEntry(ftotal[i], space+'Fit Total (chi2/ndf = '+str(round(fitchi2ndfv2,2))+')', lopt)
+            flegs[i].Draw('same')
+            
 
             ### fit residuals plots
             #-------------------------------------------------------------
@@ -818,7 +836,9 @@ def _myself_(argv):
                         else: data[key]['hist'].SetAxisRange(2e-1, 3e2, 'y')
                         
                     data[key]['hist'].Draw()
-                    legs[E][i].AddEntry(data[key]['hist'], space+'data', lopt)
+                    days = round(data[key]['runtime']/86400.,2)
+                    #legs[E][i].AddEntry(data[key]['hist'], 'data', lopt)
+                    legs[E][i].AddEntry(data[key]['hist'], 'data ('+str(days)+' days)', lopt)
                     
             for key in bakkeys:
                 if 'x'+str(i+1) in key and '-e'+str(E) in key:
@@ -907,13 +927,26 @@ def _myself_(argv):
             if dru2:
                 for n in range(total[E][i].GetNbinsX()):
                     total[E][i].SetBinError(n+bp, total[E][i].GetBinError(n+bp)*druScale)
+
+            
+            ### get the chi2 of the total mc compared to data
+            #---------------------------------------------------------
+            chi2  = ROOT.Double(0.0)
+            ndf   = ROOT.Long(0)
+            igood = ROOT.Long(0)
+            pval  = data[dkey]['hist'].Chi2TestX(total[E][i], chi2, ndf, igood, "WW")
+            print 'INFO:',dkey,'pval =',pval,'chi2 =',chi2,'ndf =',ndf,'igood =',igood
+            print 'INFO: Total MC chi2/ndf =',chi2/ndf
+            #---------------------------------------------------------
+
             
             #-----------------------------------------------------------------------------
                     
             if len(bkgs) + len(sigs) > 0:        
                 total[E][i].Draw('same')
-                legs[E][i].AddEntry(total[E][i], space+'Total MC', lopt)
-            
+                legs[E][i].AddEntry(total[E][i], 'Total MC', lopt)
+                #legs[E][i].AddEntry(total[E][i], 'Total MC (chi2/ndf = '+str(round(chi2/ndf,2))+')', lopt)
+                
             legs[E][i].Draw('same')
             
             
@@ -966,11 +999,12 @@ def _myself_(argv):
             
             ### get the chi2 of the total mc compared to data
             #---------------------------------------------------------
-            chi2  = ROOT.Double(0.0)
-            ndf   = ROOT.Long(0)
-            igood = ROOT.Long(0)
-            pval  = data[dkey]['hist'].Chi2TestX(total[E][i], chi2, ndf, igood, "WW")
-            print 'INFO:',dkey,'pval =',pval,'chi2 =',chi2,'ndf =',ndf,'igood =',igood
+            #chi2  = ROOT.Double(0.0)
+            #ndf   = ROOT.Long(0)
+            #igood = ROOT.Long(0)
+            #pval  = data[dkey]['hist'].Chi2TestX(total[E][i], chi2, ndf, igood, "WW")
+            #print 'INFO:',dkey,'pval =',pval,'chi2 =',chi2,'ndf =',ndf,'igood =',igood
+            #print 'INFO: Total MC chi2/ndf =',chi2/ndf
             #---------------------------------------------------------
 
             
@@ -998,6 +1032,7 @@ def _myself_(argv):
 
         
         ### Save separate crystal histos?
+        #-------------------------------------------------------------
         if indi:
             for i in range(8):
                 tpad=toppad[E][i].Clone()
@@ -1007,9 +1042,10 @@ def _myself_(argv):
                 bpad.Draw()
                 sepPlots[E][i].Update()
                 sepPlots[E][i].Print('./plots/x'+str(i+1)+'-e'+str(E)+'.png')
-    ### don't show all those plots
+    ### but don't show all those plots
     if indi: del sepPlots
-    
+    #-----------------------------------------------------------------
+        
     
     if not batch:
         raw_input('[Enter] to quit \n')
