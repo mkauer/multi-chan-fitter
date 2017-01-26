@@ -28,19 +28,23 @@ from funcs32 import *
 
 ### user inputs
 #================================================================
-### Better to convert to DRU before the fit
-dru1 = 1   ### convert data to dru before fit? [0,1]
-dru2 = 0   ### convert data and mc to dru after fit? [0,1]
-if dru2: dru1 = 0 ### dru safty check...
 
 ### use joined rootfile data? [0,1]
 reuse = 1
+
+### individual plots for all crystals? [0,1]
+indi = 0
 
 ### rebin the hi-E final plots [1,inf]
 hiEplotRebin = 10
 
 ### rebin the hi-E histo for fitting [1,inf]
 hiEfitRebin = 10
+
+### Better to convert to DRU before the fit
+dru1 = 1   ### convert data to dru before fit? [0,1]
+dru2 = 0   ### convert data and mc to dru after fit? [0,1]
+if dru2: dru1 = 0 ### dru safty check...
 
 ### fill the fitdata and fitmc starting with n plus number?
 ### i think this should be 1 because bin 0 is underflows right?
@@ -85,8 +89,9 @@ def _myself_(argv):
     gStyle.SetPadLeftMargin   (0.12)
     gStyle.SetPadRightMargin  (0.05)
 
-    #runNum = 1544
-    #mcfile = 'backgrounds3.txt'
+    ### for saving the plots...
+    if not os.path.exists('./plots'): 
+        os.makedirs('./plots')
     
     runNum = 1546
     mcfile = 'backgrounds32.txt'
@@ -404,6 +409,10 @@ def _myself_(argv):
                         ### v31 - save the scaling factors so you can convert to mBq/kg later
                         sigs[fskey+'-e0']['fitscale'] = dat_int/mc_int
                         sigs[fskey+'-e1']['fitscale'] = dat_int/mc_int
+                    else:
+                        ### why doesn't this work??
+                        sigs[fskey+'-e0']['fitscale'] = 1.
+                        sigs[fskey+'-e1']['fitscale'] = 1.
                         
                     #sigObj[i].Add(fitsigs[fskey]['hist']) # add to the TFractionFitter object
                     sigObj[-1].Add(fitsigs[fskey]['hist']) # add to the TFractionFitter object
@@ -505,7 +514,7 @@ def _myself_(argv):
         if reuse:        save += '_reuse'
         save += '_'+V
         
-        outfile = open(save+'_fit-results.txt', 'w')
+        outfile = open('./plots/'+save+'_fit-results.txt', 'w')
         for line in fitresults:
             outfile.write(str(line)+'\n')
         outfile.close()    
@@ -685,7 +694,7 @@ def _myself_(argv):
             
             
         fcanv.Update()
-        fcanv.Print(save+'.png')
+        fcanv.Print('./plots/'+save+'.png')
         
     ### end of fitting bit if you have signals
     
@@ -700,6 +709,10 @@ def _myself_(argv):
     
     canvs  = [[] for x in range(2)]
 
+    ### for separate plots
+    #sepPlots = [[] for x in range(2)]
+    sepPlots = [[[] for x in range(8)] for x in range(2)]
+    
     ### seperate memory space for the pads is key!!!!
     toppad = [[] for x in range(2)]
     botpad = [[] for x in range(2)]
@@ -946,9 +959,8 @@ def _myself_(argv):
             #legs2[E][i].AddEntry(resid[E][i],space+'data / MC',lopt)
             #legs2[E][i].Draw()
             #---------------------------------------------------------
+
             
-        
-        
         save = ''
         if local:        save += 'local'
         else:            save += 'cup'
@@ -969,9 +981,23 @@ def _myself_(argv):
         save += '_'+V
         
         canvs[E].Update()
-        canvs[E].Print(save+'.png')
+        canvs[E].Print('./plots/'+save+'.png')
+
         
-        
+        ### Save separate crystal histos?
+        if indi:
+            for i in range(8):
+                tpad=toppad[E][i].Clone()
+                bpad=botpad[E][i].Clone()
+                sepPlots[E][i] = TCanvas('ican'+str(E)+str(i), 'ican'+str(E)+str(i), 0, 0, 1400, 900)
+                tpad.Draw()
+                bpad.Draw()
+                sepPlots[E][i].Update()
+                sepPlots[E][i].Print('./plots/x'+str(i+1)+'-e'+str(E)+'.png')
+    ### don't show all those plots
+    if indi: del sepPlots
+    
+    
     if not batch:
         raw_input('[Enter] to quit \n')
 
