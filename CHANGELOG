@@ -14,6 +14,8 @@
 
 # 2017-01-25
 # --------------------------------------------------------------------
+# + print chi2/ndf of the total mc compared to data
+#   it will need some tweaking later one...
 # + now save plots to ./plots and make dir if doesn't exist
 # + separate/individual plotting now works for all things!
 #   The key was to have a separate canvas name for everything

@@ -796,6 +796,9 @@ def _myself_(argv):
             #---------------------------------------------------------
             for key in datkeys:
                 if 'x'+str(i+1) in key and '-e'+str(E) in key:
+
+                    ### needed for Chi2TestX()
+                    dkey = key
                     
                     if dru1 or dru2:
                         druScale = data['x'+str(i+1)+'-data'+'-e'+str(E)]['druScale']
@@ -958,6 +961,16 @@ def _myself_(argv):
 
             #legs2[E][i].AddEntry(resid[E][i],space+'data / MC',lopt)
             #legs2[E][i].Draw()
+            #---------------------------------------------------------
+
+            
+            ### get the chi2 of the total mc compared to data
+            #---------------------------------------------------------
+            chi2  = ROOT.Double(0.0)
+            ndf   = ROOT.Long(0)
+            igood = ROOT.Long(0)
+            pval  = data[dkey]['hist'].Chi2TestX(total[E][i], chi2, ndf, igood, "WW")
+            print 'INFO:',dkey,'pval =',pval,'chi2 =',chi2,'ndf =',ndf,'igood =',igood
             #---------------------------------------------------------
 
             
