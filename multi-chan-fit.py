@@ -33,7 +33,7 @@ from funcs32 import *
 reuse = 1
 
 ### individual plots for all crystals? [0,1]
-indi = 0
+indi = 1
 
 ### rebin the hi-E final plots [1,inf]
 hiEplotRebin = 10
@@ -1038,12 +1038,19 @@ def _myself_(argv):
                 tpad=toppad[E][i].Clone()
                 bpad=botpad[E][i].Clone()
                 sepPlots[E][i] = TCanvas('ican'+str(E)+str(i), 'ican'+str(E)+str(i), 0, 0, 1400, 900)
+                #sepPlots[E][i].cd()
                 tpad.Draw()
                 bpad.Draw()
                 sepPlots[E][i].Update()
                 sepPlots[E][i].Print('./plots/x'+str(i+1)+'-e'+str(E)+'.png')
     ### but don't show all those plots
-    if indi: del sepPlots
+    if indi:
+        #for E in range(2):
+        #    for i in range(8):
+        #        sepPlots[-1][-1].cd()
+        #        del sepPlots[-1][-1]
+        del sepPlots
+        # gives a seg fault and I don't know why
     #-----------------------------------------------------------------
         
     
