@@ -3,14 +3,13 @@
 ######################################################################
 # Matt Kauer - mkauer@physics.wisc.edu
 ######################################################################
-# 33-separate-plots.py
+# 40-single-hit.py
 
-V = 'v33'
+V = 'v40'
 
-# Use newGeometry simulation and run 1546 V00-02-00
-# Add option to create separate plots for the crystals
+# include single hit data
 # 
-# version: 2017-01-25
+# version: 2017-01-30
 # 
 # see CHANGELOG for changes
 ######################################################################
