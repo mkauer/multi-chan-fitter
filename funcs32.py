@@ -4,11 +4,12 @@
 #
 # Works with v32 and later versions
 #
-# version: 2017-01-24
+# version: 2017-01-31
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
-# ~ cleaned up scaleSigs32() and scaleBkgs32() 
+# + add data[key]['runtime'] to getData32() in funcs32.py
+# ~ cleaned up scaleSigs32() and scaleBkgs32()
 # + add scaleSigs32() and doesn't need data input anymore
 # + add scaleBkgs32() and doesn't need data input anymore
 # + TCut on primParticleName! This was critial to get generated
@@ -208,6 +209,12 @@ def getData32(runNum=1546, build='V00-02-00'):
     
     local = amLocal()
     
+    ### will need to do this dynamically eventually
+    # run 1324 has 1 hour subruns
+    # run 1544 has 2 hour subruns
+    # run 1546 has 2 hour subruns
+    subrunTime = float(2.) # in hours
+        
     data = {}
     
     chain = TChain("ntp","")
@@ -257,6 +264,8 @@ def getData32(runNum=1546, build='V00-02-00'):
                 for i in range(nfiles):
                     temp.Fill(0.5)
                 data[key]['subruns'] = temp
+
+                data[key]['runtime'] = nfiles*subrunTime*60.*60.
                 
     else:
         print 'ERROR: No data files found... quitting...'

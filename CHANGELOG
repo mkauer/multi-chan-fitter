@@ -12,9 +12,25 @@
 # ====================================================================
 
 
+# 2017-01-31
+# --------------------------------------------------------------------
+# - remove the [np] option, I know it should be 1
+# ~ fixed a bunch of [key] bugs
+# + add data[key]['runtime'] to getData32() in funcs32.py
+# ~ tweaked 40-single-hit.py for new functions
+# + add dataDRU40() in funcs40.py
+# + add build() in funcs40.py
+# + add buildMC40() in funcs40.py
+# + add buildData40() in funcs40.py
+# + add getInfo() in funcs40.py
+# - remove the [dru2] scaling option after the fit [dru2=1],
+#   seems the best thing to do is dru scale before the fit
+
+
 # 2017-01-30
 # --------------------------------------------------------------------
-
+# + new column for channel [A]All, [S]Single, or [M]Multi hit data
+#   in backgrounds40.txt
 # V switching to 40-single-hit.py
 # + cut release v3.3 for individual plotting and other tweaks
 

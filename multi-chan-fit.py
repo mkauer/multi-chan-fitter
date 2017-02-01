@@ -9,7 +9,7 @@ V = 'v40'
 
 # include single hit data
 # 
-# version: 2017-01-30
+# version: 2017-01-31
 # 
 # see CHANGELOG for changes
 ######################################################################
@@ -22,17 +22,17 @@ import numpy as np
 import ROOT
 from ROOT import *
 
-from funcs32 import *
+from funcs40 import *
 
 
 ### user inputs
 #================================================================
 
 ### use joined rootfile data? [0,1]
-reuse = 1
+reuse = 0
 
 ### individual plots for all crystals? [0,1]
-indi = 1
+indi = 0
 
 ### rebin the hi-E final plots [1,inf]
 hiEplotRebin = 10
@@ -40,15 +40,8 @@ hiEplotRebin = 10
 ### rebin the hi-E histo for fitting [1,inf]
 hiEfitRebin = 10
 
-### Better to convert to DRU before the fit
-dru1 = 1   ### convert data to dru before fit? [0,1]
-dru2 = 0   ### convert data and mc to dru after fit? [0,1]
-if dru2: dru1 = 0 ### dru safty check...
-
-### fill the fitdata and fitmc starting with n plus number?
-### i think this should be 1 because bin 0 is underflows right?
-### yes, just checked, this should be 1
-np = 1
+### scale to dru?
+dru = 1
 
 ### pre scale the MC? [0,1]
 mcscale = 1
@@ -93,8 +86,12 @@ def _myself_(argv):
         os.makedirs('./plots')
     
     runNum = 1546
-    mcfile = 'backgrounds32.txt'
+    #mcfile = 'backgrounds32.txt'
+    mcfile = 'backgrounds40.txt'
+
+    data, bkgs, sigs = build(mcfile)
     
+    """
     if reuse:
         ### uses Estella's calib and resol
         #rootfile = './root-join-read/join2-'+str(runNum)+'-master.root'
@@ -115,7 +112,7 @@ def _myself_(argv):
         ### uses Pushpa's calib and resol
         data = getData32(runNum, 'V00-02-00')
         bkgs, sigs = buildMC32(mcfile, 2)
-        
+    """ 
     
     datkeys, bakkeys, sigkeys = sortKeys2(data, bkgs, sigs)
     
@@ -131,12 +128,13 @@ def _myself_(argv):
     print 'INFO: Unique bkgs and sigs =',uniqAll
 
     
-    if dru1:
-        data = dataDRU2(data)
-        #bkgs = scaleBkgs(bkgs, data)
-        bkgs = scaleBkgs32(bkgs)
+    # scale into dru units
+    if dru:
+        #data = dataDRU2(data)
+        data = dataDRU40(data)
+    bkgs = scaleBkgs32(bkgs)
         
-
+    
     ### Number of colors
     Nc = len(uniqAll)
     print 'INFO: Total number of unique bkgs and sigs =',Nc
@@ -174,21 +172,21 @@ def _myself_(argv):
     #-----------------------------------------------------------------
     ### init dict for rebinned data
     rdata = {}
-    for key in datkeys:
-        #print key
-        rdata[key] = {}
+    for dkey in datkeys:
+        #print dkey
+        rdata[dkey] = {}
         
     ### init dict for rebinned backgrounds
     rbkgs = {}
-    for key in bakkeys:
-        #print key
-        rbkgs[key] = {}
+    for bkey in bakkeys:
+        #print bkey
+        rbkgs[bkey] = {}
 
     # init dict for rebinned MC/signals 
     rsigs = {}
-    for key in sigkeys:
-        #print key
-        rsigs[key] = {}
+    for skey in sigkeys:
+        #print skey
+        rsigs[skey] = {}
 
     #-----------------------------------------------------------------
     
@@ -233,75 +231,75 @@ def _myself_(argv):
 
             # fill the low energy part
             #------------------------------------------------
-            for key in datkeys:
-                if 'x'+str(i+1) in key and '-e0' in key:
+            for dkey in datkeys:
+                if 'x'+str(i+1) in dkey and '-e0' in dkey:
                     for n in range(fLoBins):
-                        fitdata[i].SetBinContent(n+np, data[key]['hist'].GetBinContent(fLo[0]+n))
-                        fitdata[i].SetBinError(n+np, data[key]['hist'].GetBinError(fLo[0]+n))
+                        fitdata[i].SetBinContent(n+1, data[dkey]['hist'].GetBinContent(fLo[0]+n))
+                        fitdata[i].SetBinError(n+1, data[dkey]['hist'].GetBinError(fLo[0]+n))
 
-            for key in sigkeys:
-                if 'x'+str(i+1) in key and '-e0' in key:
-                    fskey = key.split('-e0')[0]
+            for skey in sigkeys:
+                if 'x'+str(i+1) in skey and '-e0' in skey:
+                    fskey = skey.split('-e0')[0]
                     fsig = TH1F(fskey, fskey, fbins, 0, fbins)
                     fitsigs[fskey] = {}
                     fitsigs[fskey]['hist'] = fsig
                     for n in range(fLoBins):
-                        fitsigs[fskey]['hist'].SetBinContent(n+np, sigs[key]['hist'].GetBinContent(fLo[0]+n))
+                        fitsigs[fskey]['hist'].SetBinContent(n+1, sigs[skey]['hist'].GetBinContent(fLo[0]+n))
 
-            for key in bakkeys:
-                if 'x'+str(i+1) in key and '-e0' in key:
-                    fbkey = key.split('-e0')[0]
+            for bkey in bakkeys:
+                if 'x'+str(i+1) in bkey and '-e0' in bkey:
+                    fbkey = bkey.split('-e0')[0]
                     fbak = TH1F(fbkey, fbkey, fbins, 0, fbins)
                     fitbkgs[fbkey] = {}
                     fitbkgs[fbkey]['hist'] = fbak
                     for n in range(fLoBins):
-                        fitbkgs[fbkey]['hist'].SetBinContent(n+np, bkgs[key]['hist'].GetBinContent(fLo[0]+n))
+                        fitbkgs[fbkey]['hist'].SetBinContent(n+1, bkgs[bkey]['hist'].GetBinContent(fLo[0]+n))
 
 
             # fill the high energy part
             #-------------------------------------------------------------
 
-            for key in datkeys:
-                if 'x'+str(i+1) in key and '-e1' in key:
-                    rdata[key]['hist'] = copy.deepcopy(data[key]['hist'])
-                    rdata[key]['hist'].Rebin(hiEfitRebin)
-                    if fitRebinScale: rdata[key]['hist'].Scale(1./hiEfitRebin)
+            for dkey in datkeys:
+                if 'x'+str(i+1) in dkey and '-e1' in dkey:
+                    rdata[dkey]['hist'] = copy.deepcopy(data[dkey]['hist'])
+                    rdata[dkey]['hist'].Rebin(hiEfitRebin)
+                    if fitRebinScale: rdata[dkey]['hist'].Scale(1./hiEfitRebin)
 
-            for key in sigkeys:
-                if 'x'+str(i+1) in key and '-e1' in key:
-                    rsigs[key]['hist'] = copy.deepcopy(sigs[key]['hist'])
-                    rsigs[key]['hist'].Rebin(hiEfitRebin)
-                    if fitRebinScale: rsigs[key]['hist'].Scale(1./hiEfitRebin)
+            for skey in sigkeys:
+                if 'x'+str(i+1) in skey and '-e1' in skey:
+                    rsigs[skey]['hist'] = copy.deepcopy(sigs[skey]['hist'])
+                    rsigs[skey]['hist'].Rebin(hiEfitRebin)
+                    if fitRebinScale: rsigs[skey]['hist'].Scale(1./hiEfitRebin)
 
-            for key in bakkeys:
-                if 'x'+str(i+1) in key and '-e1' in key:
-                    rbkgs[key]['hist'] = copy.deepcopy(bkgs[key]['hist'])
-                    rbkgs[key]['hist'].Rebin(hiEfitRebin)
-                    if fitRebinScale: rbkgs[key]['hist'].Scale(1./hiEfitRebin)
+            for bkey in bakkeys:
+                if 'x'+str(i+1) in bkey and '-e1' in bkey:
+                    rbkgs[bkey]['hist'] = copy.deepcopy(bkgs[bkey]['hist'])
+                    rbkgs[bkey]['hist'].Rebin(hiEfitRebin)
+                    if fitRebinScale: rbkgs[bkey]['hist'].Scale(1./hiEfitRebin)
 
 
-            for key in datkeys:
-                if 'x'+str(i+1) in key and '-e1' in key:
+            for dkey in datkeys:
+                if 'x'+str(i+1) in dkey and '-e1' in dkey:
                     r = 0
                     for n in range(fLoBins,fbins):
-                        fitdata[i].SetBinContent(n+np, rdata[key]['hist'].GetBinContent(fHi[0]+r))
-                        fitdata[i].SetBinError(n+np, rdata[key]['hist'].GetBinError(fHi[0]+r))
+                        fitdata[i].SetBinContent(n+1, rdata[dkey]['hist'].GetBinContent(fHi[0]+r))
+                        fitdata[i].SetBinError(n+1, rdata[dkey]['hist'].GetBinError(fHi[0]+r))
                         r += 1
 
-            for key in sigkeys:
-                if 'x'+str(i+1) in key and '-e1' in key:
-                    fskey = key.split('-e1')[0]
+            for skey in sigkeys:
+                if 'x'+str(i+1) in skey and '-e1' in skey:
+                    fskey = skey.split('-e1')[0]
                     r = 0
                     for n in range(fLoBins,fbins):
-                        fitsigs[fskey]['hist'].SetBinContent(n+np, rsigs[key]['hist'].GetBinContent(fHi[0]+r))
+                        fitsigs[fskey]['hist'].SetBinContent(n+1, rsigs[skey]['hist'].GetBinContent(fHi[0]+r))
                         r += 1
 
-            for key in bakkeys:
-                if 'x'+str(i+1) in key and '-e1' in key:
-                    fbkey = key.split('-e1')[0]
+            for bkey in bakkeys:
+                if 'x'+str(i+1) in bkey and '-e1' in bkey:
+                    fbkey = bkey.split('-e1')[0]
                     r = 0
                     for n in range(fLoBins,fbins):
-                        fitbkgs[fbkey]['hist'].SetBinContent(n+np, rbkgs[key]['hist'].GetBinContent(fHi[0]+r))
+                        fitbkgs[fbkey]['hist'].SetBinContent(n+1, rbkgs[bkey]['hist'].GetBinContent(fHi[0]+r))
                         r += 1
 
 
@@ -510,8 +508,9 @@ def _myself_(argv):
         if mcscale:      save += '_mcscale'
         if mcweight:     save += '_mcweight'
         if fitweight:    save += '_fitweight'
-        if dru1:         save += '_dru1'
-        if dru2:         save += '_dru2'
+        if dru:          save += '_dru'
+        #if dru1:         save += '_dru1'
+        #if dru2:         save += '_dru2'
         if hiEplotRebin: save += '_hiEplotRebin-'+str(hiEplotRebin)
         if reuse:        save += '_reuse'
         save += '_'+V
@@ -575,13 +574,13 @@ def _myself_(argv):
             flegs[i].SetBorderSize(0)
             lopt = 'LPE'
 
-            if dru1: fitdata[i].SetAxisRange(2e-2, 3e2, 'y')
+            if dru: fitdata[i].SetAxisRange(2e-2, 3e2, 'y')
             
             fitdata[i].SetLineColor(kBlack)
             fitdata[i].SetMarkerColor(kBlack)
             fitdata[i].SetLineWidth(1)
 
-            if dru1: fitdata[i].GetYaxis().SetTitle('counts / day / kg / keV  (dru)')
+            if dru: fitdata[i].GetYaxis().SetTitle('counts / day / kg / keV  (dru)')
             else: fitdata[i].GetYaxis().SetTitle('arb. counts')
 
             fitdata[i].GetYaxis().SetTitleFont(font)
@@ -719,11 +718,6 @@ def _myself_(argv):
     # plot the lo and hi energy histograms
     #=================================================================
 
-    if dru2:
-        data = dataDRU2(data)
-        #bkgs = scaleBkgs(bkgs, data)
-        bkgs = scaleBkgs32(bkgs)
-    
     canvs  = [[] for x in range(2)]
 
     ### for separate plots
@@ -790,18 +784,18 @@ def _myself_(argv):
             legs[E][i].SetBorderSize(0)
             lopt = 'LPE'
             
-            for key in datkeys:
-                if 'x'+str(i+1) in key and '-e'+str(E) in key:
-                    data[key]['hist'].GetYaxis().SetTitle('arb. counts')
-                    if dru1 or dru2:
-                        data[key]['hist'].GetYaxis().SetTitle('counts / day / kg / keV  (dru)')
+            for dkey in datkeys:
+                if 'x'+str(i+1) in dkey and '-e'+str(E) in dkey:
+                    data[dkey]['hist'].GetYaxis().SetTitle('arb. counts')
+                    if dru:
+                        data[dkey]['hist'].GetYaxis().SetTitle('counts / day / kg / keV  (dru)')
                         
             #---------------------------------------------------------
             if E and hiEplotRebin:
-                for key in datkeys:
-                    if 'x'+str(i+1) in key and '-e'+str(E) in key:
-                        data[key]['hist'].Rebin(hiEplotRebin)
-                        data[key]['hist'].Scale(1./float(hiEplotRebin))
+                for dkey in datkeys:
+                    if 'x'+str(i+1) in dkey and '-e'+str(E) in dkey:
+                        data[dkey]['hist'].Rebin(hiEplotRebin)
+                        data[dkey]['hist'].Scale(1./float(hiEplotRebin))
                         
                 total[E][i].Rebin(hiEplotRebin)
                 total[E][i].Scale(1./float(hiEplotRebin))
@@ -815,29 +809,31 @@ def _myself_(argv):
                 if 'x'+str(i+1) in key and '-e'+str(E) in key:
 
                     ### needed for Chi2TestX()
+                    ### and needed later too
                     dkey = key
                     
-                    if dru1 or dru2:
-                        druScale = data['x'+str(i+1)+'-data'+'-e'+str(E)]['druScale']
+                    #if dru1 or dru2:
+                        #druScale = data['x'+str(i+1)+'-data'+'-e'+str(E)]['druScale']
+                        #druScale = data[key]['druScale']
                     
-                    data[key]['hist'].GetYaxis().SetTitleFont(font)
-                    data[key]['hist'].GetYaxis().SetTitleSize(size)
-                    data[key]['hist'].GetYaxis().SetTitleOffset(yoff)
-                    data[key]['hist'].GetYaxis().SetLabelFont(font)
-                    data[key]['hist'].GetYaxis().SetLabelSize(size)
-                    data[key]['hist'].GetYaxis().SetLabelOffset(0.01)
-                    #data[key]['hist'].GetXaxis().SetTitle('Energy (keV)')
-                    #data[key]['hist'].GetXaxis().SetLabelFont(font)
-                    #data[key]['hist'].GetXaxis().SetLabelSize(size)
-
-                    if dru1 or dru2:
-                        if E: data[key]['hist'].SetAxisRange(2e-2, 2e1, 'y')
-                        else: data[key]['hist'].SetAxisRange(2e-1, 3e2, 'y')
+                    data[dkey]['hist'].GetYaxis().SetTitleFont(font)
+                    data[dkey]['hist'].GetYaxis().SetTitleSize(size)
+                    data[dkey]['hist'].GetYaxis().SetTitleOffset(yoff)
+                    data[dkey]['hist'].GetYaxis().SetLabelFont(font)
+                    data[dkey]['hist'].GetYaxis().SetLabelSize(size)
+                    data[dkey]['hist'].GetYaxis().SetLabelOffset(0.01)
+                    #data[dkey]['hist'].GetXaxis().SetTitle('Energy (keV)')
+                    #data[dkey]['hist'].GetXaxis().SetLabelFont(font)
+                    #data[dkey]['hist'].GetXaxis().SetLabelSize(size)
+                    
+                    if dru:
+                        if E: data[dkey]['hist'].SetAxisRange(2e-2, 2e1, 'y')
+                        else: data[dkey]['hist'].SetAxisRange(2e-1, 3e2, 'y')
                         
-                    data[key]['hist'].Draw()
-                    days = round(data[key]['runtime']/86400.,2)
+                    data[dkey]['hist'].Draw()
+                    days = round(data[dkey]['runtime']/86400.,2)
                     #legs[E][i].AddEntry(data[key]['hist'], 'data', lopt)
-                    legs[E][i].AddEntry(data[key]['hist'], 'data ('+str(days)+' days)', lopt)
+                    legs[E][i].AddEntry(data[dkey]['hist'], 'data ('+str(days)+' days)', lopt)
                     
             for key in bakkeys:
                 if 'x'+str(i+1) in key and '-e'+str(E) in key:
@@ -847,10 +843,11 @@ def _myself_(argv):
                     bkgs[key]['hist'].SetMarkerColor(uniqColor[cname])
                     bkgs[key]['hist'].SetLineColor(uniqColor[cname])
                     
-                    if dru1 or dru2:
-                        druScale = data['x'+str(i+1)+'-data'+'-e'+str(E)]['druScale']
-                    if dru2:
-                        bkgs[key]['hist'].Scale(druScale)
+                    # don't think I need this anymore
+                    #if dru1 or dru2:
+                    #    druScale = data['x'+str(i+1)+'-data'+'-e'+str(E)]['druScale']
+                    #if dru2:
+                    #    bkgs[key]['hist'].Scale(druScale)
                     
                     if E and hiEplotRebin:
                         bkgs[key]['hist'].Rebin(hiEplotRebin)
@@ -873,11 +870,12 @@ def _myself_(argv):
                     cname = key.split('-')[1]+'-'+key.split('-')[2]
                     sigs[key]['hist'].SetMarkerColor(uniqColor[cname])
                     sigs[key]['hist'].SetLineColor(uniqColor[cname])
-                                        
-                    if dru1 or dru2:
-                        druScale = data['x'+str(i+1)+'-data'+'-e'+str(E)]['druScale']
-                    if dru2:
-                        sigs[key]['hist'].Scale(druScale)
+
+                    # don't think I need this anymore
+                    #if dru1 or dru2:
+                    #    druScale = data['x'+str(i+1)+'-data'+'-e'+str(E)]['druScale']
+                    #if dru2:
+                    #    sigs[key]['hist'].Scale(druScale)
                     
                     if E and hiEplotRebin:
                         sigs[key]['hist'].Rebin(hiEplotRebin)
@@ -915,36 +913,40 @@ def _myself_(argv):
             #-----------------------------------------------------------------------------
             total[E][i].Sumw2()
             bp = 1
-            if not dru1 and not dru2:
+            if not dru:
                 for n in range(total[E][i].GetNbinsX()):
                     total[E][i].SetBinError(n+bp, total[E][i].GetBinError(n+bp)/(float(hiEplotRebin)/math.sqrt(2.)))
             
-            if dru1:
+            else:
                 for n in range(total[E][i].GetNbinsX()):
-                    total[E][i].SetBinError(n+bp, total[E][i].GetBinError(n+bp)*druScale)
+                    #total[E][i].SetBinError(n+bp, total[E][i].GetBinError(n+bp)*druScale)
+                    total[E][i].SetBinError(n+bp, total[E][i].GetBinError(n+bp)*data[dkey]['druScale'])
             
-            if dru2:
-                for n in range(total[E][i].GetNbinsX()):
-                    total[E][i].SetBinError(n+bp, total[E][i].GetBinError(n+bp)*druScale)
+            #if dru2:
+            #    for n in range(total[E][i].GetNbinsX()):
+            #        total[E][i].SetBinError(n+bp, total[E][i].GetBinError(n+bp)*druScale)
 
-            
+
+            ### chi2 test
             ### get the chi2 of the total mc compared to data
-            #---------------------------------------------------------
+            #=============================================================================
+            #-----------------------------------------------------------------------------
             chi2  = ROOT.Double(0.0)
             ndf   = ROOT.Long(0)
             igood = ROOT.Long(0)
             pval  = data[dkey]['hist'].Chi2TestX(total[E][i], chi2, ndf, igood, "WW")
             print 'INFO:',dkey,'pval =',pval,'chi2 =',chi2,'ndf =',ndf,'igood =',igood
             print 'INFO: Total MC chi2/ndf =',chi2/ndf
-            #---------------------------------------------------------
+            #-----------------------------------------------------------------------------
+            #=============================================================================
+            
 
             
             #-----------------------------------------------------------------------------
-                    
             if len(bkgs) + len(sigs) > 0:        
                 total[E][i].Draw('same')
-                legs[E][i].AddEntry(total[E][i], 'Total MC', lopt)
-                #legs[E][i].AddEntry(total[E][i], 'Total MC (chi2/ndf = '+str(round(chi2/ndf,2))+')', lopt)
+                #legs[E][i].AddEntry(total[E][i], 'Total MC', lopt)
+                legs[E][i].AddEntry(total[E][i], 'Total MC (chi2/ndf = '+str(round(chi2/ndf,2))+')', lopt)
                 
             legs[E][i].Draw('same')
             
@@ -958,7 +960,8 @@ def _myself_(argv):
             legs2[E][i].SetBorderSize(0)
             lopt = 'LPE'
 
-            resid[E][i].Divide(data['x'+str(i+1)+'-data'+'-e'+str(E)]['hist'], total[E][i])
+            #resid[E][i].Divide(data['x'+str(i+1)+'-data'+'-e'+str(E)]['hist'], total[E][i])
+            resid[E][i].Divide(data[dkey]['hist'], total[E][i])
             #resid[E][i].Divide(total[E][i], data['x'+str(i+1)+'-data'+'-e'+str(E)]['hist'])
             
             resid[E][i].SetTitle('')
@@ -1020,8 +1023,9 @@ def _myself_(argv):
         if mcscale:      save += '_mcscale'
         if mcweight:     save += '_mcweight'
         if fitweight:    save += '_fitweight'
-        if dru1:         save += '_dru1'
-        if dru2:         save += '_dru2'
+        if dru:          save += '_dru'
+        #if dru1:         save += '_dru1'
+        #if dru2:         save += '_dru2'
         if hiEplotRebin: save += '_hiEplotRebin-'+str(hiEplotRebin)
         if reuse:        save += '_reuse'
         save += '_'+V
