@@ -12,8 +12,8 @@ base=/home/mkauer/mc-fitting/root-join-read
 cluster=$base/cluster
 build=$base/build40
 
-for mcfile in airshield  data  internalK40  internalTh232  internalU238  lsveto  lsvetoair  pmt  steel; do
-    
+for mcfile in airshield data internalK40 internalTh232 internalU238 lsveto lsvetoair pmtK40 pmtU238 pmtTh232 steel
+do
     file="$cluster/build-$mcfile.sh"
     cat > $file <<EOF
 #!/bin/bash
