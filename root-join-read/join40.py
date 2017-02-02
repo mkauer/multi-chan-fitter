@@ -5,10 +5,11 @@
 #
 # Works with v40 and later versions
 # 
-# version: 2017-02-01
+# version: 2017-02-02
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# ~ use build40(mcfile,2) to force no reusing of data
 # + mega revamp for new v40 format
 #
 # email me: mkauer@physics.wisc.edu
@@ -42,26 +43,14 @@ def _myself_(argv):
     else:
         outpath="/home/mkauer/mc-fitting/root-join-read/"+build+'/'
     
-    fname = mcfile.split('/')[-1].split('.')[0]
-    rootfile = build+'-'+fname+'-test.root'
+    #fname = mcfile.split('/')[-1].split('.')[0]
+    fname = mcfile.split('/')[-1]
+    if local: ver = 'test'
+    else: ver = 'master'
+    rootfile = build+'-'+fname+'-'+ver+'.root'
     rfile = TFile(outpath+rootfile, 'RECREATE')
     
-    data, bkgs, sigs = build40(mcfile)
-    
-    """
-    if 'data' in mcfile:
-        runNum = 1546
-        rootfile = 'join32-data-'+str(runNum)+'-test.root'
-        rfile = TFile(outpath+rootfile, 'RECREATE')
-        print 'creating rootfile',rootfile
-        data = getData32(runNum, 'V00-02-00')
-    else:
-        fname = mcfile.split('/')[-1].split('.')[0]
-        rootfile = 'join32-'+fname+'-test.root'
-        rfile = TFile(outpath+rootfile, 'RECREATE')
-        print 'creating rootfile',rootfile
-        bkgs, sigs = buildMC32(mcfile, 2)
-    """
+    data, bkgs, sigs = build40(mcfile,2)
     
     rfile.Write()
     rfile.Close()
