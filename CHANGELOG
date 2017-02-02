@@ -12,6 +12,22 @@
 # ====================================================================
 
 
+# 2017-02-01
+# --------------------------------------------------------------------
+# ~ backgrounds40.txt uses V00.02.03 data
+# ~ move to V00.02.03 processing of the 1546 data
+# + revamp of join40.py for new v40 format
+# + add force reuse options in funcs40.py
+# + reuse rootfiles works now in funcs40.py
+# + forgot to add "from copy import deepcopy" in funcs40.py - oops
+# + many tweaks to get "reuse" working
+# + add scaleBkgs40() in funcs40.py
+# + add scaleSigs40() in funcs40.py
+# + add info{} to data,bkgs,sigs in funcs40.py# 
+# + mcfile is now a top level option
+# - remove the [bp] option, I know it should be 1
+
+
 # 2017-01-31
 # --------------------------------------------------------------------
 # - remove the [np] option, I know it should be 1
@@ -23,6 +39,7 @@
 # + add buildMC40() in funcs40.py
 # + add buildData40() in funcs40.py
 # + add getInfo() in funcs40.py
+# + new backgrounds40.txt mcfile
 # - remove the [dru2] scaling option after the fit [dru2=1],
 #   seems the best thing to do is dru scale before the fit
 

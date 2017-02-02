@@ -9,7 +9,7 @@ V = 'v40'
 
 # include single hit data
 # 
-# version: 2017-01-31
+# version: 2017-02-01
 # 
 # see CHANGELOG for changes
 ######################################################################
@@ -27,8 +27,14 @@ from funcs40 import *
 
 ### user inputs
 #================================================================
+### backgrounds file to use?
+mcfile = 'backgrounds40.txt'
 
-### use joined rootfile data? [0,1]
+### force reuse of all joined rootfiles in mcfile? [0,1,2]
+### nice for debugging
+### [0] default - uses whatever is specified in the backgrounds file
+### [1] forces to reuse all data/bkgs/sigs
+### [2] forces not reusing any data/bkgs/sigs
 reuse = 0
 
 ### individual plots for all crystals? [0,1]
@@ -86,34 +92,12 @@ def _myself_(argv):
         os.makedirs('./plots')
     
     runNum = 1546
-    #mcfile = 'backgrounds32.txt'
-    mcfile = 'backgrounds40.txt'
 
-    data, bkgs, sigs = build(mcfile)
-    
-    """
-    if reuse:
-        ### uses Estella's calib and resol
-        #rootfile = './root-join-read/join2-'+str(runNum)+'-master.root'
-
-        ### uses Pushpa's calib and resol
-        #rootfile = './root-join-read/join3-'+str(runNum)+'-master.root'
-        #rootfile = './root-join-read/join32-'+str(runNum)+'-master.root'
-
-        #data, bkgs, sigs = readROOT3(rootfile, mcfile)
-        data, bkgs, sigs = readROOT32(mcfile)
+    if not os.path.exists(mcfile):
+        print 'ERROR: could not find backgrounds file -->', mcfile
+        sys.exit()
         
-        
-    else:
-        ### uses Estella's calib and resol
-        #data = getData2(runNum)
-        #bkgs, sigs = buildMC23(mcfile, 1)
-
-        ### uses Pushpa's calib and resol
-        data = getData32(runNum, 'V00-02-00')
-        bkgs, sigs = buildMC32(mcfile, 2)
-    """ 
-    
+    data, bkgs, sigs = build40(mcfile, reuse)
     datkeys, bakkeys, sigkeys = sortKeys2(data, bkgs, sigs)
     
     
@@ -132,7 +116,8 @@ def _myself_(argv):
     if dru:
         #data = dataDRU2(data)
         data = dataDRU40(data)
-    bkgs = scaleBkgs32(bkgs)
+    #bkgs = scaleBkgs32(bkgs)
+    bkgs = scaleBkgs40(bkgs)
         
     
     ### Number of colors
@@ -478,6 +463,9 @@ def _myself_(argv):
                     ### v31 - save the scaling factors so you can convert to mBq/kg later
                     sigs[fskey+'-e0']['fitscale'] = sigs[fskey+'-e0']['fitscale'] * fscale
                     sigs[fskey+'-e1']['fitscale'] = sigs[fskey+'-e1']['fitscale'] * fscale
+
+                    sigs[fskey+'-e0']['fiterror'] = ferror
+                    sigs[fskey+'-e1']['fiterror'] = ferror
                     
                     count += 1
 
@@ -487,7 +475,8 @@ def _myself_(argv):
         
         ### v31 - try to scale the signals to mBq/kg to be used as bkgs
         #sigs = scaleSigs(sigkeys, sigs, data)
-        sigs = scaleSigs32(sigkeys, sigs)
+        #sigs = scaleSigs32(sigkeys, sigs)
+        sigs = scaleSigs40(sigkeys, sigs)
         
         
         print '\n\n'
@@ -512,7 +501,8 @@ def _myself_(argv):
         #if dru1:         save += '_dru1'
         #if dru2:         save += '_dru2'
         if hiEplotRebin: save += '_hiEplotRebin-'+str(hiEplotRebin)
-        if reuse:        save += '_reuse'
+        #if reuse:        save += '_reuse'
+        save += '_reuse'+str(reuse)
         save += '_'+V
         
         outfile = open('./plots/'+save+'_fit-results.txt', 'w')
@@ -900,31 +890,31 @@ def _myself_(argv):
                 for bkey in bakkeys:
                     if name in bkey and 'x'+str(i+1) in bkey and '-e'+str(E) in bkey:
                         #legs[E][i].AddEntry(bkgs[bkey]['hist'], space+bkey, lopt)
-                        activ = '('+str(bkgs[bkey]['acti'])+') '
+                        activ = '('+str(bkgs[bkey]['info']['acti'])+') '
                         legs[E][i].AddEntry(bkgs[bkey]['hist'], activ+bkey, lopt)
                 for skey in sigkeys:
                     if name in skey and 'x'+str(i+1) in skey and '-e'+str(E) in skey:
                         #legs[E][i].AddEntry(sigs[skey]['hist'], space+skey, lopt)
-                        activ = '('+str(sigs[skey]['acti'])+') '
+                        activ = '('+str(sigs[skey]['info']['acti'])+') '
                         legs[E][i].AddEntry(sigs[skey]['hist'], activ+skey, lopt)
             
             
             ### you need to scale the error by the dru scaling and/or the rebinning
             #-----------------------------------------------------------------------------
             total[E][i].Sumw2()
-            bp = 1
+            
             if not dru:
                 for n in range(total[E][i].GetNbinsX()):
-                    total[E][i].SetBinError(n+bp, total[E][i].GetBinError(n+bp)/(float(hiEplotRebin)/math.sqrt(2.)))
+                    total[E][i].SetBinError(n+1, total[E][i].GetBinError(n+1)/(float(hiEplotRebin)/math.sqrt(2.)))
             
             else:
                 for n in range(total[E][i].GetNbinsX()):
-                    #total[E][i].SetBinError(n+bp, total[E][i].GetBinError(n+bp)*druScale)
-                    total[E][i].SetBinError(n+bp, total[E][i].GetBinError(n+bp)*data[dkey]['druScale'])
+                    #total[E][i].SetBinError(n+1, total[E][i].GetBinError(n+1)*druScale)
+                    total[E][i].SetBinError(n+1, total[E][i].GetBinError(n+1)*data[dkey]['druScale'])
             
             #if dru2:
             #    for n in range(total[E][i].GetNbinsX()):
-            #        total[E][i].SetBinError(n+bp, total[E][i].GetBinError(n+bp)*druScale)
+            #        total[E][i].SetBinError(n+1, total[E][i].GetBinError(n+1)*druScale)
 
 
             ### chi2 test
@@ -1027,7 +1017,8 @@ def _myself_(argv):
         #if dru1:         save += '_dru1'
         #if dru2:         save += '_dru2'
         if hiEplotRebin: save += '_hiEplotRebin-'+str(hiEplotRebin)
-        if reuse:        save += '_reuse'
+        #if reuse:        save += '_reuse'
+        save += '_reuse'+str(reuse)
         save += '_'+V
         
         canvs[E].Update()
@@ -1055,7 +1046,12 @@ def _myself_(argv):
         del sepPlots
         # gives a seg fault and I don't know why
     #-----------------------------------------------------------------
-        
+    
+    
+    ### will deleting things help the seg faults?
+    #del sigObj
+    #del fit
+    
     
     if not batch:
         raw_input('[Enter] to quit \n')

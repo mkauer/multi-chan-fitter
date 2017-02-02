@@ -1,19 +1,29 @@
 #!/usr/bin/env python
 ######################################################################
+# funcs40.py
+# 
 # Get single-hit data into the processing stream
-#
+# 
 # Works with v40 and later versions
-#
-# version: 2017-01-31
+# 
+# version: 2017-02-01
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# + move to V00.02.03 processing of the 1546 data
+# + add force reuse options in funcs40.py
+# + reuse rootfiles works now in funcs40.py
+# + forgot to add "from copy import deepcopy" in funcs40.py - oops
+# + many tweaks to get "reuse" working
+# + add scaleBkgs40() in funcs40.py
+# + add scaleSigs40() in funcs40.py
+# + add info{} to data,bkgs,sigs in funcs40.py
 # + add dataDRU40() in funcs40.py
 # + add build() in funcs40.py
 # + add buildMC40() in funcs40.py
 # + add buildData40() in funcs40.py
 # + add getInfo() in funcs40.py
-# + funcs4.py clean slate
+# + funcs40.py clean slate
 # 
 # email me: mkauer@physics.wisc.edu
 ######################################################################
@@ -23,12 +33,13 @@
 # 
 # Where is the processed data?
 # Right now I'm using:
-# /data/COSINE/NTP/phys/V00-02-00
+# /data/COSINE/NTP/phys/V00-02-03
 # and run ntp_I001546*
 # 
 ######################################################################
 
 import os,sys
+from copy import deepcopy
 import numpy as np
 from ROOT import *
 import ROOT
@@ -38,7 +49,7 @@ sys.path.append("/home/mkauer/mc-fitting/")
 from funcs32 import *
 
 
-def getInfo(line):
+def getInfo40(line, freuse=0):
     
     info={}
 
@@ -50,32 +61,42 @@ def getInfo(line):
     # data type
     info['type'] = str(bits[0])
 
+    #-----------------------------------------------------------------
     # reuse a joined rootfile
-    if 'R' in info['type']:
-        info['reuse'] = 1
-    else:
-        info['reuse'] = 0
-        
+    if 'R' in info['type']: info['reuse'] = 1
+    else: info['reuse'] = 0
+    # force reuse of everything - nice for debugging
+    if freuse == 1: info['reuse'] = 1
+    # force not reuse of everything - nice for debugging
+    if freuse == 2: info['reuse'] = 0
+    #-----------------------------------------------------------------
+    
     # channel
     info['chan'] = str(bits[1])
     
     # crystal
     info['xstl'] = int(bits[2])
     
-    # reuse rootfile
+    # reuse rootfile name
     if 'root' in str(bits[-1]):
-        info['root'] = str(bits[-1])
+        info['rootfile'] = str(bits[-1])
     else:
-        info['root'] = None
+        info['rootfile'] = 0
 
 
     if 'D' in info['type']:
         
-        # run number
+        ### run number
         info['run'] = str(bits[4])
 
-        # processing version
+        ### processing version
         info['build'] = str(bits[5])
+
+        ### build the histo key
+        key  = 'x'+str(info['xstl'])
+        key += '-data'
+        key += '-c'+info['chan']
+        info['key'] = key
         
     else:
         
@@ -100,13 +121,60 @@ def getInfo(line):
         ### fit bounds
         info['fbnd'] = [float(bits[9]), float(bits[10])]
 
+        ### build the histo key
+        key  = 'x'+str(info['xstl'])
+        key += '-'+info['loca']
+        if info['chst'] == info['chsp']: key += '-'+info['chst']
+        else: key += '-'+info['chst']+'_'+info['chsp']
+        key += '-c'+info['chan']
+        info['key'] = key
+        
     return info
 
 
 def buildData40(info, data):
     
     if info['reuse']:
-        print 'not ready not'
+        
+        if info['rootfile']:
+            rootfile = info['rootfile']
+            #print 'INFO: using rootfile -->',rootfile
+        else:
+            print 'WARNING: no rootfile specified in backgrounds file'
+            return data
+        
+        if not os.path.exists(rootfile):
+            print 'WARNING: rootfile not found -->', rootfile
+            return data
+        
+        rfile = TFile(rootfile, "READ")
+
+        for e in range(2):
+            key = info['key']+'-e'+str(e)
+            try:
+                data[key] = {}
+                data[key]['info'] = info
+                data[key]['hist'] = deepcopy(TH1F(rfile.Get(key)))
+            except:
+                print "WARNING: could not find hist -->",key
+
+            try:
+                data[key]['subruns_hist'] = deepcopy(TH1F(rfile.Get(key+'_subruns')))
+                data[key]['subruns'] = data[key]['subruns_hist'].GetBinContent(1)
+            except:
+                print "WARNING: could not find subruns_hist -->",key+'_subruns'
+                
+            try:
+                data[key]['runtime_hist'] = deepcopy(TH1F(rfile.Get(key+'_runtime')))
+                data[key]['runtime'] = data[key]['runtime_hist'].GetBinContent(1)
+            except:
+                print "WARNING: could not find runtime_hist -->",key+'_runtime'
+            
+            #except:
+            #    del data[key]
+            #    print "WARNING: could not find hist -->",key
+            #    return data
+        
         return data
     
     else:
@@ -139,22 +207,29 @@ def buildData40(info, data):
                 par = histparam(E)
                 #for i in range(8):
                 i = info['xstl'] - 1
-                
-                key  = 'x'+str(i+1)
-                key += '-data'
-                key += '-c'+info['chan']
-                key += '-e'+str(E)
+
+                #key  = 'x'+info['xstl']
+                #key += '-data'
+                #key += '-c'+info['chan']
+                #key += '-e'+str(E)
+                key = info['key'] + '-e'+str(E)
                 
                 data[key] = {}
+                data[key]['info'] = info
 
-                #histo = TH1F(key, key, par[0], par[1], par[2])
                 histo = TH1F(key, longNames(i), par[0], par[1], par[2])
-                #chain.Draw('(pmt'+str(i+1)+'1.'+str(edep)+'*'+str(calib(i,0,E))
-                #           +' + pmt'+str(i+1)+'2.'+str(edep)+'*'+str(calib(i,1,E))+')/2.'
-                #           +' >> '+str(key))
-                chain.Draw('crystal'+str(i+1)+'.'+str(edep)+'*'+str(calib22(i,E))
-                           +' >> '+str(key))
-
+                
+                ### reminder - [A]All-hits, [S]Single-hits, [M]Multi-hits
+                #-------------------------------------------------------------------------
+                if info['chan'] == 'A':
+                    chain.Draw('crystal'+str(i+1)+'.'+str(edep)+'*'+str(calib22(i,E))+' >> '+str(key))
+                #elif info['chan'] == 'S':
+                #    TCut = 
+                else:
+                    print 'ERROR: I do not know what to do with channel -->',info['chan']
+                    print 'Available channels are [A]All-hits, [S]Single-hits, [M]Multi-hits'
+                    sys.exit()
+                
                 histo.Sumw2()
                 histo.SetLineColor(kBlack)
                 histo.SetMarkerColor(kBlack)
@@ -162,14 +237,23 @@ def buildData40(info, data):
 
                 data[key]['hist'] = histo
 
+                subruns = nfiles
                 key2 = key+'_subruns'
-                temp = TH1F(key2,'subruns',1,0,1)
-                #temp.SetBinContent(0, nfiles)
-                for i in range(nfiles):
-                    temp.Fill(0.5)
-                data[key]['subruns'] = temp
+                temp2 = TH1F(key2,'subruns',1,0,1)
+                temp2.SetBinContent(1, subruns)
+                #for i in range(subruns):
+                #    temp2.Fill(0.5)
+                data[key]['subruns_hist'] = temp2
+                data[key]['subruns'] = subruns
 
-                data[key]['runtime'] = nfiles*subrunTime*60.*60.
+                runtime = subruns*subrunTime*60.*60.
+                key3 = key+'_runtime'
+                temp3 = TH1F(key3,'runtime',1,0,1)
+                temp3.SetBinContent(1, runtime)
+                #for i in range(runtime):
+                #    temp3.Fill(0.5)
+                data[key]['runtime_hist'] = temp3
+                data[key]['runtime'] = runtime
         
         else:
             print 'ERROR: No data files found... quitting...'
@@ -181,7 +265,41 @@ def buildData40(info, data):
 def buildMC40(info, mc, calib=2):
 
     if info['reuse']:
-        print 'not ready not'
+        if info['rootfile']:
+            rootfile = info['rootfile']
+        else:
+            print 'WARNING: no rootfile specified in backgrounds file'
+            return data
+        
+        if not os.path.exists(rootfile):
+            print 'WARNING: rootfile not found -->', rootfile
+            return data
+        
+        rfile = TFile(rootfile, "READ")
+
+        for e in range(2):
+            key = info['key']+'-e'+str(e)
+            try:
+                mc[key] = {}
+                mc[key]['info'] = info
+                mc[key]['hist'] = deepcopy(TH1F(rfile.Get(key)))
+            except:
+                print "WARNING: could not find hist -->",key
+
+            try:
+                mc[key]['generated_hist'] = deepcopy(TH1F(rfile.Get(key+'_generated')))
+                mc[key]['generated'] = mc[key]['generated_hist'].GetBinContent(1)
+            except:
+                print "WARNING: could not find generated_hist -->",key+'_generated'
+                
+                #mc[key]['acti'] = info['acti']
+                #mc[key]['erro'] = info['erro']
+                #mc[key]['fbnd'] = info['fbnd']
+            #except:
+            #    del mc[key]
+            #    print "WARNING: could not find hist -->",key
+            #    continue
+                
         return mc
     
     else:
@@ -201,16 +319,17 @@ def buildMC40(info, mc, calib=2):
                 i = info['xstl'] - 1
                 
                 ### see if i can use unique names for all the histograms
-                key  = 'x'+str(i+1)
-                key += '-'+info['loca']
-                if info['chst'] == info['chsp']: key += '-'+info['chst']
-                else: key += '-'+info['chst']+'_'+info['chsp']
-                key += '-c'+info['chan']
-                key += '-e'+str(E)
+                #key  = 'x'+info['xstl']
+                #key += '-'+info['loca']
+                #if info['chst'] == info['chsp']: key += '-'+info['chst']
+                #else: key += '-'+info['chst']+'_'+info['chsp']
+                #key += '-c'+info['chan']
+                #key += '-e'+str(E)
+                key = info['key'] + '-e'+str(E)
                 
                 mc[key] = {}
-                print key
-
+                mc[key]['info'] = info
+                
                 par = histparam(E)
                 histo = TH1F(key, longNames(i), par[0], par[1], par[2])
 
@@ -249,7 +368,7 @@ def buildMC40(info, mc, calib=2):
                     cut100 = TCut('groupNo == 15')
                 
                 key2 = key+'_generated'
-                temp = TH1F(key2, 'generated',1,0,1)
+                temp2 = TH1F(key2, 'generated',1,0,1)
                 
                 ### v31 - maybe need cut100 for generated events
                 ### to get the eff/normalization right?
@@ -260,7 +379,7 @@ def buildMC40(info, mc, calib=2):
                 else:
                     chain.Draw('primVolumeName >> '+key2, cut2+cut3)
                 
-                generated = temp.GetEntries()
+                generated = temp2.GetEntries()
                 
                 ### test out resolution smearing
                 ###-------------------------------------------------------------------------------
@@ -278,7 +397,7 @@ def buildMC40(info, mc, calib=2):
                     ### assume reso = p0/sqrt(energy) + p1
                     p0, p1 = resol2(i,E)
                     chain.SetAlias('sigma', str(p0)+'/sqrt(edep['+str(i)+']*1000.) + '+str(p1))
-
+                
                 if cut100:
                     chain.Draw('(edep['+str(i)+']*1000.) + (sigma*edep['+str(i)+']*1000.*rng) >> '+key, cut1+cut2+cut4+cut100)
                 else:
@@ -292,10 +411,12 @@ def buildMC40(info, mc, calib=2):
                 histo.SetLineWidth(1)
 
                 mc[key]['hist'] = histo
-                mc[key]['generated'] = temp
-                mc[key]['acti'] = info['acti']
-                mc[key]['erro'] = info['erro']
-                mc[key]['fbnd'] = info['fbnd']
+                mc[key]['generated_hist'] = temp2
+                mc[key]['generated'] = generated
+                
+                #mc[key]['acti'] = info['acti']
+                #mc[key]['erro'] = info['erro']
+                #mc[key]['fbnd'] = info['fbnd']
                 
                 #print 'Eff =',detected/generated
                 """
@@ -321,14 +442,14 @@ def buildMC40(info, mc, calib=2):
     return mc
 
     
-def build(infile = 'backgrounds40.txt'):
+def build40(infile = 'backgrounds40.txt', freuse=0):
 
     data = {}
     bkgs = {}
     sigs = {}
     
     for line in readFile(infile):
-        info = getInfo(line)
+        info = getInfo40(line, freuse)
         if 'D' in info['type']:
             data = buildData40(info, data)
         elif 'B' in info['type']:
@@ -363,4 +484,116 @@ def dataDRU40(data):
         
     return data
 
+
+def scaleBkgs40(bkgs):
+    
+    for key in bkgs:
+        x = key.split('-')[0]
+        loca = key.split('-')[1]
+        e = key.split('-')[-1]
+        
+        #druscale = data[x+'-data-'+e]['druScale']
+        #runtime  = data[x+'-data-'+e]['runtime']
+        
+        kev  = 1.     # keV/bin
+        day  = 86400. # in seconds
+        
+        xkgs = cmass(int(x[-1])-1)
+        pmts = 16.
+        lskg = 1800.
+        
+        generated = float(bkgs[key]['generated'])
+        if generated < 1:
+            print "WARNING: 0 events generated for -->", key
+            continue
+        
+        if loca == 'internal':
+            #scale = bkgs[key]['info']['acti'] * (xkgs) * (1./1000) * (runtime) * (1./generated) * (druscale)
+            scale = bkgs[key]['info']['acti'] * (xkgs) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./kev)
+            bkgs[key]['hist'].Scale(scale)
+        elif loca == 'pmt':
+            #scale = bkgs[key]['info']['acti'] * (pmts) * (1./1000) * (runtime) * (1./generated) * (druscale)
+            scale = bkgs[key]['info']['acti'] * (pmts) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./kev)
+            bkgs[key]['hist'].Scale(scale)
+        elif loca == 'lsveto':
+            #scale = bkgs[key]['info']['acti'] * (lskg) * (1./1000) * (runtime) * (1./generated) * (druscale)
+            scale = bkgs[key]['info']['acti'] * (lskg) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./kev)
+            bkgs[key]['hist'].Scale(scale)
+        elif loca == 'lsvetoair':
+            #scale = bkgs[key]['info']['acti'] * (xkgs) * (1./1000) * (runtime) * (1./generated) * (druscale)
+            scale = bkgs[key]['info']['acti'] * (xkgs) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./kev)
+            bkgs[key]['hist'].Scale(scale)
+        elif loca == 'airshield':
+            #scale = bkgs[key]['info']['acti'] * (xkgs) * (1./1000) * (runtime) * (1./generated) * (druscale)
+            scale = bkgs[key]['info']['acti'] * (xkgs) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./kev)
+            bkgs[key]['hist'].Scale(scale)
+        elif loca == 'steel':
+            #scale = bkgs[key]['info']['acti'] * (xkgs) * (1./1000) * (runtime) * (1./generated) * (druscale)
+            scale = bkgs[key]['info']['acti'] * (xkgs) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./kev)
+            bkgs[key]['hist'].Scale(scale)
+        else:
+            print "WARNING: No background scaling for  --> ", loca
+            continue
+
+    return bkgs
+
+
+def scaleSigs40(sigkeys, sigs):
+
+    for key in sigkeys:
+        x = key.split('-')[0]
+        loca = key.split('-')[1]
+        e = key.split('-')[-1]
+        
+        #druscale = data[x+'-data-'+e]['druScale']
+        #runtime = data[x+'-data-'+e]['runtime']
+
+        kev  = 1.     # keV/bin
+        day  = 86400. # in seconds
+        
+        xkgs = cmass(int(x[-1])-1)
+        pmts = 16.
+        lskg = 1800.
+        
+        generated = float(sigs[key]['generated'])
+        if generated < 1:
+            print "WARNING: 0 events generated for -->", key
+            continue
+        
+        # verbose?
+        V = 1
+        E = int(e[-1])
+        
+        if loca == 'internal':
+            #fitActivity = sigs[key]['fitscale'] * (1./kgs) * (1000.) * (1./runtime) * (generated) * (1./druscale)
+            fitActivity = sigs[key]['fitscale'] * (1./xkgs) * (1000.) * (generated) * (1./day) * (xkgs) * (kev)
+            sigs[key]['info']['acti'] = fitActivity
+            if V and E: print '!!!!', key, sigs[key]['info']['acti'],'mBq/kg'
+        if loca == 'pmt':
+            #fitActivity = sigs[key]['fitscale'] * (1./pmts) * (1000.) * (1./runtime) * (generated) * (1./druscale)
+            fitActivity = sigs[key]['fitscale'] * (1./pmts) * (1000.) * (generated) * (1./day) * (xkgs) * (kev)
+            sigs[key]['info']['acti'] = fitActivity
+            if V and E: print '!!!!', key, sigs[key]['info']['acti'],'mBq/pmt'
+        if loca == 'lsveto':
+            #fitActivity = sigs[key]['fitscale'] * (1./kgs) * (1000.) * (1./runtime) * (generated) * (1./druscale)
+            fitActivity = sigs[key]['fitscale'] * (1./lskg) * (1000.) * (generated) * (1./day) * (xkgs) * (kev)
+            sigs[key]['info']['acti'] = fitActivity
+            if V and E: print '!!!!', key, sigs[key]['info']['acti'],'mBq/pmt'
+        if loca == 'lsvetoair':
+            #fitActivity = sigs[key]['fitscale'] * (1./kgs) * (1000.) * (1./runtime) * (generated) * (1./druscale)
+            fitActivity = sigs[key]['fitscale'] * (1./xkgs) * (1000.) * (generated) * (1./day) * (xkgs) * (kev)
+            sigs[key]['info']['acti'] = fitActivity
+            if V and E: print '!!!!', key, sigs[key]['info']['acti'],'mBq/pmt'
+        if loca == 'airshield':
+            #fitActivity = sigs[key]['fitscale'] * (1./kgs) * (1000.) * (1./runtime) * (generated) * (1./druscale)
+            fitActivity = sigs[key]['fitscale'] * (1./xkgs) * (1000.) * (generated) * (1./day) * (xkgs) * (kev)
+            sigs[key]['info']['acti'] = fitActivity
+            if V and E: print '!!!!', key, sigs[key]['info']['acti'],'mBq/pmt'
+        if loca == 'steel':
+            #fitActivity = sigs[key]['fitscale'] * (1./kgs) * (1000.) * (1./runtime) * (generated) * (1./druscale)
+            fitActivity = sigs[key]['fitscale'] * (1./xkgs) * (1000.) * (generated) * (1./day) * (xkgs) * (kev)
+            sigs[key]['info']['acti'] = fitActivity
+            if V and E: print '!!!!', key, sigs[key]['info']['acti'],'mBq/pmt'
+
+    return sigs
 
