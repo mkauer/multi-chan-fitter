@@ -1,8 +1,9 @@
 # -*- sh -*-
 
-# version 2017-02-01
+# version 2017-02-02
 
 
+# + generated the new build40 MC
 # ~ use data build V00-02-03
 # + testing new join40.py format
 # + add production number to data
@@ -46,14 +47,14 @@
 # bsdr   chan     xstl     loca       isof      chst      chsp      acti       erro      lbnd      hbnd        file
 # ----   -----    ----    --------   ------    ------    ------    --------   -------   -------   ------      --------
 
-DR        A        1       data        1546      V00-02-03    ./root-join-read/build40/build40-backgrounds40-test.root
-DR        A        2       data        1546      V00-02-03    ./root-join-read/build40/build40-backgrounds40-test.root
-DR        A        3       data        1546      V00-02-03    ./root-join-read/build40/build40-backgrounds40-test.root
-DR        A        4       data        1546      V00-02-03    ./root-join-read/build40/build40-backgrounds40-test.root
-DR        A        5       data        1546      V00-02-03    ./root-join-read/build40/build40-backgrounds40-test.root
-DR        A        6       data        1546      V00-02-03    ./root-join-read/build40/build40-backgrounds40-test.root
-DR        A        7       data        1546      V00-02-03    ./root-join-read/build40/build40-backgrounds40-test.root
-DR        A        8       data        1546      V00-02-03    ./root-join-read/build40/build40-backgrounds40-test.root
+DR        A        1       data        1546      V00-02-03    ./root-join-read/build40/build40-data-master.root
+DR        A        2       data        1546      V00-02-03    ./root-join-read/build40/build40-data-master.root
+DR        A        3       data        1546      V00-02-03    ./root-join-read/build40/build40-data-master.root
+DR        A        4       data        1546      V00-02-03    ./root-join-read/build40/build40-data-master.root
+DR        A        5       data        1546      V00-02-03    ./root-join-read/build40/build40-data-master.root
+DR        A        6       data        1546      V00-02-03    ./root-join-read/build40/build40-data-master.root
+DR        A        7       data        1546      V00-02-03    ./root-join-read/build40/build40-data-master.root
+DR        A        8       data        1546      V00-02-03    ./root-join-read/build40/build40-data-master.root
 """
 D        A        1       data        1546      V00-02-00    ./root-join-read/build40/build40-backgrounds40-test.root
 D        A        2       data        1546      V00-02-00    ./root-join-read/build40/build40-backgrounds40-test.root
@@ -63,8 +64,7 @@ D        A        5       data        1546      V00-02-00    ./root-join-read/bu
 D        A        6       data        1546      V00-02-00    ./root-join-read/build40/build40-backgrounds40-test.root
 D        A        7       data        1546      V00-02-00    ./root-join-read/build40/build40-backgrounds40-test.root
 D        A        8       data        1546      V00-02-00    ./root-join-read/build40/build40-backgrounds40-test.root
-"""
-"""
+
 B        A        1       internal    Na22      Na22      Na22     1.     0.0001     0.001     10.0        ./root-join-read/join32-int-na22-test.root
 B        A        2       internal    Na22      Na22      Na22     1.     0.0001     0.001     10.0        ./root-join-read/join32-int-na22-test.root
 B        A        3       internal    Na22      Na22      Na22     1.     0.0001     0.001     10.0        ./root-join-read/join32-int-na22-test.root
@@ -74,147 +74,147 @@ B        A        6       internal    Na22      Na22      Na22     1.     0.0001
 B        A        7       internal    Na22      Na22      Na22     1.     0.0001     0.001     10.0        ./root-join-read/join32-int-na22-test.root
 B        A        8       internal    Na22      Na22      Na22     1.     0.0001     0.001     10.0        ./root-join-read/join32-int-na22-test.root
 """
-B        A        1       internal    K40       K40       K40      1.302     0.0001     0.001     10.0        ./root-join-read/build40/build40-backgrounds40-test.root
-B        A        2       internal    K40       K40       K40      2.481     0.0001     0.001     10.0        ./root-join-read/build40/build40-backgrounds40-test.root
-B        A        3       internal    K40       K40       K40      1.233     0.0001     0.001     10.0        ./root-join-read/build40/build40-backgrounds40-test.root
-B        A        4       internal    K40       K40       K40      1.185     0.0001     0.001     10.0        ./root-join-read/build40/build40-backgrounds40-test.root
-B        A        5       internal    K40       K40       K40      2.604     0.0001     0.001     10.0        ./root-join-read/build40/build40-backgrounds40-test.root
-B        A        6       internal    K40       K40       K40      0.366     0.0001     0.001     10.0        ./root-join-read/build40/build40-backgrounds40-test.root
-B        A        7       internal    K40       K40       K40      0.564     0.0001     0.001     10.0        ./root-join-read/build40/build40-backgrounds40-test.root
-B        A        8       internal    K40       K40       K40      1.685     0.0001     0.001     10.0        ./root-join-read/build40/build40-backgrounds40-test.root
+B        A        1       internal    K40       K40       K40      1.302     0.0001     0.001     10.0       ./root-join-read/build40/build40-internalK40-master.root
+B        A        2       internal    K40       K40       K40      2.481     0.0001     0.001     10.0       ./root-join-read/build40/build40-internalK40-master.root
+B        A        3       internal    K40       K40       K40      1.233     0.0001     0.001     10.0       ./root-join-read/build40/build40-internalK40-master.root
+B        A        4       internal    K40       K40       K40      1.185     0.0001     0.001     10.0       ./root-join-read/build40/build40-internalK40-master.root
+B        A        5       internal    K40       K40       K40      2.604     0.0001     0.001     10.0       ./root-join-read/build40/build40-internalK40-master.root
+B        A        6       internal    K40       K40       K40      0.366     0.0001     0.001     10.0       ./root-join-read/build40/build40-internalK40-master.root
+B        A        7       internal    K40       K40       K40      0.564     0.0001     0.001     10.0       ./root-join-read/build40/build40-internalK40-master.root
+B        A        8       internal    K40       K40       K40      1.685     0.0001     0.001     10.0       ./root-join-read/build40/build40-internalK40-master.root
+
+B        A        1       internal    U238      U238      Rn222    2.48e-4   0.0001     0.001     10.0       ./root-join-read/build40/build40-internalU238-master.root
+B        A        2       internal    U238      U238      Rn222    1.48e-3   0.0001     0.001     10.0       ./root-join-read/build40/build40-internalU238-master.root
+B        A        3       internal    U238      U238      Rn222    4.96e-4   0.0001     0.001     10.0       ./root-join-read/build40/build40-internalU238-master.root
+B        A        4       internal    U238      U238      Rn222    4.96e-4   0.0001     0.001     10.0       ./root-join-read/build40/build40-internalU238-master.root
+B        A        5       internal    U238      U238      Rn222    1.48e-3   0.0001     0.001     10.0       ./root-join-read/build40/build40-internalU238-master.root
+B        A        6       internal    U238      U238      Rn222    2.23e-4   0.0001     0.001     10.0       ./root-join-read/build40/build40-internalU238-master.root
+B        A        7       internal    U238      U238      Rn222    2.23e-4   0.0001     0.001     10.0       ./root-join-read/build40/build40-internalU238-master.root
+B        A        8       internal    U238      U238      Rn222    1.48e-3   0.0001     0.001     10.0       ./root-join-read/build40/build40-internalU238-master.root
+
+S        A        1       internal    U238      Pb210     Pb210    3.200     0.0001     0.001     10.0       ./root-join-read/build40/build40-internalU238-master.root
+S        A        2       internal    U238      Pb210     Pb210    2.060     0.0001     0.001     10.0       ./root-join-read/build40/build40-internalU238-master.root
+S        A        3       internal    U238      Pb210     Pb210    0.760     0.0001     0.001     10.0       ./root-join-read/build40/build40-internalU238-master.root
+S        A        4       internal    U238      Pb210     Pb210    0.740     0.0001     0.001     10.0       ./root-join-read/build40/build40-internalU238-master.root
+S        A        5       internal    U238      Pb210     Pb210    2.060     0.0001     0.001     10.0       ./root-join-read/build40/build40-internalU238-master.root
+S        A        6       internal    U238      Pb210     Pb210    1.520     0.0001     0.001     10.0       ./root-join-read/build40/build40-internalU238-master.root
+S        A        7       internal    U238      Pb210     Pb210    1.540     0.0001     0.001     10.0       ./root-join-read/build40/build40-internalU238-master.root
+S        A        8       internal    U238      Pb210     Pb210    2.050     0.0001     0.001     10.0       ./root-join-read/build40/build40-internalU238-master.root
+
+B        A        1       internal    Th232     Th232     Th232    5.37e-3   0.0001     0.001     10.0       ./root-join-read/build40/build40-internalTh232-master.root
+B        A        2       internal    Th232     Th232     Th232    2.60e-3   0.0001     0.001     10.0       ./root-join-read/build40/build40-internalTh232-master.root
+B        A        3       internal    Th232     Th232     Th232    1.80e-3   0.0001     0.001     10.0       ./root-join-read/build40/build40-internalTh232-master.root
+B        A        4       internal    Th232     Th232     Th232    1.23e-3   0.0001     0.001     10.0       ./root-join-read/build40/build40-internalTh232-master.root
+B        A        5       internal    Th232     Th232     Th232    9.60e-3   0.0001     0.001     10.0       ./root-join-read/build40/build40-internalTh232-master.root
+B        A        6       internal    Th232     Th232     Th232    2.30e-3   0.0001     0.001     10.0       ./root-join-read/build40/build40-internalTh232-master.root
+B        A        7       internal    Th232     Th232     Th232    2.50e-3   0.0001     0.001     10.0       ./root-join-read/build40/build40-internalTh232-master.root
+B        A        8       internal    Th232     Th232     Th232    5.70e-3   0.0001     0.001     10.0       ./root-join-read/build40/build40-internalTh232-master.root
+
+B        A        1       pmt         K40       K40       K40      58.0      0.0001     0.001     10.0       ./root-join-read/build40/build40-pmtK40-master.root
+B        A        2       pmt         K40       K40       K40      58.0      0.0001     0.001     10.0       ./root-join-read/build40/build40-pmtK40-master.root
+B        A        3       pmt         K40       K40       K40      58.0      0.0001     0.001     10.0       ./root-join-read/build40/build40-pmtK40-master.root
+B        A        4       pmt         K40       K40       K40      58.0      0.0001     0.001     10.0       ./root-join-read/build40/build40-pmtK40-master.root
+B        A        5       pmt         K40       K40       K40      58.0      0.0001     0.001     10.0       ./root-join-read/build40/build40-pmtK40-master.root
+B        A        6       pmt         K40       K40       K40      58.0      0.0001     0.001     10.0       ./root-join-read/build40/build40-pmtK40-master.root
+B        A        7       pmt         K40       K40       K40      58.0      0.0001     0.001     10.0       ./root-join-read/build40/build40-pmtK40-master.root
+B        A        8       pmt         K40       K40       K40      58.0      0.0001     0.001     10.0       ./root-join-read/build40/build40-pmtK40-master.root
+
+S        A        1       pmt         U238      U238      U238     60.0      0.0001     0.001     10.0       ./root-join-read/build40/build40-pmtU238-master.root
+S        A        2       pmt         U238      U238      U238     60.0      0.0001     0.001     10.0       ./root-join-read/build40/build40-pmtU238-master.root
+S        A        3       pmt         U238      U238      U238     60.0      0.0001     0.001     10.0       ./root-join-read/build40/build40-pmtU238-master.root
+S        A        4       pmt         U238      U238      U238     60.0      0.0001     0.001     10.0       ./root-join-read/build40/build40-pmtU238-master.root
+S        A        5       pmt         U238      U238      U238     60.0      0.0001     0.001     10.0       ./root-join-read/build40/build40-pmtU238-master.root
+S        A        6       pmt         U238      U238      U238     60.0      0.0001     0.001     10.0       ./root-join-read/build40/build40-pmtU238-master.root
+S        A        7       pmt         U238      U238      U238     60.0      0.0001     0.001     10.0       ./root-join-read/build40/build40-pmtU238-master.root
+S        A        8       pmt         U238      U238      U238     60.0      0.0001     0.001     10.0       ./root-join-read/build40/build40-pmtU238-master.root
+
+B        A        1       pmt         Th232     Th232     Th232    12.0      0.0001     0.001     10.0       ./root-join-read/build40/build40-pmtTh232-master.root
+B        A        2       pmt         Th232     Th232     Th232    12.0      0.0001     0.001     10.0       ./root-join-read/build40/build40-pmtTh232-master.root
+B        A        3       pmt         Th232     Th232     Th232    12.0      0.0001     0.001     10.0       ./root-join-read/build40/build40-pmtTh232-master.root
+B        A        4       pmt         Th232     Th232     Th232    12.0      0.0001     0.001     10.0       ./root-join-read/build40/build40-pmtTh232-master.root
+B        A        5       pmt         Th232     Th232     Th232    12.0      0.0001     0.001     10.0       ./root-join-read/build40/build40-pmtTh232-master.root
+B        A        6       pmt         Th232     Th232     Th232    12.0      0.0001     0.001     10.0       ./root-join-read/build40/build40-pmtTh232-master.root
+B        A        7       pmt         Th232     Th232     Th232    12.0      0.0001     0.001     10.0       ./root-join-read/build40/build40-pmtTh232-master.root
+B        A        8       pmt         Th232     Th232     Th232    12.0      0.0001     0.001     10.0       ./root-join-read/build40/build40-pmtTh232-master.root
 """
-B        A        1       internal    U238      U238      Rn222    2.48e-4   0.0001     0.001     10.0        ./root-join-read/join32-internal-master.root
-B        A        2       internal    U238      U238      Rn222    1.48e-3   0.0001     0.001     10.0        ./root-join-read/join32-internal-master.root
-B        A        3       internal    U238      U238      Rn222    4.96e-4   0.0001     0.001     10.0        ./root-join-read/join32-internal-master.root
-B        A        4       internal    U238      U238      Rn222    4.96e-4   0.0001     0.001     10.0        ./root-join-read/join32-internal-master.root
-B        A        5       internal    U238      U238      Rn222    1.48e-3   0.0001     0.001     10.0        ./root-join-read/join32-internal-master.root
-B        A        6       internal    U238      U238      Rn222    2.23e-4   0.0001     0.001     10.0        ./root-join-read/join32-internal-master.root
-B        A        7       internal    U238      U238      Rn222    2.23e-4   0.0001     0.001     10.0        ./root-join-read/join32-internal-master.root
-B        A        8       internal    U238      U238      Rn222    1.48e-3   0.0001     0.001     10.0        ./root-join-read/join32-internal-master.root
-"""
-S        A        1       internal    U238      Pb210     Pb210    3.200     0.0001     0.001     10.0        ./root-join-read/build40/build40-backgrounds40-test.root
-S        A        2       internal    U238      Pb210     Pb210    2.060     0.0001     0.001     10.0        ./root-join-read/build40/build40-backgrounds40-test.root
-S        A        3       internal    U238      Pb210     Pb210    0.760     0.0001     0.001     10.0        ./root-join-read/build40/build40-backgrounds40-test.root
-S        A        4       internal    U238      Pb210     Pb210    0.740     0.0001     0.001     10.0        ./root-join-read/build40/build40-backgrounds40-test.root
-S        A        5       internal    U238      Pb210     Pb210    2.060     0.0001     0.001     10.0        ./root-join-read/build40/build40-backgrounds40-test.root
-S        A        6       internal    U238      Pb210     Pb210    1.520     0.0001     0.001     10.0        ./root-join-read/build40/build40-backgrounds40-test.root
-S        A        7       internal    U238      Pb210     Pb210    1.540     0.0001     0.001     10.0        ./root-join-read/build40/build40-backgrounds40-test.root
-S        A        8       internal    U238      Pb210     Pb210    2.050     0.0001     0.001     10.0        ./root-join-read/build40/build40-backgrounds40-test.root
-"""
-B        A        1       internal    Th232     Th232     Th232    5.37e-3   0.0001     0.001     10.0        ./root-join-read/join32-internal-master.root
-B        A        2       internal    Th232     Th232     Th232    2.60e-3   0.0001     0.001     10.0        ./root-join-read/join32-internal-master.root
-B        A        3       internal    Th232     Th232     Th232    1.80e-3   0.0001     0.001     10.0        ./root-join-read/join32-internal-master.root
-B        A        4       internal    Th232     Th232     Th232    1.23e-3   0.0001     0.001     10.0        ./root-join-read/join32-internal-master.root
-B        A        5       internal    Th232     Th232     Th232    9.60e-3   0.0001     0.001     10.0        ./root-join-read/join32-internal-master.root
-B        A        6       internal    Th232     Th232     Th232    2.30e-3   0.0001     0.001     10.0        ./root-join-read/join32-internal-master.root
-B        A        7       internal    Th232     Th232     Th232    2.50e-3   0.0001     0.001     10.0        ./root-join-read/join32-internal-master.root
-B        A        8       internal    Th232     Th232     Th232    5.70e-3   0.0001     0.001     10.0        ./root-join-read/join32-internal-master.root
+B        A        1       lsveto      K40       K40       K40      1.00e-3   0.0001     0.001     10.0       ./root-join-read/build40/build40-lsveto-master.root
+B        A        2       lsveto      K40       K40       K40      1.00e-3   0.0001     0.001     10.0       ./root-join-read/build40/build40-lsveto-master.root
+B        A        3       lsveto      K40       K40       K40      1.00e-3   0.0001     0.001     10.0       ./root-join-read/build40/build40-lsveto-master.root
+B        A        4       lsveto      K40       K40       K40      1.00e-3   0.0001     0.001     10.0       ./root-join-read/build40/build40-lsveto-master.root
+B        A        5       lsveto      K40       K40       K40      1.00e-3   0.0001     0.001     10.0       ./root-join-read/build40/build40-lsveto-master.root
+B        A        6       lsveto      K40       K40       K40      1.00e-3   0.0001     0.001     10.0       ./root-join-read/build40/build40-lsveto-master.root
+B        A        7       lsveto      K40       K40       K40      1.00e-3   0.0001     0.001     10.0       ./root-join-read/build40/build40-lsveto-master.root
+B        A        8       lsveto      K40       K40       K40      1.00e-3   0.0001     0.001     10.0       ./root-join-read/build40/build40-lsveto-master.root
 
-B        A        1       pmt         K40       K40       K40      58.0      0.0001     0.001     10.0        ./root-join-read/join32-pmt-master.root
-B        A        2       pmt         K40       K40       K40      58.0      0.0001     0.001     10.0        ./root-join-read/join32-pmt-master.root
-B        A        3       pmt         K40       K40       K40      58.0      0.0001     0.001     10.0        ./root-join-read/join32-pmt-master.root
-B        A        4       pmt         K40       K40       K40      58.0      0.0001     0.001     10.0        ./root-join-read/join32-pmt-master.root
-B        A        5       pmt         K40       K40       K40      58.0      0.0001     0.001     10.0        ./root-join-read/join32-pmt-master.root
-B        A        6       pmt         K40       K40       K40      58.0      0.0001     0.001     10.0        ./root-join-read/join32-pmt-master.root
-B        A        7       pmt         K40       K40       K40      58.0      0.0001     0.001     10.0        ./root-join-read/join32-pmt-master.root
-B        A        8       pmt         K40       K40       K40      58.0      0.0001     0.001     10.0        ./root-join-read/join32-pmt-master.root
-"""
-S        A        1       pmt         U238      U238      U238     60.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-backgrounds40-test.root
-S        A        2       pmt         U238      U238      U238     60.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-backgrounds40-test.root
-S        A        3       pmt         U238      U238      U238     60.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-backgrounds40-test.root
-S        A        4       pmt         U238      U238      U238     60.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-backgrounds40-test.root
-S        A        5       pmt         U238      U238      U238     60.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-backgrounds40-test.root
-S        A        6       pmt         U238      U238      U238     60.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-backgrounds40-test.root
-S        A        7       pmt         U238      U238      U238     60.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-backgrounds40-test.root
-S        A        8       pmt         U238      U238      U238     60.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-backgrounds40-test.root
-"""
-B        A        1       pmt         Th232     Th232     Th232    12.0      0.0001     0.001     10.0        ./root-join-read/join32-pmt-master.root
-B        A        2       pmt         Th232     Th232     Th232    12.0      0.0001     0.001     10.0        ./root-join-read/join32-pmt-master.root
-B        A        3       pmt         Th232     Th232     Th232    12.0      0.0001     0.001     10.0        ./root-join-read/join32-pmt-master.root
-B        A        4       pmt         Th232     Th232     Th232    12.0      0.0001     0.001     10.0        ./root-join-read/join32-pmt-master.root
-B        A        5       pmt         Th232     Th232     Th232    12.0      0.0001     0.001     10.0        ./root-join-read/join32-pmt-master.root
-B        A        6       pmt         Th232     Th232     Th232    12.0      0.0001     0.001     10.0        ./root-join-read/join32-pmt-master.root
-B        A        7       pmt         Th232     Th232     Th232    12.0      0.0001     0.001     10.0        ./root-join-read/join32-pmt-master.root
-B        A        8       pmt         Th232     Th232     Th232    12.0      0.0001     0.001     10.0        ./root-join-read/join32-pmt-master.root
+B        A        1       lsveto      U238      U238      U238     8.64e-2   0.0001     0.001     10.0       ./root-join-read/build40/build40-lsveto-master.root
+B        A        2       lsveto      U238      U238      U238     8.64e-2   0.0001     0.001     10.0       ./root-join-read/build40/build40-lsveto-master.root
+B        A        3       lsveto      U238      U238      U238     8.64e-2   0.0001     0.001     10.0       ./root-join-read/build40/build40-lsveto-master.root
+B        A        4       lsveto      U238      U238      U238     8.64e-2   0.0001     0.001     10.0       ./root-join-read/build40/build40-lsveto-master.root
+B        A        5       lsveto      U238      U238      U238     8.64e-2   0.0001     0.001     10.0       ./root-join-read/build40/build40-lsveto-master.root
+B        A        6       lsveto      U238      U238      U238     8.64e-2   0.0001     0.001     10.0       ./root-join-read/build40/build40-lsveto-master.root
+B        A        7       lsveto      U238      U238      U238     8.64e-2   0.0001     0.001     10.0       ./root-join-read/build40/build40-lsveto-master.root
+B        A        8       lsveto      U238      U238      U238     8.64e-2   0.0001     0.001     10.0       ./root-join-read/build40/build40-lsveto-master.root
 
-B        A        1       lsveto      K40       K40       K40      1.00e-3   0.0001     0.001     10.0        ./root-join-read/join32-lsveto-master.root
-B        A        2       lsveto      K40       K40       K40      1.00e-3   0.0001     0.001     10.0        ./root-join-read/join32-lsveto-master.root
-B        A        3       lsveto      K40       K40       K40      1.00e-3   0.0001     0.001     10.0        ./root-join-read/join32-lsveto-master.root
-B        A        4       lsveto      K40       K40       K40      1.00e-3   0.0001     0.001     10.0        ./root-join-read/join32-lsveto-master.root
-B        A        5       lsveto      K40       K40       K40      1.00e-3   0.0001     0.001     10.0        ./root-join-read/join32-lsveto-master.root
-B        A        6       lsveto      K40       K40       K40      1.00e-3   0.0001     0.001     10.0        ./root-join-read/join32-lsveto-master.root
-B        A        7       lsveto      K40       K40       K40      1.00e-3   0.0001     0.001     10.0        ./root-join-read/join32-lsveto-master.root
-B        A        8       lsveto      K40       K40       K40      1.00e-3   0.0001     0.001     10.0        ./root-join-read/join32-lsveto-master.root
+B        A        1       lsveto      Th232     Th232     Th232    1.62e-2   0.0001     0.001     10.0       ./root-join-read/build40/build40-lsveto-master.root
+B        A        2       lsveto      Th232     Th232     Th232    1.62e-2   0.0001     0.001     10.0       ./root-join-read/build40/build40-lsveto-master.root
+B        A        3       lsveto      Th232     Th232     Th232    1.62e-2   0.0001     0.001     10.0       ./root-join-read/build40/build40-lsveto-master.root
+B        A        4       lsveto      Th232     Th232     Th232    1.62e-2   0.0001     0.001     10.0       ./root-join-read/build40/build40-lsveto-master.root
+B        A        5       lsveto      Th232     Th232     Th232    1.62e-2   0.0001     0.001     10.0       ./root-join-read/build40/build40-lsveto-master.root
+B        A        6       lsveto      Th232     Th232     Th232    1.62e-2   0.0001     0.001     10.0       ./root-join-read/build40/build40-lsveto-master.root
+B        A        7       lsveto      Th232     Th232     Th232    1.62e-2   0.0001     0.001     10.0       ./root-join-read/build40/build40-lsveto-master.root
+B        A        8       lsveto      Th232     Th232     Th232    1.62e-2   0.0001     0.001     10.0       ./root-join-read/build40/build40-lsveto-master.root
 
-B        A        1       lsveto      U238      U238      U238     8.64e-2   0.0001     0.001     10.0        ./root-join-read/join32-lsveto-master.root
-B        A        2       lsveto      U238      U238      U238     8.64e-2   0.0001     0.001     10.0        ./root-join-read/join32-lsveto-master.root
-B        A        3       lsveto      U238      U238      U238     8.64e-2   0.0001     0.001     10.0        ./root-join-read/join32-lsveto-master.root
-B        A        4       lsveto      U238      U238      U238     8.64e-2   0.0001     0.001     10.0        ./root-join-read/join32-lsveto-master.root
-B        A        5       lsveto      U238      U238      U238     8.64e-2   0.0001     0.001     10.0        ./root-join-read/join32-lsveto-master.root
-B        A        6       lsveto      U238      U238      U238     8.64e-2   0.0001     0.001     10.0        ./root-join-read/join32-lsveto-master.root
-B        A        7       lsveto      U238      U238      U238     8.64e-2   0.0001     0.001     10.0        ./root-join-read/join32-lsveto-master.root
-B        A        8       lsveto      U238      U238      U238     8.64e-2   0.0001     0.001     10.0        ./root-join-read/join32-lsveto-master.root
+B        A        1       lsvetoair   U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-lsvetoair-master.root
+B        A        2       lsvetoair   U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-lsvetoair-master.root
+B        A        3       lsvetoair   U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-lsvetoair-master.root
+B        A        4       lsvetoair   U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-lsvetoair-master.root
+B        A        5       lsvetoair   U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-lsvetoair-master.root
+B        A        6       lsvetoair   U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-lsvetoair-master.root
+B        A        7       lsvetoair   U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-lsvetoair-master.root
+B        A        8       lsvetoair   U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-lsvetoair-master.root
 
-B        A        1       lsveto      Th232     Th232     Th232    1.62e-2   0.0001     0.001     10.0        ./root-join-read/join32-lsveto-master.root
-B        A        2       lsveto      Th232     Th232     Th232    1.62e-2   0.0001     0.001     10.0        ./root-join-read/join32-lsveto-master.root
-B        A        3       lsveto      Th232     Th232     Th232    1.62e-2   0.0001     0.001     10.0        ./root-join-read/join32-lsveto-master.root
-B        A        4       lsveto      Th232     Th232     Th232    1.62e-2   0.0001     0.001     10.0        ./root-join-read/join32-lsveto-master.root
-B        A        5       lsveto      Th232     Th232     Th232    1.62e-2   0.0001     0.001     10.0        ./root-join-read/join32-lsveto-master.root
-B        A        6       lsveto      Th232     Th232     Th232    1.62e-2   0.0001     0.001     10.0        ./root-join-read/join32-lsveto-master.root
-B        A        7       lsveto      Th232     Th232     Th232    1.62e-2   0.0001     0.001     10.0        ./root-join-read/join32-lsveto-master.root
-B        A        8       lsveto      Th232     Th232     Th232    1.62e-2   0.0001     0.001     10.0        ./root-join-read/join32-lsveto-master.root
+B        A        1       lsvetoair   Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-lsvetoair-master.root
+B        A        2       lsvetoair   Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-lsvetoair-master.root
+B        A        3       lsvetoair   Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-lsvetoair-master.root
+B        A        4       lsvetoair   Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-lsvetoair-master.root
+B        A        5       lsvetoair   Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-lsvetoair-master.root
+B        A        6       lsvetoair   Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-lsvetoair-master.root
+B        A        7       lsvetoair   Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-lsvetoair-master.root
+B        A        8       lsvetoair   Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-lsvetoair-master.root
 
-B        A        1       lsvetoair   U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-lsvetoair-master.root
-B        A        2       lsvetoair   U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-lsvetoair-master.root
-B        A        3       lsvetoair   U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-lsvetoair-master.root
-B        A        4       lsvetoair   U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-lsvetoair-master.root
-B        A        5       lsvetoair   U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-lsvetoair-master.root
-B        A        6       lsvetoair   U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-lsvetoair-master.root
-B        A        7       lsvetoair   U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-lsvetoair-master.root
-B        A        8       lsvetoair   U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-lsvetoair-master.root
+B        A        1       airshield   U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-airshield-master.root
+B        A        2       airshield   U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-airshield-master.root
+B        A        3       airshield   U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-airshield-master.root
+B        A        4       airshield   U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-airshield-master.root
+B        A        5       airshield   U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-airshield-master.root
+B        A        6       airshield   U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-airshield-master.root
+B        A        7       airshield   U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-airshield-master.root
+B        A        8       airshield   U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-airshield-master.root
 
-B        A        1       lsvetoair   Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-lsvetoair-master.root
-B        A        2       lsvetoair   Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-lsvetoair-master.root
-B        A        3       lsvetoair   Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-lsvetoair-master.root
-B        A        4       lsvetoair   Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-lsvetoair-master.root
-B        A        5       lsvetoair   Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-lsvetoair-master.root
-B        A        6       lsvetoair   Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-lsvetoair-master.root
-B        A        7       lsvetoair   Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-lsvetoair-master.root
-B        A        8       lsvetoair   Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-lsvetoair-master.root
+B        A        1       airshield   Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-airshield-master.root
+B        A        2       airshield   Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-airshield-master.root
+B        A        3       airshield   Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-airshield-master.root
+B        A        4       airshield   Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-airshield-master.root
+B        A        5       airshield   Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-airshield-master.root
+B        A        6       airshield   Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-airshield-master.root
+B        A        7       airshield   Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-airshield-master.root
+B        A        8       airshield   Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-airshield-master.root
 
-B        A        1       airshield   U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-airshield-master.root
-B        A        2       airshield   U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-airshield-master.root
-B        A        3       airshield   U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-airshield-master.root
-B        A        4       airshield   U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-airshield-master.root
-B        A        5       airshield   U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-airshield-master.root
-B        A        6       airshield   U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-airshield-master.root
-B        A        7       airshield   U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-airshield-master.root
-B        A        8       airshield   U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-airshield-master.root
+B        A        1       steel       U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-steel-master.root
+B        A        2       steel       U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-steel-master.root
+B        A        3       steel       U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-steel-master.root
+B        A        4       steel       U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-steel-master.root
+B        A        5       steel       U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-steel-master.root
+B        A        6       steel       U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-steel-master.root
+B        A        7       steel       U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-steel-master.root
+B        A        8       steel       U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-steel-master.root
 
-B        A        1       airshield   Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-airshield-master.root
-B        A        2       airshield   Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-airshield-master.root
-B        A        3       airshield   Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-airshield-master.root
-B        A        4       airshield   Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-airshield-master.root
-B        A        5       airshield   Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-airshield-master.root
-B        A        6       airshield   Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-airshield-master.root
-B        A        7       airshield   Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-airshield-master.root
-B        A        8       airshield   Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-airshield-master.root
-
-B        A        1       steel       U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-steel-master.root
-B        A        2       steel       U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-steel-master.root
-B        A        3       steel       U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-steel-master.root
-B        A        4       steel       U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-steel-master.root
-B        A        5       steel       U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-steel-master.root
-B        A        6       steel       U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-steel-master.root
-B        A        7       steel       U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-steel-master.root
-B        A        8       steel       U238      U238      U238     1.0      0.0001     0.001     10.0        ./root-join-read/join32-steel-master.root
-
-B        A        1       steel       Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-steel-master.root
-B        A        2       steel       Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-steel-master.root
-B        A        3       steel       Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-steel-master.root
-B        A        4       steel       Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-steel-master.root
-B        A        5       steel       Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-steel-master.root
-B        A        6       steel       Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-steel-master.root
-B        A        7       steel       Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-steel-master.root
-B        A        8       steel       Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/join32-steel-master.root
+B        A        1       steel       Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-steel-master.root
+B        A        2       steel       Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-steel-master.root
+B        A        3       steel       Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-steel-master.root
+B        A        4       steel       Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-steel-master.root
+B        A        5       steel       Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-steel-master.root
+B        A        6       steel       Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-steel-master.root
+B        A        7       steel       Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-steel-master.root
+B        A        8       steel       Th232     Th232     Th232    1.0      0.0001     0.001     10.0        ./root-join-read/build40/build40-steel-master.root
 

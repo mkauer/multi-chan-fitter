@@ -35,7 +35,7 @@ mcfile = 'backgrounds40.txt'
 ### [0] default - uses whatever is specified in the backgrounds file
 ### [1] forces to reuse all data/bkgs/sigs
 ### [2] forces not reusing any data/bkgs/sigs
-reuse = 0
+reuse = 1
 
 ### individual plots for all crystals? [0,1]
 indi = 0
