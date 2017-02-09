@@ -9,7 +9,9 @@ V = 'v40'
 
 # include single hit data
 # 
-# version: 2017-02-01
+# version: 2017-02-06
+#
+# note: run 1616 is the first run after calibration-campaign-2
 # 
 # see CHANGELOG for changes
 ######################################################################
@@ -27,15 +29,29 @@ from funcs40 import *
 
 ### user inputs
 #================================================================
+
+### extra notes to add to the saved plot file names? [0, 'something']
+note=0
+#note = 'hitTag-cut'
+
+
 ### backgrounds file to use?
 mcfile = 'backgrounds40.txt'
 
 ### force reuse of all joined rootfiles in mcfile? [0,1,2]
 ### nice for debugging
-### [0] default - uses whatever is specified in the backgrounds file
-### [1] forces to reuse all data/bkgs/sigs
-### [2] forces not reusing any data/bkgs/sigs
-reuse = 1
+### [0] default - use whatever is specified in the backgrounds file
+### [1] forces reusing of all data/bkgs/sigs
+### [2] forces NOT reusing any data/bkgs/sigs
+reuse = 2
+
+### force a particular set of hit chan data? [0,1,2,3]
+### nice for debugging
+### [0] default - use whatever is specified in the backgrounds file
+### [1] force all-hit data selection channel
+### [2] force single-hit data selection channel
+### [3] force multi-hi data selection channel
+chan = 3
 
 ### individual plots for all crystals? [0,1]
 indi = 0
@@ -97,7 +113,7 @@ def _myself_(argv):
         print 'ERROR: could not find backgrounds file -->', mcfile
         sys.exit()
         
-    data, bkgs, sigs = build40(mcfile, reuse)
+    data, bkgs, sigs = build40(mcfile, reuse, chan)
     datkeys, bakkeys, sigkeys = sortKeys2(data, bkgs, sigs)
     
     
@@ -503,6 +519,7 @@ def _myself_(argv):
         if hiEplotRebin: save += '_hiEplotRebin-'+str(hiEplotRebin)
         #if reuse:        save += '_reuse'
         save += '_reuse'+str(reuse)
+        save += '_chan'+str(chan)
         save += '_'+V
         
         outfile = open('./plots/'+save+'_fit-results.txt', 'w')
@@ -1019,6 +1036,8 @@ def _myself_(argv):
         if hiEplotRebin: save += '_hiEplotRebin-'+str(hiEplotRebin)
         #if reuse:        save += '_reuse'
         save += '_reuse'+str(reuse)
+        save += '_chan'+str(chan)
+        if note:         save += '_'+note
         save += '_'+V
         
         canvs[E].Update()

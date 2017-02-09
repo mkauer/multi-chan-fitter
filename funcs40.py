@@ -6,10 +6,13 @@
 # 
 # Works with v40 and later versions
 # 
-# version: 2017-02-01
+# version: 2017-02-09
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# + finally fixed issue with single/multi hit selection criteria
+# + add TCut('1') as default - it works - no more if-else statements
+# + add fchan force selection 
 # + move to V00.02.03 processing of the 1546 data
 # + add force reuse options in funcs40.py
 # + reuse rootfiles works now in funcs40.py
@@ -49,7 +52,7 @@ sys.path.append("/home/mkauer/mc-fitting/")
 from funcs32 import *
 
 
-def getInfo40(line, freuse=0):
+def getInfo40(line, freuse=0, fchan=0):
     
     info={}
 
@@ -60,7 +63,7 @@ def getInfo40(line, freuse=0):
         
     # data type
     info['type'] = str(bits[0])
-
+    
     #-----------------------------------------------------------------
     # reuse a joined rootfile
     if 'R' in info['type']: info['reuse'] = 1
@@ -71,8 +74,14 @@ def getInfo40(line, freuse=0):
     if freuse == 2: info['reuse'] = 0
     #-----------------------------------------------------------------
     
+    #-----------------------------------------------------------------
     # channel
     info['chan'] = str(bits[1])
+    # force a channel of data selection
+    if fchan == 1: info['chan'] = 'A'
+    if fchan == 2: info['chan'] = 'S'
+    if fchan == 3: info['chan'] = 'M'
+    #-----------------------------------------------------------------
     
     # crystal
     info['xstl'] = int(bits[2])
@@ -191,23 +200,24 @@ def buildData40(info, data):
         if local:
             nfiles = chain.Add('/home/mkauer/COSINE/CUP/mc-fitting/data/phys/'+info['build']+'/ntp_I*'+info['run']+'*root*')
         else:
-            nfiles = chain.Add('/data/COSINE/NTP/phys/'+info['build']+'/ntp_I*'+info['run']+'*root*')
+            #nfiles = chain.Add('/data/COSINE/NTP/phys/'+info['build']+'/ntp_I*'+info['run']+'*root*')
+            nfiles = chain.Add('/data/COSINE/NTP/phys/'+info['build']+'/ntp_I*'+info['run']+'*root.000')
 
         if nfiles > 0:
             print nfiles,'data files found'
             for E in range(2):
-
+                
                 ### use crystalX.energyD for high energy
                 ### use crystalX.qc5 for low energy
                 if E:
                     edep = 'energyD'
                 else:
                     edep = 'qc5'
-
+                
                 par = histparam(E)
                 #for i in range(8):
                 i = info['xstl'] - 1
-
+                
                 #key  = 'x'+info['xstl']
                 #key += '-data'
                 #key += '-c'+info['chan']
@@ -216,20 +226,67 @@ def buildData40(info, data):
                 
                 data[key] = {}
                 data[key]['info'] = info
-
+                
                 histo = TH1F(key, longNames(i), par[0], par[1], par[2])
                 
                 ### reminder - [A]All-hits, [S]Single-hits, [M]Multi-hits
                 #-------------------------------------------------------------------------
+                
+                selection = '(crystal'+str(i+1)+'.'+str(edep)+'*'+str(calib22(i,E))+')'
+                
+                #chanCut = TCut('1')
+                
                 if info['chan'] == 'A':
-                    chain.Draw('crystal'+str(i+1)+'.'+str(edep)+'*'+str(calib22(i,E))+' >> '+str(key))
-                #elif info['chan'] == 'S':
-                #    TCut = 
+                    chanCut = TCut('(1)')
+                                        
+                elif info['chan'] == 'S':
+                    scut = []
+                    for j in range(8):
+                        if j != i:
+                            tempCut = TCut('(crystal'+str(j+1)+'.'+str(edep)+' <= 0.0)')
+                            scut.append(tempCut)
+                    chanCut = TCut('('+
+                                   scut[0].GetTitle()+' && '+
+                                   scut[1].GetTitle()+' && '+
+                                   scut[2].GetTitle()+' && '+
+                                   scut[3].GetTitle()+' && '+
+                                   scut[4].GetTitle()+' && '+
+                                   scut[5].GetTitle()+' && '+
+                                   scut[6].GetTitle()
+                                   +')')
+                    
+                    #chain.Draw(selection+' >> '+str(key), chanCut)
+                    
+                elif info['chan'] == 'M':
+                    mcut = []
+                    for j in range(8):
+                        if j != i:
+                            tempCut = TCut('(crystal'+str(j+1)+'.'+str(edep)+' > 0.0)')
+                            mcut.append(tempCut)
+                    chanCut = TCut('('+
+                                   mcut[0].GetTitle()+' || '+
+                                   mcut[1].GetTitle()+' || '+
+                                   mcut[2].GetTitle()+' || '+
+                                   mcut[3].GetTitle()+' || '+
+                                   mcut[4].GetTitle()+' || '+
+                                   mcut[5].GetTitle()+' || '+
+                                   mcut[6].GetTitle()
+                                   +')')
+                    
+                    #chain.Draw(selection+' >> '+str(key), chanCut)
+                    
                 else:
                     print 'ERROR: I do not know what to do with channel -->',info['chan']
                     print 'Available channels are [A]All-hits, [S]Single-hits, [M]Multi-hits'
                     sys.exit()
+
+                    
+                ###-----------------------------------------------------------------------
+                #chain.Draw(selection+' >> '+str(key), chanCut)
+                chain.Draw(selection+' >> '+key, chanCut)
+                ###-----------------------------------------------------------------------
                 
+                    
                 histo.Sumw2()
                 histo.SetLineColor(kBlack)
                 histo.SetMarkerColor(kBlack)
@@ -310,7 +367,8 @@ def buildMC40(info, mc, calib=2):
         if local:
             nfiles = chain.Add('/home/mkauer/COSINE/CUP/mc-fitting/sim/newGeometry/'+info['isof']+'/set2/'+'*'+info['loca']+'*root')
         else:
-            nfiles = chain.Add('/data/MC/KIMS-NaI/user-scratch/sim/processed/newGeometry/'+info['isof']+'/set2/'+'*'+info['loca']+'*root')
+            #nfiles = chain.Add('/data/MC/KIMS-NaI/user-scratch/sim/processed/newGeometry/'+info['isof']+'/set2/'+'*'+info['loca']+'*root')
+            nfiles = chain.Add('/data/MC/KIMS-NaI/user-scratch/sim/processed/newGeometry/'+info['isof']+'/set2/'+'*'+info['loca']+'*-0-*'+'*root')
 
         if nfiles > 0:
             print nfiles,'MC files found for', info['loca'], info['isof']
@@ -333,51 +391,110 @@ def buildMC40(info, mc, calib=2):
                 par = histparam(E)
                 histo = TH1F(key, longNames(i), par[0], par[1], par[2])
 
-                cut1 = TCut('edep['+str(i)+']*1000. > 0')
-                
+                #energyCut = TCut('(1)')
+                energyCut = TCut('(edep['+str(i)+']*1000. > 0.0)')
+                                
+                if info['chan'] == 'A':
+                    chanCut = TCut('(1)')
+                                        
+                elif info['chan'] == 'S':
+                    """
+                    scut = []
+                    for j in range(8):
+                        if j != i:
+                            tempCut = TCut('(edep['+str(j)+']*1000. <= 0.0)')
+                            scut.append(tempCut)
+                    chanCut = TCut('('+
+                                   scut[0].GetTitle()+' && '+
+                                   scut[1].GetTitle()+' && '+
+                                   scut[2].GetTitle()+' && '+
+                                   scut[3].GetTitle()+' && '+
+                                   scut[4].GetTitle()+' && '+
+                                   scut[5].GetTitle()+' && '+
+                                   scut[6].GetTitle()
+                                   +')')
+                    """
+                    ### try using the rootfile tags
+                    #chanCut = TCut('((singleHitTag['+str(i)+']==1) && (multipleHitTag['+str(i)+']==-1))')
+                    chanCut = TCut('((singleHitTag['+str(i)+'] > 0.0) && (multipleHitTag['+str(i)+'] < 0.0))')
+                    
+                    
+                elif info['chan'] == 'M':
+                    """
+                    mcut = []
+                    for j in range(8):
+                        if j != i:
+                            tempCut = TCut('edep['+str(j)+']*1000. > 0.0')
+                            mcut.append(tempCut)
+                    chanCut = TCut('('+
+                                   mcut[0].GetTitle()+' || '+
+                                   mcut[1].GetTitle()+' || '+
+                                   mcut[2].GetTitle()+' || '+
+                                   mcut[3].GetTitle()+' || '+
+                                   mcut[4].GetTitle()+' || '+
+                                   mcut[5].GetTitle()+' || '+
+                                   mcut[6].GetTitle()
+                                   +')')
+                    """
+                    ### try using the rootfile tags
+                    #chanCut = TCut('((singleHitTag['+str(i)+']==-1) && (multipleHitTag['+str(i)+']==1))')
+                    chanCut = TCut('((singleHitTag['+str(i)+'] < 0.0) && (multipleHitTag['+str(i)+'] > 0.0))')
+                    
+                else:
+                    print 'ERROR: I do not know what to do with channel -->',info['chan']
+                    print 'Available channels are [A]All-hits, [S]Single-hits, [M]Multi-hits'
+                    sys.exit()
+
+
+                volumeCut = TCut('(1)')
                 if info['loca'] == 'internal':
-                    cut2 = TCut('primVolumeName == "'+volumeNames(i)+'"')
+                    volumeCut = TCut('(primVolumeName == "'+volumeNames(i)+'")')
+                    #volumeCut = TCut('(primVolumeName == "NaIDet0'+str(i+1)+'Crystal")')
                 elif info['loca'] == 'pmt':
-                    cut2 = TCut('primVolumeName == "phys_pmt"')
+                    volumeCut = TCut('(primVolumeName == "phys_pmt")')
                 elif info['loca'] == 'lsveto':
-                    cut2 = TCut('primVolumeName == "lsveto"')
+                    volumeCut = TCut('(primVolumeName == "lsveto")')
                 elif info['loca'] == 'lsvetoair':
-                    cut2 = TCut('(primVolumeName == "DetPMTCover") || (primVolumeName == "DetPMTEnvelope")')
+                    volumeCut = TCut('((primVolumeName == "DetPMTCover") || (primVolumeName == "DetPMTEnvelope"))')
                 elif info['loca'] == 'airshield':
-                    cut2 = TCut('primVolumeName == "LSVetoAirRoom"')
+                    volumeCut = TCut('(primVolumeName == "LSVetoAirRoom")')
                 elif info['loca'] == 'steel':
                     # not sure this works the way I think it should?
-                    cut2 = TCut('primVolumeName != ""')
+                    volumeCut = TCut('(primVolumeName != "")')
                 else:
                     print "WARNING: No selection criteria for  --> ", info['loca']
                     continue
                 
                 ### this is needed to get the generated event numbers right!
-                cut3 = TCut('primParticleName == "'+info['chst']+'"')
+                motherCut = TCut('(primParticleName == "'+info['chst']+'")')
                 
                 ### this is needed? to cut out crap events
                 ### (event_info.Type) is new
                 ### (evt_Type) is old
-                #cut4 = TCut('(event_info.Type > 10) || (evt_Type > 10)')
-                cut4 = TCut('event_info.Type > 10')
+                #eventTypeCut = TCut('(event_info.Type > 10) || (evt_Type > 10)')
+                eventTypeCut = TCut('(event_info.Type > 10)')
                 
-                cut100 = 0
+                #brokenChainCut = 0
+                brokenChainCut = TCut('(1)')
                 if info['chst'] == 'U238' and info['chsp'] == 'Rn222':
-                    cut100 = TCut('(groupNo >= 11) && (groupNo <= 14)')
+                    brokenChainCut = TCut('((groupNo >= 11) && (groupNo <= 14))')
                 if info['chst'] == 'Pb210' and info['chsp'] == 'Pb210':
-                    cut100 = TCut('groupNo == 15')
+                    brokenChainCut = TCut('(groupNo == 15)')
                 
                 key2 = key+'_generated'
                 temp2 = TH1F(key2, 'generated',1,0,1)
                 
-                ### v31 - maybe need cut100 for generated events
+                ### v31 - maybe need brokenChainCut for generated events
                 ### to get the eff/normalization right?
-                #chain.Draw('primVolumeName >> '+key2, cut2)
-                if cut100:
-                    #chain.Draw('primVolumeName >> '+key2, cut2+cut3+cut100)
-                    chain.Draw('primVolumeName >> '+key2, cut2+cut3)
-                else:
-                    chain.Draw('primVolumeName >> '+key2, cut2+cut3)
+                #chain.Draw('primVolumeName >> '+key2, volumeCut)
+                #if brokenChainCut:
+                #    #chain.Draw('primVolumeName >> '+key2, volumeCut+motherCut+brokenChainCut)
+                #    chain.Draw('primVolumeName >> '+key2, volumeCut+motherCut)
+                #else:
+                #    chain.Draw('primVolumeName >> '+key2, volumeCut+motherCut)
+                totalCuts = TCut(volumeCut.GetTitle()+'&&'+motherCut.GetTitle())
+                #chain.Draw('primVolumeName >> '+key2, volumeCut+motherCut)
+                chain.Draw('primVolumeName >> '+key2, totalCuts)
                 
                 generated = temp2.GetEntries()
                 
@@ -398,14 +515,31 @@ def buildMC40(info, mc, calib=2):
                     p0, p1 = resol2(i,E)
                     chain.SetAlias('sigma', str(p0)+'/sqrt(edep['+str(i)+']*1000.) + '+str(p1))
                 
-                if cut100:
-                    chain.Draw('(edep['+str(i)+']*1000.) + (sigma*edep['+str(i)+']*1000.*rng) >> '+key, cut1+cut2+cut4+cut100)
-                else:
-                    chain.Draw('(edep['+str(i)+']*1000.) + (sigma*edep['+str(i)+']*1000.*rng) >> '+key, cut1+cut2+cut4)
+                #if brokenChainCut:
+                #    chain.Draw('(edep['+str(i)+']*1000.) + (sigma*edep['+str(i)+']*1000.*rng) >> '+key, energyCut+volumeCut+eventTypeCut+brokenChainCut)
+                #else:
+                #    chain.Draw('(edep['+str(i)+']*1000.) + (sigma*edep['+str(i)+']*1000.*rng) >> '+key, energyCut+volumeCut+eventTypeCut)
 
-                detected = histo.GetEntries()
+                #chain.Draw('(edep['+str(i)+']*1000.) + (sigma*edep['+str(i)+']*1000.*rng) >> '+key, energyCut+volumeCut+eventTypeCut+brokenChainCut)
+                masterCut = TCut('('+
+                                 energyCut.GetTitle()+' && '+
+                                 #volumeCut.GetTitle()+' && '+
+                                 eventTypeCut.GetTitle()+' && '+
+                                 brokenChainCut.GetTitle()+' && '+
+                                 chanCut.GetTitle()
+                                 +')')
+                selection = '((edep['+str(i)+']*1000.) + (sigma*edep['+str(i)+']*1000.*rng))'
+                chain.Draw(selection+' >> '+key, masterCut)
+                
+                ### try by hand
+                #selection = '((edep[1]*1000.) + (sigma*edep[1]*1000.*rng))'
+                #chain.Draw(selection+' >> '+key, '(edep[0]*1000. > 0.0) && (primVolumeName == "NaIDet01Crystal") && ( edep[1]*1000. <= 0.)')
+                #chain.Draw(selection+' >> '+key, '(singleHitTag[1] > 0.0) && (multipleHitTag[1] < 0.0) && (primVolumeName == "NaIDet02Crystal") && (edep[1]*1000. > 0.0)')
+                
                 ###-------------------------------------------------------------------------------
                 
+                detected = histo.GetEntries()
+                                
                 histo.SetLineColor(kBlack)
                 histo.SetMarkerColor(kBlack)
                 histo.SetLineWidth(1)
@@ -442,14 +576,14 @@ def buildMC40(info, mc, calib=2):
     return mc
 
     
-def build40(infile = 'backgrounds40.txt', freuse=0):
+def build40(infile = 'backgrounds40.txt', freuse=0, fchan=0):
 
     data = {}
     bkgs = {}
     sigs = {}
     
     for line in readFile(infile):
-        info = getInfo40(line, freuse)
+        info = getInfo40(line, freuse, fchan)
         if 'D' in info['type']:
             data = buildData40(info, data)
         elif 'B' in info['type']:

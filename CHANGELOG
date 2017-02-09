@@ -12,6 +12,22 @@
 # ====================================================================
 
 
+# 2017-02-09
+# --------------------------------------------------------------------
+# + finally fixed the bug with the single/multi hit selection criteria
+#   It was because the primVolumeName cut was messing stuff up.
+
+
+# 2017-02-06
+# --------------------------------------------------------------------
+# + add TCut('1') for simulation as default setting,
+#   it works! (no more if-else)
+# + add TCut('1') for data as default setting,
+#   it works! (no more if-else)
+# + added simple data cuts for 'all-hits', 'single-hits', and 'multi-hits'
+# + added option 'chan' to force a type of data selection
+
+
 # 2017-02-02
 # --------------------------------------------------------------------
 # ~ add new rootfile names to backgrounds40
