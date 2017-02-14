@@ -32,8 +32,7 @@ from funcs40 import *
 
 ### extra notes to add to the saved plot file names? [0, 'something']
 note=0
-#note = 'hitTag-cut'
-
+#note = 'edep-and-nclusters-cut'
 
 ### backgrounds file to use?
 mcfile = 'backgrounds40.txt'
@@ -51,10 +50,12 @@ reuse = 2
 ### [1] force all-hit data selection channel
 ### [2] force single-hit data selection channel
 ### [3] force multi-hi data selection channel
-chan = 3
+chan = 2
 
 ### individual plots for all crystals? [0,1]
 indi = 0
+### just plot individual for crystals? [1-8]
+justthese = [3]
 
 ### rebin the hi-E final plots [1,inf]
 hiEplotRebin = 10
@@ -1048,28 +1049,22 @@ def _myself_(argv):
         #-------------------------------------------------------------
         if indi:
             for i in range(8):
-                tpad=toppad[E][i].Clone()
-                bpad=botpad[E][i].Clone()
-                sepPlots[E][i] = TCanvas('ican'+str(E)+str(i), 'ican'+str(E)+str(i), 0, 0, 1400, 900)
-                #sepPlots[E][i].cd()
-                tpad.Draw()
-                bpad.Draw()
-                sepPlots[E][i].Update()
-                sepPlots[E][i].Print('./plots/x'+str(i+1)+'-e'+str(E)+'.png')
+                if i+1 in justthese:
+                    tpad=toppad[E][i].Clone()
+                    bpad=botpad[E][i].Clone()
+                    sepPlots[E][i] = TCanvas('ican'+str(E)+str(i), 'ican'+str(E)+str(i), 0, 0, 1400, 900)
+                    #sepPlots[E][i].cd()
+                    tpad.Draw()
+                    bpad.Draw()
+                    sepPlots[E][i].Update()
+                    isave  = './plots/'
+                    isave += 'x'+str(i+1)
+                    if chan: isave += '-c'+str(chan)
+                    isave += '-e'+str(E)
+                    isave += '.png'
+                    sepPlots[E][i].Print(isave)
     ### but don't show all those plots
-    if indi:
-        #for E in range(2):
-        #    for i in range(8):
-        #        sepPlots[-1][-1].cd()
-        #        del sepPlots[-1][-1]
-        del sepPlots
-        # gives a seg fault and I don't know why
-    #-----------------------------------------------------------------
-    
-    
-    ### will deleting things help the seg faults?
-    #del sigObj
-    #del fit
+    if indi: del sepPlots
     
     
     if not batch:

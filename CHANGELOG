@@ -12,6 +12,18 @@
 # ====================================================================
 
 
+# 2017-02-13
+# --------------------------------------------------------------------
+# + added lsveto cuts to the data selection
+# + added ncluster cuts to data selection - not much difference from
+#   the edep cuts
+# ~ revamped the sigle/multi hit TCut making in funcs40.py
+# + fix for lsveto MC rootfile selection - my code was also selecting
+#   lsvetoair rootfiles - this is now fixed - no big impact on anything
+# ~ checked merged data files against normal files and output was the same
+# + added paths in funcs40.py to use the Vxx-xx-xx_MERGED rootfiles for data
+
+
 # 2017-02-09
 # --------------------------------------------------------------------
 # + finally fixed the bug with the single/multi hit selection criteria

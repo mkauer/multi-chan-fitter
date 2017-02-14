@@ -6,10 +6,17 @@
 # 
 # Works with v40 and later versions
 # 
-# version: 2017-02-09
+# version: 2017-02-13
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+
+# + added ncluster cuts to data selection
+# ~ revamped the sigle/multi hit TCut making
+# ~ tweak MC rootfile selection code so that when selecting lsveto
+#   you don't also get lsvetoair - so now the code selects files
+#   for *lsvetoU238* for example
+# + user _MERGED rootfiles for data
 # + finally fixed issue with single/multi hit selection criteria
 # + add TCut('1') as default - it works - no more if-else statements
 # + add fchan force selection 
@@ -36,7 +43,7 @@
 # 
 # Where is the processed data?
 # Right now I'm using:
-# /data/COSINE/NTP/phys/V00-02-03
+# /data/COSINE/NTP/phys/V00-02-03_MERGED
 # and run ntp_I001546*
 # 
 ######################################################################
@@ -198,11 +205,14 @@ def buildData40(info, data):
         chain = TChain("ntp","")
         nfiles=0
         if local:
-            nfiles = chain.Add('/home/mkauer/COSINE/CUP/mc-fitting/data/phys/'+info['build']+'/ntp_I*'+info['run']+'*root*')
+            #nfiles = chain.Add('/home/mkauer/COSINE/CUP/mc-fitting/data/phys/'+info['build']+'/ntp_I*'+info['run']+'*root*')
+            nfiles = chain.Add('/home/mkauer/COSINE/CUP/mc-fitting/data/phys/'+info['build']+'_MERGED/ntp_I*'+info['run']+'*root*')
+            
         else:
             #nfiles = chain.Add('/data/COSINE/NTP/phys/'+info['build']+'/ntp_I*'+info['run']+'*root*')
-            nfiles = chain.Add('/data/COSINE/NTP/phys/'+info['build']+'/ntp_I*'+info['run']+'*root.000')
-
+            #nfiles = chain.Add('/data/COSINE/NTP/phys/'+info['build']+'/ntp_I*'+info['run']+'*root.000')
+            nfiles = chain.Add('/data/COSINE/NTP/phys/'+info['build']+'_MERGED/ntp_I*'+info['run']+'*root*')
+            
         if nfiles > 0:
             print nfiles,'data files found'
             for E in range(2):
@@ -238,42 +248,62 @@ def buildData40(info, data):
                 
                 if info['chan'] == 'A':
                     chanCut = TCut('(1)')
-                                        
+                
                 elif info['chan'] == 'S':
-                    scut = []
+                    edepcuts = ''
+                    nclustercuts = ''
                     for j in range(8):
                         if j != i:
-                            tempCut = TCut('(crystal'+str(j+1)+'.'+str(edep)+' <= 0.0)')
-                            scut.append(tempCut)
-                    chanCut = TCut('('+
-                                   scut[0].GetTitle()+' && '+
-                                   scut[1].GetTitle()+' && '+
-                                   scut[2].GetTitle()+' && '+
-                                   scut[3].GetTitle()+' && '+
-                                   scut[4].GetTitle()+' && '+
-                                   scut[5].GetTitle()+' && '+
-                                   scut[6].GetTitle()
-                                   +')')
+                            edepcuts += '(crystal'+str(j+1)+'.'+str(edep)+' <= 0.0) && '
+                            nclustercuts += '(crystal'+str(j+1)+'.'+'nc'+' < 4) && '
+
+                    ### remove extra '&&' or '||'
+                    edepcuts = edepcuts[:-4]
+                    nclustercuts = nclustercuts[:-4]
+
+                    ### liquid scint veto cut - from Pushpa
+                    lsvetocut = '(BLSveto.Charge/110. < 50.)'
                     
-                    #chain.Draw(selection+' >> '+str(key), chanCut)
+                    #chanCut = TCut('(('+edepcuts+'))')
+                    #chanCut = TCut('(('+nclustercuts+'))')
+                    #chanCut = TCut('(('+edepcuts+') && ('+nclustercuts+'))')
+                    chanCut = TCut('(('+edepcuts+') && ('+nclustercuts+') && ('+lsvetocut+'))')
+                    
+
+
+
+
                     
                 elif info['chan'] == 'M':
-                    mcut = []
+                    edepcuts = ''
+                    nclustercuts = ''
                     for j in range(8):
                         if j != i:
-                            tempCut = TCut('(crystal'+str(j+1)+'.'+str(edep)+' > 0.0)')
-                            mcut.append(tempCut)
+                            edepcuts += '(crystal'+str(j+1)+'.'+str(edep)+' > 0.0) || '
+                            nclustercuts += '(crystal'+str(j+1)+'.'+'nc'+' >= 4) || '
+                            #tempCut = TCut('(crystal'+str(j+1)+'.'+str(edep)+' > 0.0)')
+                            #edepcuts.append(tempCut)
+                    """
                     chanCut = TCut('('+
-                                   mcut[0].GetTitle()+' || '+
-                                   mcut[1].GetTitle()+' || '+
-                                   mcut[2].GetTitle()+' || '+
-                                   mcut[3].GetTitle()+' || '+
-                                   mcut[4].GetTitle()+' || '+
-                                   mcut[5].GetTitle()+' || '+
-                                   mcut[6].GetTitle()
+                                   edepcuts[0].GetTitle()+' || '+
+                                   edepcuts[1].GetTitle()+' || '+
+                                   edepcuts[2].GetTitle()+' || '+
+                                   edepcuts[3].GetTitle()+' || '+
+                                   edepcuts[4].GetTitle()+' || '+
+                                   edepcuts[5].GetTitle()+' || '+
+                                   edepcuts[6].GetTitle()
                                    +')')
+                    """
+                    ### remove extra '&&' or '||'
+                    edepcuts = edepcuts[:-4]
+                    nclustercuts = nclustercuts[:-4]
+
+                    chanCut = TCut('(('+edepcuts+'))')
+                    #chanCut = TCut('(('+nclustercuts+'))')
+                    #chanCut = TCut('(('+edepcuts+') && ('+nclustercuts+'))')
                     
-                    #chain.Draw(selection+' >> '+str(key), chanCut)
+
+
                     
                 else:
                     print 'ERROR: I do not know what to do with channel -->',info['chan']
@@ -365,7 +395,9 @@ def buildMC40(info, mc, calib=2):
         chain = TChain("MC","")
         nfiles=0
         if local:
-            nfiles = chain.Add('/home/mkauer/COSINE/CUP/mc-fitting/sim/newGeometry/'+info['isof']+'/set2/'+'*'+info['loca']+'*root')
+            #nfiles = chain.Add('/home/mkauer/COSINE/CUP/mc-fitting/sim/newGeometry/'+info['isof']+'/set2/'+'*'+info['loca']+'*root')
+            nfiles = chain.Add('/home/mkauer/COSINE/CUP/mc-fitting/sim/newGeometry/'+info['isof']+'/set2/'+'*'+info['loca']+info['isof']+'*root')
+            
         else:
             #nfiles = chain.Add('/data/MC/KIMS-NaI/user-scratch/sim/processed/newGeometry/'+info['isof']+'/set2/'+'*'+info['loca']+'*root')
             nfiles = chain.Add('/data/MC/KIMS-NaI/user-scratch/sim/processed/newGeometry/'+info['isof']+'/set2/'+'*'+info['loca']+'*-0-*'+'*root')
