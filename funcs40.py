@@ -6,11 +6,12 @@
 # 
 # Works with v40 and later versions
 # 
-# version: 2017-02-13
+# version: 2017-02-14
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
-
+# + added edep and lsveto cuts to MC selection
+# + added lsveto cuts to data selection
 # + added ncluster cuts to data selection
 # ~ revamped the sigle/multi hit TCut making
 # ~ tweak MC rootfile selection code so that when selecting lsveto
@@ -225,26 +226,20 @@ def buildData40(info, data):
                     edep = 'qc5'
                 
                 par = histparam(E)
-                #for i in range(8):
                 i = info['xstl'] - 1
                 
-                #key  = 'x'+info['xstl']
-                #key += '-data'
-                #key += '-c'+info['chan']
-                #key += '-e'+str(E)
                 key = info['key'] + '-e'+str(E)
                 
                 data[key] = {}
                 data[key]['info'] = info
                 
                 histo = TH1F(key, longNames(i), par[0], par[1], par[2])
+
                 
                 ### reminder - [A]All-hits, [S]Single-hits, [M]Multi-hits
                 #-------------------------------------------------------------------------
                 
                 selection = '(crystal'+str(i+1)+'.'+str(edep)+'*'+str(calib22(i,E))+')'
-                
-                #chanCut = TCut('1')
                 
                 if info['chan'] == 'A':
                     chanCut = TCut('(1)')
@@ -269,10 +264,6 @@ def buildData40(info, data):
                     #chanCut = TCut('(('+edepcuts+') && ('+nclustercuts+'))')
                     chanCut = TCut('(('+edepcuts+') && ('+nclustercuts+') && ('+lsvetocut+'))')
                     
-
-
-
-
                     
                 elif info['chan'] == 'M':
                     edepcuts = ''
@@ -281,28 +272,18 @@ def buildData40(info, data):
                         if j != i:
                             edepcuts += '(crystal'+str(j+1)+'.'+str(edep)+' > 0.0) || '
                             nclustercuts += '(crystal'+str(j+1)+'.'+'nc'+' >= 4) || '
-                            #tempCut = TCut('(crystal'+str(j+1)+'.'+str(edep)+' > 0.0)')
-                            #edepcuts.append(tempCut)
-                    """
-                    chanCut = TCut('('+
-                                   edepcuts[0].GetTitle()+' || '+
-                                   edepcuts[1].GetTitle()+' || '+
-                                   edepcuts[2].GetTitle()+' || '+
-                                   edepcuts[3].GetTitle()+' || '+
-                                   edepcuts[4].GetTitle()+' || '+
-                                   edepcuts[5].GetTitle()+' || '+
-                                   edepcuts[6].GetTitle()
-                                   +')')
-                    """
+                    
                     ### remove extra '&&' or '||'
                     edepcuts = edepcuts[:-4]
                     nclustercuts = nclustercuts[:-4]
-
-                    chanCut = TCut('(('+edepcuts+'))')
-                    #chanCut = TCut('(('+nclustercuts+'))')
-                    #chanCut = TCut('(('+edepcuts+') && ('+nclustercuts+'))')
                     
-
+                    ### liquid scint veto cut - from Pushpa
+                    lsvetocut = '(BLSveto.Charge/110. > 50.)'
+                    
+                    #chanCut = TCut('(('+edepcuts+'))')
+                    #chanCut = TCut('(('+nclustercuts+'))')
+                    #chanCut = TCut('(('+edepcuts+') || ('+nclustercuts+'))')
+                    chanCut = TCut('(('+edepcuts+') || ('+nclustercuts+') || ('+lsvetocut+'))')
 
                     
                 else:
@@ -328,8 +309,6 @@ def buildData40(info, data):
                 key2 = key+'_subruns'
                 temp2 = TH1F(key2,'subruns',1,0,1)
                 temp2.SetBinContent(1, subruns)
-                #for i in range(subruns):
-                #    temp2.Fill(0.5)
                 data[key]['subruns_hist'] = temp2
                 data[key]['subruns'] = subruns
 
@@ -337,8 +316,6 @@ def buildData40(info, data):
                 key3 = key+'_runtime'
                 temp3 = TH1F(key3,'runtime',1,0,1)
                 temp3.SetBinContent(1, runtime)
-                #for i in range(runtime):
-                #    temp3.Fill(0.5)
                 data[key]['runtime_hist'] = temp3
                 data[key]['runtime'] = runtime
         
@@ -379,9 +356,6 @@ def buildMC40(info, mc, calib=2):
             except:
                 print "WARNING: could not find generated_hist -->",key+'_generated'
                 
-                #mc[key]['acti'] = info['acti']
-                #mc[key]['erro'] = info['erro']
-                #mc[key]['fbnd'] = info['fbnd']
             #except:
             #    del mc[key]
             #    print "WARNING: could not find hist -->",key
@@ -408,13 +382,6 @@ def buildMC40(info, mc, calib=2):
                 
                 i = info['xstl'] - 1
                 
-                ### see if i can use unique names for all the histograms
-                #key  = 'x'+info['xstl']
-                #key += '-'+info['loca']
-                #if info['chst'] == info['chsp']: key += '-'+info['chst']
-                #else: key += '-'+info['chst']+'_'+info['chsp']
-                #key += '-c'+info['chan']
-                #key += '-e'+str(E)
                 key = info['key'] + '-e'+str(E)
                 
                 mc[key] = {}
@@ -422,62 +389,38 @@ def buildMC40(info, mc, calib=2):
                 
                 par = histparam(E)
                 histo = TH1F(key, longNames(i), par[0], par[1], par[2])
-
-                #energyCut = TCut('(1)')
+                
                 energyCut = TCut('(edep['+str(i)+']*1000. > 0.0)')
-                                
+                
                 if info['chan'] == 'A':
                     chanCut = TCut('(1)')
-                                        
+                
                 elif info['chan'] == 'S':
-                    """
-                    scut = []
-                    for j in range(8):
-                        if j != i:
-                            tempCut = TCut('(edep['+str(j)+']*1000. <= 0.0)')
-                            scut.append(tempCut)
-                    chanCut = TCut('('+
-                                   scut[0].GetTitle()+' && '+
-                                   scut[1].GetTitle()+' && '+
-                                   scut[2].GetTitle()+' && '+
-                                   scut[3].GetTitle()+' && '+
-                                   scut[4].GetTitle()+' && '+
-                                   scut[5].GetTitle()+' && '+
-                                   scut[6].GetTitle()
-                                   +')')
-                    """
-                    ### try using the rootfile tags
-                    #chanCut = TCut('((singleHitTag['+str(i)+']==1) && (multipleHitTag['+str(i)+']==-1))')
-                    chanCut = TCut('((singleHitTag['+str(i)+'] > 0.0) && (multipleHitTag['+str(i)+'] < 0.0))')
+                    ### main single/multi hit cut
+                    edepcuts = '((singleHitTag['+str(i)+'] > 0.0) && (multipleHitTag['+str(i)+'] < 0.0))'
                     
+                    ### liquid scint veto cut - from Estella
+                    lsvetocut = '(edep[8]*1000. < 20.0)'
+                    
+                    #chanCut = TCut('(('+edepcuts+'))')
+                    chanCut = TCut('(('+edepcuts+') && ('+lsvetocut+'))')
                     
                 elif info['chan'] == 'M':
-                    """
-                    mcut = []
-                    for j in range(8):
-                        if j != i:
-                            tempCut = TCut('edep['+str(j)+']*1000. > 0.0')
-                            mcut.append(tempCut)
-                    chanCut = TCut('('+
-                                   mcut[0].GetTitle()+' || '+
-                                   mcut[1].GetTitle()+' || '+
-                                   mcut[2].GetTitle()+' || '+
-                                   mcut[3].GetTitle()+' || '+
-                                   mcut[4].GetTitle()+' || '+
-                                   mcut[5].GetTitle()+' || '+
-                                   mcut[6].GetTitle()
-                                   +')')
-                    """
-                    ### try using the rootfile tags
-                    #chanCut = TCut('((singleHitTag['+str(i)+']==-1) && (multipleHitTag['+str(i)+']==1))')
-                    chanCut = TCut('((singleHitTag['+str(i)+'] < 0.0) && (multipleHitTag['+str(i)+'] > 0.0))')
+                    ### main single/multi hit cut
+                    edepcuts = '((singleHitTag['+str(i)+'] < 0.0) && (multipleHitTag['+str(i)+'] > 0.0))'
+                    
+                    ### liquid scint veto cut - from Estella
+                    lsvetocut = '(edep[8]*1000. > 20.0)'
+                    
+                    #chanCut = TCut('(('+edepcuts+'))')
+                    chanCut = TCut('(('+edepcuts+') || ('+lsvetocut+'))')
                     
                 else:
                     print 'ERROR: I do not know what to do with channel -->',info['chan']
                     print 'Available channels are [A]All-hits, [S]Single-hits, [M]Multi-hits'
                     sys.exit()
-
-
+                    
+                
                 volumeCut = TCut('(1)')
                 if info['loca'] == 'internal':
                     volumeCut = TCut('(primVolumeName == "'+volumeNames(i)+'")')
@@ -496,6 +439,7 @@ def buildMC40(info, mc, calib=2):
                 else:
                     print "WARNING: No selection criteria for  --> ", info['loca']
                     continue
+
                 
                 ### this is needed to get the generated event numbers right!
                 motherCut = TCut('(primParticleName == "'+info['chst']+'")')
@@ -516,19 +460,11 @@ def buildMC40(info, mc, calib=2):
                 key2 = key+'_generated'
                 temp2 = TH1F(key2, 'generated',1,0,1)
                 
-                ### v31 - maybe need brokenChainCut for generated events
-                ### to get the eff/normalization right?
-                #chain.Draw('primVolumeName >> '+key2, volumeCut)
-                #if brokenChainCut:
-                #    #chain.Draw('primVolumeName >> '+key2, volumeCut+motherCut+brokenChainCut)
-                #    chain.Draw('primVolumeName >> '+key2, volumeCut+motherCut)
-                #else:
-                #    chain.Draw('primVolumeName >> '+key2, volumeCut+motherCut)
                 totalCuts = TCut(volumeCut.GetTitle()+'&&'+motherCut.GetTitle())
-                #chain.Draw('primVolumeName >> '+key2, volumeCut+motherCut)
                 chain.Draw('primVolumeName >> '+key2, totalCuts)
                 
                 generated = temp2.GetEntries()
+
                 
                 ### test out resolution smearing
                 ###-------------------------------------------------------------------------------
@@ -547,12 +483,6 @@ def buildMC40(info, mc, calib=2):
                     p0, p1 = resol2(i,E)
                     chain.SetAlias('sigma', str(p0)+'/sqrt(edep['+str(i)+']*1000.) + '+str(p1))
                 
-                #if brokenChainCut:
-                #    chain.Draw('(edep['+str(i)+']*1000.) + (sigma*edep['+str(i)+']*1000.*rng) >> '+key, energyCut+volumeCut+eventTypeCut+brokenChainCut)
-                #else:
-                #    chain.Draw('(edep['+str(i)+']*1000.) + (sigma*edep['+str(i)+']*1000.*rng) >> '+key, energyCut+volumeCut+eventTypeCut)
-
-                #chain.Draw('(edep['+str(i)+']*1000.) + (sigma*edep['+str(i)+']*1000.*rng) >> '+key, energyCut+volumeCut+eventTypeCut+brokenChainCut)
                 masterCut = TCut('('+
                                  energyCut.GetTitle()+' && '+
                                  #volumeCut.GetTitle()+' && '+
@@ -561,12 +491,8 @@ def buildMC40(info, mc, calib=2):
                                  chanCut.GetTitle()
                                  +')')
                 selection = '((edep['+str(i)+']*1000.) + (sigma*edep['+str(i)+']*1000.*rng))'
-                chain.Draw(selection+' >> '+key, masterCut)
                 
-                ### try by hand
-                #selection = '((edep[1]*1000.) + (sigma*edep[1]*1000.*rng))'
-                #chain.Draw(selection+' >> '+key, '(edep[0]*1000. > 0.0) && (primVolumeName == "NaIDet01Crystal") && ( edep[1]*1000. <= 0.)')
-                #chain.Draw(selection+' >> '+key, '(singleHitTag[1] > 0.0) && (multipleHitTag[1] < 0.0) && (primVolumeName == "NaIDet02Crystal") && (edep[1]*1000. > 0.0)')
+                chain.Draw(selection+' >> '+key, masterCut)
                 
                 ###-------------------------------------------------------------------------------
                 
@@ -579,26 +505,6 @@ def buildMC40(info, mc, calib=2):
                 mc[key]['hist'] = histo
                 mc[key]['generated_hist'] = temp2
                 mc[key]['generated'] = generated
-                
-                #mc[key]['acti'] = info['acti']
-                #mc[key]['erro'] = info['erro']
-                #mc[key]['fbnd'] = info['fbnd']
-                
-                #print 'Eff =',detected/generated
-                """
-                if 'B' in bsdr:
-                    bkgs[key] = {}
-                    bkgs[key]['hist'] = histo
-                    bkgs[key]['generated'] = temp
-                    bkgs[key]['acti'] = acti
-                    bkgs[key]['erro'] = erro
-
-                if 'S' in bsdr:
-                    sigs[key] = {}
-                    sigs[key]['hist'] = histo
-                    sigs[key]['generated'] = temp
-                    sigs[key]['fbnd'] = fbnd
-                """
                 
         else:
             #print 'WARNING:', loca, isof, 'not found...'

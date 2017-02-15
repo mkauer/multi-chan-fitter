@@ -14,6 +14,12 @@
 
 # 2017-02-13
 # --------------------------------------------------------------------
+
+# + added edep and lsveto cuts to MC selection
+
+
+# 2017-02-13
+# --------------------------------------------------------------------
 # + added lsveto cuts to the data selection
 # + added ncluster cuts to data selection - not much difference from
 #   the edep cuts
