@@ -32,7 +32,7 @@ from funcs40 import *
 
 ### extra notes to add to the saved plot file names? [0, 'something']
 note=0
-note = 'my-cuts-with-ls20-cut'
+#note = 'new-fixed-cal'
 
 ### backgrounds file to use?
 mcfile = 'backgrounds40.txt'
@@ -50,10 +50,15 @@ reuse = 2
 ### [1] force all-hit data selection channel
 ### [2] force single-hit data selection channel
 ### [3] force multi-hi data selection channel
-chan = 3
+chan = 1
+
+### plotting ranges
+### lo and hi energy ranges
+loer = [0, 100]
+hier = [0, 3000]
 
 ### individual plots for all crystals? [0,1]
-indi = 1
+indi = 0
 ### just plot individual for crystals? [1-8]
 justthese = [3]
 
@@ -108,7 +113,7 @@ def _myself_(argv):
     if not os.path.exists('./plots'): 
         os.makedirs('./plots')
     
-    runNum = 1546
+    #runNum = 1546
 
     if not os.path.exists(mcfile):
         print 'ERROR: could not find backgrounds file -->', mcfile
@@ -116,7 +121,9 @@ def _myself_(argv):
         
     data, bkgs, sigs = build40(mcfile, reuse, chan)
     datkeys, bakkeys, sigkeys = sortKeys2(data, bkgs, sigs)
-    
+
+    runNum = data[datkeys[0]]['info']['run']
+
     
     ### find unique names for color scheme?
     ### "internal-K40" for example
@@ -833,7 +840,10 @@ def _myself_(argv):
                     #data[dkey]['hist'].GetXaxis().SetTitle('Energy (keV)')
                     #data[dkey]['hist'].GetXaxis().SetLabelFont(font)
                     #data[dkey]['hist'].GetXaxis().SetLabelSize(size)
-                    
+
+                    if E: data[dkey]['hist'].SetAxisRange(hier[0], hier[1], 'x')
+                    else: data[dkey]['hist'].SetAxisRange(loer[0], loer[1], 'x')
+                        
                     if dru:
                         if E: data[dkey]['hist'].SetAxisRange(2e-2, 2e1, 'y')
                         else: data[dkey]['hist'].SetAxisRange(2e-1, 3e2, 'y')
@@ -990,6 +1000,9 @@ def _myself_(argv):
             resid[E][i].GetYaxis().SetLabelSize(size)
             resid[E][i].GetYaxis().SetLabelOffset(0.01)
             resid[E][i].GetYaxis().SetNdivisions(505) # '5' secondary and '05' primary
+
+            if E: resid[E][i].SetAxisRange(hier[0], hier[1], 'x')
+            else: resid[E][i].SetAxisRange(loer[0], loer[1], 'x')
             
             resid[E][i].SetAxisRange(0.1,10,'y')
             resid[E][i].Draw()

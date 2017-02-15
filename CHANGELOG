@@ -12,6 +12,16 @@
 # ====================================================================
 
 
+# 2017-02-15
+# --------------------------------------------------------------------
+# ~ get runNum from data['info']
+# ~ packed all the calibration root text stuff into the calib functions
+# + add new calib41() new calib points from Pushpa
+# ~ revamped the way the data calibration is handled for lo/hi energy
+# + add new calib40() with old calib points and new format
+# ~ change low energy hist to be 0-200 keV
+
+
 # 2017-02-14
 # --------------------------------------------------------------------
 # ~ cleaned up some code in funcs40.py

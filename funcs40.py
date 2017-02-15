@@ -6,10 +6,13 @@
 # 
 # Works with v40 and later versions
 # 
-# version: 2017-02-14
+# version: 2017-02-15
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# + add new calib41() new calib points from Pushpa
+# ~ revamped the way the data calibration is handled for lo/hi energy
+# + add new calib40() with old calib points and new format
 # ~ cleaned up some of the code
 # + added edep and lsveto cuts to MC selection
 # + added lsveto cuts to data selection
@@ -219,29 +222,27 @@ def buildData40(info, data):
             print nfiles,'data files found'
             for E in range(2):
                 
-                ### use crystalX.energyD for high energy
-                ### use crystalX.qc5 for low energy
-                if E:
-                    edep = 'energyD'
-                else:
-                    edep = 'qc5'
-                
                 par = histparam(E)
                 i = info['xstl'] - 1
                 
                 key = info['key'] + '-e'+str(E)
+
+                run = int(info['run'])
                 
                 data[key] = {}
                 data[key]['info'] = info
                 
                 histo = TH1F(key, longNames(i), par[0], par[1], par[2])
-
+                
+                
+                ### old calib
+                selection = calib40(i,E)
+                ### new calib
+                #selection = calib41(i,E)
+                
                 
                 ### reminder - [A]All-hits, [S]Single-hits, [M]Multi-hits
                 #-------------------------------------------------------------------------
-                
-                selection = '(crystal'+str(i+1)+'.'+str(edep)+'*'+str(calib22(i,E))+')'
-                
                 if info['chan'] == 'A':
                     chanCut = TCut('(1)')
                 
@@ -266,9 +267,9 @@ def buildData40(info, data):
                     #chanCut = TCut('(('+edepcuts+') && ('+nclustercuts+'))')
                     
                     ### my cuts
-                    chanCut = TCut('(('+edepcuts+') && ('+nclustercuts+') && ('+lsvetocut+'))')
+                    #chanCut = TCut('(('+edepcuts+') && ('+nclustercuts+') && ('+lsvetocut+'))')
                     ### Pushpa cuts
-                    #chanCut = TCut('(('+nclustercuts+') && ('+lsvetocut+'))')
+                    chanCut = TCut('(('+nclustercuts+') && ('+lsvetocut+'))')
                     
                     
                 elif info['chan'] == 'M':
@@ -292,9 +293,9 @@ def buildData40(info, data):
                     #chanCut = TCut('(('+edepcuts+') || ('+nclustercuts+'))')
                     
                     ### my cuts
-                    chanCut = TCut('(('+edepcuts+') || ('+nclustercuts+') || ('+lsvetocut+'))')
+                    #chanCut = TCut('(('+edepcuts+') || ('+nclustercuts+') || ('+lsvetocut+'))')
                     ### Pushpa cuts
-                    #chanCut = TCut('(('+nclustercuts+') || ('+lsvetocut+'))')
+                    chanCut = TCut('(('+nclustercuts+') || ('+lsvetocut+'))')
                     
                 else:
                     print 'ERROR: I do not know what to do with channel -->',info['chan']
@@ -303,7 +304,6 @@ def buildData40(info, data):
 
                     
                 ###-----------------------------------------------------------------------
-                #chain.Draw(selection+' >> '+str(key), chanCut)
                 chain.Draw(selection+' >> '+key, chanCut)
                 ###-----------------------------------------------------------------------
                 
@@ -379,12 +379,12 @@ def buildMC40(info, mc, calib=2):
         chain = TChain("MC","")
         nfiles=0
         if local:
-            #nfiles = chain.Add('/home/mkauer/COSINE/CUP/mc-fitting/sim/newGeometry/'+info['isof']+'/set2/'+'*'+info['loca']+'*root')
-            nfiles = chain.Add('/home/mkauer/COSINE/CUP/mc-fitting/sim/newGeometry/'+info['isof']+'/set2/'+'*'+info['loca']+info['isof']+'*root')
+            nfiles = chain.Add('/home/mkauer/COSINE/CUP/mc-fitting/sim/newGeometry/'
+                               +info['isof']+'/set2/'+'*'+info['loca']+info['isof']+'*root')
             
         else:
-            #nfiles = chain.Add('/data/MC/KIMS-NaI/user-scratch/sim/processed/newGeometry/'+info['isof']+'/set2/'+'*'+info['loca']+'*root')
-            nfiles = chain.Add('/data/MC/KIMS-NaI/user-scratch/sim/processed/newGeometry/'+info['isof']+'/set2/'+'*'+info['loca']+'*-0-*'+'*root')
+            nfiles = chain.Add('/data/MC/KIMS-NaI/user-scratch/sim/processed/newGeometry/'
+                               +info['isof']+'/set2/'+'*'+info['loca']+info['isof']+'*root')
 
         if nfiles > 0:
             print nfiles,'MC files found for', info['loca'], info['isof']
@@ -434,7 +434,6 @@ def buildMC40(info, mc, calib=2):
                 volumeCut = TCut('(1)')
                 if info['loca'] == 'internal':
                     volumeCut = TCut('(primVolumeName == "'+volumeNames(i)+'")')
-                    #volumeCut = TCut('(primVolumeName == "NaIDet0'+str(i+1)+'Crystal")')
                 elif info['loca'] == 'pmt':
                     volumeCut = TCut('(primVolumeName == "phys_pmt")')
                 elif info['loca'] == 'lsveto':
@@ -444,12 +443,13 @@ def buildMC40(info, mc, calib=2):
                 elif info['loca'] == 'airshield':
                     volumeCut = TCut('(primVolumeName == "LSVetoAirRoom")')
                 elif info['loca'] == 'steel':
-                    # not sure this works the way I think it should?
+                    # Not sure this works the way I think it should?
+                    # I want all volumes except for the blank volume
                     volumeCut = TCut('(primVolumeName != "")')
                 else:
                     print "WARNING: No selection criteria for  --> ", info['loca']
                     continue
-
+                
                 
                 ### this is needed to get the generated event numbers right!
                 motherCut = TCut('(primParticleName == "'+info['chst']+'")')
@@ -501,10 +501,12 @@ def buildMC40(info, mc, calib=2):
                                  chanCut.GetTitle()
                                  +')')
                 selection = '((edep['+str(i)+']*1000.) + (sigma*edep['+str(i)+']*1000.*rng))'
-                
-                chain.Draw(selection+' >> '+key, masterCut)
+
                 
                 ###-------------------------------------------------------------------------------
+                chain.Draw(selection+' >> '+key, masterCut)
+                ###-------------------------------------------------------------------------------
+
                 
                 detected = histo.GetEntries()
                                 
@@ -678,4 +680,99 @@ def scaleSigs40(sigkeys, sigs):
             if V and E: print '!!!!', key, sigs[key]['info']['acti'],'mBq/pmt'
 
     return sigs
+
+
+def calib40(i, E=0):
+    """
+    Return the crystal calibrations
+    """
+    # from Pushpa
+    # this is the old calib that uses crystal1.
+
+    # adc = crystalX.energyD
+    # E = (adc+[0])*[1]
+    hiEcalib = [
+        [0.0, 1.000],
+	[0.0, 0.992],
+	[0.0, 1.000],
+	[0.0, 1.000],
+	[0.0, 0.966],
+	[0.0, 1.014],
+	[0.0, 0.984],
+	[0.0, 1.000]
+    ]
+    
+    # adc = crystalX.qc5
+    # E = (adc+[0])*[1]
+    loEcalib = [
+        [0.0, 1.06000e-4],
+	[0.0, 1.05676e-4],
+	[0.0, 1.15900e-4],
+	[0.0, 1.12700e-4],
+	[0.0, 2.86907e-4],
+	[0.0, 1.17634e-4],
+	[0.0, 1.11900e-4],
+	[0.0, 3.84263e-4]
+    ]
+    
+    if E:
+        edep = '(crystal'+str(i+1)+'.energyD)'
+        b,m = hiEcalib[int(i)]
+    else:
+        edep = '(crystal'+str(i+1)+'.qc5)'
+        b,m = loEcalib[int(i)]
+        
+    selection = '(('+edep+'+'+str(b)+')*'+str(m)+')'
+    #if E: return hiEcalib[int(i)]
+    #else: return loEcalib[int(i)]
+    return selection
+
+
+def calib41(i, E=0):
+    """
+    Return the crystal calibrations
+    """
+
+    # from Pushpa
+    # https://cupwiki.ibs.re.kr/Kims/NaICalibration?validation_key=fae031e9908735aeff81aacfcbf83931
+
+    # adc = pmtX1.rqcD1_5+pmtX2.rqcD1_5
+    # E = (adc+[0])*[1]
+    hiEcalib = [
+        [3942.0, 1./232.5],
+ 	[4327.0, 1./241.9],
+ 	[3834.0, 1./262.1],
+ 	[3909.0, 1./231.3],
+ 	[   0.0, 1./125.0],
+        #[   0.0, 8.401e-3],
+ 	[-231.0, 1./175.7],
+ 	[4769.0, 1./260.9],
+        [   0.0, 1./ 40.2]
+        #[   0.0, 2.487e-2]
+    ]
+
+    # adc = crystalX.qc5
+    # E = (adc+[0])*[1]
+    loEcalib = [
+        [0.0, 0.000109373],
+ 	[0.0, 0.000108797],
+ 	[0.0, 0.000117414],
+ 	[0.0, 0.000114566],
+ 	[0.0, 0.000342601],
+ 	[0.0, 0.000118527],
+ 	[0.0, 0.000113608],
+ 	[0.0, 0.000500613]
+    ]
+    
+    if E:
+        edep = '(pmt'+str(i+1)+'1.rqcD1_5 + pmt'+str(i+1)+'2.rqcD1_5)'
+        b,m = hiEcalib[int(i)]
+    else:
+        edep = '(crystal'+str(i+1)+'.qc5)'
+        b,m = loEcalib[int(i)]
+        
+    selection = '(('+edep+'+'+str(b)+')*'+str(m)+')'
+    #if E: return hiEcalib[int(i)]
+    #else: return loEcalib[int(i)]
+    return selection
 

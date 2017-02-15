@@ -4,10 +4,11 @@
 #
 # Works with v10 and later versions
 #
-# version: 2016-12-27
+# version: 2017-02-15
 #
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# ~ change low energy hist to be 0-200 keV
 # + init/set  mc[loc][iso]['act'] = [] and mc[loc][iso]["act"].append(-1)
 #   by default, and this works for local data using v14
 # ~ updated crystal masses in cmass() and carried it over into
@@ -315,7 +316,7 @@ def histparam(energy=0):
         bins = (hmax-hmin)
     else:
         hmin = 0
-        hmax = 100
+        hmax = 200
         bins = (hmax-hmin)
     return [bins, hmin, hmax]
 
