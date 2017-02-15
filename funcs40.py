@@ -258,12 +258,17 @@ def buildData40(info, data):
                     nclustercuts = nclustercuts[:-4]
 
                     ### liquid scint veto cut - from Pushpa
-                    lsvetocut = '(BLSveto.Charge/110. < 50.)'
+                    #lsvetocut = '(BLSveto.Charge/110. < 50.)'
+                    lsvetocut = '(BLSveto.Charge/110. < 20.)'
                     
                     #chanCut = TCut('(('+edepcuts+'))')
                     #chanCut = TCut('(('+nclustercuts+'))')
                     #chanCut = TCut('(('+edepcuts+') && ('+nclustercuts+'))')
+                    
+                    ### my cuts
                     chanCut = TCut('(('+edepcuts+') && ('+nclustercuts+') && ('+lsvetocut+'))')
+                    ### Pushpa cuts
+                    #chanCut = TCut('(('+nclustercuts+') && ('+lsvetocut+'))')
                     
                     
                 elif info['chan'] == 'M':
@@ -279,13 +284,17 @@ def buildData40(info, data):
                     nclustercuts = nclustercuts[:-4]
                     
                     ### liquid scint veto cut - from Pushpa
-                    lsvetocut = '(BLSveto.Charge/110. > 50.)'
+                    #lsvetocut = '(BLSveto.Charge/110. > 50.)'
+                    lsvetocut = '(BLSveto.Charge/110. > 20.)'
                     
                     #chanCut = TCut('(('+edepcuts+'))')
                     #chanCut = TCut('(('+nclustercuts+'))')
                     #chanCut = TCut('(('+edepcuts+') || ('+nclustercuts+'))')
+                    
+                    ### my cuts
                     chanCut = TCut('(('+edepcuts+') || ('+nclustercuts+') || ('+lsvetocut+'))')
-
+                    ### Pushpa cuts
+                    #chanCut = TCut('(('+nclustercuts+') || ('+lsvetocut+'))')
                     
                 else:
                     print 'ERROR: I do not know what to do with channel -->',info['chan']

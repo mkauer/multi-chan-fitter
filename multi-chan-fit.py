@@ -32,7 +32,7 @@ from funcs40 import *
 
 ### extra notes to add to the saved plot file names? [0, 'something']
 note=0
-#note = 'edep-and-nclusters-cut'
+note = 'my-cuts-with-ls20-cut'
 
 ### backgrounds file to use?
 mcfile = 'backgrounds40.txt'
@@ -50,7 +50,7 @@ reuse = 2
 ### [1] force all-hit data selection channel
 ### [2] force single-hit data selection channel
 ### [3] force multi-hi data selection channel
-chan = 2
+chan = 3
 
 ### individual plots for all crystals? [0,1]
 indi = 1
@@ -1061,6 +1061,7 @@ def _myself_(argv):
                     isave += 'x'+str(i+1)
                     if chan: isave += '-c'+str(chan)
                     isave += '-e'+str(E)
+                    if note: isave += '_'+note
                     isave += '.png'
                     sepPlots[E][i].Print(isave)
     ### but don't show all those plots
