@@ -9,7 +9,7 @@ V = 'v40'
 
 # include single hit data
 # 
-# version: 2017-02-06
+# version: 2017-02-14
 #
 # note: run 1616 is the first run after calibration-campaign-2
 # 
@@ -53,7 +53,7 @@ reuse = 2
 chan = 2
 
 ### individual plots for all crystals? [0,1]
-indi = 0
+indi = 1
 ### just plot individual for crystals? [1-8]
 justthese = [3]
 
