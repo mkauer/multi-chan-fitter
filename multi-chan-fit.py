@@ -35,14 +35,15 @@ note=0
 #note = 'new-fixed-cal'
 
 ### backgrounds file to use?
-mcfile = 'backgrounds40.txt'
+#mcfile = 'backgrounds40.txt'
+mcfile = 'backgrounds41.txt'
 
 ### force reuse of all joined rootfiles in mcfile? [0,1,2]
 ### nice for debugging
 ### [0] default - use whatever is specified in the backgrounds file
 ### [1] forces reusing of all data/bkgs/sigs
 ### [2] forces NOT reusing any data/bkgs/sigs
-reuse = 2
+reuse = 1
 
 ### force a particular set of hit chan data? [0,1,2,3]
 ### nice for debugging
@@ -54,7 +55,7 @@ chan = 1
 
 ### plotting ranges
 ### lo and hi energy ranges
-loer = [0, 100]
+loer = [0, 200]
 hier = [0, 3000]
 
 ### individual plots for all crystals? [0,1]

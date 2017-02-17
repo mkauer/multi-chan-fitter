@@ -236,9 +236,9 @@ def buildData40(info, data):
                 
                 
                 ### old calib
-                selection = calib40(i,E)
+                edep, selection = calib40(i,E)
                 ### new calib
-                #selection = calib41(i,E)
+                #edep, selection = calib41(i,E)
                 
                 
                 ### reminder - [A]All-hits, [S]Single-hits, [M]Multi-hits
@@ -251,7 +251,7 @@ def buildData40(info, data):
                     nclustercuts = ''
                     for j in range(8):
                         if j != i:
-                            edepcuts += '(crystal'+str(j+1)+'.'+str(edep)+' <= 0.0) && '
+                            edepcuts += '('+edep+' <= 0.0) && '
                             nclustercuts += '(crystal'+str(j+1)+'.'+'nc'+' < 4) && '
 
                     ### remove extra '&&' or '||'
@@ -336,7 +336,7 @@ def buildData40(info, data):
     return data
 
 
-def buildMC40(info, mc, calib=2):
+def buildMC40(info, mc, resol=2):
 
     if info['reuse']:
         if info['rootfile']:
@@ -482,12 +482,12 @@ def buildMC40(info, mc, calib=2):
                 chain.SetAlias('rng','sin(2.*pi*rndm)*sqrt(-2.*log(rndm))')
 
                 ### set the resolution function
-                if calib == 1:
+                if resol == 1:
                     ### from Estella
                     ### assume reso = p0/sqrt(energy)
                     p0 = resol(i,E)
                     chain.SetAlias('sigma', str(p0)+'/sqrt(edep['+str(i)+']*1000.)')
-                if calib == 2:
+                if resol == 2:
                     ### from Pushpa
                     ### assume reso = p0/sqrt(energy) + p1
                     p0, p1 = resol2(i,E)
@@ -687,7 +687,7 @@ def calib40(i, E=0):
     Return the crystal calibrations
     """
     # from Pushpa
-    # this is the old calib that uses crystal1.
+    # this is the old calib
 
     # adc = crystalX.energyD
     # E = (adc+[0])*[1]
@@ -717,25 +717,22 @@ def calib40(i, E=0):
     
     if E:
         edep = '(crystal'+str(i+1)+'.energyD)'
-        b,m = hiEcalib[int(i)]
+        b, m = hiEcalib[int(i)]
     else:
         edep = '(crystal'+str(i+1)+'.qc5)'
-        b,m = loEcalib[int(i)]
+        b, m = loEcalib[int(i)]
         
     selection = '(('+edep+'+'+str(b)+')*'+str(m)+')'
-    #if E: return hiEcalib[int(i)]
-    #else: return loEcalib[int(i)]
-    return selection
+    return edep, selection
 
 
 def calib41(i, E=0):
     """
     Return the crystal calibrations
     """
-
     # from Pushpa
     # https://cupwiki.ibs.re.kr/Kims/NaICalibration?validation_key=fae031e9908735aeff81aacfcbf83931
-
+    
     # adc = pmtX1.rqcD1_5+pmtX2.rqcD1_5
     # E = (adc+[0])*[1]
     hiEcalib = [
@@ -750,7 +747,7 @@ def calib41(i, E=0):
         [   0.0, 1./ 40.2]
         #[   0.0, 2.487e-2]
     ]
-
+    
     # adc = crystalX.qc5
     # E = (adc+[0])*[1]
     loEcalib = [
@@ -766,13 +763,11 @@ def calib41(i, E=0):
     
     if E:
         edep = '(pmt'+str(i+1)+'1.rqcD1_5 + pmt'+str(i+1)+'2.rqcD1_5)'
-        b,m = hiEcalib[int(i)]
+        b, m = hiEcalib[int(i)]
     else:
         edep = '(crystal'+str(i+1)+'.qc5)'
-        b,m = loEcalib[int(i)]
-        
+        b, m = loEcalib[int(i)]
+    
     selection = '(('+edep+'+'+str(b)+')*'+str(m)+')'
-    #if E: return hiEcalib[int(i)]
-    #else: return loEcalib[int(i)]
-    return selection
+    return edep, selection
 

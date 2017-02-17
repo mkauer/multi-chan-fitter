@@ -9,6 +9,7 @@
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# ~ changed to join41.py and build41
 # + build everything - all/single/multi hit into one rootfile
 # ~ use build40(mcfile,2) to force no reusing of data
 # + mega revamp for new v40 format
@@ -37,7 +38,7 @@ def _myself_(argv):
         print "ERROR: specify a backgrounds file or 'data' for data"
         return
     
-    build = 'build40'
+    build = 'build41'
     
     if local:
         outpath="/home/mkauer/COSINE/CUP/mc-fitting/root-join-read/"+build+'/'
