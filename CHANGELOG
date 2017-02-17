@@ -12,6 +12,20 @@
 # ====================================================================
 
 
+# 2017-02-17
+# --------------------------------------------------------------------
+# + cut release v4.0
+# + backgrounds41.txt with pmt u238-rn222 and pb210
+# + all joined rootfiles for buil41
+
+
+# 2017-02-16
+# --------------------------------------------------------------------
+# ~ tweaked cluster script for build41
+# ~ changed to join41.py and build41
+# + build everything - all/single/multi hit into one rootfile
+
+
 # 2017-02-15
 # --------------------------------------------------------------------
 # ~ get runNum from data['info']
