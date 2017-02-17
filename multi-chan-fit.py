@@ -3,13 +3,13 @@
 ######################################################################
 # Matt Kauer - mkauer@physics.wisc.edu
 ######################################################################
-# 40-single-hit.py
+# 41-single-multi-hit-fit.py
 
-V = 'v40'
+V = 'v41'
 
-# include single hit data
+# implement simultaneous fitting of signle-hit and multi-hit data
 # 
-# version: 2017-02-14
+# version: 2017-02-17
 #
 # note: run 1616 is the first run after calibration-campaign-2
 # 

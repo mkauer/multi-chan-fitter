@@ -14,6 +14,7 @@
 
 # 2017-02-17
 # --------------------------------------------------------------------
+# V switching to version 41-single-multi-hit-fit.py
 # + cut release v4.0
 # + backgrounds41.txt with pmt u238-rn222 and pb210
 # + all joined rootfiles for buil41
