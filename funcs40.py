@@ -6,10 +6,12 @@
 # 
 # Works with v40 and later versions
 # 
-# version: 2017-02-15
+# version: 2017-02-20
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# ~ tweak resolution for C5 and C8
+# + add new resol40() function
 # + add new calib41() new calib points from Pushpa
 # ~ revamped the way the data calibration is handled for lo/hi energy
 # + add new calib40() with old calib points and new format
@@ -336,7 +338,7 @@ def buildData40(info, data):
     return data
 
 
-def buildMC40(info, mc, resol=2):
+def buildMC40(info, mc):
 
     if info['reuse']:
         if info['rootfile']:
@@ -480,7 +482,7 @@ def buildMC40(info, mc, resol=2):
                 ###-------------------------------------------------------------------------------
                 ### using Box-Muller? method here for "rng" alias
                 chain.SetAlias('rng','sin(2.*pi*rndm)*sqrt(-2.*log(rndm))')
-
+                """
                 ### set the resolution function
                 if resol == 1:
                     ### from Estella
@@ -492,6 +494,9 @@ def buildMC40(info, mc, resol=2):
                     ### assume reso = p0/sqrt(energy) + p1
                     p0, p1 = resol2(i,E)
                     chain.SetAlias('sigma', str(p0)+'/sqrt(edep['+str(i)+']*1000.) + '+str(p1))
+                """
+                resolFunc = resol40(i,E)
+                chain.SetAlias('sigma', resolFunc)
                 
                 masterCut = TCut('('+
                                  energyCut.GetTitle()+' && '+
@@ -741,11 +746,9 @@ def calib41(i, E=0):
  	[3834.0, 1./262.1],
  	[3909.0, 1./231.3],
  	[   0.0, 1./125.0],
-        #[   0.0, 8.401e-3],
  	[-231.0, 1./175.7],
  	[4769.0, 1./260.9],
         [   0.0, 1./ 40.2]
-        #[   0.0, 2.487e-2]
     ]
     
     # adc = crystalX.qc5
@@ -770,4 +773,53 @@ def calib41(i, E=0):
     
     selection = '(('+edep+'+'+str(b)+')*'+str(m)+')'
     return edep, selection
+
+
+def resol40(i, E=0):
+    """
+    Return the crystal resolutions
+    """
+    # from Pushpa
+    
+    # res = p[0]/sqrt(x) + p[1]
+    hiEresol = [
+        [0.7127, 0.004879],
+	[0.7127, 0.004879],
+	[0.7127, 0.004879],
+	[0.7127, 0.004879],
+	# tweaking resolution on C5
+        #[0.7127, 0.004879],
+        [1.7, 0.005],
+	[0.7127, 0.004879],
+	[0.7127, 0.004879],
+        # tweaking resolution on C8
+	#[0.7127, 0.004879]
+        [2.4, 0.005]
+    ]
+    
+    # C5 = C8 == C4
+    # C6 = C7 == C1
+    loEresol = [
+        [0.2349,  0.018600],
+	[0.2699,  0.014920],
+	[0.2459,  0.015020],
+	[0.3797, -0.003919],
+	# tweaking resolution on C5
+        #[0.3797, -0.003919],
+        [0.8, -0.004],
+	[0.2349,  0.018600],
+	[0.2349,  0.018600],
+        # tweaking resolution on C8
+	#[0.3797, -0.003919]
+        [1.3, -0.004]
+    ]
+    
+    if E:
+        p0, p1 = hiEresol[int(i)]
+    else:
+        p0, p1 = loEresol[int(i)]
+
+    selection = '(('+str(p0)+'/sqrt(edep['+str(i)+']*1000.)) + '+str(p1)+')'
+    return selection
+
 

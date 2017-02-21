@@ -12,6 +12,15 @@
 # ====================================================================
 
 
+# 2017-02-20
+# --------------------------------------------------------------------
+# ~ create new build41 joined rootfiles with new resol40() and
+#   tweaks to the C5 and C8 resolutions
+# ~ tweak resolution for C5 and C8
+# + add new resol40() function in funcs40.py
+
+
+
 # 2017-02-17
 # --------------------------------------------------------------------
 # V switching to version 41-single-multi-hit-fit.py

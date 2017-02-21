@@ -9,7 +9,7 @@ V = 'v41'
 
 # implement simultaneous fitting of signle-hit and multi-hit data
 # 
-# version: 2017-02-17
+# version: 2017-02-20
 #
 # note: run 1616 is the first run after calibration-campaign-2
 # 
@@ -51,7 +51,7 @@ reuse = 1
 ### [1] force all-hit data selection channel
 ### [2] force single-hit data selection channel
 ### [3] force multi-hi data selection channel
-chan = 1
+chan = 2
 
 ### plotting ranges
 ### lo and hi energy ranges
@@ -846,8 +846,8 @@ def _myself_(argv):
                     else: data[dkey]['hist'].SetAxisRange(loer[0], loer[1], 'x')
                         
                     if dru:
-                        if E: data[dkey]['hist'].SetAxisRange(2e-2, 2e1, 'y')
-                        else: data[dkey]['hist'].SetAxisRange(2e-1, 3e2, 'y')
+                        if E: data[dkey]['hist'].SetAxisRange(2e-3, 2e1, 'y')
+                        else: data[dkey]['hist'].SetAxisRange(2e-2, 3e2, 'y')
                         
                     data[dkey]['hist'].Draw()
                     days = round(data[dkey]['runtime']/86400.,2)

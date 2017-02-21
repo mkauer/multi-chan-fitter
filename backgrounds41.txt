@@ -1,7 +1,9 @@
 # -*- sh -*-
 
-# version 2017-02-17
+# version 2017-02-20
 
+# ~ switched to using specific internalPb210 files
+# ~ oops - pmtPb210 shouldn't have had Pb210 as the "isof"
 # + generated the new build41 MC
 # + generated the new build40 MC
 # ~ use data build V00-02-03
@@ -82,7 +84,7 @@ B        A        5       internal    U238      U238      Rn222    1.48e-3   0.0
 B        A        6       internal    U238      U238      Rn222    2.23e-4   0.0001     0.001     10.0       ./root-join-read/build41/build41-internalU238-master.root
 B        A        7       internal    U238      U238      Rn222    2.23e-4   0.0001     0.001     10.0       ./root-join-read/build41/build41-internalU238-master.root
 B        A        8       internal    U238      U238      Rn222    1.48e-3   0.0001     0.001     10.0       ./root-join-read/build41/build41-internalU238-master.root
-
+"""
 B        A        1       internal    U238      Pb210     Pb210    3.200     0.0001     0.001     10.0       ./root-join-read/build41/build41-internalU238-master.root
 B        A        2       internal    U238      Pb210     Pb210    2.060     0.0001     0.001     10.0       ./root-join-read/build41/build41-internalU238-master.root
 B        A        3       internal    U238      Pb210     Pb210    0.760     0.0001     0.001     10.0       ./root-join-read/build41/build41-internalU238-master.root
@@ -91,6 +93,15 @@ B        A        5       internal    U238      Pb210     Pb210    2.060     0.0
 B        A        6       internal    U238      Pb210     Pb210    1.520     0.0001     0.001     10.0       ./root-join-read/build41/build41-internalU238-master.root
 B        A        7       internal    U238      Pb210     Pb210    1.540     0.0001     0.001     10.0       ./root-join-read/build41/build41-internalU238-master.root
 B        A        8       internal    U238      Pb210     Pb210    2.050     0.0001     0.001     10.0       ./root-join-read/build41/build41-internalU238-master.root
+"""
+B        A        1       internal    Pb210      Pb210     Pb210    3.200     0.0001     0.001     10.0       ./root-join-read/build41/build41-internalPb210-master.root
+B        A        2       internal    Pb210      Pb210     Pb210    2.060     0.0001     0.001     10.0       ./root-join-read/build41/build41-internalPb210-master.root
+B        A        3       internal    Pb210      Pb210     Pb210    0.760     0.0001     0.001     10.0       ./root-join-read/build41/build41-internalPb210-master.root
+B        A        4       internal    Pb210      Pb210     Pb210    0.740     0.0001     0.001     10.0       ./root-join-read/build41/build41-internalPb210-master.root
+B        A        5       internal    Pb210      Pb210     Pb210    2.060     0.0001     0.001     10.0       ./root-join-read/build41/build41-internalPb210-master.root
+B        A        6       internal    Pb210      Pb210     Pb210    1.520     0.0001     0.001     10.0       ./root-join-read/build41/build41-internalPb210-master.root
+B        A        7       internal    Pb210      Pb210     Pb210    1.540     0.0001     0.001     10.0       ./root-join-read/build41/build41-internalPb210-master.root
+B        A        8       internal    Pb210      Pb210     Pb210    2.050     0.0001     0.001     10.0       ./root-join-read/build41/build41-internalPb210-master.root
 
 B        A        1       internal    Th232     Th232     Th232    5.37e-3   0.0001     0.001     10.0       ./root-join-read/build41/build41-internalTh232-master.root
 B        A        2       internal    Th232     Th232     Th232    2.60e-3   0.0001     0.001     10.0       ./root-join-read/build41/build41-internalTh232-master.root
@@ -119,14 +130,14 @@ B        A        6       pmt         U238      U238      Rn222    60.0      0.0
 B        A        7       pmt         U238      U238      Rn222    60.0      0.0001     0.001     10.0       ./root-join-read/build41/build41-pmtU238-master.root
 B        A        8       pmt         U238      U238      Rn222    60.0      0.0001     0.001     10.0       ./root-join-read/build41/build41-pmtU238-master.root
 
-B        A        1       pmt         Pb210     Pb210     Pb210    60.0      0.0001     0.001     10.0       ./root-join-read/build41/build41-pmtU238-master.root
-B        A        2       pmt         Pb210     Pb210     Pb210    60.0      0.0001     0.001     10.0       ./root-join-read/build41/build41-pmtU238-master.root
-B        A        3       pmt         Pb210     Pb210     Pb210    60.0      0.0001     0.001     10.0       ./root-join-read/build41/build41-pmtU238-master.root
-B        A        4       pmt         Pb210     Pb210     Pb210    60.0      0.0001     0.001     10.0       ./root-join-read/build41/build41-pmtU238-master.root
-B        A        5       pmt         Pb210     Pb210     Pb210    60.0      0.0001     0.001     10.0       ./root-join-read/build41/build41-pmtU238-master.root
-B        A        6       pmt         Pb210     Pb210     Pb210    60.0      0.0001     0.001     10.0       ./root-join-read/build41/build41-pmtU238-master.root
-B        A        7       pmt         Pb210     Pb210     Pb210    60.0      0.0001     0.001     10.0       ./root-join-read/build41/build41-pmtU238-master.root
-B        A        8       pmt         Pb210     Pb210     Pb210    60.0      0.0001     0.001     10.0       ./root-join-read/build41/build41-pmtU238-master.root
+B        A        1       pmt         U238      Pb210     Pb210    60.0      0.0001     0.001     10.0       ./root-join-read/build41/build41-pmtU238-master.root
+B        A        2       pmt         U238      Pb210     Pb210    60.0      0.0001     0.001     10.0       ./root-join-read/build41/build41-pmtU238-master.root
+B        A        3       pmt         U238      Pb210     Pb210    60.0      0.0001     0.001     10.0       ./root-join-read/build41/build41-pmtU238-master.root
+B        A        4       pmt         U238      Pb210     Pb210    60.0      0.0001     0.001     10.0       ./root-join-read/build41/build41-pmtU238-master.root
+B        A        5       pmt         U238      Pb210     Pb210    60.0      0.0001     0.001     10.0       ./root-join-read/build41/build41-pmtU238-master.root
+B        A        6       pmt         U238      Pb210     Pb210    60.0      0.0001     0.001     10.0       ./root-join-read/build41/build41-pmtU238-master.root
+B        A        7       pmt         U238      Pb210     Pb210    60.0      0.0001     0.001     10.0       ./root-join-read/build41/build41-pmtU238-master.root
+B        A        8       pmt         U238      Pb210     Pb210    60.0      0.0001     0.001     10.0       ./root-join-read/build41/build41-pmtU238-master.root
 
 B        A        1       pmt         Th232     Th232     Th232    12.0      0.0001     0.001     10.0       ./root-join-read/build41/build41-pmtTh232-master.root
 B        A        2       pmt         Th232     Th232     Th232    12.0      0.0001     0.001     10.0       ./root-join-read/build41/build41-pmtTh232-master.root
