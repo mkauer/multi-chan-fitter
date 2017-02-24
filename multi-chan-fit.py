@@ -3,13 +3,14 @@
 ######################################################################
 # Matt Kauer - mkauer@physics.wisc.edu
 ######################################################################
-# 41-single-multi-hit-fit.py
+# 42-try-again.py
 
-V = 'v41'
+V = 'v42'
 
-# implement simultaneous fitting of signle-hit and multi-hit data
+# try working off v40 again but with smaller changes so I can try
+# to understand whats going on with the fitting
 # 
-# version: 2017-02-20
+# version: 2017-02-23
 #
 # note: run 1616 is the first run after calibration-campaign-2
 # 
@@ -32,7 +33,7 @@ from funcs40 import *
 
 ### extra notes to add to the saved plot file names? [0, 'something']
 note=0
-#note = 'new-fixed-cal'
+#note = 'bound-0.001'
 
 ### backgrounds file to use?
 #mcfile = 'backgrounds40.txt'
@@ -55,11 +56,11 @@ chan = 2
 
 ### plotting ranges
 ### lo and hi energy ranges
-loer = [0, 200]
+loer = [0, 100]
 hier = [0, 3000]
 
 ### individual plots for all crystals? [0,1]
-indi = 0
+indi = 1
 ### just plot individual for crystals? [1-8]
 justthese = [3]
 
@@ -75,7 +76,7 @@ dru = 1
 ### pre scale the MC? [0,1]
 mcscale = 1
 ### set MC weights? [0,1]
-mcweight = 1
+mcweight = 0
 
 ### this doesn't work at all, not sure why...
 fitweight = 0   ### set fit weights? [0,1]
@@ -143,6 +144,7 @@ def _myself_(argv):
         data = dataDRU40(data)
     #bkgs = scaleBkgs32(bkgs)
     bkgs = scaleBkgs40(bkgs)
+    sigs = scaleBkgs40(sigs)
         
     
     ### Number of colors
@@ -340,10 +342,10 @@ def _myself_(argv):
         ### make weights histo
         ### testing with TFractionFitter
         ### this doesn't seem to work yet...
-        weights = TH1F('weights','weights',fbins,0,fbins)
-        for n in range(0,fbins):
-            weights.SetBinContent(n, 1)
-        weights.Sumw2()
+        #weights = TH1F('weights','weights',fbins,0,fbins)
+        #for n in range(0,fbins):
+        #    weights.SetBinContent(n, 1)
+        #weights.Sumw2()
         #-----------------------------------------------------------------
 
 
@@ -395,9 +397,10 @@ def _myself_(argv):
             #sigObj.append(TObjArray(Nsigs)) # number of MC to fit to
             sigObj.append(TObjArray(len(uniqSig))) # number of MC to fit to
             
-            fitdata[i].Sumw2()
+            #fitdata[i].Sumw2()
             dat_int = fitdata[i].Integral(fmin,fmax) # data integral to normalize to
 
+                        
             for fskey in fsigkeys:
                 if 'x'+str(i+1) in fskey:
                     
@@ -411,34 +414,44 @@ def _myself_(argv):
                     ### to scale or not to scale...
                     if mcscale:
                         fitsigs[fskey]['hist'].Scale(dat_int/mc_int) # scale to data integral
+                        
                         sigs[fskey+'-e0']['hist'].Scale(dat_int/mc_int) # make sure MC is scaled too
                         sigs[fskey+'-e1']['hist'].Scale(dat_int/mc_int) # make sure MC is scaled too
 
                         ### v31 - save the scaling factors so you can convert to mBq/kg later
-                        sigs[fskey+'-e0']['fitscale'] = dat_int/mc_int
-                        sigs[fskey+'-e1']['fitscale'] = dat_int/mc_int
+                        #sigs[fskey+'-e0']['fitscale'] = dat_int/mc_int
+                        #sigs[fskey+'-e1']['fitscale'] = dat_int/mc_int
+
+                        ### v42 version of fitscale
+                        sigs[fskey+'-e0']['fitscale'] = sigs[fskey+'-e0']['scale'] * dat_int/mc_int
+                        sigs[fskey+'-e1']['fitscale'] = sigs[fskey+'-e1']['scale'] * dat_int/mc_int
+                        
                     else:
                         ### why doesn't this work??
-                        sigs[fskey+'-e0']['fitscale'] = 1.
-                        sigs[fskey+'-e1']['fitscale'] = 1.
+                        ### maybe it does now??
+                        sigs[fskey+'-e0']['fitscale'] = sigs[fskey+'-e0']['scale']
+                        sigs[fskey+'-e1']['fitscale'] = sigs[fskey+'-e1']['scale']
                         
                     #sigObj[i].Add(fitsigs[fskey]['hist']) # add to the TFractionFitter object
                     sigObj[-1].Add(fitsigs[fskey]['hist']) # add to the TFractionFitter object
             
             #fit.append(TFractionFitter(fitdata[i], sigObj[i])) # create the TFF data and MC objects
-            fit.append(TFractionFitter(fitdata[i], sigObj[-1])) # create the TFF data and MC objects
+            #fit.append(TFractionFitter(fitdata[i], sigObj[-1])) # create the TFF data and MC objects
+            fit.append(TFractionFitter(fitdata[i], sigObj[-1], "Q")) # create the TFF data and MC objects
             
             ### for some reason on CUP the fit status gets returned as a pointer
             ### like <ROOT.TFitResultPtr object at 0x37246c0>
             #fitresults.append('NaI-C'+str(i+1)+' fit completed with status '+str(status))
             fitresults.append('NaI-C'+str(i+1)+' fit results')
             fitresults.append('MC fit constrained to 0.0001 - 10.0')
-            
-            for l in range(len(uniqSig)):
-                # set fit constraints on the MC put into sigObj TObject
-                #fit[i].Constrain(l, 0.0001, 10.0)
-                fit[-1].Constrain(l, 0.0001, 10.0)
 
+            ### set fit bounds!!!
+            #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            for l in range(len(uniqSig)):
+                #fit[-1].Constrain(l, 0.0001, 10.0)
+                fit[-1].Constrain(l, 0.01, 10.0)
+            #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            
                 # set fit weights to 1
                 # this doesn't work yet, not sure why, on the to-do list...
                 if fitweight:
@@ -529,6 +542,7 @@ def _myself_(argv):
         #if reuse:        save += '_reuse'
         save += '_reuse'+str(reuse)
         save += '_chan'+str(chan)
+        if note:         save += '_'+note
         save += '_'+V
         
         outfile = open('./plots/'+save+'_fit-results.txt', 'w')
@@ -930,7 +944,7 @@ def _myself_(argv):
             
             ### you need to scale the error by the dru scaling and/or the rebinning
             #-----------------------------------------------------------------------------
-            total[E][i].Sumw2()
+            #total[E][i].Sumw2()
             
             if not dru:
                 for n in range(total[E][i].GetNbinsX()):
@@ -1071,13 +1085,15 @@ def _myself_(argv):
                     tpad.Draw()
                     bpad.Draw()
                     sepPlots[E][i].Update()
-                    isave  = './plots/'
+                    isave  = ''
                     isave += 'x'+str(i+1)
                     if chan: isave += '-c'+str(chan)
                     isave += '-e'+str(E)
                     if note: isave += '_'+note
-                    isave += '.png'
-                    sepPlots[E][i].Print(isave)
+                    isave += '_'+V
+                    
+                    sepPlots[E][i].Print('./plots/'+isave+'.png')
+
     ### but don't show all those plots
     if indi: del sepPlots
     

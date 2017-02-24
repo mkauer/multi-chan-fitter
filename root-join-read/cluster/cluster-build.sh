@@ -11,7 +11,8 @@ cluster=$base/cluster
 build=$base/build41
 join=$base/join41.py
 
-for mcfile in airshield data internalK40 internalTh232 internalU238 internalPb210 lsveto lsvetoair pmtK40 pmtU238 pmtTh232 steel
+#for mcfile in data airshield internalK40 internalTh232 internalU238 internalPb210 lsveto lsvetoair pmtK40 pmtU238 pmtTh232 steel
+for mcfile in data
 do
     file="$cluster/build-$mcfile.sh"
     cat > $file <<EOF

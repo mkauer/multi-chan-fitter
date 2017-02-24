@@ -6,10 +6,16 @@
 # 
 # Works with v40 and later versions
 # 
-# version: 2017-02-20
+# version: 2017-02-23
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# + key for bkgs[key]['scale'] = scale for sig normalization in
+#   scaleSigs40()
+# - removed all the Sumw2() as a test
+# + add Sumw2() to all data and MC histos - not sure this is needed
+#   but during some debugging tests it seems like a good idea
+# + add noiseCuts40() with Pushpa's noise cuts
 # ~ tweak resolution for C5 and C8
 # + add new resol40() function
 # + add new calib41() new calib points from Pushpa
@@ -178,6 +184,7 @@ def buildData40(info, data):
                 data[key] = {}
                 data[key]['info'] = info
                 data[key]['hist'] = deepcopy(TH1F(rfile.Get(key)))
+                #data[key]['hist'].Sumw2()
             except:
                 print "WARNING: could not find hist -->",key
 
@@ -304,18 +311,28 @@ def buildData40(info, data):
                     print 'Available channels are [A]All-hits, [S]Single-hits, [M]Multi-hits'
                     sys.exit()
 
-                    
+                
+                ### Pushpa's noise cut
+                noiseCut = TCut('('+noiseCuts40(i,E)+')')
+
+                
+                ### combine all cuts
+                masterCut = TCut('('+
+                                 chanCut.GetTitle()+' && '+
+                                 noiseCut.GetTitle()
+                                 +')')
+
+                
                 ###-----------------------------------------------------------------------
-                chain.Draw(selection+' >> '+key, chanCut)
+                chain.Draw(selection+' >> '+key, masterCut)
                 ###-----------------------------------------------------------------------
                 
-                    
-                histo.Sumw2()
-                histo.SetLineColor(kBlack)
-                histo.SetMarkerColor(kBlack)
-                histo.SetLineWidth(1)
+                #histo.SetLineColor(kBlack)
+                #histo.SetMarkerColor(kBlack)
+                #histo.SetLineWidth(1)
 
                 data[key]['hist'] = histo
+                #data[key]['hist'].Sumw2()
 
                 subruns = nfiles
                 key2 = key+'_subruns'
@@ -359,6 +376,7 @@ def buildMC40(info, mc):
                 mc[key] = {}
                 mc[key]['info'] = info
                 mc[key]['hist'] = deepcopy(TH1F(rfile.Get(key)))
+                #mc[key]['hist'].Sumw2()
             except:
                 print "WARNING: could not find hist -->",key
 
@@ -515,11 +533,13 @@ def buildMC40(info, mc):
                 
                 detected = histo.GetEntries()
                                 
-                histo.SetLineColor(kBlack)
-                histo.SetMarkerColor(kBlack)
-                histo.SetLineWidth(1)
+                #histo.SetLineColor(kBlack)
+                #histo.SetMarkerColor(kBlack)
+                #histo.SetLineWidth(1)
 
                 mc[key]['hist'] = histo
+                #mc[key]['hist'].Sumw2()
+                
                 mc[key]['generated_hist'] = temp2
                 mc[key]['generated'] = generated
                 
@@ -531,7 +551,7 @@ def buildMC40(info, mc):
     return mc
 
     
-def build40(infile = 'backgrounds40.txt', freuse=0, fchan=0):
+def build40(infile = 'backgrounds41.txt', freuse=0, fchan=0):
 
     data = {}
     bkgs = {}
@@ -600,26 +620,32 @@ def scaleBkgs40(bkgs):
             #scale = bkgs[key]['info']['acti'] * (xkgs) * (1./1000) * (runtime) * (1./generated) * (druscale)
             scale = bkgs[key]['info']['acti'] * (xkgs) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./kev)
             bkgs[key]['hist'].Scale(scale)
+            bkgs[key]['scale'] = scale
         elif loca == 'pmt':
             #scale = bkgs[key]['info']['acti'] * (pmts) * (1./1000) * (runtime) * (1./generated) * (druscale)
             scale = bkgs[key]['info']['acti'] * (pmts) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./kev)
             bkgs[key]['hist'].Scale(scale)
+            bkgs[key]['scale'] = scale
         elif loca == 'lsveto':
             #scale = bkgs[key]['info']['acti'] * (lskg) * (1./1000) * (runtime) * (1./generated) * (druscale)
             scale = bkgs[key]['info']['acti'] * (lskg) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./kev)
             bkgs[key]['hist'].Scale(scale)
+            bkgs[key]['scale'] = scale
         elif loca == 'lsvetoair':
             #scale = bkgs[key]['info']['acti'] * (xkgs) * (1./1000) * (runtime) * (1./generated) * (druscale)
             scale = bkgs[key]['info']['acti'] * (xkgs) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./kev)
             bkgs[key]['hist'].Scale(scale)
+            bkgs[key]['scale'] = scale
         elif loca == 'airshield':
             #scale = bkgs[key]['info']['acti'] * (xkgs) * (1./1000) * (runtime) * (1./generated) * (druscale)
             scale = bkgs[key]['info']['acti'] * (xkgs) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./kev)
             bkgs[key]['hist'].Scale(scale)
+            bkgs[key]['scale'] = scale
         elif loca == 'steel':
             #scale = bkgs[key]['info']['acti'] * (xkgs) * (1./1000) * (runtime) * (1./generated) * (druscale)
             scale = bkgs[key]['info']['acti'] * (xkgs) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./kev)
             bkgs[key]['hist'].Scale(scale)
+            bkgs[key]['scale'] = scale
         else:
             print "WARNING: No background scaling for  --> ", loca
             continue
@@ -633,6 +659,7 @@ def scaleSigs40(sigkeys, sigs):
         x = key.split('-')[0]
         loca = key.split('-')[1]
         e = key.split('-')[-1]
+
         
         #druscale = data[x+'-data-'+e]['druScale']
         #runtime = data[x+'-data-'+e]['runtime']
@@ -651,6 +678,7 @@ def scaleSigs40(sigkeys, sigs):
         
         # verbose?
         V = 1
+        
         E = int(e[-1])
         
         if loca == 'internal':
@@ -821,5 +849,42 @@ def resol40(i, E=0):
 
     selection = '(('+str(p0)+'/sqrt(edep['+str(i)+']*1000.)) + '+str(p1)+')'
     return selection
+
+
+def noiseCuts40(i, E):
+    """
+    Quick hack at implementing Pushpa's noise cuts
+    """
+    
+    ### so it's really noise cuts on the low energy and alpha cuts on the high energy
+    
+    hiEcuts=[
+        "!(crystal1.energyD >1000 && (pmt11.rqtD1_5+pmt12.rqtD1_5)/2<2.66)",
+        "!(crystal2.energyD >1000 && (pmt21.rqtD1_5+pmt22.rqtD1_5)/2<2.64)",
+        "!(crystal3.energyD >1000 && (pmt31.rqtD1_5+pmt32.rqtD1_5)/2<2.66)",
+        "!(crystal4.energyD >1000 && (pmt41.rqtD1_5+pmt42.rqtD1_5)/2<2.68)",
+        "!(crystal5.energyD >1000 && (pmt51.rqtD1_5+pmt52.rqtD1_5)/2<2.65)",
+        "!(crystal6.energyD >1000 && (pmt61.rqtD1_5+pmt62.rqtD1_5)/2<2.655)",
+        "!(crystal7.energyD >1000 && (pmt71.rqtD1_5+pmt72.rqtD1_5)/2<2.63)",
+        "!(crystal8.energyD >1000 && (pmt81.rqtD1_5+pmt82.rqtD1_5)/2<2.66)"
+    ]
+
+    loEcuts=[
+        "pmt11.nc>1&&pmt12.nc>1 &&crystal1.t0>2.&&crystal1.x2/crystal1.x1<1.25&&abs((pmt11.qc5-pmt12.qc5)/(pmt11.qc5+pmt12.qc5))<0.5 && crystal1.qc5*0.0001093478>((1/1500000.0)*(crystal1.qc/crystal1.nc)*(crystal1.qc/crystal1.nc)+(13.0/100000.0)*(crystal1.qc/crystal1.nc)-0.1)",
+        "pmt21.nc>1&&pmt22.nc>1 &&crystal2.t0>2.&&crystal2.x2/crystal2.x1<1.25&&abs((pmt21.qc5-pmt22.qc5)/(pmt21.qc5+pmt22.qc5))<0.5 && crystal2.qc5*0.000105676 >((1/1500000.0)*(crystal2.qc/crystal2.nc)*(crystal2.qc/crystal2.nc)+(13.0/100000.0)*(crystal2.qc/crystal2.nc)-0.1)",
+        "pmt31.nc>1&&pmt32.nc>1 &&crystal3.t0>2.&&crystal3.x2/crystal3.x1<1.25&&abs((pmt31.qc5-pmt32.qc5)/(pmt31.qc5+pmt32.qc5))<0.5 && crystal3.qc5*0.0001159 >((1/1500000.0)*(crystal3.qc/crystal3.nc)*(crystal3.qc/crystal3.nc)+(13.0/100000.0)*(crystal3.qc/crystal3.nc)-0.1)",
+        "pmt41.nc>1&&pmt42.nc>1 &&crystal4.t0>2.&&crystal4.x2/crystal4.x1<1.25&&abs((pmt41.qc5-pmt42.qc5)/(pmt41.qc5+pmt42.qc5))<0.5 && crystal4.qc5*0.0001127 >((1/1500000.0)*(crystal4.qc/crystal4.nc)*(crystal4.qc/crystal4.nc)+(13.0/100000.0)*(crystal4.qc/crystal4.nc)-0.1)",
+        "pmt51.nc>1&&pmt52.nc>1 &&crystal5.t0>2.&&crystal5.x2/crystal5.x1<2.25&&abs((pmt51.qc5-pmt52.qc5)/(pmt51.qc5+pmt52.qc5))<0.7 && crystal5.qc5*2.869072e-04 >((1/000000)*(crystal5.qc/crystal5.nc)*(crystal5.qc/crystal5.nc)+(13.0/100000.0)*(crystal5.qc/crystal5.nc)-0.1)",
+        "pmt61.nc>1&&pmt62.nc>1 &&crystal6.t0>2.&&crystal6.x2/crystal6.x1<1.25&&abs((pmt61.qc5-pmt62.qc5)/(pmt61.qc5+pmt62.qc5))<0.5 && crystal6.qc5*0.000117534 >((1/1500000.0)*(crystal6.qc/crystal6.nc)*(crystal6.qc/crystal6.nc)+(13.0/100000.0)*(crystal6.qc/crystal6.nc)-0.1)",
+        "pmt71.nc>1&&pmt72.nc>1 &&crystal7.t0>2.&&crystal7.x2/crystal7.x1<1.25&&abs((pmt71.qc5-pmt72.qc5)/(pmt71.qc5+pmt72.qc5))<0.5 && crystal7.qc5*0.0001119 >((1/1500000.0)*(crystal7.qc/crystal7.nc)*(crystal7.qc/crystal7.nc)+(13.0/100000.0)*(crystal7.qc/crystal7.nc)-0.1)",
+        "pmt81.nc>1&&pmt82.nc>1 &&crystal8.t0>2.&&crystal8.x2/crystal8.x1<2.25&&abs((pmt81.qc5-pmt82.qc5)/(pmt81.qc5+pmt82.qc5))<0.7 && crystal8.qc5*3.842627e-04 >((1/1000000.0)*(crystal8.qc/crystal8.nc)*(crystal8.qc/crystal8.nc)+(13.0/100000.0)*(crystal8.qc/crystal8.nc)-0.1)"
+    ]
+
+    if E:
+        cut = hiEcuts[i]
+    else:
+        cut = loEcuts[i]
+
+    return cut
 
 

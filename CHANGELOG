@@ -12,13 +12,39 @@
 # ====================================================================
 
 
+# 2017-02-23
+# --------------------------------------------------------------------
+# + key for "bkgs[key]['scale'] = scale" in funcs40.py for sigs
+#   normalization with sigs[fskey]['fitscale']
+# + scale sigs same as bkgs before doing the fitting,
+#   as in - "sigs = scaleBkgs40(sigs)"
+# - removed all Sumw2() in 42-try-again.py
+# - removed all Sumw2() in funcs40.py
+# V switched to 42-try-again.py
+# ~ copy v40 to v42 and try again with smaller changes...
+# + too many changes in v41 - I don't understand what's going on there
+# + add Sumw2() to all data and MC histos in funcs40.py - not sure this
+#   is needed but during some debugging tests it seemed like a good idea
+
+
+# 2017-02-22
+# --------------------------------------------------------------------
+# + set any negative data-bkgs bins to 0
+# ~ bunch of minor tweaks and clean up
+
+
+# 2017-02-21
+# --------------------------------------------------------------------
+# + add noiseCuts40() in funcs40.py with Pushpa's noise cuts, this is
+#   really noise cuts for loE and alpha cuts for hiE
+
+
 # 2017-02-20
 # --------------------------------------------------------------------
 # ~ create new build41 joined rootfiles with new resol40() and
 #   tweaks to the C5 and C8 resolutions
 # ~ tweak resolution for C5 and C8
 # + add new resol40() function in funcs40.py
-
 
 
 # 2017-02-17
