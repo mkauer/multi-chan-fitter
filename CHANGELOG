@@ -14,7 +14,8 @@
 
 # 2017-02-27
 # --------------------------------------------------------------------
-
+# + add fit bin counts instead of setting bin counts - prep for the
+#   multi chan fitting
 # + start working on adding single and multi hit channels to the fit
 # V switched to 43-add-arbitrary-chans.py
 # - remove setting data bin erros for the combined fit histo because

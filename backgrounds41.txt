@@ -2,7 +2,7 @@
 
 # version 2017-02-27
 
-# ~ change lbnd and hbnd into % change where 1.0 is 100%
+# ~ change lbnd and hbnd into % change where 1.0 is 100% (set defaults to [0.5, 1.5] ie +/- 50%)
 # ~ change lbnd to 0.1
 # ~ switched to using specific internalPb210 files
 # ~ oops - pmtPb210 shouldn't have had Pb210 as the "isof"

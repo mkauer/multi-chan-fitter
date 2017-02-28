@@ -60,7 +60,7 @@ loer = [0, 100]
 hier = [0, 3000]
 
 ### individual plots for all crystals? [0,1]
-indi = 1
+indi = 0
 ### just plot individual for crystals? [1-8]
 justthese = [3]
 
@@ -233,20 +233,21 @@ def _myself_(argv):
             tot.SetMarkerColor(kGray+1)
             tot.SetLineWidth(1)
             ftotal.append(tot)
-
+            
             res = TH1F('fresid'+str(i), longNames(i), fbins,0,fbins)
             res.SetLineColor(kBlack)
             res.SetMarkerColor(kBlack)
             res.SetLineWidth(1)
             fresid.append(res)
-
-
+            
+            
             # fill the low energy part
             #------------------------------------------------
             for dkey in datkeys:
                 if 'x'+str(i+1) in dkey and '-e0' in dkey:
                     for n in range(fLoBins):
-                        fitdata[i].SetBinContent(n+1, data[dkey]['hist'].GetBinContent(fLo[0]+n))
+                        #fitdata[i].SetBinContent(n+1, data[dkey]['hist'].GetBinContent(fLo[0]+n)) # this is in v42
+                        fitdata[i].SetBinContent(n+1, fitdata[i].GetBinContent(n+1) + data[dkey]['hist'].GetBinContent(fLo[0]+n))
                         #fitdata[i].SetBinError(n+1, data[dkey]['hist'].GetBinError(fLo[0]+n))
 
             for skey in sigkeys:
@@ -256,7 +257,8 @@ def _myself_(argv):
                     fitsigs[fskey] = {}
                     fitsigs[fskey]['hist'] = fsig
                     for n in range(fLoBins):
-                        fitsigs[fskey]['hist'].SetBinContent(n+1, sigs[skey]['hist'].GetBinContent(fLo[0]+n))
+                        #fitsigs[fskey]['hist'].SetBinContent(n+1, sigs[skey]['hist'].GetBinContent(fLo[0]+n)) # this is in v42
+                        fitsigs[fskey]['hist'].SetBinContent(n+1, fitsigs[fskey]['hist'].GetBinContent(n+1) + sigs[skey]['hist'].GetBinContent(fLo[0]+n))
 
             for bkey in bakkeys:
                 if 'x'+str(i+1) in bkey and '-e0' in bkey:
@@ -265,7 +267,8 @@ def _myself_(argv):
                     fitbkgs[fbkey] = {}
                     fitbkgs[fbkey]['hist'] = fbak
                     for n in range(fLoBins):
-                        fitbkgs[fbkey]['hist'].SetBinContent(n+1, bkgs[bkey]['hist'].GetBinContent(fLo[0]+n))
+                        #fitbkgs[fbkey]['hist'].SetBinContent(n+1, bkgs[bkey]['hist'].GetBinContent(fLo[0]+n)) # this is in v42
+                        fitbkgs[fbkey]['hist'].SetBinContent(n+1, fitbkgs[fbkey]['hist'].GetBinContent(n+1) + bkgs[bkey]['hist'].GetBinContent(fLo[0]+n))
 
 
             # fill the high energy part
@@ -294,7 +297,8 @@ def _myself_(argv):
                 if 'x'+str(i+1) in dkey and '-e1' in dkey:
                     r = 0
                     for n in range(fLoBins,fbins):
-                        fitdata[i].SetBinContent(n+1, rdata[dkey]['hist'].GetBinContent(fHi[0]+r))
+                        #fitdata[i].SetBinContent(n+1, rdata[dkey]['hist'].GetBinContent(fHi[0]+r)) # this is in v42
+                        fitdata[i].SetBinContent(n+1, fitdata[i].GetBinContent(n+1) + rdata[dkey]['hist'].GetBinContent(fHi[0]+r))
                         #fitdata[i].SetBinError(n+1, rdata[dkey]['hist'].GetBinError(fHi[0]+r))
                         r += 1
 
@@ -303,7 +307,8 @@ def _myself_(argv):
                     fskey = skey.split('-e1')[0]
                     r = 0
                     for n in range(fLoBins,fbins):
-                        fitsigs[fskey]['hist'].SetBinContent(n+1, rsigs[skey]['hist'].GetBinContent(fHi[0]+r))
+                        #fitsigs[fskey]['hist'].SetBinContent(n+1, rsigs[skey]['hist'].GetBinContent(fHi[0]+r)) # this is in v42
+                        fitsigs[fskey]['hist'].SetBinContent(n+1, fitsigs[fskey]['hist'].GetBinContent(n+1) + rsigs[skey]['hist'].GetBinContent(fHi[0]+r))
                         r += 1
 
             for bkey in bakkeys:
@@ -311,7 +316,8 @@ def _myself_(argv):
                     fbkey = bkey.split('-e1')[0]
                     r = 0
                     for n in range(fLoBins,fbins):
-                        fitbkgs[fbkey]['hist'].SetBinContent(n+1, rbkgs[bkey]['hist'].GetBinContent(fHi[0]+r))
+                        #fitbkgs[fbkey]['hist'].SetBinContent(n+1, rbkgs[bkey]['hist'].GetBinContent(fHi[0]+r)) # this is in v42
+                        fitbkgs[fbkey]['hist'].SetBinContent(n+1, fitbkgs[fbkey]['hist'].GetBinContent(n+1) + rbkgs[bkey]['hist'].GetBinContent(fHi[0]+r))
                         r += 1
 
 
