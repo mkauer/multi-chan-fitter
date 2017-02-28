@@ -14,6 +14,9 @@
 
 # 2017-02-27
 # --------------------------------------------------------------------
+
+# + start working on adding single and multi hit channels to the fit
+# V switched to 43-add-arbitrary-chans.py
 # - remove setting data bin erros for the combined fit histo because
 #   tfractionfitter gives the same results either way.
 # + changed backgrounds file to have fit bounds in a %

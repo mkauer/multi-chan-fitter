@@ -3,9 +3,9 @@
 ######################################################################
 # Matt Kauer - mkauer@physics.wisc.edu
 ######################################################################
-# 42-try-again.py
+# 43-add-arbitrary-chans.py
 
-V = 'v42'
+V = 'v43'
 
 # try working off v40 again but with smaller changes so I can try
 # to understand whats going on with the fitting
