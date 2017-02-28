@@ -10,7 +10,7 @@ V = 'v42'
 # try working off v40 again but with smaller changes so I can try
 # to understand whats going on with the fitting
 # 
-# version: 2017-02-23
+# version: 2017-02-27
 #
 # note: run 1616 is the first run after calibration-campaign-2
 # 
@@ -247,7 +247,7 @@ def _myself_(argv):
                 if 'x'+str(i+1) in dkey and '-e0' in dkey:
                     for n in range(fLoBins):
                         fitdata[i].SetBinContent(n+1, data[dkey]['hist'].GetBinContent(fLo[0]+n))
-                        fitdata[i].SetBinError(n+1, data[dkey]['hist'].GetBinError(fLo[0]+n))
+                        #fitdata[i].SetBinError(n+1, data[dkey]['hist'].GetBinError(fLo[0]+n))
 
             for skey in sigkeys:
                 if 'x'+str(i+1) in skey and '-e0' in skey:
@@ -295,7 +295,7 @@ def _myself_(argv):
                     r = 0
                     for n in range(fLoBins,fbins):
                         fitdata[i].SetBinContent(n+1, rdata[dkey]['hist'].GetBinContent(fHi[0]+r))
-                        fitdata[i].SetBinError(n+1, rdata[dkey]['hist'].GetBinError(fHi[0]+r))
+                        #fitdata[i].SetBinError(n+1, rdata[dkey]['hist'].GetBinError(fHi[0]+r))
                         r += 1
 
             for skey in sigkeys:
@@ -400,7 +400,7 @@ def _myself_(argv):
             #fitdata[i].Sumw2()
             dat_int = fitdata[i].Integral(fmin,fmax) # data integral to normalize to
 
-                        
+            bounds = []
             for fskey in fsigkeys:
                 if 'x'+str(i+1) in fskey:
                     
@@ -431,25 +431,42 @@ def _myself_(argv):
                         ### maybe it does now??
                         sigs[fskey+'-e0']['fitscale'] = sigs[fskey+'-e0']['scale']
                         sigs[fskey+'-e1']['fitscale'] = sigs[fskey+'-e1']['scale']
+
+                    
+                    renorm = sigs[fskey+'-e0']['scale'] / sigs[fskey+'-e0']['fitscale']
+                    #lbnd=0.5 # in % ie 0.5=50%
+                    #hbnd=0.5 # in % ie 0.5=50%
+                    #bounds.append([renorm*(1.-lbnd), renorm*(1.+hbnd)])
+                    bounds.append([renorm * sigs[fskey+'-e0']['info']['fbnd'][0],
+                                   renorm * sigs[fskey+'-e0']['info']['fbnd'][1]])
+                    
                         
                     #sigObj[i].Add(fitsigs[fskey]['hist']) # add to the TFractionFitter object
                     sigObj[-1].Add(fitsigs[fskey]['hist']) # add to the TFractionFitter object
             
             #fit.append(TFractionFitter(fitdata[i], sigObj[i])) # create the TFF data and MC objects
-            #fit.append(TFractionFitter(fitdata[i], sigObj[-1])) # create the TFF data and MC objects
-            fit.append(TFractionFitter(fitdata[i], sigObj[-1], "Q")) # create the TFF data and MC objects
+            fit.append(TFractionFitter(fitdata[i], sigObj[-1])) # create the TFF data and MC objects
+            #fit.append(TFractionFitter(fitdata[i], sigObj[-1], "Q")) # create the TFF data and MC objects
             
             ### for some reason on CUP the fit status gets returned as a pointer
             ### like <ROOT.TFitResultPtr object at 0x37246c0>
             #fitresults.append('NaI-C'+str(i+1)+' fit completed with status '+str(status))
             fitresults.append('NaI-C'+str(i+1)+' fit results')
-            fitresults.append('MC fit constrained to 0.0001 - 10.0')
+            #fitresults.append('MC fit constrained to 0.0001 - 10.0')
 
             ### set fit bounds!!!
             #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            for l in range(len(uniqSig)):
+            #for l in range(len(uniqSig)):
+            ### seems like Constrain starts with param=1
+            ### l=0 sets all params to the same constrain
+            ### very confusing
+            for l in range(len(bounds)):
                 #fit[-1].Constrain(l, 0.0001, 10.0)
-                fit[-1].Constrain(l, 0.01, 10.0)
+                #fit[-1].Constrain(l, 0.01, 10.0)
+                #fit[-1].Constrain(l, 0.01, 10.0)
+                fit[-1].Constrain(l+1, bounds[l][0], bounds[l][1])
+                #fit[-1].Constrain(l+1, 0.01, 10.0)
+                
             #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             
                 # set fit weights to 1
@@ -457,7 +474,7 @@ def _myself_(argv):
                 if fitweight:
                     #fit[i].SetWeight(l, weights)
                     fit[-1].SetWeight(l, weights)
-                    
+            
             #fit[i].SetRangeX(fmin, fmax) # set global range, should be the same as fmin and fmax?
             fit[-1].SetRangeX(fmin, fmax) # set global range, should be the same as fmin and fmax?
 

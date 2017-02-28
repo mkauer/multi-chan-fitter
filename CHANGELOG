@@ -12,6 +12,14 @@
 # ====================================================================
 
 
+# 2017-02-27
+# --------------------------------------------------------------------
+# - remove setting data bin erros for the combined fit histo because
+#   tfractionfitter gives the same results either way.
+# + changed backgrounds file to have fit bounds in a %
+# + add signal fit scaling to be in % and relative to initial set activity
+
+
 # 2017-02-23
 # --------------------------------------------------------------------
 # + key for "bkgs[key]['scale'] = scale" in funcs40.py for sigs
