@@ -6,10 +6,11 @@
 # 
 # Works with v40 and later versions
 # 
-# version: 2017-02-23
+# version: 2017-03-07
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# + specific low energy cuts to make sure the boolean '&&' is working
 # + key for bkgs[key]['scale'] = scale for sig normalization in
 #   scaleSigs40()
 # - removed all the Sumw2() as a test
@@ -80,7 +81,7 @@ def getInfo40(line, freuse=0, fchan=0):
     
     bits = line.split()
     #bits = [x.strip() for x in bits]
-        
+    
     # data type
     info['type'] = str(bits[0])
     
@@ -180,6 +181,7 @@ def buildData40(info, data):
 
         for e in range(2):
             key = info['key']+'-e'+str(e)
+            #print key
             try:
                 data[key] = {}
                 data[key]['info'] = info
@@ -858,7 +860,7 @@ def noiseCuts40(i, E):
     
     ### so it's really noise cuts on the low energy and alpha cuts on the high energy
     
-    hiEcuts=[
+    hiEcuts = [
         "!(crystal1.energyD >1000 && (pmt11.rqtD1_5+pmt12.rqtD1_5)/2<2.66)",
         "!(crystal2.energyD >1000 && (pmt21.rqtD1_5+pmt22.rqtD1_5)/2<2.64)",
         "!(crystal3.energyD >1000 && (pmt31.rqtD1_5+pmt32.rqtD1_5)/2<2.66)",
@@ -869,7 +871,28 @@ def noiseCuts40(i, E):
         "!(crystal8.energyD >1000 && (pmt81.rqtD1_5+pmt82.rqtD1_5)/2<2.66)"
     ]
 
-    loEcuts=[
+    loEcal = [
+        0.0001093478,
+        0.000105676,
+        0.0001159,
+        0.0001127,
+        2.869072e-04,
+        0.000117534,
+        0.0001119,
+        3.842627e-04
+    ]
+    
+    X = str(i+1)
+    noise_cut = '(pmt'+X+'1.nc > 1 && pmt'+X+'2.nc > 1)'
+    time_cut  = '(crystal'+X+'.t0 > 2.)'
+    dama_cut  = '(crystal'+X+'.x2 / crystal'+X+'.x1 < 1.25)'
+    asym_cut  = '(abs((pmt'+X+'1.qc5-pmt'+X+'2.qc5)/(pmt'+X+'1.qc5+pmt'+X+'2.qc5)) < 0.5)'
+    qcnc_cut  = '(crystal'+X+'.qc5*'+str(loEcal[i])+' > ((1./1500000.) * (crystal'+X+'.qc/crystal'+X+'.nc) * (crystal'+X+'.qc/crystal'+X+'.nc)+(13./100000.) * (crystal'+X+'.qc/crystal'+X+'.nc)-0.1))'
+    
+    loEcut = '('+noise_cut+' && '+time_cut+' && '+dama_cut+' && '+asym_cut+' && '+qcnc_cut+')'
+    
+    """
+    loEcuts = [
         "pmt11.nc>1&&pmt12.nc>1 &&crystal1.t0>2.&&crystal1.x2/crystal1.x1<1.25&&abs((pmt11.qc5-pmt12.qc5)/(pmt11.qc5+pmt12.qc5))<0.5 && crystal1.qc5*0.0001093478>((1/1500000.0)*(crystal1.qc/crystal1.nc)*(crystal1.qc/crystal1.nc)+(13.0/100000.0)*(crystal1.qc/crystal1.nc)-0.1)",
         "pmt21.nc>1&&pmt22.nc>1 &&crystal2.t0>2.&&crystal2.x2/crystal2.x1<1.25&&abs((pmt21.qc5-pmt22.qc5)/(pmt21.qc5+pmt22.qc5))<0.5 && crystal2.qc5*0.000105676 >((1/1500000.0)*(crystal2.qc/crystal2.nc)*(crystal2.qc/crystal2.nc)+(13.0/100000.0)*(crystal2.qc/crystal2.nc)-0.1)",
         "pmt31.nc>1&&pmt32.nc>1 &&crystal3.t0>2.&&crystal3.x2/crystal3.x1<1.25&&abs((pmt31.qc5-pmt32.qc5)/(pmt31.qc5+pmt32.qc5))<0.5 && crystal3.qc5*0.0001159 >((1/1500000.0)*(crystal3.qc/crystal3.nc)*(crystal3.qc/crystal3.nc)+(13.0/100000.0)*(crystal3.qc/crystal3.nc)-0.1)",
@@ -879,11 +902,13 @@ def noiseCuts40(i, E):
         "pmt71.nc>1&&pmt72.nc>1 &&crystal7.t0>2.&&crystal7.x2/crystal7.x1<1.25&&abs((pmt71.qc5-pmt72.qc5)/(pmt71.qc5+pmt72.qc5))<0.5 && crystal7.qc5*0.0001119 >((1/1500000.0)*(crystal7.qc/crystal7.nc)*(crystal7.qc/crystal7.nc)+(13.0/100000.0)*(crystal7.qc/crystal7.nc)-0.1)",
         "pmt81.nc>1&&pmt82.nc>1 &&crystal8.t0>2.&&crystal8.x2/crystal8.x1<2.25&&abs((pmt81.qc5-pmt82.qc5)/(pmt81.qc5+pmt82.qc5))<0.7 && crystal8.qc5*3.842627e-04 >((1/1000000.0)*(crystal8.qc/crystal8.nc)*(crystal8.qc/crystal8.nc)+(13.0/100000.0)*(crystal8.qc/crystal8.nc)-0.1)"
     ]
-
+    """
+    
     if E:
         cut = hiEcuts[i]
     else:
-        cut = loEcuts[i]
+        #cut = loEcuts[i]
+        cut = loEcut
 
     return cut
 

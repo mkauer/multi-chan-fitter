@@ -3,14 +3,13 @@
 ######################################################################
 # Matt Kauer - mkauer@physics.wisc.edu
 ######################################################################
-# 43-add-arbitrary-chans.py
+# 50-multi-chan.py
 
-V = 'v43'
+V = 'v50'
 
-# try working off v40 again but with smaller changes so I can try
-# to understand whats going on with the fitting
+# try to get multi-chan fitting working - it's kinda a mess right now
 # 
-# version: 2017-02-27
+# version: 2017-03-07
 #
 # note: run 1616 is the first run after calibration-campaign-2
 # 
@@ -25,7 +24,7 @@ import numpy as np
 import ROOT
 from ROOT import *
 
-from funcs40 import *
+from funcs50 import *
 
 
 ### user inputs
@@ -33,11 +32,13 @@ from funcs40 import *
 
 ### extra notes to add to the saved plot file names? [0, 'something']
 note=0
-#note = 'bound-0.001'
+#note = 'find-data'
 
 ### backgrounds file to use?
 #mcfile = 'backgrounds40.txt'
 mcfile = 'backgrounds41.txt'
+#mcfile = 'back-just-data.txt'
+#mcfile = 'back-just-c3.txt'
 
 ### force reuse of all joined rootfiles in mcfile? [0,1,2]
 ### nice for debugging
@@ -48,19 +49,19 @@ reuse = 1
 
 ### force a particular set of hit chan data? [0,1,2,3]
 ### nice for debugging
-### [0] default - use whatever is specified in the backgrounds file
-### [1] force all-hit data selection channel
-### [2] force single-hit data selection channel
-### [3] force multi-hi data selection channel
-chan = 2
+### ['D'] default - use whatever is specified in the backgrounds file
+### ['A'] force all-hit data selection channel
+### ['S'] force single-hit data selection channel
+### ['M'] force multi-hi data selection channel
+chan = 'S'
 
 ### plotting ranges
 ### lo and hi energy ranges
-loer = [0, 100]
+loer = [0, 200]
 hier = [0, 3000]
 
 ### individual plots for all crystals? [0,1]
-indi = 0
+indi = 1
 ### just plot individual for crystals? [1-8]
 justthese = [3]
 
@@ -121,7 +122,8 @@ def _myself_(argv):
         print 'ERROR: could not find backgrounds file -->', mcfile
         sys.exit()
         
-    data, bkgs, sigs = build40(mcfile, reuse, chan)
+    #data, bkgs, sigs = build40(mcfile, reuse, chan)
+    data, bkgs, sigs = build50(mcfile, reuse, chan)
     datkeys, bakkeys, sigkeys = sortKeys2(data, bkgs, sigs)
 
     runNum = data[datkeys[0]]['info']['run']
@@ -247,7 +249,8 @@ def _myself_(argv):
                 if 'x'+str(i+1) in dkey and '-e0' in dkey:
                     for n in range(fLoBins):
                         #fitdata[i].SetBinContent(n+1, data[dkey]['hist'].GetBinContent(fLo[0]+n)) # this is in v42
-                        fitdata[i].SetBinContent(n+1, fitdata[i].GetBinContent(n+1) + data[dkey]['hist'].GetBinContent(fLo[0]+n))
+                        fitdata[i].SetBinContent(n+1, fitdata[i].GetBinContent(n+1)
+                                                 + data[dkey]['hist'].GetBinContent(fLo[0]+n))
                         #fitdata[i].SetBinError(n+1, data[dkey]['hist'].GetBinError(fLo[0]+n))
 
             for skey in sigkeys:
@@ -258,7 +261,8 @@ def _myself_(argv):
                     fitsigs[fskey]['hist'] = fsig
                     for n in range(fLoBins):
                         #fitsigs[fskey]['hist'].SetBinContent(n+1, sigs[skey]['hist'].GetBinContent(fLo[0]+n)) # this is in v42
-                        fitsigs[fskey]['hist'].SetBinContent(n+1, fitsigs[fskey]['hist'].GetBinContent(n+1) + sigs[skey]['hist'].GetBinContent(fLo[0]+n))
+                        fitsigs[fskey]['hist'].SetBinContent(n+1, fitsigs[fskey]['hist'].GetBinContent(n+1)
+                                                             + sigs[skey]['hist'].GetBinContent(fLo[0]+n))
 
             for bkey in bakkeys:
                 if 'x'+str(i+1) in bkey and '-e0' in bkey:
@@ -268,7 +272,8 @@ def _myself_(argv):
                     fitbkgs[fbkey]['hist'] = fbak
                     for n in range(fLoBins):
                         #fitbkgs[fbkey]['hist'].SetBinContent(n+1, bkgs[bkey]['hist'].GetBinContent(fLo[0]+n)) # this is in v42
-                        fitbkgs[fbkey]['hist'].SetBinContent(n+1, fitbkgs[fbkey]['hist'].GetBinContent(n+1) + bkgs[bkey]['hist'].GetBinContent(fLo[0]+n))
+                        fitbkgs[fbkey]['hist'].SetBinContent(n+1, fitbkgs[fbkey]['hist'].GetBinContent(n+1)
+                                                             + bkgs[bkey]['hist'].GetBinContent(fLo[0]+n))
 
 
             # fill the high energy part
@@ -298,7 +303,8 @@ def _myself_(argv):
                     r = 0
                     for n in range(fLoBins,fbins):
                         #fitdata[i].SetBinContent(n+1, rdata[dkey]['hist'].GetBinContent(fHi[0]+r)) # this is in v42
-                        fitdata[i].SetBinContent(n+1, fitdata[i].GetBinContent(n+1) + rdata[dkey]['hist'].GetBinContent(fHi[0]+r))
+                        fitdata[i].SetBinContent(n+1, fitdata[i].GetBinContent(n+1)
+                                                 + rdata[dkey]['hist'].GetBinContent(fHi[0]+r))
                         #fitdata[i].SetBinError(n+1, rdata[dkey]['hist'].GetBinError(fHi[0]+r))
                         r += 1
 
@@ -308,7 +314,8 @@ def _myself_(argv):
                     r = 0
                     for n in range(fLoBins,fbins):
                         #fitsigs[fskey]['hist'].SetBinContent(n+1, rsigs[skey]['hist'].GetBinContent(fHi[0]+r)) # this is in v42
-                        fitsigs[fskey]['hist'].SetBinContent(n+1, fitsigs[fskey]['hist'].GetBinContent(n+1) + rsigs[skey]['hist'].GetBinContent(fHi[0]+r))
+                        fitsigs[fskey]['hist'].SetBinContent(n+1, fitsigs[fskey]['hist'].GetBinContent(n+1)
+                                                             + rsigs[skey]['hist'].GetBinContent(fHi[0]+r))
                         r += 1
 
             for bkey in bakkeys:
@@ -317,7 +324,8 @@ def _myself_(argv):
                     r = 0
                     for n in range(fLoBins,fbins):
                         #fitbkgs[fbkey]['hist'].SetBinContent(n+1, rbkgs[bkey]['hist'].GetBinContent(fHi[0]+r)) # this is in v42
-                        fitbkgs[fbkey]['hist'].SetBinContent(n+1, fitbkgs[fbkey]['hist'].GetBinContent(n+1) + rbkgs[bkey]['hist'].GetBinContent(fHi[0]+r))
+                        fitbkgs[fbkey]['hist'].SetBinContent(n+1, fitbkgs[fbkey]['hist'].GetBinContent(n+1)
+                                                             + rbkgs[bkey]['hist'].GetBinContent(fHi[0]+r))
                         r += 1
 
 
@@ -440,9 +448,7 @@ def _myself_(argv):
 
                     
                     renorm = sigs[fskey+'-e0']['scale'] / sigs[fskey+'-e0']['fitscale']
-                    #lbnd=0.5 # in % ie 0.5=50%
-                    #hbnd=0.5 # in % ie 0.5=50%
-                    #bounds.append([renorm*(1.-lbnd), renorm*(1.+hbnd)])
+                    ### use bounds from backgrounds files
                     bounds.append([renorm * sigs[fskey+'-e0']['info']['fbnd'][0],
                                    renorm * sigs[fskey+'-e0']['info']['fbnd'][1]])
                     
@@ -467,11 +473,10 @@ def _myself_(argv):
             ### l=0 sets all params to the same constrain
             ### very confusing
             for l in range(len(bounds)):
-                #fit[-1].Constrain(l, 0.0001, 10.0)
-                #fit[-1].Constrain(l, 0.01, 10.0)
-                #fit[-1].Constrain(l, 0.01, 10.0)
-                fit[-1].Constrain(l+1, bounds[l][0], bounds[l][1])
-                #fit[-1].Constrain(l+1, 0.01, 10.0)
+                ### use numbers from backgrounds file
+                #fit[-1].Constrain(l+1, bounds[l][0], bounds[l][1])
+                ### or force other less strict contraints
+                fit[-1].Constrain(l+1, 0.01, 10.0)
                 
             #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             
@@ -869,6 +874,10 @@ def _myself_(argv):
                         #druScale = data['x'+str(i+1)+'-data'+'-e'+str(E)]['druScale']
                         #druScale = data[key]['druScale']
                     
+                    data[dkey]['hist'].SetMarkerColor(kBlack)
+                    data[dkey]['hist'].SetLineColor(kBlack)
+                    data[dkey]['hist'].SetLineWidth(1)
+                    
                     data[dkey]['hist'].GetYaxis().SetTitleFont(font)
                     data[dkey]['hist'].GetYaxis().SetTitleSize(size)
                     data[dkey]['hist'].GetYaxis().SetTitleOffset(yoff)
@@ -889,7 +898,8 @@ def _myself_(argv):
                     data[dkey]['hist'].Draw()
                     days = round(data[dkey]['runtime']/86400.,2)
                     #legs[E][i].AddEntry(data[key]['hist'], 'data', lopt)
-                    legs[E][i].AddEntry(data[dkey]['hist'], 'data ('+str(days)+' days)', lopt)
+                    #legs[E][i].AddEntry(data[dkey]['hist'], 'data ('+str(days)+' days)', lopt)
+                    legs[E][i].AddEntry(data[dkey]['hist'], dkey+' ('+str(days)+' days)', lopt)
                     
             for key in bakkeys:
                 if 'x'+str(i+1) in key and '-e'+str(E) in key:

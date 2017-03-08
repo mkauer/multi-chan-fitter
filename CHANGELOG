@@ -14,12 +14,22 @@
 
 # 2017-02-27
 # --------------------------------------------------------------------
-# + add fit bin counts instead of setting bin counts - prep for the
+# + new build50() to deal with format changes
+# + new getInfo50() to deal with format changes
+# ~ changed "chan" format to be "D", "A", "S", "M" instead of 0,1,2,3
+# V switched to v50-multi-chan.py - this requires some big changes
+#   within the various functions I have - I want to keep v43 for
+#   comparing and cross-checking
+# + add the fit bin counts instead of setting bin counts - prep for the
 #   multi chan fitting
 # + start working on adding single and multi hit channels to the fit
 # V switched to 43-add-arbitrary-chans.py
 # - remove setting data bin erros for the combined fit histo because
 #   tfractionfitter gives the same results either way.
+# + found out that setting constraints with TFractionFitter you need to
+#   use the param numbers, which start at [1] and not [0] as I assumed.
+#   Setting a param contraint with [0] sets ALL the param contraints
+#   to that value. Not clear at all in the documentation. 
 # + changed backgrounds file to have fit bounds in a %
 # + add signal fit scaling to be in % and relative to initial set activity
 
