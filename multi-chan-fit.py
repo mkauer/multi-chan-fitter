@@ -9,7 +9,7 @@ V = 'v50'
 
 # try to get multi-chan fitting working - it's kinda a mess right now
 # 
-# version: 2017-03-07
+# version: 2017-03-09
 #
 # note: run 1616 is the first run after calibration-campaign-2
 # 
@@ -42,6 +42,7 @@ mcfile = 'backgrounds41.txt'
 
 ### force reuse of all joined rootfiles in mcfile? [0,1,2]
 ### nice for debugging
+reuse = 0
 ### [0] default - use whatever is specified in the backgrounds file
 ### [1] forces reusing of all data/bkgs/sigs
 ### [2] forces NOT reusing any data/bkgs/sigs
@@ -49,11 +50,12 @@ reuse = 1
 
 ### force a particular set of hit chan data? [0,1,2,3]
 ### nice for debugging
-### ['D'] default - use whatever is specified in the backgrounds file
+mychans = 0
+### [ 0 ] default - use whatever is specified in the backgrounds file
 ### ['A'] force all-hit data selection channel
 ### ['S'] force single-hit data selection channel
 ### ['M'] force multi-hi data selection channel
-chan = 'S'
+mychans = 'S'
 
 ### plotting ranges
 ### lo and hi energy ranges
@@ -102,7 +104,7 @@ gROOT.SetBatch(batch)
 
 
 def _myself_(argv):
-
+    
     gROOT.Reset()
     gStyle.SetPalette (1)
     gStyle.SetOptStat ('')
@@ -116,18 +118,16 @@ def _myself_(argv):
     if not os.path.exists('./plots'): 
         os.makedirs('./plots')
     
-    #runNum = 1546
-
     if not os.path.exists(mcfile):
         print 'ERROR: could not find backgrounds file -->', mcfile
         sys.exit()
-        
-    #data, bkgs, sigs = build40(mcfile, reuse, chan)
-    data, bkgs, sigs = build50(mcfile, reuse, chan)
+    
+    data, bkgs, sigs = build50(mcfile, reuse, mychans)
     datkeys, bakkeys, sigkeys = sortKeys2(data, bkgs, sigs)
-
+    
+    # assume all data is using same run and channels
     runNum = data[datkeys[0]]['info']['run']
-
+    chans  = data[datkeys[0]]['info']['chans']
     
     ### find unique names for color scheme?
     ### "internal-K40" for example
@@ -138,16 +138,11 @@ def _myself_(argv):
         uniqAll.append(key.split('-')[1]+'-'+key.split('-')[2])
     uniqAll = sorted(list(set(uniqAll)))
     print 'INFO: Unique bkgs and sigs =',uniqAll
-
     
     # scale into dru units
-    if dru:
-        #data = dataDRU2(data)
-        data = dataDRU40(data)
-    #bkgs = scaleBkgs32(bkgs)
+    if dru: data = dataDRU40(data)
     bkgs = scaleBkgs40(bkgs)
     sigs = scaleBkgs40(sigs)
-        
     
     ### Number of colors
     Nc = len(uniqAll)
@@ -242,9 +237,74 @@ def _myself_(argv):
             res.SetLineWidth(1)
             fresid.append(res)
             
+
+            for c in chans:
+                print '\n\n\n!!!!!!!!!!!!!!!!!!!!!!!!!!',c
+            
+            
+            # build the histos for fitting
+            #-----------------------------------------------------------------------------
+            for dkey in datkeys:
+                if 'x'+str(i+1) in dkey and '-e0' in dkey:
+                    for n in range(fLoBins):
+                        fitdata[i].SetBinContent(n+1, fitdata[i].GetBinContent(n+1)
+                                                 + data[dkey]['hist'].GetBinContent(fLo[0]+n))
+                if 'x'+str(i+1) in dkey and '-e1' in dkey:
+                    rdata[dkey]['hist'] = copy.deepcopy(data[dkey]['hist'])
+                    rdata[dkey]['hist'].Rebin(hiEfitRebin)
+                    if fitRebinScale: rdata[dkey]['hist'].Scale(1./hiEfitRebin)
+                    r = 0
+                    for n in range(fLoBins,fbins):
+                        fitdata[i].SetBinContent(n+1, fitdata[i].GetBinContent(n+1)
+                                                 + rdata[dkey]['hist'].GetBinContent(fHi[0]+r))
+                        r += 1
+            
+            for skey in sigkeys:
+                if 'x'+str(i+1) in skey and '-e0' in skey:
+                    fskey = skey.split('-e0')[0]
+                    fsig = TH1F(fskey, fskey, fbins, 0, fbins)
+                    fitsigs[fskey] = {}
+                    fitsigs[fskey]['hist'] = fsig
+                    for n in range(fLoBins):
+                        fitsigs[fskey]['hist'].SetBinContent(n+1, fitsigs[fskey]['hist'].GetBinContent(n+1)
+                                                             + sigs[skey]['hist'].GetBinContent(fLo[0]+n))
+                if 'x'+str(i+1) in skey and '-e1' in skey:
+                    rsigs[skey]['hist'] = copy.deepcopy(sigs[skey]['hist'])
+                    rsigs[skey]['hist'].Rebin(hiEfitRebin)
+                    if fitRebinScale: rsigs[skey]['hist'].Scale(1./hiEfitRebin)
+                    fskey = skey.split('-e1')[0]
+                    r = 0
+                    for n in range(fLoBins,fbins):
+                        fitsigs[fskey]['hist'].SetBinContent(n+1, fitsigs[fskey]['hist'].GetBinContent(n+1)
+                                                             + rsigs[skey]['hist'].GetBinContent(fHi[0]+r))
+                        r += 1
+                    
+            for bkey in bakkeys:
+                if 'x'+str(i+1) in bkey and '-e0' in bkey:
+                    fbkey = bkey.split('-e0')[0]
+                    fbak = TH1F(fbkey, fbkey, fbins, 0, fbins)
+                    fitbkgs[fbkey] = {}
+                    fitbkgs[fbkey]['hist'] = fbak
+                    for n in range(fLoBins):
+                        fitbkgs[fbkey]['hist'].SetBinContent(n+1, fitbkgs[fbkey]['hist'].GetBinContent(n+1)
+                                                             + bkgs[bkey]['hist'].GetBinContent(fLo[0]+n))
+                if 'x'+str(i+1) in bkey and '-e1' in bkey:
+                    rbkgs[bkey]['hist'] = copy.deepcopy(bkgs[bkey]['hist'])
+                    rbkgs[bkey]['hist'].Rebin(hiEfitRebin)
+                    if fitRebinScale: rbkgs[bkey]['hist'].Scale(1./hiEfitRebin)
+                    fbkey = bkey.split('-e1')[0]
+                    r = 0
+                    for n in range(fLoBins,fbins):
+                        #fitbkgs[fbkey]['hist'].SetBinContent(n+1, rbkgs[bkey]['hist'].GetBinContent(fHi[0]+r)) # this is in v42
+                        fitbkgs[fbkey]['hist'].SetBinContent(n+1, fitbkgs[fbkey]['hist'].GetBinContent(n+1)
+                                                             + rbkgs[bkey]['hist'].GetBinContent(fHi[0]+r))
+                        r += 1
+            
+            
             
             # fill the low energy part
             #------------------------------------------------
+            """
             for dkey in datkeys:
                 if 'x'+str(i+1) in dkey and '-e0' in dkey:
                     for n in range(fLoBins):
@@ -252,7 +312,7 @@ def _myself_(argv):
                         fitdata[i].SetBinContent(n+1, fitdata[i].GetBinContent(n+1)
                                                  + data[dkey]['hist'].GetBinContent(fLo[0]+n))
                         #fitdata[i].SetBinError(n+1, data[dkey]['hist'].GetBinError(fLo[0]+n))
-
+            
             for skey in sigkeys:
                 if 'x'+str(i+1) in skey and '-e0' in skey:
                     fskey = skey.split('-e0')[0]
@@ -263,7 +323,7 @@ def _myself_(argv):
                         #fitsigs[fskey]['hist'].SetBinContent(n+1, sigs[skey]['hist'].GetBinContent(fLo[0]+n)) # this is in v42
                         fitsigs[fskey]['hist'].SetBinContent(n+1, fitsigs[fskey]['hist'].GetBinContent(n+1)
                                                              + sigs[skey]['hist'].GetBinContent(fLo[0]+n))
-
+            
             for bkey in bakkeys:
                 if 'x'+str(i+1) in bkey and '-e0' in bkey:
                     fbkey = bkey.split('-e0')[0]
@@ -274,30 +334,30 @@ def _myself_(argv):
                         #fitbkgs[fbkey]['hist'].SetBinContent(n+1, bkgs[bkey]['hist'].GetBinContent(fLo[0]+n)) # this is in v42
                         fitbkgs[fbkey]['hist'].SetBinContent(n+1, fitbkgs[fbkey]['hist'].GetBinContent(n+1)
                                                              + bkgs[bkey]['hist'].GetBinContent(fLo[0]+n))
-
+            """
 
             # fill the high energy part
             #-------------------------------------------------------------
-
+            """
             for dkey in datkeys:
                 if 'x'+str(i+1) in dkey and '-e1' in dkey:
                     rdata[dkey]['hist'] = copy.deepcopy(data[dkey]['hist'])
                     rdata[dkey]['hist'].Rebin(hiEfitRebin)
                     if fitRebinScale: rdata[dkey]['hist'].Scale(1./hiEfitRebin)
-
+            
             for skey in sigkeys:
                 if 'x'+str(i+1) in skey and '-e1' in skey:
                     rsigs[skey]['hist'] = copy.deepcopy(sigs[skey]['hist'])
                     rsigs[skey]['hist'].Rebin(hiEfitRebin)
                     if fitRebinScale: rsigs[skey]['hist'].Scale(1./hiEfitRebin)
-
+            
             for bkey in bakkeys:
                 if 'x'+str(i+1) in bkey and '-e1' in bkey:
                     rbkgs[bkey]['hist'] = copy.deepcopy(bkgs[bkey]['hist'])
                     rbkgs[bkey]['hist'].Rebin(hiEfitRebin)
                     if fitRebinScale: rbkgs[bkey]['hist'].Scale(1./hiEfitRebin)
-
-
+            """
+            """
             for dkey in datkeys:
                 if 'x'+str(i+1) in dkey and '-e1' in dkey:
                     r = 0
@@ -307,7 +367,7 @@ def _myself_(argv):
                                                  + rdata[dkey]['hist'].GetBinContent(fHi[0]+r))
                         #fitdata[i].SetBinError(n+1, rdata[dkey]['hist'].GetBinError(fHi[0]+r))
                         r += 1
-
+            
             for skey in sigkeys:
                 if 'x'+str(i+1) in skey and '-e1' in skey:
                     fskey = skey.split('-e1')[0]
@@ -317,7 +377,7 @@ def _myself_(argv):
                         fitsigs[fskey]['hist'].SetBinContent(n+1, fitsigs[fskey]['hist'].GetBinContent(n+1)
                                                              + rsigs[skey]['hist'].GetBinContent(fHi[0]+r))
                         r += 1
-
+            
             for bkey in bakkeys:
                 if 'x'+str(i+1) in bkey and '-e1' in bkey:
                     fbkey = bkey.split('-e1')[0]
@@ -327,7 +387,7 @@ def _myself_(argv):
                         fitbkgs[fbkey]['hist'].SetBinContent(n+1, fitbkgs[fbkey]['hist'].GetBinContent(n+1)
                                                              + rbkgs[bkey]['hist'].GetBinContent(fHi[0]+r))
                         r += 1
-
+            """
 
             ### subtract fixed MC from data
             #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -370,7 +430,7 @@ def _myself_(argv):
         
         ### set up the fitting object for TFractionFitter
         for i in range(8):
-
+            
             ### Do a per crystal unique of the signals to see how many
             ### signal channels each crystal fit will have
             uniqSig = []
@@ -378,7 +438,7 @@ def _myself_(argv):
                 if 'x'+str(i+1) in fskey:
                     uniqSig.append(fskey.split('-')[1]+'-'+fskey.split('-')[2])
             uniqSig = sorted(list(set(uniqSig)))
-
+            
             ### only fit a crystal that has 2 or more signals
             ### TFF wants at least 2 MC to converge the fit
             if len(uniqSig) < 2:
@@ -569,7 +629,7 @@ def _myself_(argv):
         if hiEplotRebin: save += '_hiEplotRebin-'+str(hiEplotRebin)
         #if reuse:        save += '_reuse'
         save += '_reuse'+str(reuse)
-        save += '_chan'+str(chan)
+        save += '_chans'+str(chans)
         if note:         save += '_'+note
         save += '_'+V
         
@@ -1098,7 +1158,7 @@ def _myself_(argv):
         if hiEplotRebin: save += '_hiEplotRebin-'+str(hiEplotRebin)
         #if reuse:        save += '_reuse'
         save += '_reuse'+str(reuse)
-        save += '_chan'+str(chan)
+        save += '_chans'+str(chans)
         if note:         save += '_'+note
         save += '_'+V
         
@@ -1120,7 +1180,7 @@ def _myself_(argv):
                     sepPlots[E][i].Update()
                     isave  = ''
                     isave += 'x'+str(i+1)
-                    if chan: isave += '-c'+str(chan)
+                    if chans: isave += '-c'+str(chans)
                     isave += '-e'+str(E)
                     if note: isave += '_'+note
                     isave += '_'+V

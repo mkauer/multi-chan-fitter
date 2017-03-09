@@ -12,6 +12,15 @@
 # ====================================================================
 
 
+# 2017-03-09
+# --------------------------------------------------------------------
+# + iterate through the chars in the chans string
+# ~ mashed all the fitting histo code together
+# ~ tweaked the multi channel handling
+# + new buildMC50() in funcs50.py
+# + new buildData50() in funcs50.py
+
+
 # 2017-02-27
 # --------------------------------------------------------------------
 # + new build50() to deal with format changes

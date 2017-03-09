@@ -552,7 +552,7 @@ def buildMC40(info, mc):
             
     return mc
 
-    
+
 def build40(infile = 'backgrounds41.txt', freuse=0, fchan=0):
 
     data = {}
