@@ -6,10 +6,14 @@
 # 
 # Works with v50 and later versions
 # 
-# version: 2017-03-09
+# version: 2017-03-10
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# ~ fixed a bug in makeResid50() histo naming
+# ~ fixed return data/mc bugs in buildData50() and buildMC50()
+# + new makeTotal50()
+# + new makeResid50()
 # + iterate through the chars in the chans string
 # + new buildMC50()
 # + new buildData50()
@@ -153,8 +157,6 @@ def build50(infile = 'backgrounds41.txt', freuse=0, fchans=0):
 
 def buildData50(info, data):
 
-    #for i in range(len(info['chans'])):
-    #    info['chan'] = info['chans'][i]
     for c in info['chans']:
         info['chan'] = c
         
@@ -203,7 +205,7 @@ def buildData50(info, data):
                 #    print "WARNING: could not find hist -->",key
                 #    return data
 
-            return data
+            #return data
 
         else:
             local = amLocal()
@@ -357,11 +359,9 @@ def buildData50(info, data):
 
 def buildMC50(info, mc):
 
-    #for i in range(len(info['chans'])):
-    #    info['chan'] = info['chans'][i]
     for c in info['chans']:
         info['chan'] = c
-        
+    
         if info['reuse']:
             if info['rootfile']:
                 rootfile = info['rootfile']
@@ -379,7 +379,7 @@ def buildMC50(info, mc):
                 key  = info['key']
                 key += '-c'+info['chan']
                 key += '-e'+str(e)
-
+                #print '!!!!!!!!!!!!!!!!!!!!!!!',key
                 try:
                     mc[key] = {}
                     mc[key]['info'] = info
@@ -399,7 +399,7 @@ def buildMC50(info, mc):
                 #    print "WARNING: could not find hist -->",key
                 #    continue
 
-            return mc
+            #return mc
 
         else:
             local = amLocal()
@@ -559,4 +559,36 @@ def buildMC50(info, mc):
                 sys.exit()
 
     return mc
+
+
+def makeTotal50(chan, E):
+    total = []
+    par = histparam(E)
+    for i in range(8):
+        key  = 'x'+str(i)
+        key += '-c'+chan
+        key += '-e'+str(E)
+        key += '-total'
+        tot = TH1F(key, longNames(i), par[0], par[1], par[2])
+        tot.SetLineColor(kGray+1)
+        tot.SetMarkerColor(kGray+1)
+        tot.SetLineWidth(1)
+        total.append(tot)
+    return total
+
+
+def makeResid50(chan, E):
+    resid = []
+    par = histparam(E)
+    for i in range(8):
+        key  = 'x'+str(i)
+        key += '-c'+chan
+        key += '-e'+str(E)
+        key += '-resid'
+        res = TH1F(key, longNames(i), par[0], par[1], par[2])
+        res.SetLineColor(kBlack)
+        res.SetMarkerColor(kBlack)
+        res.SetLineWidth(1)
+        resid.append(res)
+    return resid
 

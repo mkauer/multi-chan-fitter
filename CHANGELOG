@@ -12,8 +12,18 @@
 # ====================================================================
 
 
+# 2017-03-10
+# --------------------------------------------------------------------
+# ~ fixed a bug in makeResid50() histo naming
+# ~ fixed return data/mc bugs in buildData50() and buildMC50()
+
+
 # 2017-03-09
 # --------------------------------------------------------------------
+# + using backgrounds50.txt
+# + mega code revamp to ger multi chans separately plotted
+# + mega code revamp to get multi chans included in the fit
+# V switch to 51-multi-chan2.py - more big code rewrite needed
 # + iterate through the chars in the chans string
 # ~ mashed all the fitting histo code together
 # ~ tweaked the multi channel handling

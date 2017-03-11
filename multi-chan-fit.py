@@ -3,13 +3,13 @@
 ######################################################################
 # Matt Kauer - mkauer@physics.wisc.edu
 ######################################################################
-# 50-multi-chan.py
+# 51-multi-chan2.py
 
-V = 'v50'
+V = 'v51'
 
 # try to get multi-chan fitting working - it's kinda a mess right now
 # 
-# version: 2017-03-09
+# version: 2017-03-10
 #
 # note: run 1616 is the first run after calibration-campaign-2
 # 
@@ -36,7 +36,8 @@ note=0
 
 ### backgrounds file to use?
 #mcfile = 'backgrounds40.txt'
-mcfile = 'backgrounds41.txt'
+#mcfile = 'backgrounds41.txt'
+mcfile = 'backgrounds50.txt'
 #mcfile = 'back-just-data.txt'
 #mcfile = 'back-just-c3.txt'
 
@@ -55,7 +56,7 @@ mychans = 0
 ### ['A'] force all-hit data selection channel
 ### ['S'] force single-hit data selection channel
 ### ['M'] force multi-hi data selection channel
-mychans = 'S'
+mychans = 'SM'
 
 ### plotting ranges
 ### lo and hi energy ranges
@@ -238,166 +239,90 @@ def _myself_(argv):
             fresid.append(res)
             
 
-            for c in chans:
-                print '\n\n\n!!!!!!!!!!!!!!!!!!!!!!!!!!',c
-            
-            
-            # build the histos for fitting
-            #-----------------------------------------------------------------------------
-            for dkey in datkeys:
-                if 'x'+str(i+1) in dkey and '-e0' in dkey:
-                    for n in range(fLoBins):
-                        fitdata[i].SetBinContent(n+1, fitdata[i].GetBinContent(n+1)
-                                                 + data[dkey]['hist'].GetBinContent(fLo[0]+n))
-                if 'x'+str(i+1) in dkey and '-e1' in dkey:
-                    rdata[dkey]['hist'] = copy.deepcopy(data[dkey]['hist'])
-                    rdata[dkey]['hist'].Rebin(hiEfitRebin)
-                    if fitRebinScale: rdata[dkey]['hist'].Scale(1./hiEfitRebin)
-                    r = 0
-                    for n in range(fLoBins,fbins):
-                        fitdata[i].SetBinContent(n+1, fitdata[i].GetBinContent(n+1)
-                                                 + rdata[dkey]['hist'].GetBinContent(fHi[0]+r))
-                        r += 1
-            
-            for skey in sigkeys:
-                if 'x'+str(i+1) in skey and '-e0' in skey:
-                    fskey = skey.split('-e0')[0]
-                    fsig = TH1F(fskey, fskey, fbins, 0, fbins)
-                    fitsigs[fskey] = {}
-                    fitsigs[fskey]['hist'] = fsig
-                    for n in range(fLoBins):
-                        fitsigs[fskey]['hist'].SetBinContent(n+1, fitsigs[fskey]['hist'].GetBinContent(n+1)
-                                                             + sigs[skey]['hist'].GetBinContent(fLo[0]+n))
-                if 'x'+str(i+1) in skey and '-e1' in skey:
-                    rsigs[skey]['hist'] = copy.deepcopy(sigs[skey]['hist'])
-                    rsigs[skey]['hist'].Rebin(hiEfitRebin)
-                    if fitRebinScale: rsigs[skey]['hist'].Scale(1./hiEfitRebin)
-                    fskey = skey.split('-e1')[0]
-                    r = 0
-                    for n in range(fLoBins,fbins):
-                        fitsigs[fskey]['hist'].SetBinContent(n+1, fitsigs[fskey]['hist'].GetBinContent(n+1)
-                                                             + rsigs[skey]['hist'].GetBinContent(fHi[0]+r))
-                        r += 1
-                    
-            for bkey in bakkeys:
-                if 'x'+str(i+1) in bkey and '-e0' in bkey:
-                    fbkey = bkey.split('-e0')[0]
-                    fbak = TH1F(fbkey, fbkey, fbins, 0, fbins)
-                    fitbkgs[fbkey] = {}
-                    fitbkgs[fbkey]['hist'] = fbak
-                    for n in range(fLoBins):
-                        fitbkgs[fbkey]['hist'].SetBinContent(n+1, fitbkgs[fbkey]['hist'].GetBinContent(n+1)
-                                                             + bkgs[bkey]['hist'].GetBinContent(fLo[0]+n))
-                if 'x'+str(i+1) in bkey and '-e1' in bkey:
-                    rbkgs[bkey]['hist'] = copy.deepcopy(bkgs[bkey]['hist'])
-                    rbkgs[bkey]['hist'].Rebin(hiEfitRebin)
-                    if fitRebinScale: rbkgs[bkey]['hist'].Scale(1./hiEfitRebin)
-                    fbkey = bkey.split('-e1')[0]
-                    r = 0
-                    for n in range(fLoBins,fbins):
-                        #fitbkgs[fbkey]['hist'].SetBinContent(n+1, rbkgs[bkey]['hist'].GetBinContent(fHi[0]+r)) # this is in v42
-                        fitbkgs[fbkey]['hist'].SetBinContent(n+1, fitbkgs[fbkey]['hist'].GetBinContent(n+1)
-                                                             + rbkgs[bkey]['hist'].GetBinContent(fHi[0]+r))
-                        r += 1
-            
-            
-            
-            # fill the low energy part
-            #------------------------------------------------
-            """
-            for dkey in datkeys:
-                if 'x'+str(i+1) in dkey and '-e0' in dkey:
-                    for n in range(fLoBins):
-                        #fitdata[i].SetBinContent(n+1, data[dkey]['hist'].GetBinContent(fLo[0]+n)) # this is in v42
-                        fitdata[i].SetBinContent(n+1, fitdata[i].GetBinContent(n+1)
-                                                 + data[dkey]['hist'].GetBinContent(fLo[0]+n))
-                        #fitdata[i].SetBinError(n+1, data[dkey]['hist'].GetBinError(fLo[0]+n))
-            
-            for skey in sigkeys:
-                if 'x'+str(i+1) in skey and '-e0' in skey:
-                    fskey = skey.split('-e0')[0]
-                    fsig = TH1F(fskey, fskey, fbins, 0, fbins)
-                    fitsigs[fskey] = {}
-                    fitsigs[fskey]['hist'] = fsig
-                    for n in range(fLoBins):
-                        #fitsigs[fskey]['hist'].SetBinContent(n+1, sigs[skey]['hist'].GetBinContent(fLo[0]+n)) # this is in v42
-                        fitsigs[fskey]['hist'].SetBinContent(n+1, fitsigs[fskey]['hist'].GetBinContent(n+1)
-                                                             + sigs[skey]['hist'].GetBinContent(fLo[0]+n))
-            
-            for bkey in bakkeys:
-                if 'x'+str(i+1) in bkey and '-e0' in bkey:
-                    fbkey = bkey.split('-e0')[0]
-                    fbak = TH1F(fbkey, fbkey, fbins, 0, fbins)
-                    fitbkgs[fbkey] = {}
-                    fitbkgs[fbkey]['hist'] = fbak
-                    for n in range(fLoBins):
-                        #fitbkgs[fbkey]['hist'].SetBinContent(n+1, bkgs[bkey]['hist'].GetBinContent(fLo[0]+n)) # this is in v42
-                        fitbkgs[fbkey]['hist'].SetBinContent(n+1, fitbkgs[fbkey]['hist'].GetBinContent(n+1)
-                                                             + bkgs[bkey]['hist'].GetBinContent(fLo[0]+n))
-            """
+            # cycle through the channels
+            init = 1
+            for C in chans:
 
-            # fill the high energy part
-            #-------------------------------------------------------------
-            """
-            for dkey in datkeys:
-                if 'x'+str(i+1) in dkey and '-e1' in dkey:
-                    rdata[dkey]['hist'] = copy.deepcopy(data[dkey]['hist'])
-                    rdata[dkey]['hist'].Rebin(hiEfitRebin)
-                    if fitRebinScale: rdata[dkey]['hist'].Scale(1./hiEfitRebin)
-            
-            for skey in sigkeys:
-                if 'x'+str(i+1) in skey and '-e1' in skey:
-                    rsigs[skey]['hist'] = copy.deepcopy(sigs[skey]['hist'])
-                    rsigs[skey]['hist'].Rebin(hiEfitRebin)
-                    if fitRebinScale: rsigs[skey]['hist'].Scale(1./hiEfitRebin)
-            
-            for bkey in bakkeys:
-                if 'x'+str(i+1) in bkey and '-e1' in bkey:
-                    rbkgs[bkey]['hist'] = copy.deepcopy(bkgs[bkey]['hist'])
-                    rbkgs[bkey]['hist'].Rebin(hiEfitRebin)
-                    if fitRebinScale: rbkgs[bkey]['hist'].Scale(1./hiEfitRebin)
-            """
-            """
-            for dkey in datkeys:
-                if 'x'+str(i+1) in dkey and '-e1' in dkey:
-                    r = 0
-                    for n in range(fLoBins,fbins):
-                        #fitdata[i].SetBinContent(n+1, rdata[dkey]['hist'].GetBinContent(fHi[0]+r)) # this is in v42
-                        fitdata[i].SetBinContent(n+1, fitdata[i].GetBinContent(n+1)
-                                                 + rdata[dkey]['hist'].GetBinContent(fHi[0]+r))
-                        #fitdata[i].SetBinError(n+1, rdata[dkey]['hist'].GetBinError(fHi[0]+r))
-                        r += 1
-            
-            for skey in sigkeys:
-                if 'x'+str(i+1) in skey and '-e1' in skey:
-                    fskey = skey.split('-e1')[0]
-                    r = 0
-                    for n in range(fLoBins,fbins):
-                        #fitsigs[fskey]['hist'].SetBinContent(n+1, rsigs[skey]['hist'].GetBinContent(fHi[0]+r)) # this is in v42
-                        fitsigs[fskey]['hist'].SetBinContent(n+1, fitsigs[fskey]['hist'].GetBinContent(n+1)
-                                                             + rsigs[skey]['hist'].GetBinContent(fHi[0]+r))
-                        r += 1
-            
-            for bkey in bakkeys:
-                if 'x'+str(i+1) in bkey and '-e1' in bkey:
-                    fbkey = bkey.split('-e1')[0]
-                    r = 0
-                    for n in range(fLoBins,fbins):
-                        #fitbkgs[fbkey]['hist'].SetBinContent(n+1, rbkgs[bkey]['hist'].GetBinContent(fHi[0]+r)) # this is in v42
-                        fitbkgs[fbkey]['hist'].SetBinContent(n+1, fitbkgs[fbkey]['hist'].GetBinContent(n+1)
-                                                             + rbkgs[bkey]['hist'].GetBinContent(fHi[0]+r))
-                        r += 1
-            """
+                print '!!!!!!!!!!!!  DEBUG point-1', C
 
-            ### subtract fixed MC from data
-            #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            ### this works I think, but then this plots the data-fixedMC
-            for key in fitbkgs:
-                if 'x'+str(i+1) in key:
-                    fitdata[i].Add(fitbkgs[key]['hist'], -1)
-            #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                ###########################################################
+                ### SOMETHING WEIRD HERE WITH THE HISTO FILLING!!!!!
+                ###########################################################
+                
+                # build the histos for fitting
+                #-----------------------------------------------------------------------------
+                for dkey in datkeys:
+                    if 'x'+str(i+1) in dkey and '-c'+C in dkey and '-e0' in dkey:
+                        for n in range(fLoBins):
+                            fitdata[i].SetBinContent(n+1, fitdata[i].GetBinContent(n+1)
+                                                     + data[dkey]['hist'].GetBinContent(fLo[0]+n))
+                    if 'x'+str(i+1) in dkey and '-c'+C in dkey and '-e1' in dkey:
+                        rdata[dkey]['hist'] = copy.deepcopy(data[dkey]['hist'])
+                        rdata[dkey]['hist'].Rebin(hiEfitRebin)
+                        if fitRebinScale: rdata[dkey]['hist'].Scale(1./hiEfitRebin)
+                        r = 0
+                        for n in range(fLoBins,fbins):
+                            fitdata[i].SetBinContent(n+1, fitdata[i].GetBinContent(n+1)
+                                                     + rdata[dkey]['hist'].GetBinContent(fHi[0]+r))
+                            r += 1
+
+                for skey in sigkeys:
+                    if 'x'+str(i+1) in skey and '-c'+C in dkey and '-e0' in skey:
+                        #fskey = skey.split('-e0')[0]
+                        fskey = skey.split('-c')[0]
+                        if init:
+                            fsig = TH1F(fskey, fskey, fbins, 0, fbins)
+                            fitsigs[fskey] = {}
+                            fitsigs[fskey]['hist'] = fsig
+                        for n in range(fLoBins):
+                            fitsigs[fskey]['hist'].SetBinContent(n+1, fitsigs[fskey]['hist'].GetBinContent(n+1)
+                                                                 + sigs[skey]['hist'].GetBinContent(fLo[0]+n))
+                    if 'x'+str(i+1) in skey and '-c'+C in dkey and '-e1' in skey:
+                        rsigs[skey]['hist'] = copy.deepcopy(sigs[skey]['hist'])
+                        rsigs[skey]['hist'].Rebin(hiEfitRebin)
+                        if fitRebinScale: rsigs[skey]['hist'].Scale(1./hiEfitRebin)
+                        #fskey = skey.split('-e1')[0]
+                        fskey = skey.split('-c')[0]
+                        r = 0
+                        for n in range(fLoBins,fbins):
+                            fitsigs[fskey]['hist'].SetBinContent(n+1, fitsigs[fskey]['hist'].GetBinContent(n+1)
+                                                                 + rsigs[skey]['hist'].GetBinContent(fHi[0]+r))
+                            r += 1
+
+                for bkey in bakkeys:
+                    if 'x'+str(i+1) in bkey and '-c'+C in dkey and '-e0' in bkey:
+                        #fbkey = bkey.split('-e0')[0]
+                        fbkey = bkey.split('-c')[0]
+                        if init:
+                            fbak = TH1F(fbkey, fbkey, fbins, 0, fbins)
+                            fitbkgs[fbkey] = {}
+                            fitbkgs[fbkey]['hist'] = fbak
+                        for n in range(fLoBins):
+                            fitbkgs[fbkey]['hist'].SetBinContent(n+1, fitbkgs[fbkey]['hist'].GetBinContent(n+1)
+                                                                 + bkgs[bkey]['hist'].GetBinContent(fLo[0]+n))
+                    if 'x'+str(i+1) in bkey and '-c'+C in dkey and '-e1' in bkey:
+                        rbkgs[bkey]['hist'] = copy.deepcopy(bkgs[bkey]['hist'])
+                        rbkgs[bkey]['hist'].Rebin(hiEfitRebin)
+                        if fitRebinScale: rbkgs[bkey]['hist'].Scale(1./hiEfitRebin)
+                        #fbkey = bkey.split('-e1')[0]
+                        fbkey = bkey.split('-c')[0]
+                        r = 0
+                        for n in range(fLoBins,fbins):
+                            fitbkgs[fbkey]['hist'].SetBinContent(n+1, fitbkgs[fbkey]['hist'].GetBinContent(n+1)
+                                                                 + rbkgs[bkey]['hist'].GetBinContent(fHi[0]+r))
+                            r += 1
+
+                ### do not create new histos from previous channel
+                init = 0
+                
+
+                ### subtract fixed MC from data
+                #-------------------------------------------------------------------
+                for key in fitbkgs:
+                    if 'x'+str(i+1) in key:
+                        fitdata[i].Add(fitbkgs[key]['hist'], -1)
+                #-------------------------------------------------------------------
+
             
 
         ### sort all the fbakkeys
@@ -477,42 +402,43 @@ def _myself_(argv):
             bounds = []
             for fskey in fsigkeys:
                 if 'x'+str(i+1) in fskey:
-                    
-                    mc_int = fitsigs[fskey]['hist'].Integral(fmin,fmax) # MC integral
-                    
-                    ### to weight or not to weight...
-                    # what if you weight first?
-                    if mcweight:
-                        fitsigs[fskey]['hist'].Sumw2() # set stat weights
-                    
-                    ### to scale or not to scale...
-                    if mcscale:
-                        fitsigs[fskey]['hist'].Scale(dat_int/mc_int) # scale to data integral
+                    for C in chans:
                         
-                        sigs[fskey+'-e0']['hist'].Scale(dat_int/mc_int) # make sure MC is scaled too
-                        sigs[fskey+'-e1']['hist'].Scale(dat_int/mc_int) # make sure MC is scaled too
+                        mc_int = fitsigs[fskey]['hist'].Integral(fmin,fmax) # MC integral
 
-                        ### v31 - save the scaling factors so you can convert to mBq/kg later
-                        #sigs[fskey+'-e0']['fitscale'] = dat_int/mc_int
-                        #sigs[fskey+'-e1']['fitscale'] = dat_int/mc_int
+                        ### to weight or not to weight...
+                        # what if you weight first?
+                        if mcweight:
+                            fitsigs[fskey]['hist'].Sumw2() # set stat weights
 
-                        ### v42 version of fitscale
-                        sigs[fskey+'-e0']['fitscale'] = sigs[fskey+'-e0']['scale'] * dat_int/mc_int
-                        sigs[fskey+'-e1']['fitscale'] = sigs[fskey+'-e1']['scale'] * dat_int/mc_int
-                        
-                    else:
-                        ### why doesn't this work??
-                        ### maybe it does now??
-                        sigs[fskey+'-e0']['fitscale'] = sigs[fskey+'-e0']['scale']
-                        sigs[fskey+'-e1']['fitscale'] = sigs[fskey+'-e1']['scale']
+                        ### to scale or not to scale...
+                        if mcscale:
+                            fitsigs[fskey]['hist'].Scale(dat_int/mc_int) # scale to data integral
 
-                    
-                    renorm = sigs[fskey+'-e0']['scale'] / sigs[fskey+'-e0']['fitscale']
-                    ### use bounds from backgrounds files
-                    bounds.append([renorm * sigs[fskey+'-e0']['info']['fbnd'][0],
-                                   renorm * sigs[fskey+'-e0']['info']['fbnd'][1]])
-                    
-                        
+                            sigs[fskey+'-c'+C+'-e0']['hist'].Scale(dat_int/mc_int) # make sure MC is scaled too
+                            sigs[fskey+'-c'+C+'-e1']['hist'].Scale(dat_int/mc_int) # make sure MC is scaled too
+
+                            ### v31 - save the scaling factors so you can convert to mBq/kg later
+                            #sigs[fskey+'-e0']['fitscale'] = dat_int/mc_int
+                            #sigs[fskey+'-e1']['fitscale'] = dat_int/mc_int
+
+                            ### v42 version of fitscale
+                            sigs[fskey+'-c'+C+'-e0']['fitscale'] = sigs[fskey+'-c'+C+'-e0']['scale'] * dat_int/mc_int
+                            sigs[fskey+'-c'+C+'-e1']['fitscale'] = sigs[fskey+'-c'+C+'-e1']['scale'] * dat_int/mc_int
+
+                        else:
+                            ### why doesn't this work??
+                            ### maybe it does now??
+                            sigs[fskey+'-c'+C+'-e0']['fitscale'] = sigs[fskey+'-c'+C+'-e0']['scale']
+                            sigs[fskey+'-c'+C+'-e1']['fitscale'] = sigs[fskey+'-c'+C+'-e1']['scale']
+
+
+                        renorm = sigs[fskey+'-c'+C+'-e0']['scale'] / sigs[fskey+'-c'+C+'-e0']['fitscale']
+                        ### use bounds from backgrounds files
+                        bounds.append([renorm * sigs[fskey+'-c'+C+'-e0']['info']['fbnd'][0],
+                                       renorm * sigs[fskey+'-c'+C+'-e0']['info']['fbnd'][1]])
+
+
                     #sigObj[i].Add(fitsigs[fskey]['hist']) # add to the TFractionFitter object
                     sigObj[-1].Add(fitsigs[fskey]['hist']) # add to the TFractionFitter object
             
@@ -576,32 +502,30 @@ def _myself_(argv):
             count = 0
             for fskey in fsigkeys:
                 if 'x'+str(i+1) in fskey:
+                    for C in chans:
+                        fscale = ROOT.Double(0.0)
+                        ferror = ROOT.Double(0.0)
+                        #fit[i].GetResult(count, fscale, ferror)
+                        fit[-1].GetResult(count, fscale, ferror)
+                        fitresults.append(fskey+' = '+str(round(fscale,4))+' +/- '+str(round(ferror,4)))
+                        fitsigs[fskey]['hist'].Scale(fscale)
+                        sigs[fskey+'-c'+C+'-e0']['hist'].Scale(fscale)
+                        sigs[fskey+'-c'+C+'-e1']['hist'].Scale(fscale)
 
-                    fscale = ROOT.Double(0.0)
-                    ferror = ROOT.Double(0.0)
-                    #fit[i].GetResult(count, fscale, ferror)
-                    fit[-1].GetResult(count, fscale, ferror)
-                    fitresults.append(fskey+' = '+str(round(fscale,4))+' +/- '+str(round(ferror,4)))
-                    fitsigs[fskey]['hist'].Scale(fscale)
-                    sigs[fskey+'-e0']['hist'].Scale(fscale)
-                    sigs[fskey+'-e1']['hist'].Scale(fscale)
-                    
-                    ### v31 - save the scaling factors so you can convert to mBq/kg later
-                    sigs[fskey+'-e0']['fitscale'] = sigs[fskey+'-e0']['fitscale'] * fscale
-                    sigs[fskey+'-e1']['fitscale'] = sigs[fskey+'-e1']['fitscale'] * fscale
+                        ### v31 - save the scaling factors so you can convert to mBq/kg later
+                        sigs[fskey+'-c'+C+'-e0']['fitscale'] = sigs[fskey+'-c'+C+'-e0']['fitscale'] * fscale
+                        sigs[fskey+'-c'+C+'-e1']['fitscale'] = sigs[fskey+'-c'+C+'-e1']['fitscale'] * fscale
 
-                    sigs[fskey+'-e0']['fiterror'] = ferror
-                    sigs[fskey+'-e1']['fiterror'] = ferror
-                    
+                        sigs[fskey+'-c'+C+'-e0']['fiterror'] = ferror
+                        sigs[fskey+'-c'+C+'-e1']['fiterror'] = ferror
+
                     count += 1
 
             fitresults.append('\n')
             
             
         
-        ### v31 - try to scale the signals to mBq/kg to be used as bkgs
-        #sigs = scaleSigs(sigkeys, sigs, data)
-        #sigs = scaleSigs32(sigkeys, sigs)
+        ### scale the signals to mBq/kg
         sigs = scaleSigs40(sigkeys, sigs)
         
         
@@ -612,25 +536,25 @@ def _myself_(argv):
         ### write fit results to text file
         #-----------------------------------------------------------------
         save = ''
-        if local:        save += 'local'
-        else:            save += 'cup'
+        if local:         save += 'local'
+        else:             save += 'cup'
         save += '_'+str(runNum)
         save += '_Nchan-fit'
         save += '_loEfit-'+str(int(fLo[0]))+'-'+str(int(fLo[1]))
         save += '_hiEfit-'+str(int(fHiE[0]))+'-'+str(int(fHiE[1]))
         save += '_hiEfitRebin-'+str(hiEfitRebin)
-        if fitRebinScale:   save += '_rebinscale'
-        if mcscale:      save += '_mcscale'
-        if mcweight:     save += '_mcweight'
-        if fitweight:    save += '_fitweight'
-        if dru:          save += '_dru'
-        #if dru1:         save += '_dru1'
-        #if dru2:         save += '_dru2'
-        if hiEplotRebin: save += '_hiEplotRebin-'+str(hiEplotRebin)
-        #if reuse:        save += '_reuse'
+        if fitRebinScale: save += '_rebinscale'
+        if mcscale:       save += '_mcscale'
+        if mcweight:      save += '_mcweight'
+        if fitweight:     save += '_fitweight'
+        if dru:           save += '_dru'
+        #if dru1:          save += '_dru1'
+        #if dru2:          save += '_dru2'
+        if hiEplotRebin:  save += '_hiEplotRebin-'+str(hiEplotRebin)
+        #if reuse:         save += '_reuse'
         save += '_reuse'+str(reuse)
         save += '_chans'+str(chans)
-        if note:         save += '_'+note
+        if note:          save += '_'+note
         save += '_'+V
         
         outfile = open('./plots/'+save+'_fit-results.txt', 'w')
@@ -833,359 +757,369 @@ def _myself_(argv):
     ### end of fitting bit if you have signals
     
     
-    # plot the lo and hi energy histograms
+    # plot the lo and hi energy histograms for all channels
     #=================================================================
 
-    canvs  = [[] for x in range(2)]
+    # number of energy ranges (lo, hi)
+    numE = 2
+    # number of channels (all, single, multi, combos)
+    numC = len(chans)
+    
+    canvs  = [[[] for x in range(numE)] for x in range(numC)]
 
     ### for separate plots
-    #sepPlots = [[] for x in range(2)]
-    sepPlots = [[[] for x in range(8)] for x in range(2)]
+    #sepPlots = [[] for x in range(numE)]
+    #sepPlots = [[[] for x in range(8)] for x in range(numE)]
+    sepPlots = [[[[] for x in range(8)] for x in range(numE)] for x in range(numC)]
     
     ### seperate memory space for the pads is key!!!!
-    toppad = [[] for x in range(2)]
-    botpad = [[] for x in range(2)]
+    toppad = [[[] for x in range(numE)] for x in range(numC)]
+    botpad = [[[] for x in range(numE)] for x in range(numC)]
 
-    legs   = [[] for x in range(2)]
-    legs2  = [[] for x in range(2)]
-    zeros  = [[] for x in range(2)]
+    legs   = [[[] for x in range(numE)] for x in range(numC)]
+    legs2  = [[[] for x in range(numE)] for x in range(numC)]
+    zeros  = [[[] for x in range(numE)] for x in range(numC)]
 
-    total  = [[] for x in range(2)]
-    resid  = [[] for x in range(2)]
+    total  = [[[] for x in range(numE)] for x in range(numC)]
+    resid  = [[[] for x in range(numE)] for x in range(numC)]
+
+
+    for C, chan in enumerate(chans): 
+        print '!!!!!!!!!!!!!!!!!!!',C,chan
     
-    for E in range(2):
+        for E in range(numE):
 
-        # have the plotting be seperated out from the loop
-        canvs[E] = TCanvas('canv'+str(E), 'canv'+str(E), 0, 0, 1400, 900)
-        canvs[E].Divide(4,2)
-        
-        toppad[E] = []
-        botpad[E] = []
-        
-        legs[E]   = []
-        legs2[E]  = []
-        zeros[E]  = []
-        
-        total[E]  = makeTotal(E)
-        resid[E]  = makeResid(E)
-        
-        font=63
-        size=13
-        yoff=4.2
-        
-        for i in range(8):
-            canvs[E].cd(i+1)
+            # have the plotting be seperated out from the loop
+            canvs[C][E] = TCanvas('canv'+chan+str(E), 'canv'+chan+str(E), 0, 0, 1400, 900)
+            canvs[C][E].Divide(4,2)
 
-            fraction = 0.3
-            pad1 = TPad('pad1','pad1',0,fraction,1,1)
-            toppad[E].append(pad1)
-            pad2 = TPad('pad2','pad2',0,0,1,fraction)
-            botpad[E].append(pad2)
-                        
-            toppad[E][i].SetBottomMargin(0.01)
-            toppad[E][i].SetBorderMode(0)
-            toppad[E][i].SetLogy()
-            botpad[E][i].SetTopMargin(0.05)
-            botpad[E][i].SetBottomMargin(0.3)
-            botpad[E][i].SetBorderMode(0)
-            botpad[E][i].SetLogy()
-            toppad[E][i].Draw()
-            botpad[E][i].Draw()
-            toppad[E][i].cd()
-            
-            ylegstart = 0.88
-            ylegend = (ylegstart-(Nlg*0.035))
-            space = '  '
-            leg = TLegend(0.55, ylegend, 0.94, ylegstart)
-            legs[E].append(leg)
-            legs[E][i].SetFillColor(0)
-            legs[E][i].SetBorderSize(0)
-            lopt = 'LPE'
-            
-            for dkey in datkeys:
-                if 'x'+str(i+1) in dkey and '-e'+str(E) in dkey:
-                    data[dkey]['hist'].GetYaxis().SetTitle('arb. counts')
-                    if dru:
-                        data[dkey]['hist'].GetYaxis().SetTitle('counts / day / kg / keV  (dru)')
-                        
-            #---------------------------------------------------------
-            if E and hiEplotRebin:
-                for dkey in datkeys:
-                    if 'x'+str(i+1) in dkey and '-e'+str(E) in dkey:
-                        data[dkey]['hist'].Rebin(hiEplotRebin)
-                        data[dkey]['hist'].Scale(1./float(hiEplotRebin))
-                        
-                total[E][i].Rebin(hiEplotRebin)
-                total[E][i].Scale(1./float(hiEplotRebin))
-                #total[E][i].Sumw2()
-                
-                resid[E][i].Rebin(hiEplotRebin)
-                resid[E][i].Scale(1./float(hiEplotRebin))
-                #resid[E][i].Sumw2()
-            #---------------------------------------------------------
-            for key in datkeys:
-                if 'x'+str(i+1) in key and '-e'+str(E) in key:
+            toppad[C][E] = []
+            botpad[C][E] = []
 
-                    ### needed for Chi2TestX()
-                    ### and needed later too
-                    dkey = key
-                    
-                    #if dru1 or dru2:
-                        #druScale = data['x'+str(i+1)+'-data'+'-e'+str(E)]['druScale']
-                        #druScale = data[key]['druScale']
-                    
-                    data[dkey]['hist'].SetMarkerColor(kBlack)
-                    data[dkey]['hist'].SetLineColor(kBlack)
-                    data[dkey]['hist'].SetLineWidth(1)
-                    
-                    data[dkey]['hist'].GetYaxis().SetTitleFont(font)
-                    data[dkey]['hist'].GetYaxis().SetTitleSize(size)
-                    data[dkey]['hist'].GetYaxis().SetTitleOffset(yoff)
-                    data[dkey]['hist'].GetYaxis().SetLabelFont(font)
-                    data[dkey]['hist'].GetYaxis().SetLabelSize(size)
-                    data[dkey]['hist'].GetYaxis().SetLabelOffset(0.01)
-                    #data[dkey]['hist'].GetXaxis().SetTitle('Energy (keV)')
-                    #data[dkey]['hist'].GetXaxis().SetLabelFont(font)
-                    #data[dkey]['hist'].GetXaxis().SetLabelSize(size)
+            legs[C][E]   = []
+            legs2[C][E]  = []
+            zeros[C][E]  = []
 
-                    if E: data[dkey]['hist'].SetAxisRange(hier[0], hier[1], 'x')
-                    else: data[dkey]['hist'].SetAxisRange(loer[0], loer[1], 'x')
-                        
-                    if dru:
-                        if E: data[dkey]['hist'].SetAxisRange(2e-3, 2e1, 'y')
-                        else: data[dkey]['hist'].SetAxisRange(2e-2, 3e2, 'y')
-                        
-                    data[dkey]['hist'].Draw()
-                    days = round(data[dkey]['runtime']/86400.,2)
-                    #legs[E][i].AddEntry(data[key]['hist'], 'data', lopt)
-                    #legs[E][i].AddEntry(data[dkey]['hist'], 'data ('+str(days)+' days)', lopt)
-                    legs[E][i].AddEntry(data[dkey]['hist'], dkey+' ('+str(days)+' days)', lopt)
-                    
-            for key in bakkeys:
-                if 'x'+str(i+1) in key and '-e'+str(E) in key:
-                    
-                    # find the unique name for color and set color
-                    cname = key.split('-')[1]+'-'+key.split('-')[2]
-                    bkgs[key]['hist'].SetMarkerColor(uniqColor[cname])
-                    bkgs[key]['hist'].SetLineColor(uniqColor[cname])
-                    
-                    # don't think I need this anymore
-                    #if dru1 or dru2:
-                    #    druScale = data['x'+str(i+1)+'-data'+'-e'+str(E)]['druScale']
-                    #if dru2:
-                    #    bkgs[key]['hist'].Scale(druScale)
-                    
-                    if E and hiEplotRebin:
-                        bkgs[key]['hist'].Rebin(hiEplotRebin)
-                        bkgs[key]['hist'].Scale(1./float(hiEplotRebin))
-                        #bkgs[key]['hist'].Sumw2()
-                    
-                    ### temp - don't draw MC if you just want to show data
-                    bkgs[key]['hist'].Draw('same')
-                    
-                    ### add MC to total MC hist
-                    total[E][i].Add(bkgs[key]['hist'])
-                    
-                    ### create the legend entry for MC
-                    #legs[E][i].AddEntry(bkgs[key]['hist'], space+key, lopt)
-                    
-            for key in sigkeys:
-                if 'x'+str(i+1) in key and '-e'+str(E) in key:
-                                        
-                    # find the unique name for color and set color
-                    cname = key.split('-')[1]+'-'+key.split('-')[2]
-                    sigs[key]['hist'].SetMarkerColor(uniqColor[cname])
-                    sigs[key]['hist'].SetLineColor(uniqColor[cname])
+            total[C][E]  = makeTotal50(chan,E)
+            resid[C][E]  = makeResid50(chan,E)
 
-                    # don't think I need this anymore
-                    #if dru1 or dru2:
-                    #    druScale = data['x'+str(i+1)+'-data'+'-e'+str(E)]['druScale']
-                    #if dru2:
-                    #    sigs[key]['hist'].Scale(druScale)
-                    
-                    if E and hiEplotRebin:
-                        sigs[key]['hist'].Rebin(hiEplotRebin)
-                        sigs[key]['hist'].Scale(1./float(hiEplotRebin))
-                        #sigs[key]['hist'].Sumw2()
-                    
-                    ### set range
-                    #sigs[key]['hist'].SetAxisRange(1,1000,'y')
-                    
-                    ### draw sigs
-                    sigs[key]['hist'].Draw('same')
-                    
-                    ### add MC to total MC hist
-                    total[E][i].Add(sigs[key]['hist'])
-                    
-                    ### create the legend entry for MC
-                    #legs[E][i].AddEntry(sigs[key]['hist'], space+key, lopt)
-                    
-            
-            # add legend entries in order
-            for name in uniqAll:
-                for bkey in bakkeys:
-                    if name in bkey and 'x'+str(i+1) in bkey and '-e'+str(E) in bkey:
-                        #legs[E][i].AddEntry(bkgs[bkey]['hist'], space+bkey, lopt)
-                        activ = '('+str(bkgs[bkey]['info']['acti'])+') '
-                        legs[E][i].AddEntry(bkgs[bkey]['hist'], activ+bkey, lopt)
-                for skey in sigkeys:
-                    if name in skey and 'x'+str(i+1) in skey and '-e'+str(E) in skey:
-                        #legs[E][i].AddEntry(sigs[skey]['hist'], space+skey, lopt)
-                        activ = '('+str(sigs[skey]['info']['acti'])+') '
-                        legs[E][i].AddEntry(sigs[skey]['hist'], activ+skey, lopt)
-            
-            
-            ### you need to scale the error by the dru scaling and/or the rebinning
-            #-----------------------------------------------------------------------------
-            #total[E][i].Sumw2()
-            
-            if not dru:
-                for n in range(total[E][i].GetNbinsX()):
-                    total[E][i].SetBinError(n+1, total[E][i].GetBinError(n+1)/(float(hiEplotRebin)/math.sqrt(2.)))
-            
-            else:
-                for n in range(total[E][i].GetNbinsX()):
-                    #total[E][i].SetBinError(n+1, total[E][i].GetBinError(n+1)*druScale)
-                    total[E][i].SetBinError(n+1, total[E][i].GetBinError(n+1)*data[dkey]['druScale'])
-            
-            #if dru2:
-            #    for n in range(total[E][i].GetNbinsX()):
-            #        total[E][i].SetBinError(n+1, total[E][i].GetBinError(n+1)*druScale)
+            font=63
+            size=13
+            yoff=4.2
 
-
-            ### chi2 test
-            ### get the chi2 of the total mc compared to data
-            #=============================================================================
-            #-----------------------------------------------------------------------------
-            chi2  = ROOT.Double(0.0)
-            ndf   = ROOT.Long(0)
-            igood = ROOT.Long(0)
-            pval  = data[dkey]['hist'].Chi2TestX(total[E][i], chi2, ndf, igood, "WW")
-            print 'INFO:',dkey,'pval =',pval,'chi2 =',chi2,'ndf =',ndf,'igood =',igood
-            print 'INFO: Total MC chi2/ndf =',chi2/ndf
-            #-----------------------------------------------------------------------------
-            #=============================================================================
-            
-
-            
-            #-----------------------------------------------------------------------------
-            if len(bkgs) + len(sigs) > 0:        
-                total[E][i].Draw('same')
-                #legs[E][i].AddEntry(total[E][i], 'Total MC', lopt)
-                legs[E][i].AddEntry(total[E][i], 'Total MC (chi2/ndf = '+str(round(chi2/ndf,2))+')', lopt)
-                
-            legs[E][i].Draw('same')
-            
-            
-            ### try to get the residuals in!
-            #---------------------------------------------------------
-            botpad[E][i].cd()
-            leg = TLegend(0.72, 0.78, 0.94, 0.94)
-            legs2[E].append(leg)
-            legs2[E][i].SetFillColor(0)
-            legs2[E][i].SetBorderSize(0)
-            lopt = 'LPE'
-
-            #resid[E][i].Divide(data['x'+str(i+1)+'-data'+'-e'+str(E)]['hist'], total[E][i])
-            resid[E][i].Divide(data[dkey]['hist'], total[E][i])
-            #resid[E][i].Divide(total[E][i], data['x'+str(i+1)+'-data'+'-e'+str(E)]['hist'])
-            
-            resid[E][i].SetTitle('')
-            resid[E][i].SetXTitle('Energy (keVee)')
-            resid[E][i].GetXaxis().SetTitleFont(font)
-            resid[E][i].GetXaxis().SetTitleSize(size)
-            resid[E][i].GetXaxis().SetLabelFont(font)
-            resid[E][i].GetXaxis().SetLabelSize(size)
-            resid[E][i].GetXaxis().SetLabelOffset(0.03)
-            resid[E][i].GetXaxis().SetTitleOffset(8)
-            #resid[E][i].SetYTitle('counts / keV')
-            resid[E][i].SetYTitle('data / MC')
-            #resid[E][i].SetYTitle('MC / data')
-            resid[E][i].GetYaxis().SetTitleFont(font)
-            resid[E][i].GetYaxis().SetTitleSize(size)
-            resid[E][i].GetYaxis().SetTitleOffset(yoff)
-            resid[E][i].GetYaxis().SetLabelFont(font)
-            resid[E][i].GetYaxis().SetLabelSize(size)
-            resid[E][i].GetYaxis().SetLabelOffset(0.01)
-            resid[E][i].GetYaxis().SetNdivisions(505) # '5' secondary and '05' primary
-
-            if E: resid[E][i].SetAxisRange(hier[0], hier[1], 'x')
-            else: resid[E][i].SetAxisRange(loer[0], loer[1], 'x')
-            
-            resid[E][i].SetAxisRange(0.1,10,'y')
-            resid[E][i].Draw()
-            
-            par = histparam(E)
-            # set my line to '1'
-            zero = TLine(par[1], 1, par[2], 1)
-            zeros[E].append(zero)
-            zeros[E][i].SetLineColor(kRed)
-            zeros[E][i].SetLineWidth(1)
-            zeros[E][i].Draw()
-
-            #legs2[E][i].AddEntry(resid[E][i],space+'data / MC',lopt)
-            #legs2[E][i].Draw()
-            #---------------------------------------------------------
-
-            
-            ### get the chi2 of the total mc compared to data
-            #---------------------------------------------------------
-            #chi2  = ROOT.Double(0.0)
-            #ndf   = ROOT.Long(0)
-            #igood = ROOT.Long(0)
-            #pval  = data[dkey]['hist'].Chi2TestX(total[E][i], chi2, ndf, igood, "WW")
-            #print 'INFO:',dkey,'pval =',pval,'chi2 =',chi2,'ndf =',ndf,'igood =',igood
-            #print 'INFO: Total MC chi2/ndf =',chi2/ndf
-            #---------------------------------------------------------
-
-            
-        save = ''
-        if local:        save += 'local'
-        else:            save += 'cup'
-        save += '_'+str(runNum)
-        if E:            save += '_hiE'
-        else:            save += '_loE'
-        save += '_loEfit-'+str(int(fLo[0]))+'-'+str(int(fLo[1]))
-        save += '_hiEfit-'+str(int(fHiE[0]))+'-'+str(int(fHiE[1]))
-        save += '_hiEfitRebin-'+str(hiEfitRebin)
-        if fitRebinScale:   save += '_rebinscale'
-        if mcscale:      save += '_mcscale'
-        if mcweight:     save += '_mcweight'
-        if fitweight:    save += '_fitweight'
-        if dru:          save += '_dru'
-        #if dru1:         save += '_dru1'
-        #if dru2:         save += '_dru2'
-        if hiEplotRebin: save += '_hiEplotRebin-'+str(hiEplotRebin)
-        #if reuse:        save += '_reuse'
-        save += '_reuse'+str(reuse)
-        save += '_chans'+str(chans)
-        if note:         save += '_'+note
-        save += '_'+V
-        
-        canvs[E].Update()
-        canvs[E].Print('./plots/'+save+'.png')
-
-        
-        ### Save separate crystal histos?
-        #-------------------------------------------------------------
-        if indi:
             for i in range(8):
-                if i+1 in justthese:
-                    tpad=toppad[E][i].Clone()
-                    bpad=botpad[E][i].Clone()
-                    sepPlots[E][i] = TCanvas('ican'+str(E)+str(i), 'ican'+str(E)+str(i), 0, 0, 1400, 900)
-                    #sepPlots[E][i].cd()
-                    tpad.Draw()
-                    bpad.Draw()
-                    sepPlots[E][i].Update()
-                    isave  = ''
-                    isave += 'x'+str(i+1)
-                    if chans: isave += '-c'+str(chans)
-                    isave += '-e'+str(E)
-                    if note: isave += '_'+note
-                    isave += '_'+V
-                    
-                    sepPlots[E][i].Print('./plots/'+isave+'.png')
+                canvs[C][E].cd(i+1)
+
+                fraction = 0.3
+                pad1 = TPad('pad1'+chan+str(E),'pad1'+chan+str(E),0,fraction,1,1)
+                toppad[C][E].append(pad1)
+                pad2 = TPad('pad2'+chan+str(E),'pad2'+chan+str(E),0,0,1,fraction)
+                botpad[C][E].append(pad2)
+
+                toppad[C][E][i].SetBottomMargin(0.01)
+                toppad[C][E][i].SetBorderMode(0)
+                toppad[C][E][i].SetLogy()
+                botpad[C][E][i].SetTopMargin(0.05)
+                botpad[C][E][i].SetBottomMargin(0.3)
+                botpad[C][E][i].SetBorderMode(0)
+                botpad[C][E][i].SetLogy()
+                toppad[C][E][i].Draw()
+                botpad[C][E][i].Draw()
+                toppad[C][E][i].cd()
+
+                ylegstart = 0.88
+                ylegend = (ylegstart-(Nlg*0.035))
+                space = '  '
+                leg = TLegend(0.55, ylegend, 0.94, ylegstart)
+                legs[C][E].append(leg)
+                legs[C][E][i].SetFillColor(0)
+                legs[C][E][i].SetBorderSize(0)
+                lopt = 'LPE'
+
+                for dkey in datkeys:
+                    if 'x'+str(i+1) in dkey and '-c'+chan in dkey and '-e'+str(E) in dkey:
+                        data[dkey]['hist'].GetYaxis().SetTitle('arb. counts')
+                        if dru:
+                            data[dkey]['hist'].GetYaxis().SetTitle('counts / day / kg / keV  (dru)')
+
+                #---------------------------------------------------------
+                if E and hiEplotRebin:
+                    for dkey in datkeys:
+                        if 'x'+str(i+1) in dkey and '-c'+chan in dkey and '-e'+str(E) in dkey:
+                            data[dkey]['hist'].Rebin(hiEplotRebin)
+                            data[dkey]['hist'].Scale(1./float(hiEplotRebin))
+
+                    total[C][E][i].Rebin(hiEplotRebin)
+                    total[C][E][i].Scale(1./float(hiEplotRebin))
+                    #total[C][E][i].Sumw2()
+
+                    resid[C][E][i].Rebin(hiEplotRebin)
+                    resid[C][E][i].Scale(1./float(hiEplotRebin))
+                    #resid[C][E][i].Sumw2()
+                #---------------------------------------------------------
+                for key in datkeys:
+                    if 'x'+str(i+1) in key and '-c'+chan in key and '-e'+str(E) in key:
+
+                        ### needed for Chi2TestX()
+                        ### and needed later too
+                        dkey = key
+
+                        #if dru1 or dru2:
+                            #druScale = data['x'+str(i+1)+'-data'+'-e'+str(E)]['druScale']
+                            #druScale = data[key]['druScale']
+
+                        data[dkey]['hist'].SetMarkerColor(kBlack)
+                        data[dkey]['hist'].SetLineColor(kBlack)
+                        data[dkey]['hist'].SetLineWidth(1)
+
+                        data[dkey]['hist'].GetYaxis().SetTitleFont(font)
+                        data[dkey]['hist'].GetYaxis().SetTitleSize(size)
+                        data[dkey]['hist'].GetYaxis().SetTitleOffset(yoff)
+                        data[dkey]['hist'].GetYaxis().SetLabelFont(font)
+                        data[dkey]['hist'].GetYaxis().SetLabelSize(size)
+                        data[dkey]['hist'].GetYaxis().SetLabelOffset(0.01)
+                        #data[dkey]['hist'].GetXaxis().SetTitle('Energy (keV)')
+                        #data[dkey]['hist'].GetXaxis().SetLabelFont(font)
+                        #data[dkey]['hist'].GetXaxis().SetLabelSize(size)
+
+                        if E: data[dkey]['hist'].SetAxisRange(hier[0], hier[1], 'x')
+                        else: data[dkey]['hist'].SetAxisRange(loer[0], loer[1], 'x')
+
+                        if dru:
+                            if E: data[dkey]['hist'].SetAxisRange(2e-3, 2e1, 'y')
+                            else: data[dkey]['hist'].SetAxisRange(2e-2, 3e2, 'y')
+
+                        data[dkey]['hist'].Draw()
+                        days = round(data[dkey]['runtime']/86400.,2)
+                        #legs[C][E][i].AddEntry(data[key]['hist'], 'data', lopt)
+                        #legs[C][E][i].AddEntry(data[dkey]['hist'], 'data ('+str(days)+' days)', lopt)
+                        legs[C][E][i].AddEntry(data[dkey]['hist'], dkey+' ('+str(days)+' days)', lopt)
+
+                for key in bakkeys:
+                    if 'x'+str(i+1) in key and '-c'+chan in key and '-e'+str(E) in key:
+
+                        # find the unique name for color and set color
+                        cname = key.split('-')[1]+'-'+key.split('-')[2]
+                        bkgs[key]['hist'].SetMarkerColor(uniqColor[cname])
+                        bkgs[key]['hist'].SetLineColor(uniqColor[cname])
+
+                        # don't think I need this anymore
+                        #if dru1 or dru2:
+                        #    druScale = data['x'+str(i+1)+'-data'+'-e'+str(E)]['druScale']
+                        #if dru2:
+                        #    bkgs[key]['hist'].Scale(druScale)
+
+                        if E and hiEplotRebin:
+                            bkgs[key]['hist'].Rebin(hiEplotRebin)
+                            bkgs[key]['hist'].Scale(1./float(hiEplotRebin))
+                            #bkgs[key]['hist'].Sumw2()
+
+                        ### temp - don't draw MC if you just want to show data
+                        bkgs[key]['hist'].Draw('same')
+
+                        ### add MC to total MC hist
+                        total[C][E][i].Add(bkgs[key]['hist'])
+
+                        ### create the legend entry for MC
+                        #legs[C][E][i].AddEntry(bkgs[key]['hist'], space+key, lopt)
+
+                for key in sigkeys:
+                    if 'x'+str(i+1) in key and '-c'+chan in key and '-e'+str(E) in key:
+
+                        # find the unique name for color and set color
+                        cname = key.split('-')[1]+'-'+key.split('-')[2]
+                        sigs[key]['hist'].SetMarkerColor(uniqColor[cname])
+                        sigs[key]['hist'].SetLineColor(uniqColor[cname])
+
+                        # don't think I need this anymore
+                        #if dru1 or dru2:
+                        #    druScale = data['x'+str(i+1)+'-data'+'-e'+str(E)]['druScale']
+                        #if dru2:
+                        #    sigs[key]['hist'].Scale(druScale)
+
+                        if E and hiEplotRebin:
+                            sigs[key]['hist'].Rebin(hiEplotRebin)
+                            sigs[key]['hist'].Scale(1./float(hiEplotRebin))
+                            #sigs[key]['hist'].Sumw2()
+
+                        ### set range
+                        #sigs[key]['hist'].SetAxisRange(1,1000,'y')
+
+                        ### draw sigs
+                        sigs[key]['hist'].Draw('same')
+
+                        ### add MC to total MC hist
+                        total[C][E][i].Add(sigs[key]['hist'])
+
+                        ### create the legend entry for MC
+                        #legs[C][E][i].AddEntry(sigs[key]['hist'], space+key, lopt)
+
+
+                # add legend entries in order
+                for name in uniqAll:
+                    for bkey in bakkeys:
+                        if name in bkey and 'x'+str(i+1) in bkey and '-c'+chan in bkey and '-e'+str(E) in bkey:
+                            #legs[C][E][i].AddEntry(bkgs[bkey]['hist'], space+bkey, lopt)
+                            activ = '('+str(bkgs[bkey]['info']['acti'])+') '
+                            legs[C][E][i].AddEntry(bkgs[bkey]['hist'], activ+bkey, lopt)
+                    for skey in sigkeys:
+                        if name in skey and 'x'+str(i+1) in skey and '-c'+chan in skey and '-e'+str(E) in skey:
+                            #legs[C][E][i].AddEntry(sigs[skey]['hist'], space+skey, lopt)
+                            activ = '('+str(sigs[skey]['info']['acti'])+') '
+                            legs[C][E][i].AddEntry(sigs[skey]['hist'], activ+skey, lopt)
+
+
+                ### you need to scale the error by the dru scaling and/or the rebinning
+                #-----------------------------------------------------------------------------
+                #total[C][E][i].Sumw2()
+
+                if not dru:
+                    for n in range(total[C][E][i].GetNbinsX()):
+                        total[C][E][i].SetBinError(n+1, total[C][E][i].GetBinError(n+1)/(float(hiEplotRebin)/math.sqrt(2.)))
+
+                else:
+                    for n in range(total[C][E][i].GetNbinsX()):
+                        #total[C][E][i].SetBinError(n+1, total[C][E][i].GetBinError(n+1)*druScale)
+                        total[C][E][i].SetBinError(n+1, total[C][E][i].GetBinError(n+1)*data[dkey]['druScale'])
+
+                #if dru2:
+                #    for n in range(total[C][E][i].GetNbinsX()):
+                #        total[C][E][i].SetBinError(n+1, total[C][E][i].GetBinError(n+1)*druScale)
+
+
+                ### chi2 test
+                ### get the chi2 of the total mc compared to data
+                #=============================================================================
+                #-----------------------------------------------------------------------------
+                chi2  = ROOT.Double(0.0)
+                ndf   = ROOT.Long(0)
+                igood = ROOT.Long(0)
+                pval  = data[dkey]['hist'].Chi2TestX(total[C][E][i], chi2, ndf, igood, "WW")
+                print 'INFO:',dkey,'pval =',pval,'chi2 =',chi2,'ndf =',ndf,'igood =',igood
+                print 'INFO: Total MC chi2/ndf =',chi2/ndf
+                #-----------------------------------------------------------------------------
+                #=============================================================================
+
+
+
+                #-----------------------------------------------------------------------------
+                if len(bkgs) + len(sigs) > 0:        
+                    total[C][E][i].Draw('same')
+                    #legs[C][E][i].AddEntry(total[C][E][i], 'Total MC', lopt)
+                    legs[C][E][i].AddEntry(total[C][E][i], 'Total MC (chi2/ndf = '+str(round(chi2/ndf,2))+')', lopt)
+
+                legs[C][E][i].Draw('same')
+
+
+                ### try to get the residuals in!
+                #---------------------------------------------------------
+                botpad[C][E][i].cd()
+                leg = TLegend(0.72, 0.78, 0.94, 0.94)
+                legs2[C][E].append(leg)
+                legs2[C][E][i].SetFillColor(0)
+                legs2[C][E][i].SetBorderSize(0)
+                lopt = 'LPE'
+
+                #resid[C][E][i].Divide(data['x'+str(i+1)+'-data'+'-e'+str(E)]['hist'], total[C][E][i])
+                resid[C][E][i].Divide(data[dkey]['hist'], total[C][E][i])
+                #resid[C][E][i].Divide(total[C][E][i], data['x'+str(i+1)+'-data'+'-e'+str(E)]['hist'])
+
+                resid[C][E][i].SetTitle('')
+                resid[C][E][i].SetXTitle('Energy (keVee)')
+                resid[C][E][i].GetXaxis().SetTitleFont(font)
+                resid[C][E][i].GetXaxis().SetTitleSize(size)
+                resid[C][E][i].GetXaxis().SetLabelFont(font)
+                resid[C][E][i].GetXaxis().SetLabelSize(size)
+                resid[C][E][i].GetXaxis().SetLabelOffset(0.03)
+                resid[C][E][i].GetXaxis().SetTitleOffset(8)
+                #resid[C][E][i].SetYTitle('counts / keV')
+                resid[C][E][i].SetYTitle('data / MC')
+                #resid[C][E][i].SetYTitle('MC / data')
+                resid[C][E][i].GetYaxis().SetTitleFont(font)
+                resid[C][E][i].GetYaxis().SetTitleSize(size)
+                resid[C][E][i].GetYaxis().SetTitleOffset(yoff)
+                resid[C][E][i].GetYaxis().SetLabelFont(font)
+                resid[C][E][i].GetYaxis().SetLabelSize(size)
+                resid[C][E][i].GetYaxis().SetLabelOffset(0.01)
+                resid[C][E][i].GetYaxis().SetNdivisions(505) # '5' secondary and '05' primary
+
+                if E: resid[C][E][i].SetAxisRange(hier[0], hier[1], 'x')
+                else: resid[C][E][i].SetAxisRange(loer[0], loer[1], 'x')
+
+                resid[C][E][i].SetAxisRange(0.1,10,'y')
+                resid[C][E][i].Draw()
+
+                par = histparam(E)
+                # set my line to '1'
+                zero = TLine(par[1], 1, par[2], 1)
+                zeros[C][E].append(zero)
+                zeros[C][E][i].SetLineColor(kRed)
+                zeros[C][E][i].SetLineWidth(1)
+                zeros[C][E][i].Draw()
+
+                #legs2[C][E][i].AddEntry(resid[C][E][i],space+'data / MC',lopt)
+                #legs2[C][E][i].Draw()
+                #---------------------------------------------------------
+
+
+                ### get the chi2 of the total mc compared to data
+                #---------------------------------------------------------
+                #chi2  = ROOT.Double(0.0)
+                #ndf   = ROOT.Long(0)
+                #igood = ROOT.Long(0)
+                #pval  = data[dkey]['hist'].Chi2TestX(total[C][E][i], chi2, ndf, igood, "WW")
+                #print 'INFO:',dkey,'pval =',pval,'chi2 =',chi2,'ndf =',ndf,'igood =',igood
+                #print 'INFO: Total MC chi2/ndf =',chi2/ndf
+                #---------------------------------------------------------
+
+
+            save = ''
+            if local:        save += 'local'
+            else:            save += 'cup'
+            save += '_'+str(runNum)
+            if E:            save += '_hiE'
+            else:            save += '_loE'
+            save += '_loEfit-'+str(int(fLo[0]))+'-'+str(int(fLo[1]))
+            save += '_hiEfit-'+str(int(fHiE[0]))+'-'+str(int(fHiE[1]))
+            save += '_hiEfitRebin-'+str(hiEfitRebin)
+            if fitRebinScale:   save += '_rebinscale'
+            if mcscale:      save += '_mcscale'
+            if mcweight:     save += '_mcweight'
+            if fitweight:    save += '_fitweight'
+            if dru:          save += '_dru'
+            #if dru1:         save += '_dru1'
+            #if dru2:         save += '_dru2'
+            if hiEplotRebin: save += '_hiEplotRebin-'+str(hiEplotRebin)
+            #if reuse:        save += '_reuse'
+            save += '_reuse'+str(reuse)
+            save += '_chan'+chan
+            if note:         save += '_'+note
+            save += '_'+V
+
+            canvs[C][E].Update()
+            canvs[C][E].Print('./plots/'+save+'.png')
+
+
+            ### Save separate crystal histos?
+            #-------------------------------------------------------------
+            if indi:
+                for i in range(8):
+                    if i+1 in justthese:
+                        tpad=toppad[C][E][i].Clone()
+                        bpad=botpad[C][E][i].Clone()
+                        sepPlots[C][E][i] = TCanvas('ican'+chan+str(E)+str(i), 'ican'+chan+str(E)+str(i), 0, 0, 1400, 900)
+                        #sepPlots[C][E][i].cd()
+                        tpad.Draw()
+                        bpad.Draw()
+                        sepPlots[C][E][i].Update()
+                        isave  = ''
+                        isave += 'x'+str(i+1)
+                        isave += '-c'+chan
+                        isave += '-e'+str(E)
+                        if note: isave += '_'+note
+                        isave += '_'+V
+
+                        sepPlots[C][E][i].Print('./plots/'+isave+'.png')
 
     ### but don't show all those plots
     if indi: del sepPlots
