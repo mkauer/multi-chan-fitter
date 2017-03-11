@@ -240,7 +240,8 @@ def _myself_(argv):
             
 
             # cycle through the channels
-            init = 1
+            sinit = 1
+            binit = 1
             for C in chans:
 
                 print '!!!!!!!!!!!!  DEBUG point-1', C
@@ -265,12 +266,12 @@ def _myself_(argv):
                             fitdata[i].SetBinContent(n+1, fitdata[i].GetBinContent(n+1)
                                                      + rdata[dkey]['hist'].GetBinContent(fHi[0]+r))
                             r += 1
-
+                
                 for skey in sigkeys:
                     if 'x'+str(i+1) in skey and '-c'+C in dkey and '-e0' in skey:
                         #fskey = skey.split('-e0')[0]
                         fskey = skey.split('-c')[0]
-                        if init:
+                        if sinit:
                             fsig = TH1F(fskey, fskey, fbins, 0, fbins)
                             fitsigs[fskey] = {}
                             fitsigs[fskey]['hist'] = fsig
@@ -288,12 +289,13 @@ def _myself_(argv):
                             fitsigs[fskey]['hist'].SetBinContent(n+1, fitsigs[fskey]['hist'].GetBinContent(n+1)
                                                                  + rsigs[skey]['hist'].GetBinContent(fHi[0]+r))
                             r += 1
-
+                sinit=0
+                
                 for bkey in bakkeys:
                     if 'x'+str(i+1) in bkey and '-c'+C in dkey and '-e0' in bkey:
                         #fbkey = bkey.split('-e0')[0]
                         fbkey = bkey.split('-c')[0]
-                        if init:
+                        if binit:
                             fbak = TH1F(fbkey, fbkey, fbins, 0, fbins)
                             fitbkgs[fbkey] = {}
                             fitbkgs[fbkey]['hist'] = fbak
@@ -311,9 +313,10 @@ def _myself_(argv):
                             fitbkgs[fbkey]['hist'].SetBinContent(n+1, fitbkgs[fbkey]['hist'].GetBinContent(n+1)
                                                                  + rbkgs[bkey]['hist'].GetBinContent(fHi[0]+r))
                             r += 1
-
+                binit=0
+                
                 ### do not create new histos from previous channel
-                init = 0
+                #init = 0
                 
 
                 ### subtract fixed MC from data
