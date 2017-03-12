@@ -12,6 +12,15 @@
 # ====================================================================
 
 
+# 2017-03-11
+# --------------------------------------------------------------------
+# ~ fixed a BIG bug with the second channel showing less activity,
+#   turns out I was double scaling the fit hist to data/mc integral
+# + add init to make sure the fit bounds get set correctly
+# ~ set the fit rebin rescale to help the fit converge
+# ~ expanded the fit range a little bit
+
+
 # 2017-03-10
 # --------------------------------------------------------------------
 # ~ fixed a bug in makeResid50() histo naming

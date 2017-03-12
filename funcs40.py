@@ -6,10 +6,11 @@
 # 
 # Works with v40 and later versions
 # 
-# version: 2017-03-07
+# version: 2017-03-11
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# ~ make my scaleSigs40() verbose setting, very verbose
 # + specific low energy cuts to make sure the boolean '&&' is working
 # + key for bkgs[key]['scale'] = scale for sig normalization in
 #   scaleSigs40()
@@ -680,39 +681,37 @@ def scaleSigs40(sigkeys, sigs):
         
         # verbose?
         V = 1
-        
-        E = int(e[-1])
-        
+                
         if loca == 'internal':
             #fitActivity = sigs[key]['fitscale'] * (1./kgs) * (1000.) * (1./runtime) * (generated) * (1./druscale)
             fitActivity = sigs[key]['fitscale'] * (1./xkgs) * (1000.) * (generated) * (1./day) * (xkgs) * (kev)
             sigs[key]['info']['acti'] = fitActivity
-            if V and E: print '!!!!', key, sigs[key]['info']['acti'],'mBq/kg'
+            if V: print '!!!!', key, sigs[key]['info']['acti'],'mBq/kg'
         if loca == 'pmt':
             #fitActivity = sigs[key]['fitscale'] * (1./pmts) * (1000.) * (1./runtime) * (generated) * (1./druscale)
             fitActivity = sigs[key]['fitscale'] * (1./pmts) * (1000.) * (generated) * (1./day) * (xkgs) * (kev)
             sigs[key]['info']['acti'] = fitActivity
-            if V and E: print '!!!!', key, sigs[key]['info']['acti'],'mBq/pmt'
+            if V: print '!!!!', key, sigs[key]['info']['acti'],'mBq/pmt'
         if loca == 'lsveto':
             #fitActivity = sigs[key]['fitscale'] * (1./kgs) * (1000.) * (1./runtime) * (generated) * (1./druscale)
             fitActivity = sigs[key]['fitscale'] * (1./lskg) * (1000.) * (generated) * (1./day) * (xkgs) * (kev)
             sigs[key]['info']['acti'] = fitActivity
-            if V and E: print '!!!!', key, sigs[key]['info']['acti'],'mBq/pmt'
+            if V: print '!!!!', key, sigs[key]['info']['acti'],'mBq/pmt'
         if loca == 'lsvetoair':
             #fitActivity = sigs[key]['fitscale'] * (1./kgs) * (1000.) * (1./runtime) * (generated) * (1./druscale)
             fitActivity = sigs[key]['fitscale'] * (1./xkgs) * (1000.) * (generated) * (1./day) * (xkgs) * (kev)
             sigs[key]['info']['acti'] = fitActivity
-            if V and E: print '!!!!', key, sigs[key]['info']['acti'],'mBq/pmt'
+            if V: print '!!!!', key, sigs[key]['info']['acti'],'mBq/pmt'
         if loca == 'airshield':
             #fitActivity = sigs[key]['fitscale'] * (1./kgs) * (1000.) * (1./runtime) * (generated) * (1./druscale)
             fitActivity = sigs[key]['fitscale'] * (1./xkgs) * (1000.) * (generated) * (1./day) * (xkgs) * (kev)
             sigs[key]['info']['acti'] = fitActivity
-            if V and E: print '!!!!', key, sigs[key]['info']['acti'],'mBq/pmt'
+            if V: print '!!!!', key, sigs[key]['info']['acti'],'mBq/pmt'
         if loca == 'steel':
             #fitActivity = sigs[key]['fitscale'] * (1./kgs) * (1000.) * (1./runtime) * (generated) * (1./druscale)
             fitActivity = sigs[key]['fitscale'] * (1./xkgs) * (1000.) * (generated) * (1./day) * (xkgs) * (kev)
             sigs[key]['info']['acti'] = fitActivity
-            if V and E: print '!!!!', key, sigs[key]['info']['acti'],'mBq/pmt'
+            if V: print '!!!!', key, sigs[key]['info']['acti'],'mBq/pmt'
 
     return sigs
 

@@ -9,7 +9,7 @@ V = 'v51'
 
 # try to get multi-chan fitting working - it's kinda a mess right now
 # 
-# version: 2017-03-10
+# version: 2017-03-11
 #
 # note: run 1616 is the first run after calibration-campaign-2
 # 
@@ -35,7 +35,6 @@ note=0
 #note = 'find-data'
 
 ### backgrounds file to use?
-#mcfile = 'backgrounds40.txt'
 #mcfile = 'backgrounds41.txt'
 mcfile = 'backgrounds50.txt'
 #mcfile = 'back-just-data.txt'
@@ -82,12 +81,10 @@ mcscale = 1
 ### set MC weights? [0,1]
 mcweight = 0
 
-### this doesn't work at all, not sure why...
-fitweight = 0   ### set fit weights? [0,1]
-
-### still working on this - I don't understand why
-### this is effecting the fit so much
-fitRebinScale = 0   ### scale data and mc hi-E hists to 1/hiEfitRebin factor? [0,1]
+### I don't understand why this is effecting the fit so much
+### But it does help the fit converage and especially with multi-chan
+# scale data and mc hi-E hists to 1/hiEfitRebin factor? [0,1]
+fitRebinScale = 1
 #================================================================
 
 
@@ -159,23 +156,26 @@ def _myself_(argv):
     Nlg = Nc+2
     
     
-    ### fit the MC to data
-    #-----------------------------------------------------------------
+    ### set fit bounds for the fit
+    #=================================================================
+    #=================================================================
     
-    fLo = [10, 100]
+    #fLo = [10, 100]
+    fLo = [20, 180]
     fLoBins = fLo[1]-fLo[0]
     
-    fHiE = [400, 2000]
+    #fHiE = [400, 2000]
+    fHiE = [300, 2400]
     fHi = [fHiE[0]/hiEfitRebin, fHiE[1]/hiEfitRebin]
     fHiBins = fHi[1]-fHi[0]
-    #print fHi
-    #print fHiBins
     
     fbins = fLoBins+fHiBins
     
     fmin=0
     fmax=fbins
-
+    #=================================================================
+    #=================================================================
+    
 
     ### need seperate dicts for rebinned data and MC for plotting to
     ### to work right - they need their own memory space
@@ -200,14 +200,6 @@ def _myself_(argv):
 
     #-----------------------------------------------------------------
     
-    
-    # pre-scale all backgrounds for testing purposes
-    # generally needed if not using tons of data
-    #if not reuse:
-    #    for key in bakkeys:
-    #        bkgs[key]['hist'].Scale(0.001)
-
-
     
     ### here's the fitting part!!!
     ##################################################################
@@ -244,12 +236,6 @@ def _myself_(argv):
             binit = 1
             for C in chans:
 
-                print '!!!!!!!!!!!!  DEBUG point-1', C
-
-                ###########################################################
-                ### SOMETHING WEIRD HERE WITH THE HISTO FILLING!!!!!
-                ###########################################################
-                
                 # build the histos for fitting
                 #-----------------------------------------------------------------------------
                 for dkey in datkeys:
@@ -268,7 +254,7 @@ def _myself_(argv):
                             r += 1
                 
                 for skey in sigkeys:
-                    if 'x'+str(i+1) in skey and '-c'+C in dkey and '-e0' in skey:
+                    if 'x'+str(i+1) in skey and '-c'+C in skey and '-e0' in skey:
                         #fskey = skey.split('-e0')[0]
                         fskey = skey.split('-c')[0]
                         if sinit:
@@ -278,7 +264,7 @@ def _myself_(argv):
                         for n in range(fLoBins):
                             fitsigs[fskey]['hist'].SetBinContent(n+1, fitsigs[fskey]['hist'].GetBinContent(n+1)
                                                                  + sigs[skey]['hist'].GetBinContent(fLo[0]+n))
-                    if 'x'+str(i+1) in skey and '-c'+C in dkey and '-e1' in skey:
+                    if 'x'+str(i+1) in skey and '-c'+C in skey and '-e1' in skey:
                         rsigs[skey]['hist'] = copy.deepcopy(sigs[skey]['hist'])
                         rsigs[skey]['hist'].Rebin(hiEfitRebin)
                         if fitRebinScale: rsigs[skey]['hist'].Scale(1./hiEfitRebin)
@@ -292,7 +278,7 @@ def _myself_(argv):
                 sinit=0
                 
                 for bkey in bakkeys:
-                    if 'x'+str(i+1) in bkey and '-c'+C in dkey and '-e0' in bkey:
+                    if 'x'+str(i+1) in bkey and '-c'+C in bkey and '-e0' in bkey:
                         #fbkey = bkey.split('-e0')[0]
                         fbkey = bkey.split('-c')[0]
                         if binit:
@@ -302,7 +288,7 @@ def _myself_(argv):
                         for n in range(fLoBins):
                             fitbkgs[fbkey]['hist'].SetBinContent(n+1, fitbkgs[fbkey]['hist'].GetBinContent(n+1)
                                                                  + bkgs[bkey]['hist'].GetBinContent(fLo[0]+n))
-                    if 'x'+str(i+1) in bkey and '-c'+C in dkey and '-e1' in bkey:
+                    if 'x'+str(i+1) in bkey and '-c'+C in bkey and '-e1' in bkey:
                         rbkgs[bkey]['hist'] = copy.deepcopy(bkgs[bkey]['hist'])
                         rbkgs[bkey]['hist'].Rebin(hiEfitRebin)
                         if fitRebinScale: rbkgs[bkey]['hist'].Scale(1./hiEfitRebin)
@@ -315,10 +301,7 @@ def _myself_(argv):
                             r += 1
                 binit=0
                 
-                ### do not create new histos from previous channel
-                #init = 0
                 
-
                 ### subtract fixed MC from data
                 #-------------------------------------------------------------------
                 for key in fitbkgs:
@@ -339,16 +322,6 @@ def _myself_(argv):
         for fskey in fitsigs:
             fsigkeys.append(fskey)
         fsigkeys.sort()
-
-
-        ### make weights histo
-        ### testing with TFractionFitter
-        ### this doesn't seem to work yet...
-        #weights = TH1F('weights','weights',fbins,0,fbins)
-        #for n in range(0,fbins):
-        #    weights.SetBinContent(n, 1)
-        #weights.Sumw2()
-        #-----------------------------------------------------------------
 
 
         sigObj = []
@@ -405,46 +378,50 @@ def _myself_(argv):
             bounds = []
             for fskey in fsigkeys:
                 if 'x'+str(i+1) in fskey:
-                    for C in chans:
-                        
-                        mc_int = fitsigs[fskey]['hist'].Integral(fmin,fmax) # MC integral
+                    
+                    mc_int = fitsigs[fskey]['hist'].Integral(fmin,fmax) # MC integral
 
-                        ### to weight or not to weight...
-                        # what if you weight first?
-                        if mcweight:
-                            fitsigs[fskey]['hist'].Sumw2() # set stat weights
+                    ### to weight or not to weight...
+                    # what if you weight first?
+                    if mcweight:
+                        fitsigs[fskey]['hist'].Sumw2() # set stat weights
 
-                        ### to scale or not to scale...
-                        if mcscale:
-                            fitsigs[fskey]['hist'].Scale(dat_int/mc_int) # scale to data integral
+                    ### to scale or not to scale...
+                    if mcscale:
+                        fitsigs[fskey]['hist'].Scale(dat_int/mc_int) # scale to data integral
 
+                        for C in chans:
                             sigs[fskey+'-c'+C+'-e0']['hist'].Scale(dat_int/mc_int) # make sure MC is scaled too
                             sigs[fskey+'-c'+C+'-e1']['hist'].Scale(dat_int/mc_int) # make sure MC is scaled too
-
+                            
                             ### v31 - save the scaling factors so you can convert to mBq/kg later
                             #sigs[fskey+'-e0']['fitscale'] = dat_int/mc_int
                             #sigs[fskey+'-e1']['fitscale'] = dat_int/mc_int
-
+                            
                             ### v42 version of fitscale
                             sigs[fskey+'-c'+C+'-e0']['fitscale'] = sigs[fskey+'-c'+C+'-e0']['scale'] * dat_int/mc_int
                             sigs[fskey+'-c'+C+'-e1']['fitscale'] = sigs[fskey+'-c'+C+'-e1']['scale'] * dat_int/mc_int
-
-                        else:
-                            ### why doesn't this work??
-                            ### maybe it does now??
+                            
+                    else:
+                        ### why doesn't this work??
+                        ### maybe it does now??
+                        for C in chans:
                             sigs[fskey+'-c'+C+'-e0']['fitscale'] = sigs[fskey+'-c'+C+'-e0']['scale']
                             sigs[fskey+'-c'+C+'-e1']['fitscale'] = sigs[fskey+'-c'+C+'-e1']['scale']
 
 
-                        renorm = sigs[fskey+'-c'+C+'-e0']['scale'] / sigs[fskey+'-c'+C+'-e0']['fitscale']
-                        ### use bounds from backgrounds files
-                        bounds.append([renorm * sigs[fskey+'-c'+C+'-e0']['info']['fbnd'][0],
-                                       renorm * sigs[fskey+'-c'+C+'-e0']['info']['fbnd'][1]])
-
-
+                    #renorm = sigs[fskey+'-c'+C+'-e0']['scale'] / sigs[fskey+'-c'+C+'-e0']['fitscale']
+                    renorm = sigs[fskey+'-c'+chans[0]+'-e0']['scale'] / sigs[fskey+'-c'+chans[0]+'-e0']['fitscale']
+                    ### use bounds from backgrounds files
+                    #bounds.append([renorm * sigs[fskey+'-c'+C+'-e0']['info']['fbnd'][0],
+                    #               renorm * sigs[fskey+'-c'+C+'-e0']['info']['fbnd'][1]])
+                    bounds.append([renorm * sigs[fskey+'-c'+chans[0]+'-e0']['info']['fbnd'][0],
+                                   renorm * sigs[fskey+'-c'+chans[0]+'-e0']['info']['fbnd'][1]])
+                    
                     #sigObj[i].Add(fitsigs[fskey]['hist']) # add to the TFractionFitter object
                     sigObj[-1].Add(fitsigs[fskey]['hist']) # add to the TFractionFitter object
             
+
             #fit.append(TFractionFitter(fitdata[i], sigObj[i])) # create the TFF data and MC objects
             fit.append(TFractionFitter(fitdata[i], sigObj[-1])) # create the TFF data and MC objects
             #fit.append(TFractionFitter(fitdata[i], sigObj[-1], "Q")) # create the TFF data and MC objects
@@ -466,14 +443,9 @@ def _myself_(argv):
                 #fit[-1].Constrain(l+1, bounds[l][0], bounds[l][1])
                 ### or force other less strict contraints
                 fit[-1].Constrain(l+1, 0.01, 10.0)
-                
+            
             #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             
-                # set fit weights to 1
-                # this doesn't work yet, not sure why, on the to-do list...
-                if fitweight:
-                    #fit[i].SetWeight(l, weights)
-                    fit[-1].SetWeight(l, weights)
             
             #fit[i].SetRangeX(fmin, fmax) # set global range, should be the same as fmin and fmax?
             fit[-1].SetRangeX(fmin, fmax) # set global range, should be the same as fmin and fmax?
@@ -505,22 +477,30 @@ def _myself_(argv):
             count = 0
             for fskey in fsigkeys:
                 if 'x'+str(i+1) in fskey:
+                    fscale = ROOT.Double(0.0)
+                    ferror = ROOT.Double(0.0)
+                    fit[-1].GetResult(count, fscale, ferror)
+                    fitresults.append(fskey+' = '+str(round(fscale,4))+' +/- '+str(round(ferror,4)))
+                    fitsigs[fskey]['hist'].Scale(fscale)
+                    
                     for C in chans:
-                        fscale = ROOT.Double(0.0)
-                        ferror = ROOT.Double(0.0)
-                        #fit[i].GetResult(count, fscale, ferror)
-                        fit[-1].GetResult(count, fscale, ferror)
-                        fitresults.append(fskey+' = '+str(round(fscale,4))+' +/- '+str(round(ferror,4)))
-                        fitsigs[fskey]['hist'].Scale(fscale)
-                        sigs[fskey+'-c'+C+'-e0']['hist'].Scale(fscale)
-                        sigs[fskey+'-c'+C+'-e1']['hist'].Scale(fscale)
-
-                        ### v31 - save the scaling factors so you can convert to mBq/kg later
-                        sigs[fskey+'-c'+C+'-e0']['fitscale'] = sigs[fskey+'-c'+C+'-e0']['fitscale'] * fscale
-                        sigs[fskey+'-c'+C+'-e1']['fitscale'] = sigs[fskey+'-c'+C+'-e1']['fitscale'] * fscale
-
-                        sigs[fskey+'-c'+C+'-e0']['fiterror'] = ferror
-                        sigs[fskey+'-c'+C+'-e1']['fiterror'] = ferror
+                        for E in range(2):
+                            E = str(E)
+                            #fscale = ROOT.Double(0.0)
+                            #ferror = ROOT.Double(0.0)
+                            #fit[-1].GetResult(count, fscale, ferror)
+                            #fitresults.append(fskey+' = '+str(round(fscale,4))+' +/- '+str(round(ferror,4)))
+                            #fitsigs[fskey]['hist'].Scale(fscale)
+                            
+                            sigs[fskey+'-c'+C+'-e'+E]['hist'].Scale(fscale)
+                            #sigs[fskey+'-c'+C+'-e1']['hist'].Scale(fscale)
+                            
+                            ### v31 - save the scaling factors so you can convert to mBq/kg later
+                            sigs[fskey+'-c'+C+'-e'+E]['fitscale'] = sigs[fskey+'-c'+C+'-e'+E]['fitscale'] * fscale
+                            #sigs[fskey+'-c'+C+'-e1']['fitscale'] = sigs[fskey+'-c'+C+'-e1']['fitscale'] * fscale
+                            
+                            sigs[fskey+'-c'+C+'-e'+E]['fiterror'] = ferror
+                            #sigs[fskey+'-c'+C+'-e1']['fiterror'] = ferror
 
                     count += 1
 
@@ -549,7 +529,6 @@ def _myself_(argv):
         if fitRebinScale: save += '_rebinscale'
         if mcscale:       save += '_mcscale'
         if mcweight:      save += '_mcweight'
-        if fitweight:     save += '_fitweight'
         if dru:           save += '_dru'
         #if dru1:          save += '_dru1'
         #if dru2:          save += '_dru2'
@@ -603,13 +582,6 @@ def _myself_(argv):
             fbotpad[i].Draw()
             ftoppad[i].cd()
             
-            ### not quite that easy because of indexing
-            #scount=0
-            #for fskey in fsigkeys:
-            #    if 'x'+str(i+1) in fskey:
-            #        scount+=1
-            #if scount < 2: continue
-            
             ylegstart = 0.88
             ylegend = (ylegstart-(Nlg*0.035))
             space = '  '
@@ -640,25 +612,6 @@ def _myself_(argv):
             fitdata[i].Draw()
             flegs[i].AddEntry(fitdata[i], space+'data - bkgs', lopt)
 
-
-            ### fitdata[i] is already background subtracted
-            ### not sure if I should even show the background data here
-            """
-            for fbkey in fbakkeys:
-                if 'x'+str(i+1) in fbkey:
-                    
-                    # find the unique name for color and set color
-                    cname = fbkey.split('-')[1]+'-'+fbkey.split('-')[2]
-                    fitbkgs[fbkey]['hist'].SetMarkerColor(uniqColor[cname])
-                    fitbkgs[fbkey]['hist'].SetLineColor(uniqColor[cname])
-                    
-                    ### draw the bkgs
-                    fitbkgs[fbkey]['hist'].Draw('same')
-
-                    ### add MC to total MC hist - NO!!!!
-                    #ftotal[i].Add(fitbkgs[fbkey]['hist'])
-
-            """
             
             for fskey in fsigkeys:
                 if 'x'+str(i+1) in fskey:
@@ -788,7 +741,7 @@ def _myself_(argv):
 
 
     for C, chan in enumerate(chans): 
-        print '!!!!!!!!!!!!!!!!!!!',C,chan
+        #print '!!!!!!!!!!!!!!!!!!!',C,chan
     
         for E in range(numE):
 
@@ -1088,7 +1041,6 @@ def _myself_(argv):
             if fitRebinScale:   save += '_rebinscale'
             if mcscale:      save += '_mcscale'
             if mcweight:     save += '_mcweight'
-            if fitweight:    save += '_fitweight'
             if dru:          save += '_dru'
             #if dru1:         save += '_dru1'
             #if dru2:         save += '_dru2'
