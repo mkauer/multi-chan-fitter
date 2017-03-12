@@ -14,6 +14,7 @@
 
 # 2017-03-12
 # --------------------------------------------------------------------
+# + cut release v5.1
 # ~ revamped the fit results print out, it now prints the fit activities
 #   and does a big print out and the end of everything so you can easily
 #   see the results per crystal.
