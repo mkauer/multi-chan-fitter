@@ -3,11 +3,12 @@
 ######################################################################
 # Matt Kauer - mkauer@physics.wisc.edu
 ######################################################################
-# 51-multi-chan2.py
+# 52-whats-next.py
 
-V = 'v51'
+V = 'v52'
 
-# try to get multi-chan fitting working - it's kinda a mess right now
+# not sure what's next, probably a lot of bug fixing that will present
+#  itself when I start adding more MC
 # 
 # version: 2017-03-12
 #
