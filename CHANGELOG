@@ -12,6 +12,13 @@
 # ====================================================================
 
 
+# 2017-03-12
+# --------------------------------------------------------------------
+# ~ revamped the fit results print out, it now prints the fit activities
+#   and does a big print out and the end of everything so you can easily
+#   see the results per crystal.
+
+
 # 2017-03-11
 # --------------------------------------------------------------------
 # ~ fixed a BIG bug with the second channel showing less activity,

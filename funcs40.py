@@ -680,7 +680,7 @@ def scaleSigs40(sigkeys, sigs):
             continue
         
         # verbose?
-        V = 1
+        V = 0
                 
         if loca == 'internal':
             #fitActivity = sigs[key]['fitscale'] * (1./kgs) * (1000.) * (1./runtime) * (generated) * (1./druscale)

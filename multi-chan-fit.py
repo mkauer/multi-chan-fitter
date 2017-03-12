@@ -9,7 +9,7 @@ V = 'v51'
 
 # try to get multi-chan fitting working - it's kinda a mess right now
 # 
-# version: 2017-03-11
+# version: 2017-03-12
 #
 # note: run 1616 is the first run after calibration-campaign-2
 # 
@@ -55,7 +55,8 @@ mychans = 0
 ### ['A'] force all-hit data selection channel
 ### ['S'] force single-hit data selection channel
 ### ['M'] force multi-hi data selection channel
-mychans = 'SM'
+# seems to help doing 'MS' over 'SM' ???
+mychans = 'MS'
 
 ### plotting ranges
 ### lo and hi energy ranges
@@ -76,14 +77,19 @@ hiEfitRebin = 10
 ### scale to dru?
 dru = 1
 
+### This seems to be a must for TFF to weight all MC equally
 ### pre scale the MC? [0,1]
 mcscale = 1
-### set MC weights? [0,1]
-mcweight = 0
+
+### This doesn't seem to effect the fit results at all
+### set MC sumw2()? [0,1]
+mcsumw2 = 0
+### set data sumw2()? [0,1]
+datsumw2 = 0
 
 ### I don't understand why this is effecting the fit so much
 ### But it does help the fit converage and especially with multi-chan
-# scale data and mc hi-E hists to 1/hiEfitRebin factor? [0,1]
+### scale data and mc hi-E hists to 1/hiEfitRebin factor? [0,1]
 fitRebinScale = 1
 #================================================================
 
@@ -326,11 +332,14 @@ def _myself_(argv):
 
         sigObj = []
         fit = []
-        fitresults = []
+        #fitresults = []
+        fitresults = {}
         fitchi2ndf = []
         
         ### set up the fitting object for TFractionFitter
         for i in range(8):
+
+            fitresults[str(i)] = []
             
             ### Do a per crystal unique of the signals to see how many
             ### signal channels each crystal fit will have
@@ -372,7 +381,9 @@ def _myself_(argv):
             #sigObj.append(TObjArray(Nsigs)) # number of MC to fit to
             sigObj.append(TObjArray(len(uniqSig))) # number of MC to fit to
             
-            #fitdata[i].Sumw2()
+            if datsumw2:
+                fitdata[i].Sumw2()
+            
             dat_int = fitdata[i].Integral(fmin,fmax) # data integral to normalize to
 
             bounds = []
@@ -383,7 +394,7 @@ def _myself_(argv):
 
                     ### to weight or not to weight...
                     # what if you weight first?
-                    if mcweight:
+                    if mcsumw2:
                         fitsigs[fskey]['hist'].Sumw2() # set stat weights
 
                     ### to scale or not to scale...
@@ -429,9 +440,10 @@ def _myself_(argv):
             ### for some reason on CUP the fit status gets returned as a pointer
             ### like <ROOT.TFitResultPtr object at 0x37246c0>
             #fitresults.append('NaI-C'+str(i+1)+' fit completed with status '+str(status))
-            fitresults.append('NaI-C'+str(i+1)+' fit results')
+            #fitresults.append('NaI-C'+str(i+1)+' fit results')
+            fitresults[str(i)].append('NaI-C'+str(i+1)+' fit results')
             #fitresults.append('MC fit constrained to 0.0001 - 10.0')
-
+            
             ### set fit bounds!!!
             #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             #for l in range(len(uniqSig)):
@@ -469,10 +481,12 @@ def _myself_(argv):
 
             ### for some reason on CUP the fit status gets returned as a pointer
             ### like <ROOT.TFitResultPtr object at 0x37246c0>
-            fitresults.append('chi2/ndf = '+str(round(chi2,2))+'/'+str(ndf)+' = '+str(round(chi2/float(ndf),2)))
+            #fitresults.append('chi2/ndf = '+str(round(chi2,2))+'/'+str(ndf)+' = '+str(round(chi2/float(ndf),2)))
+            fitresults[str(i)].append('chi2/ndf = '+str(round(chi2,2))+'/'+str(ndf)+' = '+str(round(chi2/float(ndf),2)))
 
             ### p-val is always 0 - need to look into this
-            fitresults.append('p-value = '+str(pval))
+            #fitresults.append('p-value = '+str(pval))
+            fitresults[str(i)].append('p-value = '+str(pval))
 
             count = 0
             for fskey in fsigkeys:
@@ -480,9 +494,10 @@ def _myself_(argv):
                     fscale = ROOT.Double(0.0)
                     ferror = ROOT.Double(0.0)
                     fit[-1].GetResult(count, fscale, ferror)
-                    fitresults.append(fskey+' = '+str(round(fscale,4))+' +/- '+str(round(ferror,4)))
+                    #fitresults.append(fskey+' = '+str(round(fscale,4))+' +/- '+str(round(ferror,4)))
+                    fitresults[str(i)].append('fit scale  -  '+fskey+' = '+str(round(fscale,4))+' +/- '+str(round(ferror,4)))
                     fitsigs[fskey]['hist'].Scale(fscale)
-                    
+
                     for C in chans:
                         for E in range(2):
                             E = str(E)
@@ -504,20 +519,48 @@ def _myself_(argv):
 
                     count += 1
 
-            fitresults.append('\n')
-            
-            
+            #fitresults.append('\n')
+        
+        
+        ### print the fit results
+        #print '\n\n'
+        #for line in fitresults:
+        #    print line
         
         ### scale the signals to mBq/kg
         sigs = scaleSigs40(sigkeys, sigs)
         
+        ### print the fit activities
+        for i in range(8):
+            for fskey in fsigkeys:
+                if 'x'+str(i+1) in fskey:
+                    finit=1
+                    for C in chans:
+                        for E in range(2):
+                            if finit:
+                                E = str(E)
+                                #print fskey, sigs[fskey+'-c'+C+'-e'+E]['info']['acti']
+                                fitresults[str(i)].append('activity   -  '+fskey+' '
+                                                          +str(sigs[fskey+'-c'+C+'-e'+E]['info']['acti'])+' mBq')
+                                finit=0
+            #print '\n'
+            fitresults[str(i)].append('\n')
+
+            
+        #-------------------------------------------------------------
+        ### sort all the fitresults
+        #resultskeys=[]
+        #for rskey in fitresults:
+        #    resultskeys.append(rskey)
+        #resultskeys.sort()
+
+        ### print out the goods
+        #for key in resultskeys:
+        #    for line in fitresults[key]:
+        #        print line
+        #-------------------------------------------------------------
         
-        print '\n\n'
-        for line in fitresults:
-            print line
-        
-        ### write fit results to text file
-        #-----------------------------------------------------------------
+
         save = ''
         if local:         save += 'local'
         else:             save += 'cup'
@@ -528,21 +571,32 @@ def _myself_(argv):
         save += '_hiEfitRebin-'+str(hiEfitRebin)
         if fitRebinScale: save += '_rebinscale'
         if mcscale:       save += '_mcscale'
-        if mcweight:      save += '_mcweight'
+        if mcsumw2:       save += '_mcsumw2'
+        if datsumw2:      save += '_datsumw2'
         if dru:           save += '_dru'
-        #if dru1:          save += '_dru1'
-        #if dru2:          save += '_dru2'
         if hiEplotRebin:  save += '_hiEplotRebin-'+str(hiEplotRebin)
-        #if reuse:         save += '_reuse'
         save += '_reuse'+str(reuse)
         save += '_chans'+str(chans)
         if note:          save += '_'+note
         save += '_'+V
+
         
+        #-------------------------------------------------------------
+        ### sort all the fitresults
+        resultskeys=[]
+        for rskey in fitresults:
+            resultskeys.append(rskey)
+        resultskeys.sort()
+
+        ### write results to file
         outfile = open('./plots/'+save+'_fit-results.txt', 'w')
-        for line in fitresults:
-            outfile.write(str(line)+'\n')
+        #for line in fitresults:
+        #    outfile.write(str(line)+'\n')
+        for key in resultskeys:
+            for line in fitresults[key]:
+                outfile.write(line+'\n')
         outfile.close()    
+        #-------------------------------------------------------------
         
         
         
@@ -1030,27 +1084,26 @@ def _myself_(argv):
 
 
             save = ''
-            if local:        save += 'local'
-            else:            save += 'cup'
+            if local:         save += 'local'
+            else:             save += 'cup'
             save += '_'+str(runNum)
-            if E:            save += '_hiE'
-            else:            save += '_loE'
+            if E:             save += '_hiE'
+            else:             save += '_loE'
             save += '_loEfit-'+str(int(fLo[0]))+'-'+str(int(fLo[1]))
             save += '_hiEfit-'+str(int(fHiE[0]))+'-'+str(int(fHiE[1]))
             save += '_hiEfitRebin-'+str(hiEfitRebin)
-            if fitRebinScale:   save += '_rebinscale'
-            if mcscale:      save += '_mcscale'
-            if mcweight:     save += '_mcweight'
-            if dru:          save += '_dru'
-            #if dru1:         save += '_dru1'
-            #if dru2:         save += '_dru2'
-            if hiEplotRebin: save += '_hiEplotRebin-'+str(hiEplotRebin)
-            #if reuse:        save += '_reuse'
+            if fitRebinScale: save += '_rebinscale'
+            if mcscale:       save += '_mcscale'
+            if mcsumw2:       save += '_mcsumw2'
+            if datsumw2:      save += '_datsumw2'
+            if dru:           save += '_dru'
+            if hiEplotRebin:  save += '_hiEplotRebin-'+str(hiEplotRebin)
             save += '_reuse'+str(reuse)
+            save += '_chans'+chans
             save += '_chan'+chan
-            if note:         save += '_'+note
+            if note:          save += '_'+note
             save += '_'+V
-
+            
             canvs[C][E].Update()
             canvs[C][E].Print('./plots/'+save+'.png')
 
@@ -1069,6 +1122,7 @@ def _myself_(argv):
                         sepPlots[C][E][i].Update()
                         isave  = ''
                         isave += 'x'+str(i+1)
+                        isave += '-cs'+chans
                         isave += '-c'+chan
                         isave += '-e'+str(E)
                         if note: isave += '_'+note
@@ -1078,6 +1132,16 @@ def _myself_(argv):
 
     ### but don't show all those plots
     if indi: del sepPlots
+
+    
+    #-----------------------------------------------------------------
+    ### print out the fit results
+    print '\n\n'
+    print '!!!!!  FIT RESULTS  !!!!!\n'
+    for key in resultskeys:
+        for line in fitresults[key]:
+            print line
+    #-----------------------------------------------------------------
     
     
     if not batch:
