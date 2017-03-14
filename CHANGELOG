@@ -14,6 +14,8 @@
 
 # 2017-03-13
 # --------------------------------------------------------------------
+# V switch to 60-add-more-mc.py - start adding more MC and tweak the
+#   the code as needed
 # + version 52-whats-next.py now works with purely funcs52.py
 # ~ version 51-multi-chan2.py should still work as-is using funcs50.py
 # ~ shift everything over to new funcs52.py for better managing...

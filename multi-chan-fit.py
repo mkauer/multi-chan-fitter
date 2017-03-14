@@ -3,12 +3,11 @@
 ######################################################################
 # Matt Kauer - mkauer@physics.wisc.edu
 ######################################################################
-# 52-whats-next.py
+# 60-add-more-mc.py
 
-V = 'v52'
+V = 'v60'
 
-# not sure what's next, probably a lot of bug fixing that will present
-#  itself when I start adding more MC
+# add more MC and tweak things as need be to get it working
 # 
 # version: 2017-03-13
 #
@@ -25,10 +24,7 @@ import numpy as np
 import ROOT
 from ROOT import *
 
-sys.path.append("/home/mkauer/COSINE/CUP/mc-fitting/")
-sys.path.append("/home/mkauer/mc-fitting/")
-#from funcs50 import *
-from funcs52 import *
+from funcs60 import *
 
 
 ### user inputs
@@ -39,9 +35,8 @@ note=0
 #note = 'find-data'
 
 ### backgrounds file to use?
-#mcfile = 'backgrounds41.txt'
-mcfile = 'backgrounds50.txt'
-#mcfile = 'backgrounds60.txt'
+#mcfile = 'backgrounds50.txt'
+mcfile = 'backgrounds60.txt'
 #mcfile = 'back-just-data.txt'
 #mcfile = 'back-just-c3.txt'
 
@@ -130,7 +125,7 @@ def _myself_(argv):
         print 'ERROR: could not find backgrounds file -->', mcfile
         sys.exit()
     
-    data, bkgs, sigs = build52(mcfile, reuse, mychans)
+    data, bkgs, sigs = build60(mcfile, reuse, mychans)
     datkeys, bakkeys, sigkeys = sortKeys(data, bkgs, sigs)
     
     # assume all data is using same run and channels
@@ -165,9 +160,9 @@ def _myself_(argv):
     print 'INFO: Unique bkgs and sigs =',uniqAll
     
     # scale into dru units
-    if dru: data = dataDRU52(data)
-    bkgs = scaleBkgs52(bkgs)
-    sigs = scaleBkgs52(sigs)
+    if dru: data = dataDRU60(data)
+    bkgs = scaleBkgs60(bkgs)
+    sigs = scaleBkgs60(sigs)
     
     ### Number of colors
     Nc = len(uniqAll)
@@ -556,7 +551,7 @@ def _myself_(argv):
         #    print line
         
         ### scale the signals to mBq/kg
-        sigs = scaleSigs52(sigkeys, sigs)
+        sigs = scaleSigs60(sigkeys, sigs)
         
         ### print the fit activities
         for i in range(8):
@@ -838,8 +833,8 @@ def _myself_(argv):
             legs2[C][E]  = []
             zeros[C][E]  = []
 
-            total[C][E]  = makeTotal52(chan,E)
-            resid[C][E]  = makeResid52(chan,E)
+            total[C][E]  = makeTotal60(chan,E)
+            resid[C][E]  = makeResid60(chan,E)
 
             font=63
             size=13
