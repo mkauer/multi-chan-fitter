@@ -4,15 +4,12 @@
 mkauer@physics.wisc.edu
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-I now have this code in gitlab...
-But this is still very preliminary
-
-There are many paths that are specific to my environment for testing purposes
-Many bits of code that are commented out for testing purposes
-It's pretty messy, I know, sorry
+There are a few paths that are specific to my environment for testing
+purposes, and many bits of code that are commented out for testing
+purposes. It is still pretty messy, I know, sorry.
 
 This version should work if you don't change anything...
-Just do git checkout on CUP or your personal PC and run ./multi-chan-fit.py
+Just do a git checkout on CUP or your personal PC and run "./multi-chan-fit.py"
 That should work on both CUP and your personal PC, I hope...
 NOTE: if on CUP, it will run in batch mode and not show the plots, but it will
 create the plots.

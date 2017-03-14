@@ -115,16 +115,16 @@ B        SM        5       internal    Th232     Th232     Th232    9.60e-3   0.
 B        SM        6       internal    Th232     Th232     Th232    2.30e-3   0.0001     0.5     1.5       ./root-join-read/build41/build41-internalTh232-master.root
 B        SM        7       internal    Th232     Th232     Th232    2.50e-3   0.0001     0.5     1.5       ./root-join-read/build41/build41-internalTh232-master.root
 B        SM        8       internal    Th232     Th232     Th232    5.70e-3   0.0001     0.5     1.5       ./root-join-read/build41/build41-internalTh232-master.root
-"""
-S        SM        1       internalsurf    Pb210     Pb210     Pb210    3.200     0.0001     0.5     1.5       ./root-join-read/build41/build41-internalPb210-master.root
-S        SM        2       internalsurf    Pb210     Pb210     Pb210    2.060     0.0001     0.5     1.5       ./root-join-read/build41/build41-internalPb210-master.root
-S        SM        3       internalsurf    Pb210     Pb210     Pb210    0.760     0.0001     0.5     1.5       ./root-join-read/build41/build41-internalPb210-master.root
-S        SM        4       internalsurf    Pb210     Pb210     Pb210    0.740     0.0001     0.5     1.5       ./root-join-read/build41/build41-internalPb210-master.root
 
-S        SM        5       internalsurf    Pb210     Pb210     Pb210    2.060     0.0001     0.5     1.5       ./root-join-read/build41/build41-internalPb210-master.root
-S        SM        6       internalsurf    Pb210     Pb210     Pb210    1.520     0.0001     0.5     1.5       ./root-join-read/build41/build41-internalPb210-master.root
-S        SM        7       internalsurf    Pb210     Pb210     Pb210    1.540     0.0001     0.5     1.5       ./root-join-read/build41/build41-internalPb210-master.root
-S        SM        8       internalsurf    Pb210     Pb210     Pb210    2.050     0.0001     0.5     1.5       ./root-join-read/build41/build41-internalPb210-master.root
+S        SM        1       internalsurf    Pb210     Pb210     Pb210    1.000     0.0001     0.5     1.5       ./root-join-read/build41/build41-internalPb210-master.root
+S        SM        2       internalsurf    Pb210     Pb210     Pb210    1.000     0.0001     0.5     1.5       ./root-join-read/build41/build41-internalPb210-master.root
+S        SM        3       internalsurf    Pb210     Pb210     Pb210    1.000     0.0001     0.5     1.5       ./root-join-read/build41/build41-internalPb210-master.root
+S        SM        4       internalsurf    Pb210     Pb210     Pb210    1.000     0.0001     0.5     1.5       ./root-join-read/build41/build41-internalPb210-master.root
+"""
+S        SM        5       internalsurf    Pb210     Pb210     Pb210    1.000     0.0001     0.5     1.5       ./root-join-read/build41/build41-internalPb210-master.root
+S        SM        6       internalsurf    Pb210     Pb210     Pb210    1.000     0.0001     0.5     1.5       ./root-join-read/build41/build41-internalPb210-master.root
+S        SM        7       internalsurf    Pb210     Pb210     Pb210    1.000     0.0001     0.5     1.5       ./root-join-read/build41/build41-internalPb210-master.root
+S        SM        8       internalsurf    Pb210     Pb210     Pb210    1.000     0.0001     0.5     1.5       ./root-join-read/build41/build41-internalPb210-master.root
 """
 B        SM        1       pmt         K40       K40       K40      58.0      0.0001     0.5     1.5       ./root-join-read/build41/build41-pmtK40-master.root
 B        SM        2       pmt         K40       K40       K40      58.0      0.0001     0.5     1.5       ./root-join-read/build41/build41-pmtK40-master.root
