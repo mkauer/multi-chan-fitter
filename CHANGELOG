@@ -12,6 +12,17 @@
 # ====================================================================
 
 
+# 2017-03-13
+# --------------------------------------------------------------------
+# + version 52-whats-next.py now works with purely funcs52.py
+# ~ version 51-multi-chan2.py should still work as-is using funcs50.py
+# ~ shift everything over to new funcs52.py for better managing...
+# ~ change location name to 'internalsurf' - makes the code easier
+# - remove the mod for 'internal-surf'
+# + added a primVolume cut for 'internal-surf'
+# + specific path for surface pb210 in buildMC50()
+
+
 # 2017-03-12
 # --------------------------------------------------------------------
 # V switch to 52-whats-next.py

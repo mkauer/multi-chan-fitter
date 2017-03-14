@@ -1,26 +1,19 @@
 #!/usr/bin/env python
 ######################################################################
-# funcs50.py
+# funcs52.py
 # 
-# Get single-hit data into the processing stream
+# Get all needed funcs into here
 # 
-# Works with v50 and later versions
+# Works with v52 and later versions
 # 
 # version: 2017-03-13
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
-# + specific path for surface pb210 in buildMC50()
-# ~ fixed a bug in makeResid50() histo naming
-# ~ fixed return data/mc bugs in buildData50() and buildMC50()
-# + new makeTotal50()
-# + new makeResid50()
-# + iterate through the chars in the chans string
-# + new buildMC50()
-# + new buildData50()
-# + new build50()
-# + new getInfo50()
-# + building off funcs40.py
+# ~ rename everything to 52 version and add other funcs as needed
+# + try to move all main funcs to here funcs52.py - it's becoming too
+#   confusing to find all funcs in all various versions of funcs
+# + building off funcs50.py
 # 
 # email me: mkauer@physics.wisc.edu
 ######################################################################
@@ -41,12 +34,12 @@ import numpy as np
 from ROOT import *
 import ROOT
 
-sys.path.append("/home/mkauer/COSINE/CUP/mc-fitting/")
-sys.path.append("/home/mkauer/mc-fitting/")
-from funcs40 import *
+#sys.path.append("/home/mkauer/COSINE/CUP/mc-fitting/")
+#sys.path.append("/home/mkauer/mc-fitting/")
+#from funcs40 import *
 
 
-def getInfo50(line, freuse=0, fchans=0):
+def getInfo52(line, freuse=0, fchans=0):
     
     info={}
     
@@ -134,20 +127,20 @@ def getInfo50(line, freuse=0, fchans=0):
     return info
 
 
-def build50(infile = 'backgrounds41.txt', freuse=0, fchans=0):
+def build52(infile = 'backgrounds50.txt', freuse=0, fchans=0):
 
     data = {}
     bkgs = {}
     sigs = {}
     
     for line in readFile(infile):
-        info = getInfo50(line, freuse, fchans)
+        info = getInfo52(line, freuse, fchans)
         if 'D' in info['type']:
-            data = buildData50(info, data)
+            data = buildData52(info, data)
         elif 'B' in info['type']:
-            bkgs = buildMC50(info, bkgs)
+            bkgs = buildMC52(info, bkgs)
         elif 'S' in info['type']:
-            sigs = buildMC50(info, sigs)
+            sigs = buildMC52(info, sigs)
         else:
             print 'WARNING: I do not know what to do with type',info['type'], 'in line:'
             print info['line']
@@ -156,7 +149,28 @@ def build50(infile = 'backgrounds41.txt', freuse=0, fchans=0):
     return data, bkgs, sigs
 
 
-def buildData50(info, data):
+def dataDRU52(data):
+    """
+    Scale data into DRU
+    """
+        
+    # this will eventually have to be made dynamic
+    keVperBin = float(1.)
+    
+    for key in data:
+        
+        i = int(key.split('-')[0].split('x')[-1]) - 1
+        days = float((data[key]['runtime'])/(60.*60.*24.))
+        kgs = float(cmass(i))
+        scale = float(1./(days*kgs*keVperBin))
+        
+        data[key]['hist'].Scale(scale)
+        data[key]['druScale'] = scale
+        
+    return data
+
+
+def buildData52(info, data):
 
     for c in info['chans']:
         info['chan'] = c
@@ -248,9 +262,9 @@ def buildData50(info, data):
 
 
                     ### old calib
-                    edep, selection = calib40(i,e)
+                    edep, selection = calib52a(i,e)
                     ### new calib
-                    #edep, selection = calib41(i,e)
+                    #edep, selection = calib52b(i,e)
 
 
                     ### reminder - [A]All-hits, [S]Single-hits, [M]Multi-hits
@@ -316,7 +330,7 @@ def buildData50(info, data):
 
 
                     ### Pushpa's noise cut
-                    noiseCut = TCut('('+noiseCuts40(i,e)+')')
+                    noiseCut = TCut('('+noiseCuts52(i,e)+')')
 
 
                     ### combine all cuts
@@ -358,7 +372,7 @@ def buildData50(info, data):
     return data
 
 
-def buildMC50(info, mc):
+def buildMC52(info, mc):
 
     for c in info['chans']:
         info['chan'] = c
@@ -548,7 +562,7 @@ def buildMC50(info, mc):
                         p0, p1 = resol2(i,e)
                         chain.SetAlias('sigma', str(p0)+'/sqrt(edep['+str(i)+']*1000.) + '+str(p1))
                     """
-                    resolFunc = resol40(i,e)
+                    resolFunc = resol52(i,e)
                     chain.SetAlias('sigma', resolFunc)
 
                     masterCut = TCut('('+
@@ -586,7 +600,139 @@ def buildMC50(info, mc):
     return mc
 
 
-def makeTotal50(chan, E):
+def scaleBkgs52(bkgs):
+    
+    for key in bkgs:
+        x = key.split('-')[0]
+        loca = key.split('-')[1]
+        e = key.split('-')[-1]
+        
+        #druscale = data[x+'-data-'+e]['druScale']
+        #runtime  = data[x+'-data-'+e]['runtime']
+        
+        kev  = 1.     # keV/bin
+        day  = 86400. # in seconds
+        
+        xkgs = cmass(int(x[-1])-1)
+        pmts = 16.
+        lskg = 1800.
+        
+        generated = float(bkgs[key]['generated'])
+        if generated < 1:
+            print "WARNING: 0 events generated for -->", key
+            continue
+        
+        if loca == 'internal':
+            #scale = bkgs[key]['info']['acti'] * (xkgs) * (1./1000) * (runtime) * (1./generated) * (druscale)
+            scale = bkgs[key]['info']['acti'] * (xkgs) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./kev)
+            bkgs[key]['hist'].Scale(scale)
+            bkgs[key]['scale'] = scale
+        elif loca == 'internalsurf':
+            #scale = bkgs[key]['info']['acti'] * (xkgs) * (1./1000) * (runtime) * (1./generated) * (druscale)
+            scale = bkgs[key]['info']['acti'] * (xkgs) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./kev)
+            bkgs[key]['hist'].Scale(scale)
+            bkgs[key]['scale'] = scale
+        elif loca == 'pmt':
+            #scale = bkgs[key]['info']['acti'] * (pmts) * (1./1000) * (runtime) * (1./generated) * (druscale)
+            scale = bkgs[key]['info']['acti'] * (pmts) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./kev)
+            bkgs[key]['hist'].Scale(scale)
+            bkgs[key]['scale'] = scale
+        elif loca == 'lsveto':
+            #scale = bkgs[key]['info']['acti'] * (lskg) * (1./1000) * (runtime) * (1./generated) * (druscale)
+            scale = bkgs[key]['info']['acti'] * (lskg) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./kev)
+            bkgs[key]['hist'].Scale(scale)
+            bkgs[key]['scale'] = scale
+        elif loca == 'lsvetoair':
+            #scale = bkgs[key]['info']['acti'] * (xkgs) * (1./1000) * (runtime) * (1./generated) * (druscale)
+            scale = bkgs[key]['info']['acti'] * (xkgs) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./kev)
+            bkgs[key]['hist'].Scale(scale)
+            bkgs[key]['scale'] = scale
+        elif loca == 'airshield':
+            #scale = bkgs[key]['info']['acti'] * (xkgs) * (1./1000) * (runtime) * (1./generated) * (druscale)
+            scale = bkgs[key]['info']['acti'] * (xkgs) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./kev)
+            bkgs[key]['hist'].Scale(scale)
+            bkgs[key]['scale'] = scale
+        elif loca == 'steel':
+            #scale = bkgs[key]['info']['acti'] * (xkgs) * (1./1000) * (runtime) * (1./generated) * (druscale)
+            scale = bkgs[key]['info']['acti'] * (xkgs) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./kev)
+            bkgs[key]['hist'].Scale(scale)
+            bkgs[key]['scale'] = scale
+        else:
+            print "WARNING: No background scaling for  --> ", loca
+            continue
+
+    return bkgs
+
+
+def scaleSigs52(sigkeys, sigs):
+
+    for key in sigkeys:
+        x = key.split('-')[0]
+        loca = key.split('-')[1]
+        e = key.split('-')[-1]
+
+        
+        #druscale = data[x+'-data-'+e]['druScale']
+        #runtime = data[x+'-data-'+e]['runtime']
+
+        kev  = 1.     # keV/bin
+        day  = 86400. # in seconds
+        
+        xkgs = cmass(int(x[-1])-1)
+        pmts = 16.
+        lskg = 1800.
+        
+        generated = float(sigs[key]['generated'])
+        if generated < 1:
+            print "WARNING: 0 events generated for -->", key
+            continue
+        
+        # verbose?
+        V = 0
+                
+        if loca == 'internal':
+            #fitActivity = sigs[key]['fitscale'] * (1./kgs) * (1000.) * (1./runtime) * (generated) * (1./druscale)
+            fitActivity = sigs[key]['fitscale'] * (1./xkgs) * (1000.) * (generated) * (1./day) * (xkgs) * (kev)
+            sigs[key]['info']['acti'] = fitActivity
+            if V: print '!!!!', key, sigs[key]['info']['acti'],'mBq/kg'
+        elif loca == 'internalsurf':
+            #fitActivity = sigs[key]['fitscale'] * (1./kgs) * (1000.) * (1./runtime) * (generated) * (1./druscale)
+            fitActivity = sigs[key]['fitscale'] * (1./xkgs) * (1000.) * (generated) * (1./day) * (xkgs) * (kev)
+            sigs[key]['info']['acti'] = fitActivity
+            if V: print '!!!!', key, sigs[key]['info']['acti'],'mBq/kg'
+        elif loca == 'pmt':
+            #fitActivity = sigs[key]['fitscale'] * (1./pmts) * (1000.) * (1./runtime) * (generated) * (1./druscale)
+            fitActivity = sigs[key]['fitscale'] * (1./pmts) * (1000.) * (generated) * (1./day) * (xkgs) * (kev)
+            sigs[key]['info']['acti'] = fitActivity
+            if V: print '!!!!', key, sigs[key]['info']['acti'],'mBq/pmt'
+        elif loca == 'lsveto':
+            #fitActivity = sigs[key]['fitscale'] * (1./kgs) * (1000.) * (1./runtime) * (generated) * (1./druscale)
+            fitActivity = sigs[key]['fitscale'] * (1./lskg) * (1000.) * (generated) * (1./day) * (xkgs) * (kev)
+            sigs[key]['info']['acti'] = fitActivity
+            if V: print '!!!!', key, sigs[key]['info']['acti'],'mBq/pmt'
+        elif loca == 'lsvetoair':
+            #fitActivity = sigs[key]['fitscale'] * (1./kgs) * (1000.) * (1./runtime) * (generated) * (1./druscale)
+            fitActivity = sigs[key]['fitscale'] * (1./xkgs) * (1000.) * (generated) * (1./day) * (xkgs) * (kev)
+            sigs[key]['info']['acti'] = fitActivity
+            if V: print '!!!!', key, sigs[key]['info']['acti'],'mBq/pmt'
+        elif loca == 'airshield':
+            #fitActivity = sigs[key]['fitscale'] * (1./kgs) * (1000.) * (1./runtime) * (generated) * (1./druscale)
+            fitActivity = sigs[key]['fitscale'] * (1./xkgs) * (1000.) * (generated) * (1./day) * (xkgs) * (kev)
+            sigs[key]['info']['acti'] = fitActivity
+            if V: print '!!!!', key, sigs[key]['info']['acti'],'mBq/pmt'
+        elif loca == 'steel':
+            #fitActivity = sigs[key]['fitscale'] * (1./kgs) * (1000.) * (1./runtime) * (generated) * (1./druscale)
+            fitActivity = sigs[key]['fitscale'] * (1./xkgs) * (1000.) * (generated) * (1./day) * (xkgs) * (kev)
+            sigs[key]['info']['acti'] = fitActivity
+            if V: print '!!!!', key, sigs[key]['info']['acti'],'mBq/pmt'
+        else:
+            print "WARNING: No background scaling for  --> ", loca
+            continue
+
+    return sigs
+
+
+def makeTotal52(chan, E):
     total = []
     par = histparam(E)
     for i in range(8):
@@ -602,7 +748,7 @@ def makeTotal50(chan, E):
     return total
 
 
-def makeResid50(chan, E):
+def makeResid52(chan, E):
     resid = []
     par = histparam(E)
     for i in range(8):
@@ -616,4 +762,389 @@ def makeResid50(chan, E):
         res.SetLineWidth(1)
         resid.append(res)
     return resid
+
+
+def calib52a(i, E=0):
+    """
+    Return the crystal calibrations
+    """
+    # from Pushpa
+    # this is the old calib
+
+    # adc = crystalX.energyD
+    # E = (adc+[0])*[1]
+    hiEcalib = [
+        [0.0, 1.000],
+	[0.0, 0.992],
+	[0.0, 1.000],
+	[0.0, 1.000],
+	[0.0, 0.966],
+	[0.0, 1.014],
+	[0.0, 0.984],
+	[0.0, 1.000]
+    ]
+    
+    # adc = crystalX.qc5
+    # E = (adc+[0])*[1]
+    loEcalib = [
+        [0.0, 1.06000e-4],
+	[0.0, 1.05676e-4],
+	[0.0, 1.15900e-4],
+	[0.0, 1.12700e-4],
+	[0.0, 2.86907e-4],
+	[0.0, 1.17634e-4],
+	[0.0, 1.11900e-4],
+	[0.0, 3.84263e-4]
+    ]
+    
+    if E:
+        edep = '(crystal'+str(i+1)+'.energyD)'
+        b, m = hiEcalib[int(i)]
+    else:
+        edep = '(crystal'+str(i+1)+'.qc5)'
+        b, m = loEcalib[int(i)]
+        
+    selection = '(('+edep+'+'+str(b)+')*'+str(m)+')'
+    return edep, selection
+
+
+def calib52b(i, E=0):
+    """
+    Return the crystal calibrations
+    """
+    # from Pushpa
+    # https://cupwiki.ibs.re.kr/Kims/NaICalibration?validation_key=fae031e9908735aeff81aacfcbf83931
+    
+    # adc = pmtX1.rqcD1_5+pmtX2.rqcD1_5
+    # E = (adc+[0])*[1]
+    hiEcalib = [
+        [3942.0, 1./232.5],
+ 	[4327.0, 1./241.9],
+ 	[3834.0, 1./262.1],
+ 	[3909.0, 1./231.3],
+ 	[   0.0, 1./125.0],
+ 	[-231.0, 1./175.7],
+ 	[4769.0, 1./260.9],
+        [   0.0, 1./ 40.2]
+    ]
+    
+    # adc = crystalX.qc5
+    # E = (adc+[0])*[1]
+    loEcalib = [
+        [0.0, 0.000109373],
+ 	[0.0, 0.000108797],
+ 	[0.0, 0.000117414],
+ 	[0.0, 0.000114566],
+ 	[0.0, 0.000342601],
+ 	[0.0, 0.000118527],
+ 	[0.0, 0.000113608],
+ 	[0.0, 0.000500613]
+    ]
+    
+    if E:
+        edep = '(pmt'+str(i+1)+'1.rqcD1_5 + pmt'+str(i+1)+'2.rqcD1_5)'
+        b, m = hiEcalib[int(i)]
+    else:
+        edep = '(crystal'+str(i+1)+'.qc5)'
+        b, m = loEcalib[int(i)]
+    
+    selection = '(('+edep+'+'+str(b)+')*'+str(m)+')'
+    return edep, selection
+
+
+def resol52(i, E=0):
+    """
+    Return the crystal resolutions
+    """
+    # from Pushpa
+    
+    # res = p[0]/sqrt(x) + p[1]
+    hiEresol = [
+        [0.7127, 0.004879],
+	[0.7127, 0.004879],
+	[0.7127, 0.004879],
+	[0.7127, 0.004879],
+	# tweaking resolution on C5
+        #[0.7127, 0.004879],
+        [1.7, 0.005],
+	[0.7127, 0.004879],
+	[0.7127, 0.004879],
+        # tweaking resolution on C8
+	#[0.7127, 0.004879]
+        [2.4, 0.005]
+    ]
+    
+    # C5 = C8 == C4
+    # C6 = C7 == C1
+    loEresol = [
+        [0.2349,  0.018600],
+	[0.2699,  0.014920],
+	[0.2459,  0.015020],
+	[0.3797, -0.003919],
+	# tweaking resolution on C5
+        #[0.3797, -0.003919],
+        [0.8, -0.004],
+	[0.2349,  0.018600],
+	[0.2349,  0.018600],
+        # tweaking resolution on C8
+	#[0.3797, -0.003919]
+        [1.3, -0.004]
+    ]
+    
+    if E:
+        p0, p1 = hiEresol[int(i)]
+    else:
+        p0, p1 = loEresol[int(i)]
+
+    selection = '(('+str(p0)+'/sqrt(edep['+str(i)+']*1000.)) + '+str(p1)+')'
+    return selection
+
+
+def noiseCuts52(i, E):
+    """
+    Quick hack at implementing Pushpa's noise cuts
+    """
+    
+    ### so it's really noise cuts on the low energy and alpha cuts on the high energy
+    
+    hiEcuts = [
+        "!(crystal1.energyD >1000 && (pmt11.rqtD1_5+pmt12.rqtD1_5)/2<2.66)",
+        "!(crystal2.energyD >1000 && (pmt21.rqtD1_5+pmt22.rqtD1_5)/2<2.64)",
+        "!(crystal3.energyD >1000 && (pmt31.rqtD1_5+pmt32.rqtD1_5)/2<2.66)",
+        "!(crystal4.energyD >1000 && (pmt41.rqtD1_5+pmt42.rqtD1_5)/2<2.68)",
+        "!(crystal5.energyD >1000 && (pmt51.rqtD1_5+pmt52.rqtD1_5)/2<2.65)",
+        "!(crystal6.energyD >1000 && (pmt61.rqtD1_5+pmt62.rqtD1_5)/2<2.655)",
+        "!(crystal7.energyD >1000 && (pmt71.rqtD1_5+pmt72.rqtD1_5)/2<2.63)",
+        "!(crystal8.energyD >1000 && (pmt81.rqtD1_5+pmt82.rqtD1_5)/2<2.66)"
+    ]
+
+    loEcal = [
+        0.0001093478,
+        0.000105676,
+        0.0001159,
+        0.0001127,
+        2.869072e-04,
+        0.000117534,
+        0.0001119,
+        3.842627e-04
+    ]
+    
+    X = str(i+1)
+    noise_cut = '(pmt'+X+'1.nc > 1 && pmt'+X+'2.nc > 1)'
+    time_cut  = '(crystal'+X+'.t0 > 2.)'
+    dama_cut  = '(crystal'+X+'.x2 / crystal'+X+'.x1 < 1.25)'
+    asym_cut  = '(abs((pmt'+X+'1.qc5-pmt'+X+'2.qc5)/(pmt'+X+'1.qc5+pmt'+X+'2.qc5)) < 0.5)'
+    qcnc_cut  = '(crystal'+X+'.qc5*'+str(loEcal[i])+' > ((1./1500000.) * (crystal'+X+'.qc/crystal'+X+'.nc) * (crystal'+X+'.qc/crystal'+X+'.nc)+(13./100000.) * (crystal'+X+'.qc/crystal'+X+'.nc)-0.1))'
+    
+    loEcut = '('+noise_cut+' && '+time_cut+' && '+dama_cut+' && '+asym_cut+' && '+qcnc_cut+')'
+    
+    if E:
+        cut = hiEcuts[i]
+    else:
+        #cut = loEcuts[i]
+        cut = loEcut
+
+    return cut
+
+
+
+#===============================================================================
+#   STANDARD FUNCS
+#===============================================================================
+
+def amLocal():
+    """
+    Check to see what machine you're on so you can get right paths
+    """
+    import socket
+    ### master.cunpa.ibs
+    local = 1
+    host = str(socket.gethostname())
+    #print 'hostname =',host
+    if 'cunpa' in host:
+        local = 0
+    return local
+
+
+def sortKeys(data, bkgs, sigs):
+    datkeys=[]
+    bakkeys=[]
+    sigkeys=[]
+
+    for key in data:
+        datkeys.append(key)
+    datkeys.sort()
+
+    for key in bkgs:
+        bakkeys.append(key)
+    bakkeys.sort()
+
+    for key in sigs:
+        sigkeys.append(key)
+    sigkeys.sort()
+
+    return datkeys, bakkeys, sigkeys
+
+
+def histparam(energy=0):
+    """
+    Histogram parameters for number of bins, min, and max in keV
+    """
+    if energy:
+        hmin = 0
+        hmax = 3000
+        bins = (hmax-hmin)
+    else:
+        hmin = 0
+        hmax = 200
+        bins = (hmax-hmin)
+    return [bins, hmin, hmax]
+
+
+def names(i):
+    """
+    The names of the crystals
+    """
+    crystals = [
+        'NaI-01',
+        'NaI-02',
+        'NaI-03',
+        'NaI-04',
+        'NaI-05',
+        'NaI-06',
+        'NaI-07',
+        'NaI-08'
+    ]
+    return crystals[int(i)]
+
+
+def cnames(i):
+    """
+    The C names of the crystals
+    """
+    crystals = [
+        'C1',
+        'C2',
+        'C3',
+        'C4',
+        'C5',
+        'C6',
+        'C7',
+        'C8'
+    ]
+    return crystals[int(i)]
+
+
+def cmass(i):
+    """
+    crystal masses in kg
+    """
+    mass = [
+         8.26,
+         9.15,
+         9.16,
+        18.01,
+        18.28,
+        12.50,
+        12.50,
+        18.28
+        ]
+    return mass[int(i)]
+
+
+def longNames(i):
+    """
+    Full name and specs for the crystal
+    """
+    crystals = [
+        cnames(i)+'  NaI-001  Sample-B  '+str(cmass(i))+'kg',
+        cnames(i)+'  NaI-002  Sample-C  '+str(cmass(i))+'kg',
+        cnames(i)+'  NaI-007  WimpScint-2  '+str(cmass(i))+'kg',
+        cnames(i)+'  AS-3  WimpScint-2  '+str(cmass(i))+'kg',
+        cnames(i)+'  AS-1  Sample-C  '+str(cmass(i))+'kg',
+        cnames(i)+'  NaI-011  WimpScint-3  '+str(cmass(i))+'kg',
+        cnames(i)+'  NaI-012  WimpScint-3  '+str(cmass(i))+'kg',
+        cnames(i)+'  AS-2  Sample-C  '+str(cmass(i))+'kg'
+    ]
+    return crystals[int(i)]
+
+
+def volumeNames(i):
+    """
+    For the simulation primary volume names
+    """
+    volumeNames = [
+        'NaIDet01Crystal',
+        'NaIDet02Crystal',
+        'NaIDet03Crystal',
+        'NaIDet04Crystal',
+        'NaIDet05Crystal',
+        'NaIDet06Crystal',
+        'NaIDet07Crystal',
+        'NaIDet08Crystal'
+    ]
+    return volumeNames[int(i)]
+
+
+def rainbow(N):
+    """
+    Generate an array of colors for MC plotting
+    """
+    from random import randint
+    colors=[]
+    cis=[]
+    # ci cannot be too large > 10,000!
+    ci = randint(1000, 5000)
+    for h in range(N):
+        H = float(h)/float(N)
+        ci += 1
+        if H <= 1/5. :
+            R=1.
+            G=1.*5*H
+            B=0.
+        elif H > 1/5. and H <= 2/5. :
+            R=1.-(1*5*(H-1/5.))
+            G=1.
+            B=0.
+        elif H > 2/5. and H <= 3/5. :
+            R=0.
+            G=1.
+            B=1.*5*(H-2/5.)
+        elif H > 3/5. and H <= 4/5. :
+            R=0.
+            G=1.-(1*5*(H-3/5.))
+            B=1.
+        elif H > 4/5. and H <= 1. :
+            R=1.*5*(H-4/5.)
+            G=0.
+            B=1.
+        elif H > 1. :
+            R=1.
+            G=1.
+            B=1.
+        
+        color = TColor(ci, R, G, B)
+        # must keep the color and the ci in memory
+        colors.append(color)
+        cis.append(ci)
+        
+    return colors, cis
+
+
+def readFile(fileName="backgrounds50.txt"):
+    lines = []
+    skip = 0
+    with open(fileName) as mcfile:
+        for line in mcfile:
+            line = line.strip()
+            if not line: continue
+            if line.startswith('#'): continue
+            if line.startswith('\"\"\"'):
+                if skip == 0: skip = 1
+                else: skip = 0
+                continue
+            if skip: continue
+            lines.append(line)
+    mcfile.close()
+    return lines
 

@@ -10,7 +10,7 @@ V = 'v52'
 # not sure what's next, probably a lot of bug fixing that will present
 #  itself when I start adding more MC
 # 
-# version: 2017-03-12
+# version: 2017-03-13
 #
 # note: run 1616 is the first run after calibration-campaign-2
 # 
@@ -25,7 +25,10 @@ import numpy as np
 import ROOT
 from ROOT import *
 
-from funcs50 import *
+sys.path.append("/home/mkauer/COSINE/CUP/mc-fitting/")
+sys.path.append("/home/mkauer/mc-fitting/")
+#from funcs50 import *
+from funcs52 import *
 
 
 ### user inputs
@@ -38,16 +41,16 @@ note=0
 ### backgrounds file to use?
 #mcfile = 'backgrounds41.txt'
 mcfile = 'backgrounds50.txt'
+#mcfile = 'backgrounds60.txt'
 #mcfile = 'back-just-data.txt'
 #mcfile = 'back-just-c3.txt'
 
 ### force reuse of all joined rootfiles in mcfile? [0,1,2]
 ### nice for debugging
-reuse = 0
 ### [0] default - use whatever is specified in the backgrounds file
 ### [1] forces reusing of all data/bkgs/sigs
 ### [2] forces NOT reusing any data/bkgs/sigs
-reuse = 1
+reuse = 0
 
 ### force a particular set of hit chan data? [0,1,2,3]
 ### nice for debugging
@@ -127,8 +130,8 @@ def _myself_(argv):
         print 'ERROR: could not find backgrounds file -->', mcfile
         sys.exit()
     
-    data, bkgs, sigs = build50(mcfile, reuse, mychans)
-    datkeys, bakkeys, sigkeys = sortKeys2(data, bkgs, sigs)
+    data, bkgs, sigs = build52(mcfile, reuse, mychans)
+    datkeys, bakkeys, sigkeys = sortKeys(data, bkgs, sigs)
     
     # assume all data is using same run and channels
     runNum = data[datkeys[0]]['info']['run']
@@ -137,17 +140,34 @@ def _myself_(argv):
     ### find unique names for color scheme?
     ### "internal-K40" for example
     uniqAll = []
+    
     for key in bakkeys:
         uniqAll.append(key.split('-')[1]+'-'+key.split('-')[2])
     for key in sigkeys:
         uniqAll.append(key.split('-')[1]+'-'+key.split('-')[2])
+    
+    # do a better job splitting for things like 'internal-surf-Pb210'
+    """
+    for key in bakkeys:
+        bits = key.split('-')
+        if len(bits) == 5:
+            uniqAll.append(bits[1]+'-'+bits[2])
+        if len(bits) == 6:
+            uniqAll.append(bits[1]+'-'+bits[2]+'-'+bits[3])
+    for key in sigkeys:
+        bits = key.split('-')
+        if len(bits) == 5:
+            uniqAll.append(bits[1]+'-'+bits[2])
+        if len(bits) == 6:
+            uniqAll.append(bits[1]+'-'+bits[2]+'-'+bits[3])
+    """
     uniqAll = sorted(list(set(uniqAll)))
     print 'INFO: Unique bkgs and sigs =',uniqAll
     
     # scale into dru units
-    if dru: data = dataDRU40(data)
-    bkgs = scaleBkgs40(bkgs)
-    sigs = scaleBkgs40(sigs)
+    if dru: data = dataDRU52(data)
+    bkgs = scaleBkgs52(bkgs)
+    sigs = scaleBkgs52(sigs)
     
     ### Number of colors
     Nc = len(uniqAll)
@@ -348,6 +368,13 @@ def _myself_(argv):
             for fskey in fsigkeys:
                 if 'x'+str(i+1) in fskey:
                     uniqSig.append(fskey.split('-')[1]+'-'+fskey.split('-')[2])
+                    """
+                    bits = fskey.split('-')
+                    if len(bits) == 5:
+                        uniqSig.append(bits[1]+'-'+bits[2])
+                    if len(bits) == 6:
+                        uniqSig.append(bits[1]+'-'+bits[2]+'-'+bits[3])
+                    """
             uniqSig = sorted(list(set(uniqSig)))
             
             ### only fit a crystal that has 2 or more signals
@@ -529,7 +556,7 @@ def _myself_(argv):
         #    print line
         
         ### scale the signals to mBq/kg
-        sigs = scaleSigs40(sigkeys, sigs)
+        sigs = scaleSigs52(sigkeys, sigs)
         
         ### print the fit activities
         for i in range(8):
@@ -811,8 +838,8 @@ def _myself_(argv):
             legs2[C][E]  = []
             zeros[C][E]  = []
 
-            total[C][E]  = makeTotal50(chan,E)
-            resid[C][E]  = makeResid50(chan,E)
+            total[C][E]  = makeTotal52(chan,E)
+            resid[C][E]  = makeResid52(chan,E)
 
             font=63
             size=13
