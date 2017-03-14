@@ -6,7 +6,7 @@
 # 
 # Works with v60 and later versions
 # 
-# version: 2017-03-13
+# version: 2017-03-14
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
@@ -226,17 +226,16 @@ def buildData60(info, data):
             ### run 1544 has 2 hour subruns
             ### run 1546 has 2 hour subruns
             subrunTime = float(2.) # in hours
+            
+            path1 = 0
+            if local: path1 = '/home/mkauer/COSINE/CUP/mc-fitting/data/phys/'
+            else:     path1 = '/data/COSINE/NTP/phys/'
+            path2 = str(info['build'])+'_MERGED/'
+            path3 = 'ntp_I*'+str(info['run'])+'*root*'
 
             chain = TChain("ntp","")
             nfiles=0
-            if local:
-                #nfiles = chain.Add('/home/mkauer/COSINE/CUP/mc-fitting/data/phys/'+info['build']+'/ntp_I*'+info['run']+'*root*')
-                nfiles = chain.Add('/home/mkauer/COSINE/CUP/mc-fitting/data/phys/'+info['build']+'_MERGED/ntp_I*'+info['run']+'*root*')
-
-            else:
-                #nfiles = chain.Add('/data/COSINE/NTP/phys/'+info['build']+'/ntp_I*'+info['run']+'*root*')
-                #nfiles = chain.Add('/data/COSINE/NTP/phys/'+info['build']+'/ntp_I*'+info['run']+'*root.000')
-                nfiles = chain.Add('/data/COSINE/NTP/phys/'+info['build']+'_MERGED/ntp_I*'+info['run']+'*root*')
+            nfiles = chain.Add(path1+path2+path3)
 
             if nfiles > 0:
                 print nfiles,'data files found'
@@ -284,10 +283,6 @@ def buildData60(info, data):
                         #lsvetocut = '(BLSveto.Charge/110. < 50.)'
                         lsvetocut = '(BLSveto.Charge/110. < 20.)'
 
-                        #chanCut = TCut('(('+edepcuts+'))')
-                        #chanCut = TCut('(('+nclustercuts+'))')
-                        #chanCut = TCut('(('+edepcuts+') && ('+nclustercuts+'))')
-
                         ### my cuts
                         #chanCut = TCut('(('+edepcuts+') && ('+nclustercuts+') && ('+lsvetocut+'))')
                         ### Pushpa cuts
@@ -310,10 +305,6 @@ def buildData60(info, data):
                         #lsvetocut = '(BLSveto.Charge/110. > 50.)'
                         lsvetocut = '(BLSveto.Charge/110. > 20.)'
 
-                        #chanCut = TCut('(('+edepcuts+'))')
-                        #chanCut = TCut('(('+nclustercuts+'))')
-                        #chanCut = TCut('(('+edepcuts+') || ('+nclustercuts+'))')
-
                         ### my cuts
                         #chanCut = TCut('(('+edepcuts+') || ('+nclustercuts+') || ('+lsvetocut+'))')
                         ### Pushpa cuts
@@ -330,12 +321,12 @@ def buildData60(info, data):
 
 
                     ### combine all cuts
-                    masterCut = TCut('('+
-                                     chanCut.GetTitle()+' && '+
-                                     noiseCut.GetTitle()
+                    masterCut = TCut('('
+                                     +chanCut.GetTitle()+' && '
+                                     +noiseCut.GetTitle()
                                      +')')
-
-
+                    
+                    
                     ###-----------------------------------------------------------------------
                     chain.Draw(selection+' >> '+key, masterCut)
                     ###-----------------------------------------------------------------------
@@ -390,7 +381,7 @@ def buildMC60(info, mc):
                 key  = info['key']
                 key += '-c'+info['chan']
                 key += '-e'+str(e)
-                #print '!!!!!!!!!!!!!!!!!!!!!!!',key
+                
                 try:
                     mc[key] = {}
                     mc[key]['info'] = info
@@ -405,41 +396,28 @@ def buildMC60(info, mc):
                 except:
                     print "WARNING: could not find generated_hist -->",key+'_generated'
 
-                #except:
-                #    del mc[key]
-                #    print "WARNING: could not find hist -->",key
-                #    continue
-
-            #return mc
-
+                
         else:
             local = amLocal()
-
+            
             ### top level path to the MC
             path1 = 0
             if local: path1 = '/home/mkauer/COSINE/CUP/mc-fitting/sim/newGeometry/'
             else: path1 = '/data/MC/KIMS-NaI/user-scratch/sim/processed/newGeometry/'
-
+            
             ### 2nd level path to the specific files
-            # generally looks like this...
-            #path2 = info['isof']+'/set2/'+'*'+info['loca']+info['isof']+'*root'
             path2 = info['isof']+'/set2/'+'*'+info['loca']+'*'+info['isof']+'*root'
+
             # but there will be a few exceptions...
             if info['loca'] == 'internalsurf':
-                #path2 = info['isof']+'/set2/surf/10um/'+'*'+info['loca']+'*'+info['isof']+'*root'
-                path2 = info['isof']+'/set2/surf/10um/'+'*'+info['loca']+'*'+'C'+str(info['xstl'])+'*'+info['isof']+'*root'
-            
+                #path2 = info['isof']+'/set2/surf/10um/'+'*'+info['loca']+'*'+'C'+str(info['xstl'])+'*'+info['isof']+'*root'
+                path2 = info['isof']+'/set2/surf/10um/'+'*'+info['loca']+'*'+info['isof']+'*'+'C'+str(info['xstl'])+'*root'
+
             
             chain  = TChain("MC","")
             nfiles = 0
             nfiles = chain.Add(path1+path2)
-            #if local:
-            #    nfiles = chain.Add('/home/mkauer/COSINE/CUP/mc-fitting/sim/newGeometry/'
-            #                       +info['isof']+'/set2/'+'*'+info['loca']+info['isof']+'*root')
-            #else:
-            #    nfiles = chain.Add('/data/MC/KIMS-NaI/user-scratch/sim/processed/newGeometry/'
-            #                       +info['isof']+'/set2/'+'*'+info['loca']+info['isof']+'*root')
-            
+                        
             if nfiles > 0:
                 print nfiles,'MC files found for', info['loca'], info['isof']
                 for e in range(2):
@@ -545,19 +523,6 @@ def buildMC60(info, mc):
                     ###-------------------------------------------------------------------------------
                     ### using Box-Muller? method here for "rng" alias
                     chain.SetAlias('rng','sin(2.*pi*rndm)*sqrt(-2.*log(rndm))')
-                    """
-                    ### set the resolution function
-                    if resol == 1:
-                        ### from Estella
-                        ### assume reso = p0/sqrt(energy)
-                        p0 = resol(i,e)
-                        chain.SetAlias('sigma', str(p0)+'/sqrt(edep['+str(i)+']*1000.)')
-                    if resol == 2:
-                        ### from Pushpa
-                        ### assume reso = p0/sqrt(energy) + p1
-                        p0, p1 = resol2(i,e)
-                        chain.SetAlias('sigma', str(p0)+'/sqrt(edep['+str(i)+']*1000.) + '+str(p1))
-                    """
                     resolFunc = resol60(i,e)
                     chain.SetAlias('sigma', resolFunc)
 
@@ -666,10 +631,6 @@ def scaleSigs60(sigkeys, sigs):
         x = key.split('-')[0]
         loca = key.split('-')[1]
         e = key.split('-')[-1]
-
-        
-        #druscale = data[x+'-data-'+e]['druScale']
-        #runtime = data[x+'-data-'+e]['runtime']
 
         kev  = 1.     # keV/bin
         day  = 86400. # in seconds
@@ -901,19 +862,17 @@ def noiseCuts60(i, E):
     Quick hack at implementing Pushpa's noise cuts
     """
     
-    ### so it's really noise cuts on the low energy and alpha cuts on the high energy
-    
     hiEcuts = [
-        "!(crystal1.energyD >1000 && (pmt11.rqtD1_5+pmt12.rqtD1_5)/2<2.66)",
-        "!(crystal2.energyD >1000 && (pmt21.rqtD1_5+pmt22.rqtD1_5)/2<2.64)",
-        "!(crystal3.energyD >1000 && (pmt31.rqtD1_5+pmt32.rqtD1_5)/2<2.66)",
-        "!(crystal4.energyD >1000 && (pmt41.rqtD1_5+pmt42.rqtD1_5)/2<2.68)",
-        "!(crystal5.energyD >1000 && (pmt51.rqtD1_5+pmt52.rqtD1_5)/2<2.65)",
-        "!(crystal6.energyD >1000 && (pmt61.rqtD1_5+pmt62.rqtD1_5)/2<2.655)",
-        "!(crystal7.energyD >1000 && (pmt71.rqtD1_5+pmt72.rqtD1_5)/2<2.63)",
-        "!(crystal8.energyD >1000 && (pmt81.rqtD1_5+pmt82.rqtD1_5)/2<2.66)"
+        "!((crystal1.energyD > 1000.) && ((pmt11.rqtD1_5+pmt12.rqtD1_5)/2. < 2.660))",
+        "!((crystal2.energyD > 1000.) && ((pmt21.rqtD1_5+pmt22.rqtD1_5)/2. < 2.640))",
+        "!((crystal3.energyD > 1000.) && ((pmt31.rqtD1_5+pmt32.rqtD1_5)/2. < 2.660))",
+        "!((crystal4.energyD > 1000.) && ((pmt41.rqtD1_5+pmt42.rqtD1_5)/2. < 2.680))",
+        "!((crystal5.energyD > 1000.) && ((pmt51.rqtD1_5+pmt52.rqtD1_5)/2. < 2.650))",
+        "!((crystal6.energyD > 1000.) && ((pmt61.rqtD1_5+pmt62.rqtD1_5)/2. < 2.655))",
+        "!((crystal7.energyD > 1000.) && ((pmt71.rqtD1_5+pmt72.rqtD1_5)/2. < 2.630))",
+        "!((crystal8.energyD > 1000.) && ((pmt81.rqtD1_5+pmt82.rqtD1_5)/2. < 2.660))"
     ]
-
+    
     loEcal = [
         0.0001093478,
         0.000105676,

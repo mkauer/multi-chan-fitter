@@ -1,18 +1,23 @@
 #!/bin/bash
 
-# 2017-02-16
+# 2017-03-14
 
-# + add internalPb210
+
+# + add internal I125
+# + add internal Na22
+# + add internalsurf Pb210
+# ~ switch to join60.py
+# + add internal Pb210
 # ~ switch to join41.py
 
 
 base=/home/mkauer/mc-fitting/root-join-read
 cluster=$base/cluster
-build=$base/build41
-join=$base/join41.py
+build=$base/build60
+join=$base/join60.py
 
-#for mcfile in data airshield internalK40 internalTh232 internalU238 internalPb210 lsveto lsvetoair pmtK40 pmtU238 pmtTh232 steel
-for mcfile in data
+for mcfile in data airshield internalNa22 internalI125 internalK40 internalTh232 internalU238 internalPb210 internalsurfPb210 lsveto lsvetoair pmtK40 pmtU238 pmtTh232 steel
+#for mcfile in data
 do
     file="$cluster/build-$mcfile.sh"
     cat > $file <<EOF

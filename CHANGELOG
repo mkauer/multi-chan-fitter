@@ -12,6 +12,15 @@
 # ====================================================================
 
 
+# 2017-03-14
+# --------------------------------------------------------------------
+
+# + added internal i125
+# + added internal na22
+# ~ changed the naming format for internalsurf pb210
+# + added the rest of internalsurf pb210
+
+
 # 2017-03-13
 # --------------------------------------------------------------------
 # V switch to 60-add-more-mc.py - start adding more MC and tweak the

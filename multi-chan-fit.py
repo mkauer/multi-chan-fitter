@@ -9,7 +9,7 @@ V = 'v60'
 
 # add more MC and tweak things as need be to get it working
 # 
-# version: 2017-03-13
+# version: 2017-03-14
 #
 # note: run 1616 is the first run after calibration-campaign-2
 # 
@@ -65,7 +65,8 @@ hier = [0, 3000]
 ### individual plots for all crystals? [0,1]
 indi = 1
 ### just plot individual for crystals? [1-8]
-justthese = [3]
+justthese = [1,2,3,4,5,6,7,8]
+#justthese = [3]
 
 ### rebin the hi-E final plots [1,inf]
 hiEplotRebin = 10
@@ -135,27 +136,11 @@ def _myself_(argv):
     ### find unique names for color scheme?
     ### "internal-K40" for example
     uniqAll = []
-    
     for key in bakkeys:
         uniqAll.append(key.split('-')[1]+'-'+key.split('-')[2])
     for key in sigkeys:
         uniqAll.append(key.split('-')[1]+'-'+key.split('-')[2])
     
-    # do a better job splitting for things like 'internal-surf-Pb210'
-    """
-    for key in bakkeys:
-        bits = key.split('-')
-        if len(bits) == 5:
-            uniqAll.append(bits[1]+'-'+bits[2])
-        if len(bits) == 6:
-            uniqAll.append(bits[1]+'-'+bits[2]+'-'+bits[3])
-    for key in sigkeys:
-        bits = key.split('-')
-        if len(bits) == 5:
-            uniqAll.append(bits[1]+'-'+bits[2])
-        if len(bits) == 6:
-            uniqAll.append(bits[1]+'-'+bits[2]+'-'+bits[3])
-    """
     uniqAll = sorted(list(set(uniqAll)))
     print 'INFO: Unique bkgs and sigs =',uniqAll
     
@@ -226,7 +211,9 @@ def _myself_(argv):
     ### here's the fitting part!!!
     ##################################################################
     ### only do the fit if you have signals and data!
+    fitting=0
     if len(sigs) > 0:
+        fitting=1
         
         fitdata = []
         fitsigs = {}
@@ -363,13 +350,7 @@ def _myself_(argv):
             for fskey in fsigkeys:
                 if 'x'+str(i+1) in fskey:
                     uniqSig.append(fskey.split('-')[1]+'-'+fskey.split('-')[2])
-                    """
-                    bits = fskey.split('-')
-                    if len(bits) == 5:
-                        uniqSig.append(bits[1]+'-'+bits[2])
-                    if len(bits) == 6:
-                        uniqSig.append(bits[1]+'-'+bits[2]+'-'+bits[3])
-                    """
+
             uniqSig = sorted(list(set(uniqSig)))
             
             ### only fit a crystal that has 2 or more signals
@@ -465,7 +446,12 @@ def _myself_(argv):
             #fitresults.append('NaI-C'+str(i+1)+' fit completed with status '+str(status))
             #fitresults.append('NaI-C'+str(i+1)+' fit results')
             fitresults[str(i)].append('NaI-C'+str(i+1)+' fit results')
+
+            fitresults[str(i)].append('lo-E fit range = '+str(fLo[0])+' - '+str(fLo[1])+' keV')
+            fitresults[str(i)].append('hi-E fit range = '+str(fHiE[0])+' - '+str(fHiE[1])+' keV')
+            
             #fitresults.append('MC fit constrained to 0.0001 - 10.0')
+
             
             ### set fit bounds!!!
             #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -507,9 +493,7 @@ def _myself_(argv):
             #fitresults.append('chi2/ndf = '+str(round(chi2,2))+'/'+str(ndf)+' = '+str(round(chi2/float(ndf),2)))
             fitresults[str(i)].append('chi2/ndf = '+str(round(chi2,2))+'/'+str(ndf)+' = '+str(round(chi2/float(ndf),2)))
 
-            ### p-val is always 0 - need to look into this
-            #fitresults.append('p-value = '+str(pval))
-            fitresults[str(i)].append('p-value = '+str(pval))
+            #fitresults[str(i)].append('p-value = '+str(pval))
 
             count = 0
             for fskey in fsigkeys:
@@ -518,7 +502,7 @@ def _myself_(argv):
                     ferror = ROOT.Double(0.0)
                     fit[-1].GetResult(count, fscale, ferror)
                     #fitresults.append(fskey+' = '+str(round(fscale,4))+' +/- '+str(round(ferror,4)))
-                    fitresults[str(i)].append('fit scale  -  '+fskey+' = '+str(round(fscale,4))+' +/- '+str(round(ferror,4)))
+                    #fitresults[str(i)].append('fit scale  -  '+fskey+' = '+str(round(fscale,4))+' +/- '+str(round(ferror,4)))
                     fitsigs[fskey]['hist'].Scale(fscale)
 
                     for C in chans:
@@ -563,8 +547,9 @@ def _myself_(argv):
                             if finit:
                                 E = str(E)
                                 #print fskey, sigs[fskey+'-c'+C+'-e'+E]['info']['acti']
-                                fitresults[str(i)].append('activity   -  '+fskey+' '
-                                                          +str(sigs[fskey+'-c'+C+'-e'+E]['info']['acti'])+' mBq')
+                                fitresults[str(i)].append('activity - '+fskey+'   ('
+                                                          +str(round(sigs[fskey+'-c'+C+'-e'+E]['info']['acti'],2))
+                                                          +' mBq)')
                                 finit=0
             #print '\n'
             fitresults[str(i)].append('\n')
@@ -1138,34 +1123,37 @@ def _myself_(argv):
                     if i+1 in justthese:
                         tpad=toppad[C][E][i].Clone()
                         bpad=botpad[C][E][i].Clone()
-                        sepPlots[C][E][i] = TCanvas('ican'+chan+str(E)+str(i), 'ican'+chan+str(E)+str(i), 0, 0, 1400, 900)
+                        sepPlots[C][E][i] = TCanvas('ican-'+str(chan)+str(E)+str(i), 'ican-'+str(chan)+str(E)+str(i), 0, 0, 1400, 900)
                         #sepPlots[C][E][i].cd()
                         tpad.Draw()
                         bpad.Draw()
                         sepPlots[C][E][i].Update()
                         isave  = ''
                         isave += 'x'+str(i+1)
-                        isave += '-cs'+chans
-                        isave += '-c'+chan
+                        isave += '-cs'+str(chans)
+                        isave += '-c'+str(chan)
                         isave += '-e'+str(E)
-                        if note: isave += '_'+note
-                        isave += '_'+V
+                        if note: isave += '_'+str(note)
+                        isave += '_'+str(V)
 
-                        sepPlots[C][E][i].Print('./plots/'+isave+'.png')
-
+                        try:
+                            sepPlots[C][E][i].Print(str('./plots/'+isave+'.png'))
+                        except:
+                            pass
+    
     ### but don't show all those plots
     if indi: del sepPlots
 
     
     #-----------------------------------------------------------------
     ### print out the fit results
-    print '\n\n'
-    print '!!!!!  FIT RESULTS  !!!!!\n'
-    for key in resultskeys:
-        for line in fitresults[key]:
-            print line
+    if fitting:
+        print '\n\n'
+        print '!!!!!  FIT RESULTS  !!!!!\n'
+        for key in resultskeys:
+            for line in fitresults[key]:
+                print line
     #-----------------------------------------------------------------
-    
     
     if not batch:
         raw_input('[Enter] to quit \n')
