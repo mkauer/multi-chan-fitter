@@ -10,6 +10,10 @@
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# ~ tweaked longNames() in funcs60.py
+# + detailNames() to funcs60.py
+# + chanNames() to funcs60.py
+# + energyNames() to funcs60.py
 # ~ rename everything to 60 version and add other funcs as needed
 # + try to move all main funcs to here funcs60.py - it's becoming too
 #   confusing to find all funcs in all various versions of funcs
@@ -872,7 +876,8 @@ def noiseCuts60(i, E):
         "!((crystal7.energyD > 1000.) && ((pmt71.rqtD1_5+pmt72.rqtD1_5)/2. < 2.630))",
         "!((crystal8.energyD > 1000.) && ((pmt81.rqtD1_5+pmt82.rqtD1_5)/2. < 2.660))"
     ]
-    
+
+    # pushpas calibrations used for the noise cuts
     loEcal = [
         0.0001093478,
         0.000105676,
@@ -1007,6 +1012,35 @@ def cmass(i):
     return mass[int(i)]
 
 
+def energyNames(E=0):
+    name = ''
+    if E == 0: name = 'lo-energy'
+    if E == 1: name = 'hi-energy'
+    return name
+
+    
+def chanNames(chan='S'):
+    name = ''
+    if chan == 'A': name = 'all-hit'
+    if chan == 'S': name = 'single-hit'
+    if chan == 'M': name = 'multi-hit'
+    return name
+    
+
+def detailNames(i):
+    crystals = [
+        'NaI-001  Sample-B',
+        'NaI-002  Sample-C',
+        'NaI-007  WimpScint-2',
+        'AS-3  WimpScint-2',
+        'AS-1  Sample-C',
+        'NaI-011  WimpScint-3',
+        'NaI-012  WimpScint-3',
+        'AS-2  Sample-C'
+    ]
+    return crystals[int(i)]
+
+    
 def longNames(i):
     """
     Full name and specs for the crystal
@@ -1021,7 +1055,8 @@ def longNames(i):
         cnames(i)+'  NaI-012  WimpScint-3  '+str(cmass(i))+'kg',
         cnames(i)+'  AS-2  Sample-C  '+str(cmass(i))+'kg'
     ]
-    return crystals[int(i)]
+    #return crystals[int(i)]
+    return str(cnames(i)+'  '+detailNames(i)+'  '+str(cmass(i))+'kg')
 
 
 def volumeNames(i):

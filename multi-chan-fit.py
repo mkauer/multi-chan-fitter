@@ -37,15 +37,15 @@ note=0
 ### backgrounds file to use?
 #mcfile = 'backgrounds50.txt'
 mcfile = 'backgrounds60.txt'
+#mcfile = 'backgrounds60b.txt'
 #mcfile = 'back-just-data.txt'
-#mcfile = 'back-just-c3.txt'
 
 ### force reuse of all joined rootfiles in mcfile? [0,1,2]
 ### nice for debugging
 ### [0] default - use whatever is specified in the backgrounds file
 ### [1] forces reusing of all data/bkgs/sigs
 ### [2] forces NOT reusing any data/bkgs/sigs
-reuse = 0
+reuse = 1
 
 ### force a particular set of hit chan data? [0,1,2,3]
 ### nice for debugging
@@ -65,8 +65,8 @@ hier = [0, 3000]
 ### individual plots for all crystals? [0,1]
 indi = 1
 ### just plot individual for crystals? [1-8]
-justthese = [1,2,3,4,5,6,7,8]
-#justthese = [3]
+#justthese = [1,2,3,4,5,6,7,8]
+justthese = [3]
 
 ### rebin the hi-E final plots [1,inf]
 hiEplotRebin = 10
@@ -86,6 +86,8 @@ mcscale = 1
 mcsumw2 = 0
 ### set data sumw2()? [0,1]
 datsumw2 = 0
+### set error on the total? [0,1]
+toterr = 0
 
 ### I don't understand why this is effecting the fit so much
 ### But it does help the fit converage and especially with multi-chan
@@ -108,6 +110,18 @@ gROOT.SetBatch(batch)
 
 
 def _myself_(argv):
+
+    
+    ### some legends settings
+    #---------------------------------
+    # number of columns
+    lnc = 2
+    
+    if lnc==1: xlegstart = 0.65
+    if lnc==2: xlegstart = 0.40
+    ylegstop  = 0.89
+    ymultiply = 0.04 / float(lnc)
+    #---------------------------------
     
     gROOT.Reset()
     gStyle.SetPalette (1)
@@ -445,7 +459,8 @@ def _myself_(argv):
             ### like <ROOT.TFitResultPtr object at 0x37246c0>
             #fitresults.append('NaI-C'+str(i+1)+' fit completed with status '+str(status))
             #fitresults.append('NaI-C'+str(i+1)+' fit results')
-            fitresults[str(i)].append('NaI-C'+str(i+1)+' fit results')
+            #fitresults[str(i)].append('NaI-C'+str(i+1)+' fit results')
+            fitresults[str(i)].append('Crystal-'+str(i+1)+' fit results')
 
             fitresults[str(i)].append('lo-E fit range = '+str(fLo[0])+' - '+str(fLo[1])+' keV')
             fitresults[str(i)].append('hi-E fit range = '+str(fHiE[0])+' - '+str(fHiE[1])+' keV')
@@ -643,17 +658,21 @@ def _myself_(argv):
             ftoppad[i].Draw()
             fbotpad[i].Draw()
             ftoppad[i].cd()
-            
-            ylegstart = 0.88
-            ylegend = (ylegstart-(Nlg*0.035))
+
+            ylegstart = (0.89-(Nlg*0.02))
+            leg = TLegend(0.45, ylegstart, 0.94, 0.89)
             space = '  '
-            leg = TLegend(0.55, ylegend, 0.94, ylegstart)
             flegs.append(leg)
             flegs[i].SetFillColor(0)
             flegs[i].SetBorderSize(0)
             lopt = 'LPE'
 
             if dru: fitdata[i].SetAxisRange(2e-2, 3e2, 'y')
+
+            
+            newFitTitle = str('Crystal-'+str(i+1)+'   '+'Fit-chans-'+chans)
+            fitdata[i].SetTitle(newFitTitle)
+
             
             fitdata[i].SetLineColor(kBlack)
             fitdata[i].SetMarkerColor(kBlack)
@@ -789,7 +808,7 @@ def _myself_(argv):
     #sepPlots = [[] for x in range(numE)]
     #sepPlots = [[[] for x in range(8)] for x in range(numE)]
     sepPlots = [[[[] for x in range(8)] for x in range(numE)] for x in range(numC)]
-    
+        
     ### seperate memory space for the pads is key!!!!
     toppad = [[[] for x in range(numE)] for x in range(numC)]
     botpad = [[[] for x in range(numE)] for x in range(numC)]
@@ -803,11 +822,10 @@ def _myself_(argv):
 
 
     for C, chan in enumerate(chans): 
-        #print '!!!!!!!!!!!!!!!!!!!',C,chan
     
         for E in range(numE):
 
-            # have the plotting be seperated out from the loop
+            # have the plotting be seperated out from the 8 crystal loop
             canvs[C][E] = TCanvas('canv'+chan+str(E), 'canv'+chan+str(E), 0, 0, 1400, 900)
             canvs[C][E].Divide(4,2)
 
@@ -826,6 +844,7 @@ def _myself_(argv):
             yoff=4.2
 
             for i in range(8):
+                
                 canvs[C][E].cd(i+1)
 
                 fraction = 0.3
@@ -845,21 +864,33 @@ def _myself_(argv):
                 botpad[C][E][i].Draw()
                 toppad[C][E][i].cd()
 
-                ylegstart = 0.88
-                ylegend = (ylegstart-(Nlg*0.035))
+                ylegstart = (ylegstop-(Nlg*ymultiply))
+                leg = TLegend(xlegstart, ylegstart, 0.94, ylegstop)
                 space = '  '
-                leg = TLegend(0.55, ylegend, 0.94, ylegstart)
                 legs[C][E].append(leg)
                 legs[C][E][i].SetFillColor(0)
                 legs[C][E][i].SetBorderSize(0)
+                legs[C][E][i].SetNColumns(lnc)
                 lopt = 'LPE'
-
+                
                 for dkey in datkeys:
                     if 'x'+str(i+1) in dkey and '-c'+chan in dkey and '-e'+str(E) in dkey:
                         data[dkey]['hist'].GetYaxis().SetTitle('arb. counts')
                         if dru:
                             data[dkey]['hist'].GetYaxis().SetTitle('counts / day / kg / keV  (dru)')
 
+                        #newTitle = str(longNames(i)+'  '+energyNames(E)+'  '+chanNames(chan))
+                        #newTitle = str(energyNames(E)+'  '+chanNames(chan)+'  '+longNames(i))
+                        #newTitle = str(chanNames(chan)+'  '+energyNames(E)+'  '+longNames(i))
+                        #newTitle = str(cnames(i)+'  '+energyNames(E)+'  '+chanNames(chan)+'  '+detailNames(i)+'  '+str(cmass(i))+'kg')
+                        newTitle = str('crystal-'+str(i+1)+'   '
+                                       +energyNames(E)+'   '
+                                       +chanNames(chan)+'   '
+                                       +detailNames(i)+'   '
+                                       +str(cmass(i))+'kg')
+                        
+                        data[dkey]['hist'].SetTitle(newTitle)
+                        
                 #---------------------------------------------------------
                 if E and hiEplotRebin:
                     for dkey in datkeys:
@@ -990,21 +1021,17 @@ def _myself_(argv):
                 ### you need to scale the error by the dru scaling and/or the rebinning
                 #-----------------------------------------------------------------------------
                 #total[C][E][i].Sumw2()
-
-                if not dru:
-                    for n in range(total[C][E][i].GetNbinsX()):
-                        total[C][E][i].SetBinError(n+1, total[C][E][i].GetBinError(n+1)/(float(hiEplotRebin)/math.sqrt(2.)))
-
-                else:
-                    for n in range(total[C][E][i].GetNbinsX()):
-                        #total[C][E][i].SetBinError(n+1, total[C][E][i].GetBinError(n+1)*druScale)
-                        total[C][E][i].SetBinError(n+1, total[C][E][i].GetBinError(n+1)*data[dkey]['druScale'])
-
-                #if dru2:
-                #    for n in range(total[C][E][i].GetNbinsX()):
-                #        total[C][E][i].SetBinError(n+1, total[C][E][i].GetBinError(n+1)*druScale)
-
-
+                
+                # don't set the error on total until I understand what's going on?
+                if toterr:
+                    if dru:
+                        for n in range(total[C][E][i].GetNbinsX()):
+                            total[C][E][i].SetBinError(n+1, total[C][E][i].GetBinError(n+1)*data[dkey]['druScale'])
+                    else:
+                        for n in range(total[C][E][i].GetNbinsX()):
+                            total[C][E][i].SetBinError(n+1, total[C][E][i].GetBinError(n+1)/(float(hiEplotRebin)/math.sqrt(2.)))
+                
+                
                 ### chi2 test
                 ### get the chi2 of the total mc compared to data
                 #=============================================================================
@@ -1142,7 +1169,7 @@ def _myself_(argv):
                             pass
     
     ### but don't show all those plots
-    if indi: del sepPlots
+    #if indi: del sepPlots
 
     
     #-----------------------------------------------------------------
