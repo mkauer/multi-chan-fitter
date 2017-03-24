@@ -3,13 +3,13 @@
 ######################################################################
 # Matt Kauer - mkauer@physics.wisc.edu
 ######################################################################
-# 60-add-more-mc.py
+# 61-new-pmt-id.py
 
-V = 'v60'
+V = 'v61'
 
-# add more MC and tweak things as need be to get it working
+# change functions to use Estella's new pmt_id variable
 # 
-# version: 2017-03-14
+# version: 2017-03-24
 #
 # note: run 1616 is the first run after calibration-campaign-2
 # 
@@ -24,7 +24,7 @@ import numpy as np
 import ROOT
 from ROOT import *
 
-from funcs60 import *
+from funcs61 import *
 
 
 ### user inputs
@@ -36,8 +36,8 @@ note=0
 
 ### backgrounds file to use?
 #mcfile = 'backgrounds50.txt'
-mcfile = 'backgrounds60.txt'
-#mcfile = 'backgrounds60b.txt'
+#mcfile = 'backgrounds60.txt'
+mcfile = 'backgrounds60b.txt'
 #mcfile = 'back-just-data.txt'
 
 ### force reuse of all joined rootfiles in mcfile? [0,1,2]
@@ -45,7 +45,7 @@ mcfile = 'backgrounds60.txt'
 ### [0] default - use whatever is specified in the backgrounds file
 ### [1] forces reusing of all data/bkgs/sigs
 ### [2] forces NOT reusing any data/bkgs/sigs
-reuse = 1
+reuse = 0
 
 ### force a particular set of hit chan data? [0,1,2,3]
 ### nice for debugging
@@ -144,7 +144,7 @@ def _myself_(argv):
     ### where everything gets loaded into dictionary
     #-----------------------------------------------------------------
     #-----------------------------------------------------------------
-    data, bkgs, sigs = build60(mcfile, reuse, mychans)
+    data, bkgs, sigs = build61(mcfile, reuse, mychans)
     datkeys, bakkeys, sigkeys = sortKeys(data, bkgs, sigs)
     #-----------------------------------------------------------------
     #-----------------------------------------------------------------
@@ -167,8 +167,8 @@ def _myself_(argv):
     
     # scale into dru units
     if dru: data = dataDRU60(data)
-    bkgs = scaleBkgs60(bkgs)
-    sigs = scaleBkgs60(sigs)
+    bkgs = scaleBkgs61(bkgs)
+    sigs = scaleBkgs61(sigs)
     
     ### Number of colors
     Nc = len(uniqAll)
@@ -557,7 +557,7 @@ def _myself_(argv):
         #    print line
         
         ### scale the signals to mBq/kg
-        sigs = scaleSigs60(sigkeys, sigs)
+        sigs = scaleSigs61(sigkeys, sigs)
         
         ### print the fit activities
         for i in range(8):

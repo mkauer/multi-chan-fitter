@@ -12,6 +12,17 @@
 # ====================================================================
 
 
+# 2017-03-24
+# --------------------------------------------------------------------
+# ~ think I have the primPMTid cuts working right
+# ~ change number of pmts to '2' for scaleSigs61()
+# ~ change number of pmts to '2' for scaleBkgs61()
+# + added in new primPMTid cuts to buildMC61()
+# + new funcs61.py to add in pmt_id selection functions
+# V switch to 61-new-pmt-id.py
+# + cut release v6.0
+
+
 # 2017-03-14
 # --------------------------------------------------------------------
 # + add option to turn on/off the errors on the total mc histo
