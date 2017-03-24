@@ -36,8 +36,8 @@ note=0
 
 ### backgrounds file to use?
 #mcfile = 'backgrounds50.txt'
-#mcfile = 'backgrounds60.txt'
-mcfile = 'backgrounds60b.txt'
+mcfile = 'backgrounds60.txt'
+#mcfile = 'backgrounds60b.txt'
 #mcfile = 'back-just-data.txt'
 
 ### force reuse of all joined rootfiles in mcfile? [0,1,2]
