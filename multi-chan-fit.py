@@ -32,7 +32,7 @@ from funcs60 import *
 
 ### extra notes to add to the saved plot file names? [0, 'something']
 note=0
-#note = 'find-data'
+#note = 'old-pmt'
 
 ### backgrounds file to use?
 #mcfile = 'backgrounds50.txt'
@@ -63,7 +63,7 @@ loer = [0, 200]
 hier = [0, 3000]
 
 ### individual plots for all crystals? [0,1]
-indi = 1
+indi = 0
 ### just plot individual for crystals? [1-8]
 #justthese = [1,2,3,4,5,6,7,8]
 justthese = [3]
@@ -140,8 +140,15 @@ def _myself_(argv):
         print 'ERROR: could not find backgrounds file -->', mcfile
         sys.exit()
     
+    
+    ### where everything gets loaded into dictionary
+    #-----------------------------------------------------------------
+    #-----------------------------------------------------------------
     data, bkgs, sigs = build60(mcfile, reuse, mychans)
     datkeys, bakkeys, sigkeys = sortKeys(data, bkgs, sigs)
+    #-----------------------------------------------------------------
+    #-----------------------------------------------------------------
+    
     
     # assume all data is using same run and channels
     runNum = data[datkeys[0]]['info']['run']
