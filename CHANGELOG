@@ -14,6 +14,9 @@
 
 # 2017-03-24
 # --------------------------------------------------------------------
+# ~ fixed sim path+name so not to combine lsveto and lsvetoair
+# ~ regenerate pmt U238 and Th232 with primPMTid cuts
+# ~ regenerate lsveto so not to include lsvetoair
 # ~ think I have the primPMTid cuts working right
 # ~ change number of pmts to '2' for scaleSigs61()
 # ~ change number of pmts to '2' for scaleBkgs61()

@@ -1,8 +1,9 @@
 #!/bin/bash
 
-# 2017-03-14
+# 2017-03-24
 
-
+# ~ new primPMTid pmt cuts
+# ~ switch to join/build 61
 # + add internal I125
 # + add internal Na22
 # + add internalsurf Pb210
@@ -13,11 +14,11 @@
 
 base=/home/mkauer/mc-fitting/root-join-read
 cluster=$base/cluster
-build=$base/build60
-join=$base/join60.py
+build=$base/build61
+join=$base/join61.py
 
-for mcfile in data airshield internalNa22 internalI125 internalK40 internalTh232 internalU238 internalPb210 internalsurfPb210 lsveto lsvetoair pmtK40 pmtU238 pmtTh232 steel
-#for mcfile in data
+#for mcfile in data airshield internalNa22 internalI125 internalK40 internalTh232 internalU238 internalPb210 internalsurfPb210 lsveto lsvetoair pmtK40 pmtU238 pmtTh232 steel
+for mcfile in pmtU238 pmtTh232
 do
     file="$cluster/build-$mcfile.sh"
     cat > $file <<EOF

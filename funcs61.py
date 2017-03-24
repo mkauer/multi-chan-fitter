@@ -10,6 +10,7 @@
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# ~ fixed sim path+name so not to combine lsveto and lsvetoair
 # ~ think I have the primPMTid cuts working right
 # ~ change number of pmts to '2' for scaleSigs61()
 # ~ change number of pmts to '2' for scaleBkgs61()
@@ -109,7 +110,8 @@ def buildMC61(info, mc):
             else: path1 = '/data/MC/KIMS-NaI/user-scratch/sim/processed/newGeometry/'
             
             ### 2nd level path to the specific files
-            path2 = info['isof']+'/set2/'+'*'+info['loca']+'*'+info['isof']+'*root'
+            #path2 = info['isof']+'/set2/'+'*'+info['loca']+'*'+info['isof']+'*root'
+            path2 = info['isof']+'/set2/'+'*'+info['loca']+info['isof']+'*root'
 
             # but there will be a few exceptions...
             if info['loca'] == 'internalsurf':
