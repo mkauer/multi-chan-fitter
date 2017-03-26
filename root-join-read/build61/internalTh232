@@ -1,0 +1,16 @@
+# -*- sh -*-
+
+# version 2017-02-01
+
+
+# bsdr   chan     xstl     loca       isof      chst      chsp      acti       erro      lbnd      hbnd        file
+# ----   -----    ----    --------   ------    ------    ------    --------   -------   -------   ------      --------
+
+B        A        1       internal    Th232     Th232     Th232    5.37e-3   0.0001     0.001     10.0        ./root-join-read/join32-internal-master.root
+B        A        2       internal    Th232     Th232     Th232    2.60e-3   0.0001     0.001     10.0        ./root-join-read/join32-internal-master.root
+B        A        3       internal    Th232     Th232     Th232    1.80e-3   0.0001     0.001     10.0        ./root-join-read/join32-internal-master.root
+B        A        4       internal    Th232     Th232     Th232    1.23e-3   0.0001     0.001     10.0        ./root-join-read/join32-internal-master.root
+B        A        5       internal    Th232     Th232     Th232    9.60e-3   0.0001     0.001     10.0        ./root-join-read/join32-internal-master.root
+B        A        6       internal    Th232     Th232     Th232    2.30e-3   0.0001     0.001     10.0        ./root-join-read/join32-internal-master.root
+B        A        7       internal    Th232     Th232     Th232    2.50e-3   0.0001     0.001     10.0        ./root-join-read/join32-internal-master.root
+B        A        8       internal    Th232     Th232     Th232    5.70e-3   0.0001     0.001     10.0        ./root-join-read/join32-internal-master.root

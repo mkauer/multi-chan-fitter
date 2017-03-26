@@ -6,10 +6,11 @@
 # 
 # Works with v60 and later versions
 # 
-# version: 2017-03-24
+# version: 2017-03-26
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# ~ had to change the way the number of generated events was being saved
 # ~ fixed sim path+name so not to combine lsveto and lsvetoair
 # ~ think I have the primPMTid cuts working right
 # ~ change number of pmts to '2' for scaleSigs61()
@@ -33,6 +34,7 @@
 import os,sys
 from copy import deepcopy
 import numpy as np
+
 from ROOT import *
 import ROOT
 
@@ -41,7 +43,7 @@ sys.path.append("/home/mkauer/mc-fitting/")
 from funcs60 import *
 
 
-def build61(infile = 'backgrounds60.txt', freuse=0, fchans=0):
+def build61(infile = 'backgrounds61.txt', freuse=0, fchans=0):
 
     data = {}
     bkgs = {}
@@ -49,12 +51,16 @@ def build61(infile = 'backgrounds60.txt', freuse=0, fchans=0):
     
     for line in readFile(infile):
         info = getInfo60(line, freuse, fchans)
+
         if 'D' in info['type']:
             data = buildData60(info, data)
+
         elif 'B' in info['type']:
             bkgs = buildMC61(info, bkgs)
+
         elif 'S' in info['type']:
             sigs = buildMC61(info, sigs)
+
         else:
             print 'WARNING: I do not know what to do with type',info['type'], 'in line:'
             print info['line']
@@ -96,7 +102,8 @@ def buildMC61(info, mc):
 
                 try:
                     mc[key]['generated_hist'] = deepcopy(TH1F(rfile.Get(key+'_generated')))
-                    mc[key]['generated'] = mc[key]['generated_hist'].GetBinContent(1)
+                    #mc[key]['generated'] = mc[key]['generated_hist'].GetBinContent(1)
+                    mc[key]['generated'] = mc[key]['generated_hist'].GetEntries()
                 except:
                     print "WARNING: could not find generated_hist -->",key+'_generated'
 
@@ -184,10 +191,9 @@ def buildMC61(info, mc):
                     #=====================================================================
                     elif info['loca'] == 'pmt':
                         #volumeCut = TCut('(primVolumeName == "phys_pmt")')
+                        #volumeCut = TCut('((primPMTid == '+str((int(info['xstl'])*2)-2)+') || (primPMTid == '+str((int(info['xstl'])*2)-1)+'))')
                         volumeCut = TCut('((primPMTid[0] == '+str((int(info['xstl'])*2)-2)+') || (primPMTid[0] == '+str((int(info['xstl'])*2)-1)+'))')
-                        #print '!!! Crystal',info['xstl'],'is using primPMTid[0] ==',(int(info['xstl'])*2)-2,'or',(int(info['xstl'])*2)-1
                         #volumeCut = TCut('((primPMTid['+str(i)+'] == '+str((int(info['xstl'])*2)-2)+') || (primPMTid['+str(i)+'] == '+str((int(info['xstl'])*2)-1)+'))')
-                        #print '!!! Crystal',info['xstl'],'is using primPMTid['+str(i)+'] ==',(int(info['xstl'])*2)-2,'or',(int(info['xstl'])*2)-1
                     #=====================================================================
                     #=====================================================================
                     
@@ -228,11 +234,13 @@ def buildMC61(info, mc):
                     if info['chst'] == 'Pb210' and info['chsp'] == 'Pb210':
                         brokenChainCut = TCut('(groupNo == 15)')
                     
+                    
+                    ### create a hist of the generated events
+                    #---------------------------------------------------------------------
                     key2 = key+'_generated'
-                    temp2 = TH1F(key2, 'generated',1,0,1)
+                    temp2 = TH1F(key2, 'generated', 1, 1, 2)
                     
                     totalCuts = TCut(volumeCut.GetTitle()+' && '+motherCut.GetTitle())
-
                     
                     ### I think that has to change?
                     #=====================================================================
@@ -240,15 +248,33 @@ def buildMC61(info, mc):
                     #chain.Draw('primVolumeName >> '+key2, totalCuts)
                     
                     if info['loca'] == 'pmt':
-                        chain.Draw('primPMTid[0] >> '+key2, totalCuts)
+                        chain.Draw('1 >> '+key2, totalCuts)
+                        #chain.Draw('primPMTid >> '+key2, totalCuts)
+                        #chain.Draw('primPMTid[0] >> '+key2, totalCuts)
                         #chain.Draw('primPMTid['+str(i)+'] >> '+key2, totalCuts)
+                        #chain.Draw('primVolumeName >> '+key2, totalCuts)
                     else:
-                        chain.Draw('primVolumeName >> '+key2, totalCuts)
+                        #chain.Draw('primVolumeName >> '+key2, totalCuts)
+                        chain.Draw('1 >> '+key2, totalCuts)
+                        
                     #=====================================================================
                     #=====================================================================
-                                        
                     
-                    generated = temp2.GetEntries()
+                    #mc[key]['generated_hist'] = temp2
+                    #mc[key]['generated'] = generated
+
+                    mc[key]['generated_hist'] = temp2
+                    #mc[key]['generated_hist'] = deepcopy(TH1F(temp2))
+                    #mc[key]['generated'] = mc[key]['generated_hist'].GetBinContent(1)
+                    #mc[key]['generated'] = temp2.GetBinContent(1)
+                    mc[key]['generated'] = temp2.Integral()
+                    #mc[key]['generated'] = temp2.GetEntries()
+                    
+                    entries = temp2.GetEntries()
+                    generated = mc[key]['generated']
+                    print '!!!! ',key2,'',generated,' generated events  (',entries,'entries )' 
+                    
+                    #---------------------------------------------------------------------
                     
                     
                     ### using Box-Muller for resolution smearing method
@@ -285,9 +311,7 @@ def buildMC61(info, mc):
                     mc[key]['hist'] = histo
                     #mc[key]['hist'].Sumw2()
 
-                    mc[key]['generated_hist'] = temp2
-                    mc[key]['generated'] = generated
-
+                    
             else:
                 #print 'WARNING:', loca, isof, 'not found...'
                 print 'ERROR: No MC files found for',info['loca'], info['isof'],'... quitting...'

@@ -12,6 +12,13 @@
 # ====================================================================
 
 
+# 2017-03-26
+# --------------------------------------------------------------------
+# ~ updated join61.py
+# ~ set ROOT.gErrorIgnoreLevel = kWarning
+# ~ fixed how the generated events histos are filled and read
+
+
 # 2017-03-24
 # --------------------------------------------------------------------
 # ~ fixed sim path+name so not to combine lsveto and lsvetoair

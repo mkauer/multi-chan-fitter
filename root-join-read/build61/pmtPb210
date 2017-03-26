@@ -1,0 +1,16 @@
+# -*- sh -*-
+
+# version 2017-03-26
+
+# bsdr   chan     xstl     loca       isof      chst      chsp      acti       erro      lbnd      hbnd        file
+# ----   -----    ----    --------   ------    ------    ------    --------   -------   -------   ------      --------
+
+B        A        1       pmt         U238      Pb210     Pb210     60.0      0.0001     0.001     10.0        dummy.root
+B        A        2       pmt         U238      Pb210     Pb210     60.0      0.0001     0.001     10.0        dummy.root
+B        A        3       pmt         U238      Pb210     Pb210     60.0      0.0001     0.001     10.0        dummy.root
+B        A        4       pmt         U238      Pb210     Pb210     60.0      0.0001     0.001     10.0        dummy.root
+B        A        5       pmt         U238      Pb210     Pb210     60.0      0.0001     0.001     10.0        dummy.root
+B        A        6       pmt         U238      Pb210     Pb210     60.0      0.0001     0.001     10.0        dummy.root
+B        A        7       pmt         U238      Pb210     Pb210     60.0      0.0001     0.001     10.0        dummy.root
+B        A        8       pmt         U238      Pb210     Pb210     60.0      0.0001     0.001     10.0        dummy.root
+

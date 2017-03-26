@@ -9,7 +9,7 @@ V = 'v61'
 
 # change functions to use Estella's new pmt_id variable
 # 
-# version: 2017-03-24
+# version: 2017-03-26
 #
 # note: run 1616 is the first run after calibration-campaign-2
 # 
@@ -21,9 +21,14 @@ import socket
 import copy
 import math
 import numpy as np
+
 import ROOT
 from ROOT import *
+ROOT.gROOT.Reset()
+ROOT.gErrorIgnoreLevel = kWarning
 
+sys.path.append("/home/mkauer/COSINE/CUP/mc-fitting/")
+sys.path.append("/home/mkauer/mc-fitting/")
 from funcs61 import *
 
 
@@ -34,18 +39,23 @@ from funcs61 import *
 note=0
 #note = 'old-pmt'
 
+
 ### backgrounds file to use?
 #mcfile = 'backgrounds50.txt'
-mcfile = 'backgrounds60.txt'
+#mcfile = 'backgrounds60.txt'
 #mcfile = 'backgrounds60b.txt'
-#mcfile = 'back-just-data.txt'
+#mcfile = 'backgrounds61.txt'
+#mcfile = 'backgrounds61b.txt'
+mcfile = 'backgrounds61b-test.txt'
+
 
 ### force reuse of all joined rootfiles in mcfile? [0,1,2]
 ### nice for debugging
 ### [0] default - use whatever is specified in the backgrounds file
 ### [1] forces reusing of all data/bkgs/sigs
 ### [2] forces NOT reusing any data/bkgs/sigs
-reuse = 0
+reuse = 1
+
 
 ### force a particular set of hit chan data? [0,1,2,3]
 ### nice for debugging
@@ -57,16 +67,19 @@ mychans = 0
 # seems to help doing 'MS' over 'SM' ???
 mychans = 'MS'
 
+
 ### plotting ranges
 ### lo and hi energy ranges
 loer = [0, 200]
 hier = [0, 3000]
+
 
 ### individual plots for all crystals? [0,1]
 indi = 0
 ### just plot individual for crystals? [1-8]
 #justthese = [1,2,3,4,5,6,7,8]
 justthese = [3]
+
 
 ### rebin the hi-E final plots [1,inf]
 hiEplotRebin = 10
@@ -111,7 +124,6 @@ gROOT.SetBatch(batch)
 
 def _myself_(argv):
 
-    
     ### some legends settings
     #---------------------------------
     # number of columns
@@ -123,7 +135,6 @@ def _myself_(argv):
     ymultiply = 0.04 / float(lnc)
     #---------------------------------
     
-    gROOT.Reset()
     gStyle.SetPalette (1)
     gStyle.SetOptStat ('')
     gStyle.SetOptFit  (0)
@@ -733,8 +744,10 @@ def _myself_(argv):
             chi2  = ROOT.Double(0.0)
             ndf   = ROOT.Long(0)
             igood = ROOT.Long(0)
-            pval  = fitdata[i].Chi2TestX(ftotal[i], chi2, ndf, igood, "WW")
-            print 'INFO:','fit = crystal-'+str(i+1),'pval =',pval,'chi2 =',chi2,'ndf =',ndf,'igood =',igood
+            #pval  = fitdata[i].Chi2TestX(ftotal[i], chi2, ndf, igood, "UU")
+            pval  = fitdata[i].Chi2TestX(ftotal[i], chi2, ndf, igood, "UW")
+            #pval  = fitdata[i].Chi2TestX(ftotal[i], chi2, ndf, igood, "WW")
+            #print 'INFO:','fit = crystal-'+str(i+1),'pval =',pval,'chi2 =',chi2,'ndf =',ndf,'igood =',igood
             fitchi2ndfv2=chi2/ndf
             #---------------------------------------------------------
 
@@ -742,7 +755,7 @@ def _myself_(argv):
             ftotal[i].Draw('same')
             #flegs[i].AddEntry(ftotal[i], space+'Fit Total', lopt)
             ### chi2/ndf from the fit results
-            #flegs[i].AddEntry(ftotal[i], space+'Fit Total (chi2/ndf = '+str(round(fitchi2ndf[i],2))+')', lopt)
+            flegs[i].AddEntry(ftotal[i], space+'Fit Total (chi2/ndf = '+str(round(fitchi2ndf[i],2))+')', lopt)
             ### chi2/ndf from the Chi2TestX function
             flegs[i].AddEntry(ftotal[i], space+'Fit Total (chi2/ndf = '+str(round(fitchi2ndfv2,2))+')', lopt)
             flegs[i].Draw('same')
@@ -1046,9 +1059,11 @@ def _myself_(argv):
                 chi2  = ROOT.Double(0.0)
                 ndf   = ROOT.Long(0)
                 igood = ROOT.Long(0)
-                pval  = data[dkey]['hist'].Chi2TestX(total[C][E][i], chi2, ndf, igood, "WW")
-                print 'INFO:',dkey,'pval =',pval,'chi2 =',chi2,'ndf =',ndf,'igood =',igood
-                print 'INFO: Total MC chi2/ndf =',chi2/ndf
+                #pval  = data[dkey]['hist'].Chi2TestX(total[C][E][i], chi2, ndf, igood, "WW")
+                pval  = data[dkey]['hist'].Chi2TestX(total[C][E][i], chi2, ndf, igood, "UW")
+                #pval  = data[dkey]['hist'].Chi2TestX(total[C][E][i], chi2, ndf, igood, "UU")
+                #print 'INFO:',dkey,'pval =',pval,'chi2 =',chi2,'ndf =',ndf,'igood =',igood
+                #print 'INFO: Total MC chi2/ndf =',chi2/ndf
                 #-----------------------------------------------------------------------------
                 #=============================================================================
 

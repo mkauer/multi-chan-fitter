@@ -5,7 +5,7 @@
 #
 # Works with v61 and later versions
 # 
-# version: 2017-03-24
+# version: 2017-03-26
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
@@ -22,14 +22,15 @@
 
 import os,sys
 import numpy as np
+
 import ROOT
 from ROOT import *
+ROOT.gROOT.Reset()
+ROOT.gErrorIgnoreLevel = kWarning
 
 sys.path.append("/home/mkauer/COSINE/CUP/mc-fitting/")
 sys.path.append("/home/mkauer/mc-fitting/")
-
 from funcs61 import *
-
 
 local = amLocal()
 gROOT.SetBatch(1)
@@ -49,14 +50,15 @@ def _myself_(argv):
     else:
         outpath="/home/mkauer/mc-fitting/root-join-read/"+build+'/'
     
-    #fname = mcfile.split('/')[-1].split('.')[0]
     fname = mcfile.split('/')[-1]
+
     if local: ver = 'test'
     else: ver = 'master'
+    
     rootfile = build+'-'+fname+'-'+ver+'.root'
     rfile = TFile(outpath+rootfile, 'RECREATE')
     
-    data1, bkgs1, sigs1 = build61(mcfile, 2, 'SMA')
+    data1, bkgs1, sigs1 = build61(mcfile, 2, 'MSA')
     
     rfile.Write()
     rfile.Close()
