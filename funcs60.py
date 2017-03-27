@@ -523,7 +523,7 @@ def buildMC60(info, mc):
                     chain.Draw('primVolumeName >> '+key2, totalCuts)
 
                     generated = temp2.GetEntries()
-
+                    
 
                     ### test out resolution smearing
                     ###-------------------------------------------------------------------------------

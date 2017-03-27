@@ -39,15 +39,9 @@ from funcs61 import *
 note=0
 #note = 'old-pmt'
 
-
 ### backgrounds file to use?
-#mcfile = 'backgrounds50.txt'
-#mcfile = 'backgrounds60.txt'
-#mcfile = 'backgrounds60b.txt'
-#mcfile = 'backgrounds61.txt'
+mcfile = 'backgrounds61.txt'
 #mcfile = 'backgrounds61b.txt'
-mcfile = 'backgrounds61b-test.txt'
-
 
 ### force reuse of all joined rootfiles in mcfile? [0,1,2]
 ### nice for debugging
@@ -55,7 +49,6 @@ mcfile = 'backgrounds61b-test.txt'
 ### [1] forces reusing of all data/bkgs/sigs
 ### [2] forces NOT reusing any data/bkgs/sigs
 reuse = 1
-
 
 ### force a particular set of hit chan data? [0,1,2,3]
 ### nice for debugging
@@ -67,19 +60,16 @@ mychans = 0
 # seems to help doing 'MS' over 'SM' ???
 mychans = 'MS'
 
-
 ### plotting ranges
 ### lo and hi energy ranges
 loer = [0, 200]
 hier = [0, 3000]
 
-
 ### individual plots for all crystals? [0,1]
-indi = 0
+indi = 1
 ### just plot individual for crystals? [1-8]
-#justthese = [1,2,3,4,5,6,7,8]
-justthese = [3]
-
+justthese = [1,2,3,4,5,6,7,8]
+#justthese = [3]
 
 ### rebin the hi-E final plots [1,inf]
 hiEplotRebin = 10
@@ -1191,7 +1181,7 @@ def _myself_(argv):
                             pass
     
     ### but don't show all those plots
-    #if indi: del sepPlots
+    if indi: del sepPlots
 
     
     #-----------------------------------------------------------------
@@ -1203,6 +1193,7 @@ def _myself_(argv):
             for line in fitresults[key]:
                 print line
     #-----------------------------------------------------------------
+
     
     if not batch:
         raw_input('[Enter] to quit \n')
