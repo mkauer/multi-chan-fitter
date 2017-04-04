@@ -12,6 +12,20 @@
 # ====================================================================
 
 
+# 2017-04-03
+# --------------------------------------------------------------------
+# + added updateBkgsFile61() and outputModelTable61() to v61
+# + added updateBkgsFile61() and outputModelTable61() to v60
+# + added outputModelTable61()
+# + added updateBkgsFile61()
+
+
+# 2017-03-28
+# --------------------------------------------------------------------
+# + new build61() for the new [F] format
+# ~ changed signal [S] format to [F] for "Fit"
+
+
 # 2017-03-26
 # --------------------------------------------------------------------
 # ~ updated join61.py

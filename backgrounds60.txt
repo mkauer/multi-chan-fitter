@@ -139,16 +139,16 @@ S        MS        5   internalsurf    Pb210     Pb210     Pb210    1.0       1e
 S        MS        6   internalsurf    Pb210     Pb210     Pb210    1.0       1e-4     0.5     1.5       ./root-join-read/build60/build60-internalsurfPb210-master.root
 S        MS        7   internalsurf    Pb210     Pb210     Pb210    1.0       1e-4     0.5     1.5       ./root-join-read/build60/build60-internalsurfPb210-master.root
 S        MS        8   internalsurf    Pb210     Pb210     Pb210    1.0       1e-4     0.5     1.5       ./root-join-read/build60/build60-internalsurfPb210-master.root
-"""
-B        MS        1       pmt         K40       K40       K40      58.0      1e-4     0.5     1.5       ./root-join-read/build60/build60-pmtK40-master.root
-B        MS        2       pmt         K40       K40       K40      58.0      1e-4     0.5     1.5       ./root-join-read/build60/build60-pmtK40-master.root
-B        MS        3       pmt         K40       K40       K40      58.0      1e-4     0.5     1.5       ./root-join-read/build60/build60-pmtK40-master.root
-B        MS        4       pmt         K40       K40       K40      58.0      1e-4     0.5     1.5       ./root-join-read/build60/build60-pmtK40-master.root
-B        MS        5       pmt         K40       K40       K40      58.0      1e-4     0.5     1.5       ./root-join-read/build60/build60-pmtK40-master.root
-B        MS        6       pmt         K40       K40       K40      58.0      1e-4     0.5     1.5       ./root-join-read/build60/build60-pmtK40-master.root
-B        MS        7       pmt         K40       K40       K40      58.0      1e-4     0.5     1.5       ./root-join-read/build60/build60-pmtK40-master.root
-B        MS        8       pmt         K40       K40       K40      58.0      1e-4     0.5     1.5       ./root-join-read/build60/build60-pmtK40-master.root
-"""
+
+S        MS        1       pmt         K40       K40       K40      58.0      1e-4     0.5     1.5       ./root-join-read/build60/build60-pmtK40-master.root
+S        MS        2       pmt         K40       K40       K40      58.0      1e-4     0.5     1.5       ./root-join-read/build60/build60-pmtK40-master.root
+S        MS        3       pmt         K40       K40       K40      58.0      1e-4     0.5     1.5       ./root-join-read/build60/build60-pmtK40-master.root
+S        MS        4       pmt         K40       K40       K40      58.0      1e-4     0.5     1.5       ./root-join-read/build60/build60-pmtK40-master.root
+S        MS        5       pmt         K40       K40       K40      58.0      1e-4     0.5     1.5       ./root-join-read/build60/build60-pmtK40-master.root
+S        MS        6       pmt         K40       K40       K40      58.0      1e-4     0.5     1.5       ./root-join-read/build60/build60-pmtK40-master.root
+S        MS        7       pmt         K40       K40       K40      58.0      1e-4     0.5     1.5       ./root-join-read/build60/build60-pmtK40-master.root
+S        MS        8       pmt         K40       K40       K40      58.0      1e-4     0.5     1.5       ./root-join-read/build60/build60-pmtK40-master.root
+
 S        MS        1       pmt         U238      U238      Rn222    25.0      1e-4     0.5     1.5       ./root-join-read/build60/build60-pmtU238-master.root
 S        MS        2       pmt         U238      U238      Rn222    25.0      1e-4     0.5     1.5       ./root-join-read/build60/build60-pmtU238-master.root
 S        MS        3       pmt         U238      U238      Rn222    25.0      1e-4     0.5     1.5       ./root-join-read/build60/build60-pmtU238-master.root
@@ -167,14 +167,14 @@ S        MS        6       pmt         U238      Pb210     Pb210    60.0      1e
 S        MS        7       pmt         U238      Pb210     Pb210    60.0      1e-4     0.5     1.5       ./root-join-read/build60/build60-pmtU238-master.root
 S        MS        8       pmt         U238      Pb210     Pb210    60.0      1e-4     0.5     1.5       ./root-join-read/build60/build60-pmtU238-master.root
 
-B        MS        1       pmt         Th232     Th232     Th232    12.0      1e-4     0.5     1.5       ./root-join-read/build60/build60-pmtTh232-master.root
-B        MS        2       pmt         Th232     Th232     Th232    12.0      1e-4     0.5     1.5       ./root-join-read/build60/build60-pmtTh232-master.root
-B        MS        3       pmt         Th232     Th232     Th232    12.0      1e-4     0.5     1.5       ./root-join-read/build60/build60-pmtTh232-master.root
-B        MS        4       pmt         Th232     Th232     Th232    12.0      1e-4     0.5     1.5       ./root-join-read/build60/build60-pmtTh232-master.root
-B        MS        5       pmt         Th232     Th232     Th232    12.0      1e-4     0.5     1.5       ./root-join-read/build60/build60-pmtTh232-master.root
-B        MS        6       pmt         Th232     Th232     Th232    12.0      1e-4     0.5     1.5       ./root-join-read/build60/build60-pmtTh232-master.root
-B        MS        7       pmt         Th232     Th232     Th232    12.0      1e-4     0.5     1.5       ./root-join-read/build60/build60-pmtTh232-master.root
-B        MS        8       pmt         Th232     Th232     Th232    12.0      1e-4     0.5     1.5       ./root-join-read/build60/build60-pmtTh232-master.root
+S        MS        1       pmt         Th232     Th232     Th232    12.0      1e-4     0.5     1.5       ./root-join-read/build60/build60-pmtTh232-master.root
+S        MS        2       pmt         Th232     Th232     Th232    12.0      1e-4     0.5     1.5       ./root-join-read/build60/build60-pmtTh232-master.root
+S        MS        3       pmt         Th232     Th232     Th232    12.0      1e-4     0.5     1.5       ./root-join-read/build60/build60-pmtTh232-master.root
+S        MS        4       pmt         Th232     Th232     Th232    12.0      1e-4     0.5     1.5       ./root-join-read/build60/build60-pmtTh232-master.root
+S        MS        5       pmt         Th232     Th232     Th232    12.0      1e-4     0.5     1.5       ./root-join-read/build60/build60-pmtTh232-master.root
+S        MS        6       pmt         Th232     Th232     Th232    12.0      1e-4     0.5     1.5       ./root-join-read/build60/build60-pmtTh232-master.root
+S        MS        7       pmt         Th232     Th232     Th232    12.0      1e-4     0.5     1.5       ./root-join-read/build60/build60-pmtTh232-master.root
+S        MS        8       pmt         Th232     Th232     Th232    12.0      1e-4     0.5     1.5       ./root-join-read/build60/build60-pmtTh232-master.root
 
 B        MS        1       lsveto      K40       K40       K40      1.00e-3   1e-4     0.5     1.5       ./root-join-read/build60/build60-lsveto-master.root
 B        MS        2       lsveto      K40       K40       K40      1.00e-3   1e-4     0.5     1.5       ./root-join-read/build60/build60-lsveto-master.root

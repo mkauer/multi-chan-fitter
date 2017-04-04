@@ -9,7 +9,7 @@ V = 'v61'
 
 # change functions to use Estella's new pmt_id variable
 # 
-# version: 2017-03-26
+# version: 2017-04-03
 #
 # note: run 1616 is the first run after calibration-campaign-2
 # 
@@ -37,11 +37,15 @@ from funcs61 import *
 
 ### extra notes to add to the saved plot file names? [0, 'something']
 note=0
-#note = 'old-pmt'
+#note = 'just-bkgs'
+#note = 'refit-bkgs'
+
 
 ### backgrounds file to use?
 mcfile = 'backgrounds61.txt'
 #mcfile = 'backgrounds61b.txt'
+#mcfile = 'backgrounds61-updated.txt'
+
 
 ### force reuse of all joined rootfiles in mcfile? [0,1,2]
 ### nice for debugging
@@ -69,7 +73,7 @@ hier = [0, 3000]
 indi = 1
 ### just plot individual for crystals? [1-8]
 justthese = [1,2,3,4,5,6,7,8]
-#justthese = [3]
+justthese = [3]
 
 ### rebin the hi-E final plots [1,inf]
 hiEplotRebin = 10
@@ -96,6 +100,11 @@ toterr = 0
 ### But it does help the fit converage and especially with multi-chan
 ### scale data and mc hi-E hists to 1/hiEfitRebin factor? [0,1]
 fitRebinScale = 1
+
+### chi2 test option
+### ["UU", "UW", "WW", "NORM"]
+chiopt = 'UW'
+
 #================================================================
 
 
@@ -445,10 +454,11 @@ def _myself_(argv):
                         for C in chans:
                             sigs[fskey+'-c'+C+'-e0']['fitscale'] = sigs[fskey+'-c'+C+'-e0']['scale']
                             sigs[fskey+'-c'+C+'-e1']['fitscale'] = sigs[fskey+'-c'+C+'-e1']['scale']
-
-
+                    
+                    
                     #renorm = sigs[fskey+'-c'+C+'-e0']['scale'] / sigs[fskey+'-c'+C+'-e0']['fitscale']
                     renorm = sigs[fskey+'-c'+chans[0]+'-e0']['scale'] / sigs[fskey+'-c'+chans[0]+'-e0']['fitscale']
+                    
                     ### use bounds from backgrounds files
                     #bounds.append([renorm * sigs[fskey+'-c'+C+'-e0']['info']['fbnd'][0],
                     #               renorm * sigs[fskey+'-c'+C+'-e0']['info']['fbnd'][1]])
@@ -487,6 +497,7 @@ def _myself_(argv):
                 #fit[-1].Constrain(l+1, bounds[l][0], bounds[l][1])
                 ### or force other less strict contraints
                 fit[-1].Constrain(l+1, 0.01, 10.0)
+                #fit[-1].Constrain(l+1, 0.001, 100.0)
             
             #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             
@@ -570,9 +581,9 @@ def _myself_(argv):
                             if finit:
                                 E = str(E)
                                 #print fskey, sigs[fskey+'-c'+C+'-e'+E]['info']['acti']
-                                fitresults[str(i)].append('activity - '+fskey+'   ('
+                                fitresults[str(i)].append('fit-activ '+fskey+' '
                                                           +str(round(sigs[fskey+'-c'+C+'-e'+E]['info']['acti'],2))
-                                                          +' mBq)')
+                                                          +' mBq')
                                 finit=0
             #print '\n'
             fitresults[str(i)].append('\n')
@@ -593,25 +604,26 @@ def _myself_(argv):
         
 
         save = ''
-        if local:         save += 'local'
-        else:             save += 'cup'
+        if local: save += 'local'
+        else:     save += 'on-cup'
         save += '_'+str(runNum)
         save += '_Nchan-fit'
         save += '_loEfit-'+str(int(fLo[0]))+'-'+str(int(fLo[1]))
         save += '_hiEfit-'+str(int(fHiE[0]))+'-'+str(int(fHiE[1]))
         save += '_hiEfitRebin-'+str(hiEfitRebin)
-        if fitRebinScale: save += '_rebinscale'
-        if mcscale:       save += '_mcscale'
-        if mcsumw2:       save += '_mcsumw2'
-        if datsumw2:      save += '_datsumw2'
-        if dru:           save += '_dru'
-        if hiEplotRebin:  save += '_hiEplotRebin-'+str(hiEplotRebin)
+        save += '_fitRebinScale'+str(fitRebinScale)
+        save += '_mcscale'+str(mcscale)
+        save += '_mcsumw2'+str(mcsumw2)
+        save += '_datsumw2'+str(datsumw2)
+        save += '_dru'+str(dru)
+        save += '_hiEplotRebin-'+str(hiEplotRebin)
         save += '_reuse'+str(reuse)
         save += '_chans'+str(chans)
-        if note:          save += '_'+note
+        if note: save += '_'+note
         save += '_'+V
-
         
+
+        ### print out the results and update the backgrounds file
         #-------------------------------------------------------------
         ### sort all the fitresults
         resultskeys=[]
@@ -620,13 +632,20 @@ def _myself_(argv):
         resultskeys.sort()
 
         ### write results to file
-        outfile = open('./plots/'+save+'_fit-results.txt', 'w')
-        #for line in fitresults:
-        #    outfile.write(str(line)+'\n')
+        resultsfile = './plots/'+save+'_fit-results.txt'
+        outfile = open(resultsfile, 'w')
         for key in resultskeys:
             for line in fitresults[key]:
                 outfile.write(line+'\n')
-        outfile.close()    
+        outfile.close()
+        
+        ### create the updated backgrounds file
+        newbkgs = './plots/'+mcfile[:-4]+'-updated.txt'
+        updateBkgsFile61(mcfile, resultsfile, newbkgs, BF='F')
+
+        ### create the background model table
+        outtable = newbkgs[:-4]+'-table.txt'
+        outputModelTable61(newbkgs, outtable)
         #-------------------------------------------------------------
         
         
@@ -734,9 +753,7 @@ def _myself_(argv):
             chi2  = ROOT.Double(0.0)
             ndf   = ROOT.Long(0)
             igood = ROOT.Long(0)
-            #pval  = fitdata[i].Chi2TestX(ftotal[i], chi2, ndf, igood, "UU")
-            pval  = fitdata[i].Chi2TestX(ftotal[i], chi2, ndf, igood, "UW")
-            #pval  = fitdata[i].Chi2TestX(ftotal[i], chi2, ndf, igood, "WW")
+            pval  = fitdata[i].Chi2TestX(ftotal[i], chi2, ndf, igood, chiopt)
             #print 'INFO:','fit = crystal-'+str(i+1),'pval =',pval,'chi2 =',chi2,'ndf =',ndf,'igood =',igood
             fitchi2ndfv2=chi2/ndf
             #---------------------------------------------------------
@@ -1049,9 +1066,7 @@ def _myself_(argv):
                 chi2  = ROOT.Double(0.0)
                 ndf   = ROOT.Long(0)
                 igood = ROOT.Long(0)
-                #pval  = data[dkey]['hist'].Chi2TestX(total[C][E][i], chi2, ndf, igood, "WW")
-                pval  = data[dkey]['hist'].Chi2TestX(total[C][E][i], chi2, ndf, igood, "UW")
-                #pval  = data[dkey]['hist'].Chi2TestX(total[C][E][i], chi2, ndf, igood, "UU")
+                pval  = data[dkey]['hist'].Chi2TestX(total[C][E][i], chi2, ndf, igood, chiopt)
                 #print 'INFO:',dkey,'pval =',pval,'chi2 =',chi2,'ndf =',ndf,'igood =',igood
                 #print 'INFO: Total MC chi2/ndf =',chi2/ndf
                 #-----------------------------------------------------------------------------
@@ -1117,44 +1132,32 @@ def _myself_(argv):
                 #legs2[C][E][i].AddEntry(resid[C][E][i],space+'data / MC',lopt)
                 #legs2[C][E][i].Draw()
                 #---------------------------------------------------------
-
-
-                ### get the chi2 of the total mc compared to data
-                #---------------------------------------------------------
-                #chi2  = ROOT.Double(0.0)
-                #ndf   = ROOT.Long(0)
-                #igood = ROOT.Long(0)
-                #pval  = data[dkey]['hist'].Chi2TestX(total[C][E][i], chi2, ndf, igood, "WW")
-                #print 'INFO:',dkey,'pval =',pval,'chi2 =',chi2,'ndf =',ndf,'igood =',igood
-                #print 'INFO: Total MC chi2/ndf =',chi2/ndf
-                #---------------------------------------------------------
-
+            
 
             save = ''
-            if local:         save += 'local'
-            else:             save += 'cup'
+            if local: save += 'local'
+            else: save += 'on-cup'
             save += '_'+str(runNum)
-            if E:             save += '_hiE'
-            else:             save += '_loE'
+            save += '_E'+str(E)
             save += '_loEfit-'+str(int(fLo[0]))+'-'+str(int(fLo[1]))
             save += '_hiEfit-'+str(int(fHiE[0]))+'-'+str(int(fHiE[1]))
             save += '_hiEfitRebin-'+str(hiEfitRebin)
-            if fitRebinScale: save += '_rebinscale'
-            if mcscale:       save += '_mcscale'
-            if mcsumw2:       save += '_mcsumw2'
-            if datsumw2:      save += '_datsumw2'
-            if dru:           save += '_dru'
-            if hiEplotRebin:  save += '_hiEplotRebin-'+str(hiEplotRebin)
+            save += '_fitRebinScale'+str(fitRebinScale)
+            save += '_mcscale'+str(mcscale)
+            save += '_mcsumw2'+str(mcsumw2)
+            save += '_datsumw2'+str(datsumw2)
+            save += '_dru'+str(dru)
+            save += '_hiEplotRebin-'+str(hiEplotRebin)
             save += '_reuse'+str(reuse)
             save += '_chans'+chans
             save += '_chan'+chan
-            if note:          save += '_'+note
+            if note: save += '_'+note
             save += '_'+V
             
             canvs[C][E].Update()
             canvs[C][E].Print('./plots/'+save+'.png')
-
-
+            
+            
             ### Save separate crystal histos?
             #-------------------------------------------------------------
             if indi:
