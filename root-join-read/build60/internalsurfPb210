@@ -1,0 +1,14 @@
+# -*- sh -*-
+
+# version 2017-03-14
+
+# bsdr   chan   xstl    loca       isof      chst      chsp     acti    erro    lbnd   hbnd     file
+# ----   -----  ----   --------    ------    ------    ------   -----   -----   ----   ------   --------
+B        SMA     1  internalsurf   Pb210     Pb210     Pb210    1.000    0.1     0.5    1.5     dummy.root
+B        SMA     2  internalsurf   Pb210     Pb210     Pb210    1.000    0.1     0.5    1.5     dummy.root
+B        SMA     3  internalsurf   Pb210     Pb210     Pb210    1.000    0.1     0.5    1.5     dummy.root
+B        SMA     4  internalsurf   Pb210     Pb210     Pb210    1.000    0.1     0.5    1.5     dummy.root
+B        SMA     5  internalsurf   Pb210     Pb210     Pb210    1.000    0.1     0.5    1.5     dummy.root
+B        SMA     6  internalsurf   Pb210     Pb210     Pb210    1.000    0.1     0.5    1.5     dummy.root
+B        SMA     7  internalsurf   Pb210     Pb210     Pb210    1.000    0.1     0.5    1.5     dummy.root
+B        SMA     8  internalsurf   Pb210     Pb210     Pb210    1.000    0.1     0.5    1.5     dummy.root
