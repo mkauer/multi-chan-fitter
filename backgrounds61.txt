@@ -1,8 +1,9 @@
 # -*- sh -*-
 
-# version 2017-03-28
+# version 2017-04-04
 
 
+# + added some fit activities for Na22 and I125
 # ~ switch signal [S] to signal [F] for "Fit"
 # + reprocessed everything into build61
 # + new pmt cuts implemented on build61
@@ -71,183 +72,183 @@ DR       MS        6       data        1546      V00-02-03    ./root-join-read/b
 DR       MS        7       data        1546      V00-02-03    ./root-join-read/build61/build61-data-master.root
 DR       MS        8       data        1546      V00-02-03    ./root-join-read/build61/build61-data-master.root
 
-F        MS        1       internal    Na22      Na22      Na22     1.0       1e-4     0.5     1.5       ./root-join-read/build61/build61-internalNa22-master.root
-F        MS        2       internal    Na22      Na22      Na22     1.0       1e-4     0.5     1.5       ./root-join-read/build61/build61-internalNa22-master.root
-F        MS        3       internal    Na22      Na22      Na22     1.0       1e-4     0.5     1.5       ./root-join-read/build61/build61-internalNa22-master.root
-F        MS        4       internal    Na22      Na22      Na22     1.0       1e-4     0.5     1.5       ./root-join-read/build61/build61-internalNa22-master.root
-F        MS        5       internal    Na22      Na22      Na22     1.0       1e-4     0.5     1.5       ./root-join-read/build61/build61-internalNa22-master.root
-F        MS        6       internal    Na22      Na22      Na22     1.0       1e-4     0.5     1.5       ./root-join-read/build61/build61-internalNa22-master.root
-F        MS        7       internal    Na22      Na22      Na22     1.0       1e-4     0.5     1.5       ./root-join-read/build61/build61-internalNa22-master.root
-F        MS        8       internal    Na22      Na22      Na22     1.0       1e-4     0.5     1.5       ./root-join-read/build61/build61-internalNa22-master.root
+B	MS	1	internal	Na22	Na22	Na22	1.27	1e-4	0.69	1.31	./root-join-read/build61/build61-internalNa22-master.root	
+B	MS	2	internal	Na22	Na22	Na22	1.03	1e-4	0.69	1.31	./root-join-read/build61/build61-internalNa22-master.root	
+B	MS	3	internal	Na22	Na22	Na22	1.05	1e-4	0.69	1.31	./root-join-read/build61/build61-internalNa22-master.root	
+B	MS	4	internal	Na22	Na22	Na22	0.88	1e-4	0.69	1.31	./root-join-read/build61/build61-internalNa22-master.root	
+B	MS	5	internal	Na22	Na22	Na22	0.54	1e-4	0.69	1.31	./root-join-read/build61/build61-internalNa22-master.root	
+B	MS	6	internal	Na22	Na22	Na22	0.99	1e-4	0.69	1.31	./root-join-read/build61/build61-internalNa22-master.root	
+B	MS	7	internal	Na22	Na22	Na22	0.97	1e-4	0.69	1.31	./root-join-read/build61/build61-internalNa22-master.root	
+B	MS	8	internal	Na22	Na22	Na22	1.0	1e-4	0.69	1.31	./root-join-read/build61/build61-internalNa22-master.root	
 
-F        MS        1       internal    I125      I125      I125     0.10      1e-4     0.5     1.5       ./root-join-read/build61/build61-internalI125-master.root
-F        MS        2       internal    I125      I125      I125     0.10      1e-4     0.5     1.5       ./root-join-read/build61/build61-internalI125-master.root
-F        MS        3       internal    I125      I125      I125     0.10      1e-4     0.5     1.5       ./root-join-read/build61/build61-internalI125-master.root
-F        MS        4       internal    I125      I125      I125     0.10      1e-4     0.5     1.5       ./root-join-read/build61/build61-internalI125-master.root
-F        MS        5       internal    I125      I125      I125     0.10      1e-4     0.5     1.5       ./root-join-read/build61/build61-internalI125-master.root
-F        MS        6       internal    I125      I125      I125     0.10      1e-4     0.5     1.5       ./root-join-read/build61/build61-internalI125-master.root
-F        MS        7       internal    I125      I125      I125     0.10      1e-4     0.5     1.5       ./root-join-read/build61/build61-internalI125-master.root
-F        MS        8       internal    I125      I125      I125     0.10      1e-4     0.5     1.5       ./root-join-read/build61/build61-internalI125-master.root
+B	MS	1	internal	I125	I125	I125	0.07	1e-4	0.69	1.31	./root-join-read/build61/build61-internalI125-master.root	
+B	MS	2	internal	I125	I125	I125	0.07	1e-4	0.69	1.31	./root-join-read/build61/build61-internalI125-master.root	
+B	MS	3	internal	I125	I125	I125	0.07	1e-4	0.69	1.31	./root-join-read/build61/build61-internalI125-master.root	
+B	MS	4	internal	I125	I125	I125	0.22	1e-4	0.69	1.31	./root-join-read/build61/build61-internalI125-master.root	
+B	MS	5	internal	I125	I125	I125	0.29	1e-4	0.69	1.31	./root-join-read/build61/build61-internalI125-master.root	
+B	MS	6	internal	I125	I125	I125	0.29	1e-4	0.69	1.31	./root-join-read/build61/build61-internalI125-master.root	
+B	MS	7	internal	I125	I125	I125	0.28	1e-4	0.69	1.31	./root-join-read/build61/build61-internalI125-master.root	
+B	MS	8	internal	I125	I125	I125	0.28	1e-4	0.69	1.31	./root-join-read/build61/build61-internalI125-master.root	
 
-B        MS        1       internal    K40       K40       K40      1.302     1e-4     0.5     1.5       ./root-join-read/build61/build61-internalK40-master.root
-B        MS        2       internal    K40       K40       K40      2.481     1e-4     0.5     1.5       ./root-join-read/build61/build61-internalK40-master.root
-B        MS        3       internal    K40       K40       K40      1.233     1e-4     0.5     1.5       ./root-join-read/build61/build61-internalK40-master.root
-B        MS        4       internal    K40       K40       K40      1.185     1e-4     0.5     1.5       ./root-join-read/build61/build61-internalK40-master.root
-B        MS        5       internal    K40       K40       K40      2.604     1e-4     0.5     1.5       ./root-join-read/build61/build61-internalK40-master.root
-B        MS        6       internal    K40       K40       K40      0.366     1e-4     0.5     1.5       ./root-join-read/build61/build61-internalK40-master.root
-B        MS        7       internal    K40       K40       K40      0.564     1e-4     0.5     1.5       ./root-join-read/build61/build61-internalK40-master.root
-B        MS        8       internal    K40       K40       K40      1.685     1e-4     0.5     1.5       ./root-join-read/build61/build61-internalK40-master.root
+B        MS        1       internal    K40       K40       K40      1.302     1e-4     0.69     1.31       ./root-join-read/build61/build61-internalK40-master.root
+B        MS        2       internal    K40       K40       K40      2.481     1e-4     0.69     1.31       ./root-join-read/build61/build61-internalK40-master.root
+B        MS        3       internal    K40       K40       K40      1.233     1e-4     0.69     1.31       ./root-join-read/build61/build61-internalK40-master.root
+B        MS        4       internal    K40       K40       K40      1.185     1e-4     0.69     1.31       ./root-join-read/build61/build61-internalK40-master.root
+B        MS        5       internal    K40       K40       K40      2.604     1e-4     0.69     1.31       ./root-join-read/build61/build61-internalK40-master.root
+B        MS        6       internal    K40       K40       K40      0.366     1e-4     0.69     1.31       ./root-join-read/build61/build61-internalK40-master.root
+B        MS        7       internal    K40       K40       K40      0.564     1e-4     0.69     1.31       ./root-join-read/build61/build61-internalK40-master.root
+B        MS        8       internal    K40       K40       K40      1.685     1e-4     0.69     1.31       ./root-join-read/build61/build61-internalK40-master.root
 
-B        MS        1       internal    U238      U238      Rn222    2.48e-4   1e-4     0.5     1.5       ./root-join-read/build61/build61-internalU238-master.root
-B        MS        2       internal    U238      U238      Rn222    1.48e-3   1e-4     0.5     1.5       ./root-join-read/build61/build61-internalU238-master.root
-B        MS        3       internal    U238      U238      Rn222    4.96e-4   1e-4     0.5     1.5       ./root-join-read/build61/build61-internalU238-master.root
-B        MS        4       internal    U238      U238      Rn222    4.96e-4   1e-4     0.5     1.5       ./root-join-read/build61/build61-internalU238-master.root
-B        MS        5       internal    U238      U238      Rn222    1.48e-3   1e-4     0.5     1.5       ./root-join-read/build61/build61-internalU238-master.root
-B        MS        6       internal    U238      U238      Rn222    2.23e-4   1e-4     0.5     1.5       ./root-join-read/build61/build61-internalU238-master.root
-B        MS        7       internal    U238      U238      Rn222    2.23e-4   1e-4     0.5     1.5       ./root-join-read/build61/build61-internalU238-master.root
-B        MS        8       internal    U238      U238      Rn222    1.48e-3   1e-4     0.5     1.5       ./root-join-read/build61/build61-internalU238-master.root
+B        MS        1       internal    U238      U238      Rn222    2.48e-4   1e-4     0.69     1.31       ./root-join-read/build61/build61-internalU238-master.root
+B        MS        2       internal    U238      U238      Rn222    1.48e-3   1e-4     0.69     1.31       ./root-join-read/build61/build61-internalU238-master.root
+B        MS        3       internal    U238      U238      Rn222    4.96e-4   1e-4     0.69     1.31       ./root-join-read/build61/build61-internalU238-master.root
+B        MS        4       internal    U238      U238      Rn222    4.96e-4   1e-4     0.69     1.31       ./root-join-read/build61/build61-internalU238-master.root
+B        MS        5       internal    U238      U238      Rn222    1.48e-3   1e-4     0.69     1.31       ./root-join-read/build61/build61-internalU238-master.root
+B        MS        6       internal    U238      U238      Rn222    2.23e-4   1e-4     0.69     1.31       ./root-join-read/build61/build61-internalU238-master.root
+B        MS        7       internal    U238      U238      Rn222    2.23e-4   1e-4     0.69     1.31       ./root-join-read/build61/build61-internalU238-master.root
+B        MS        8       internal    U238      U238      Rn222    1.48e-3   1e-4     0.69     1.31       ./root-join-read/build61/build61-internalU238-master.root
 
-F        MS        1       internal    Pb210     Pb210     Pb210    3.200     1e-4     0.5     1.5       ./root-join-read/build61/build61-internalPb210-master.root
-F        MS        2       internal    Pb210     Pb210     Pb210    2.060     1e-4     0.5     1.5       ./root-join-read/build61/build61-internalPb210-master.root
-F        MS        3       internal    Pb210     Pb210     Pb210    0.760     1e-4     0.5     1.5       ./root-join-read/build61/build61-internalPb210-master.root
-F        MS        4       internal    Pb210     Pb210     Pb210    0.740     1e-4     0.5     1.5       ./root-join-read/build61/build61-internalPb210-master.root
-F        MS        5       internal    Pb210     Pb210     Pb210    2.060     1e-4     0.5     1.5       ./root-join-read/build61/build61-internalPb210-master.root
-F        MS        6       internal    Pb210     Pb210     Pb210    1.520     1e-4     0.5     1.5       ./root-join-read/build61/build61-internalPb210-master.root
-F        MS        7       internal    Pb210     Pb210     Pb210    1.540     1e-4     0.5     1.5       ./root-join-read/build61/build61-internalPb210-master.root
-F        MS        8       internal    Pb210     Pb210     Pb210    2.050     1e-4     0.5     1.5       ./root-join-read/build61/build61-internalPb210-master.root
+F        MS        1       internal    Pb210     Pb210     Pb210    3.200     1e-4     0.69     1.31       ./root-join-read/build61/build61-internalPb210-master.root
+F        MS        2       internal    Pb210     Pb210     Pb210    2.060     1e-4     0.69     1.31       ./root-join-read/build61/build61-internalPb210-master.root
+F        MS        3       internal    Pb210     Pb210     Pb210    0.760     1e-4     0.69     1.31       ./root-join-read/build61/build61-internalPb210-master.root
+F        MS        4       internal    Pb210     Pb210     Pb210    0.740     1e-4     0.69     1.31       ./root-join-read/build61/build61-internalPb210-master.root
+F        MS        5       internal    Pb210     Pb210     Pb210    2.060     1e-4     0.69     1.31       ./root-join-read/build61/build61-internalPb210-master.root
+F        MS        6       internal    Pb210     Pb210     Pb210    1.520     1e-4     0.69     1.31       ./root-join-read/build61/build61-internalPb210-master.root
+F        MS        7       internal    Pb210     Pb210     Pb210    1.540     1e-4     0.69     1.31       ./root-join-read/build61/build61-internalPb210-master.root
+F        MS        8       internal    Pb210     Pb210     Pb210    2.050     1e-4     0.69     1.31       ./root-join-read/build61/build61-internalPb210-master.root
 
-B        MS        1       internal    Th232     Th232     Th232    5.37e-3   1e-4     0.5     1.5       ./root-join-read/build61/build61-internalTh232-master.root
-B        MS        2       internal    Th232     Th232     Th232    2.60e-3   1e-4     0.5     1.5       ./root-join-read/build61/build61-internalTh232-master.root
-B        MS        3       internal    Th232     Th232     Th232    1.80e-3   1e-4     0.5     1.5       ./root-join-read/build61/build61-internalTh232-master.root
-B        MS        4       internal    Th232     Th232     Th232    1.23e-3   1e-4     0.5     1.5       ./root-join-read/build61/build61-internalTh232-master.root
-B        MS        5       internal    Th232     Th232     Th232    9.60e-3   1e-4     0.5     1.5       ./root-join-read/build61/build61-internalTh232-master.root
-B        MS        6       internal    Th232     Th232     Th232    2.30e-3   1e-4     0.5     1.5       ./root-join-read/build61/build61-internalTh232-master.root
-B        MS        7       internal    Th232     Th232     Th232    2.50e-3   1e-4     0.5     1.5       ./root-join-read/build61/build61-internalTh232-master.root
-B        MS        8       internal    Th232     Th232     Th232    5.70e-3   1e-4     0.5     1.5       ./root-join-read/build61/build61-internalTh232-master.root
+B        MS        1       internal    Th232     Th232     Th232    5.37e-3   1e-4     0.69     1.31       ./root-join-read/build61/build61-internalTh232-master.root
+B        MS        2       internal    Th232     Th232     Th232    2.60e-3   1e-4     0.69     1.31       ./root-join-read/build61/build61-internalTh232-master.root
+B        MS        3       internal    Th232     Th232     Th232    1.80e-3   1e-4     0.69     1.31       ./root-join-read/build61/build61-internalTh232-master.root
+B        MS        4       internal    Th232     Th232     Th232    1.23e-3   1e-4     0.69     1.31       ./root-join-read/build61/build61-internalTh232-master.root
+B        MS        5       internal    Th232     Th232     Th232    9.60e-3   1e-4     0.69     1.31       ./root-join-read/build61/build61-internalTh232-master.root
+B        MS        6       internal    Th232     Th232     Th232    2.30e-3   1e-4     0.69     1.31       ./root-join-read/build61/build61-internalTh232-master.root
+B        MS        7       internal    Th232     Th232     Th232    2.50e-3   1e-4     0.69     1.31       ./root-join-read/build61/build61-internalTh232-master.root
+B        MS        8       internal    Th232     Th232     Th232    5.70e-3   1e-4     0.69     1.31       ./root-join-read/build61/build61-internalTh232-master.root
 
-F        MS        1   internalsurf    Pb210     Pb210     Pb210    1.0       1e-4     0.5     1.5       ./root-join-read/build61/build61-internalsurfPb210-master.root
-F        MS        2   internalsurf    Pb210     Pb210     Pb210    1.0       1e-4     0.5     1.5       ./root-join-read/build61/build61-internalsurfPb210-master.root
-F        MS        3   internalsurf    Pb210     Pb210     Pb210    1.0       1e-4     0.5     1.5       ./root-join-read/build61/build61-internalsurfPb210-master.root
-F        MS        4   internalsurf    Pb210     Pb210     Pb210    1.0       1e-4     0.5     1.5       ./root-join-read/build61/build61-internalsurfPb210-master.root
-F        MS        5   internalsurf    Pb210     Pb210     Pb210    1.0       1e-4     0.5     1.5       ./root-join-read/build61/build61-internalsurfPb210-master.root
-F        MS        6   internalsurf    Pb210     Pb210     Pb210    1.0       1e-4     0.5     1.5       ./root-join-read/build61/build61-internalsurfPb210-master.root
-F        MS        7   internalsurf    Pb210     Pb210     Pb210    1.0       1e-4     0.5     1.5       ./root-join-read/build61/build61-internalsurfPb210-master.root
-F        MS        8   internalsurf    Pb210     Pb210     Pb210    1.0       1e-4     0.5     1.5       ./root-join-read/build61/build61-internalsurfPb210-master.root
+F        MS        1   internalsurf    Pb210     Pb210     Pb210    0.2       1e-4     0.69     1.31       ./root-join-read/build61/build61-internalsurfPb210-master.root
+F        MS        2   internalsurf    Pb210     Pb210     Pb210    0.2       1e-4     0.69     1.31       ./root-join-read/build61/build61-internalsurfPb210-master.root
+F        MS        3   internalsurf    Pb210     Pb210     Pb210    0.2       1e-4     0.69     1.31       ./root-join-read/build61/build61-internalsurfPb210-master.root
+F        MS        4   internalsurf    Pb210     Pb210     Pb210    0.2       1e-4     0.69     1.31       ./root-join-read/build61/build61-internalsurfPb210-master.root
+F        MS        5   internalsurf    Pb210     Pb210     Pb210    0.2       1e-4     0.69     1.31       ./root-join-read/build61/build61-internalsurfPb210-master.root
+F        MS        6   internalsurf    Pb210     Pb210     Pb210    0.2       1e-4     0.69     1.31       ./root-join-read/build61/build61-internalsurfPb210-master.root
+F        MS        7   internalsurf    Pb210     Pb210     Pb210    0.2       1e-4     0.69     1.31       ./root-join-read/build61/build61-internalsurfPb210-master.root
+F        MS        8   internalsurf    Pb210     Pb210     Pb210    0.2       1e-4     0.69     1.31       ./root-join-read/build61/build61-internalsurfPb210-master.root
 
-F        MS        1       pmt         K40       K40       K40      58.0      1e-4     0.5     1.5       ./root-join-read/build61/build61-pmtK40-master.root
-F        MS        2       pmt         K40       K40       K40      58.0      1e-4     0.5     1.5       ./root-join-read/build61/build61-pmtK40-master.root
-F        MS        3       pmt         K40       K40       K40      58.0      1e-4     0.5     1.5       ./root-join-read/build61/build61-pmtK40-master.root
-F        MS        4       pmt         K40       K40       K40      58.0      1e-4     0.5     1.5       ./root-join-read/build61/build61-pmtK40-master.root
-F        MS        5       pmt         K40       K40       K40      58.0      1e-4     0.5     1.5       ./root-join-read/build61/build61-pmtK40-master.root
-F        MS        6       pmt         K40       K40       K40      58.0      1e-4     0.5     1.5       ./root-join-read/build61/build61-pmtK40-master.root
-F        MS        7       pmt         K40       K40       K40      58.0      1e-4     0.5     1.5       ./root-join-read/build61/build61-pmtK40-master.root
-F        MS        8       pmt         K40       K40       K40      58.0      1e-4     0.5     1.5       ./root-join-read/build61/build61-pmtK40-master.root
+B        MS        1       pmt         K40       K40       K40      58.0      1e-4     0.69     1.31       ./root-join-read/build61/build61-pmtK40-master.root
+B        MS        2       pmt         K40       K40       K40      58.0      1e-4     0.69     1.31       ./root-join-read/build61/build61-pmtK40-master.root
+B        MS        3       pmt         K40       K40       K40      58.0      1e-4     0.69     1.31       ./root-join-read/build61/build61-pmtK40-master.root
+B        MS        4       pmt         K40       K40       K40      58.0      1e-4     0.69     1.31       ./root-join-read/build61/build61-pmtK40-master.root
+B        MS        5       pmt         K40       K40       K40      58.0      1e-4     0.69     1.31       ./root-join-read/build61/build61-pmtK40-master.root
+B        MS        6       pmt         K40       K40       K40      58.0      1e-4     0.69     1.31       ./root-join-read/build61/build61-pmtK40-master.root
+B        MS        7       pmt         K40       K40       K40      58.0      1e-4     0.69     1.31       ./root-join-read/build61/build61-pmtK40-master.root
+B        MS        8       pmt         K40       K40       K40      58.0      1e-4     0.69     1.31       ./root-join-read/build61/build61-pmtK40-master.root
 
-F        MS        1       pmt         U238      U238      Rn222    25.0      1e-4     0.5     1.5       ./root-join-read/build61/build61-pmtU238-master.root
-F        MS        2       pmt         U238      U238      Rn222    25.0      1e-4     0.5     1.5       ./root-join-read/build61/build61-pmtU238-master.root
-F        MS        3       pmt         U238      U238      Rn222    25.0      1e-4     0.5     1.5       ./root-join-read/build61/build61-pmtU238-master.root
-F        MS        4       pmt         U238      U238      Rn222    25.0      1e-4     0.5     1.5       ./root-join-read/build61/build61-pmtU238-master.root
-F        MS        5       pmt         U238      U238      Rn222    25.0      1e-4     0.5     1.5       ./root-join-read/build61/build61-pmtU238-master.root
-F        MS        6       pmt         U238      U238      Rn222    25.0      1e-4     0.5     1.5       ./root-join-read/build61/build61-pmtU238-master.root
-F        MS        7       pmt         U238      U238      Rn222    25.0      1e-4     0.5     1.5       ./root-join-read/build61/build61-pmtU238-master.root
-F        MS        8       pmt         U238      U238      Rn222    25.0      1e-4     0.5     1.5       ./root-join-read/build61/build61-pmtU238-master.root
+B        MS        1       pmt         U238      U238      Rn222    25.0      1e-4     0.69     1.31       ./root-join-read/build61/build61-pmtU238-master.root
+B        MS        2       pmt         U238      U238      Rn222    25.0      1e-4     0.69     1.31       ./root-join-read/build61/build61-pmtU238-master.root
+B        MS        3       pmt         U238      U238      Rn222    25.0      1e-4     0.69     1.31       ./root-join-read/build61/build61-pmtU238-master.root
+B        MS        4       pmt         U238      U238      Rn222    25.0      1e-4     0.69     1.31       ./root-join-read/build61/build61-pmtU238-master.root
+B        MS        5       pmt         U238      U238      Rn222    25.0      1e-4     0.69     1.31       ./root-join-read/build61/build61-pmtU238-master.root
+B        MS        6       pmt         U238      U238      Rn222    25.0      1e-4     0.69     1.31       ./root-join-read/build61/build61-pmtU238-master.root
+B        MS        7       pmt         U238      U238      Rn222    25.0      1e-4     0.69     1.31       ./root-join-read/build61/build61-pmtU238-master.root
+B        MS        8       pmt         U238      U238      Rn222    25.0      1e-4     0.69     1.31       ./root-join-read/build61/build61-pmtU238-master.root
 
-F        MS        1       pmt         U238      Pb210     Pb210    60.0      1e-4     0.5     1.5       ./root-join-read/build61/build61-pmtPb210-master.root
-F        MS        2       pmt         U238      Pb210     Pb210    60.0      1e-4     0.5     1.5       ./root-join-read/build61/build61-pmtPb210-master.root
-F        MS        3       pmt         U238      Pb210     Pb210    60.0      1e-4     0.5     1.5       ./root-join-read/build61/build61-pmtPb210-master.root
-F        MS        4       pmt         U238      Pb210     Pb210    60.0      1e-4     0.5     1.5       ./root-join-read/build61/build61-pmtPb210-master.root
-F        MS        5       pmt         U238      Pb210     Pb210    60.0      1e-4     0.5     1.5       ./root-join-read/build61/build61-pmtPb210-master.root
-F        MS        6       pmt         U238      Pb210     Pb210    60.0      1e-4     0.5     1.5       ./root-join-read/build61/build61-pmtPb210-master.root
-F        MS        7       pmt         U238      Pb210     Pb210    60.0      1e-4     0.5     1.5       ./root-join-read/build61/build61-pmtPb210-master.root
-F        MS        8       pmt         U238      Pb210     Pb210    60.0      1e-4     0.5     1.5       ./root-join-read/build61/build61-pmtPb210-master.root
+B        MS        1       pmt         U238      Pb210     Pb210    60.0      1e-4     0.69     1.31       ./root-join-read/build61/build61-pmtPb210-master.root
+B        MS        2       pmt         U238      Pb210     Pb210    60.0      1e-4     0.69     1.31       ./root-join-read/build61/build61-pmtPb210-master.root
+B        MS        3       pmt         U238      Pb210     Pb210    60.0      1e-4     0.69     1.31       ./root-join-read/build61/build61-pmtPb210-master.root
+B        MS        4       pmt         U238      Pb210     Pb210    60.0      1e-4     0.69     1.31       ./root-join-read/build61/build61-pmtPb210-master.root
+B        MS        5       pmt         U238      Pb210     Pb210    60.0      1e-4     0.69     1.31       ./root-join-read/build61/build61-pmtPb210-master.root
+B        MS        6       pmt         U238      Pb210     Pb210    60.0      1e-4     0.69     1.31       ./root-join-read/build61/build61-pmtPb210-master.root
+B        MS        7       pmt         U238      Pb210     Pb210    60.0      1e-4     0.69     1.31       ./root-join-read/build61/build61-pmtPb210-master.root
+B        MS        8       pmt         U238      Pb210     Pb210    60.0      1e-4     0.69     1.31       ./root-join-read/build61/build61-pmtPb210-master.root
 
-F        MS        1       pmt         Th232     Th232     Th232    12.0      1e-4     0.5     1.5       ./root-join-read/build61/build61-pmtTh232-master.root
-F        MS        2       pmt         Th232     Th232     Th232    12.0      1e-4     0.5     1.5       ./root-join-read/build61/build61-pmtTh232-master.root
-F        MS        3       pmt         Th232     Th232     Th232    12.0      1e-4     0.5     1.5       ./root-join-read/build61/build61-pmtTh232-master.root
-F        MS        4       pmt         Th232     Th232     Th232    12.0      1e-4     0.5     1.5       ./root-join-read/build61/build61-pmtTh232-master.root
-F        MS        5       pmt         Th232     Th232     Th232    12.0      1e-4     0.5     1.5       ./root-join-read/build61/build61-pmtTh232-master.root
-F        MS        6       pmt         Th232     Th232     Th232    12.0      1e-4     0.5     1.5       ./root-join-read/build61/build61-pmtTh232-master.root
-F        MS        7       pmt         Th232     Th232     Th232    12.0      1e-4     0.5     1.5       ./root-join-read/build61/build61-pmtTh232-master.root
-F        MS        8       pmt         Th232     Th232     Th232    12.0      1e-4     0.5     1.5       ./root-join-read/build61/build61-pmtTh232-master.root
+B        MS        1       pmt         Th232     Th232     Th232    12.0      1e-4     0.69     1.31       ./root-join-read/build61/build61-pmtTh232-master.root
+B        MS        2       pmt         Th232     Th232     Th232    12.0      1e-4     0.69     1.31       ./root-join-read/build61/build61-pmtTh232-master.root
+B        MS        3       pmt         Th232     Th232     Th232    12.0      1e-4     0.69     1.31       ./root-join-read/build61/build61-pmtTh232-master.root
+B        MS        4       pmt         Th232     Th232     Th232    12.0      1e-4     0.69     1.31       ./root-join-read/build61/build61-pmtTh232-master.root
+B        MS        5       pmt         Th232     Th232     Th232    12.0      1e-4     0.69     1.31       ./root-join-read/build61/build61-pmtTh232-master.root
+B        MS        6       pmt         Th232     Th232     Th232    12.0      1e-4     0.69     1.31       ./root-join-read/build61/build61-pmtTh232-master.root
+B        MS        7       pmt         Th232     Th232     Th232    12.0      1e-4     0.69     1.31       ./root-join-read/build61/build61-pmtTh232-master.root
+B        MS        8       pmt         Th232     Th232     Th232    12.0      1e-4     0.69     1.31       ./root-join-read/build61/build61-pmtTh232-master.root
 
-B        MS        1       lsveto      K40       K40       K40      1.00e-3   1e-4     0.5     1.5       ./root-join-read/build61/build61-lsvetoK40-master.root
-B        MS        2       lsveto      K40       K40       K40      1.00e-3   1e-4     0.5     1.5       ./root-join-read/build61/build61-lsvetoK40-master.root
-B        MS        3       lsveto      K40       K40       K40      1.00e-3   1e-4     0.5     1.5       ./root-join-read/build61/build61-lsvetoK40-master.root
-B        MS        4       lsveto      K40       K40       K40      1.00e-3   1e-4     0.5     1.5       ./root-join-read/build61/build61-lsvetoK40-master.root
-B        MS        5       lsveto      K40       K40       K40      1.00e-3   1e-4     0.5     1.5       ./root-join-read/build61/build61-lsvetoK40-master.root
-B        MS        6       lsveto      K40       K40       K40      1.00e-3   1e-4     0.5     1.5       ./root-join-read/build61/build61-lsvetoK40-master.root
-B        MS        7       lsveto      K40       K40       K40      1.00e-3   1e-4     0.5     1.5       ./root-join-read/build61/build61-lsvetoK40-master.root
-B        MS        8       lsveto      K40       K40       K40      1.00e-3   1e-4     0.5     1.5       ./root-join-read/build61/build61-lsvetoK40-master.root
+B        MS        1       lsveto      K40       K40       K40      1.00e-3   1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoK40-master.root
+B        MS        2       lsveto      K40       K40       K40      1.00e-3   1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoK40-master.root
+B        MS        3       lsveto      K40       K40       K40      1.00e-3   1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoK40-master.root
+B        MS        4       lsveto      K40       K40       K40      1.00e-3   1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoK40-master.root
+B        MS        5       lsveto      K40       K40       K40      1.00e-3   1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoK40-master.root
+B        MS        6       lsveto      K40       K40       K40      1.00e-3   1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoK40-master.root
+B        MS        7       lsveto      K40       K40       K40      1.00e-3   1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoK40-master.root
+B        MS        8       lsveto      K40       K40       K40      1.00e-3   1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoK40-master.root
 
-B        MS        1       lsveto      U238      U238      U238     8.64e-2   1e-4     0.5     1.5       ./root-join-read/build61/build61-lsvetoU238-master.root
-B        MS        2       lsveto      U238      U238      U238     8.64e-2   1e-4     0.5     1.5       ./root-join-read/build61/build61-lsvetoU238-master.root
-B        MS        3       lsveto      U238      U238      U238     8.64e-2   1e-4     0.5     1.5       ./root-join-read/build61/build61-lsvetoU238-master.root
-B        MS        4       lsveto      U238      U238      U238     8.64e-2   1e-4     0.5     1.5       ./root-join-read/build61/build61-lsvetoU238-master.root
-B        MS        5       lsveto      U238      U238      U238     8.64e-2   1e-4     0.5     1.5       ./root-join-read/build61/build61-lsvetoU238-master.root
-B        MS        6       lsveto      U238      U238      U238     8.64e-2   1e-4     0.5     1.5       ./root-join-read/build61/build61-lsvetoU238-master.root
-B        MS        7       lsveto      U238      U238      U238     8.64e-2   1e-4     0.5     1.5       ./root-join-read/build61/build61-lsvetoU238-master.root
-B        MS        8       lsveto      U238      U238      U238     8.64e-2   1e-4     0.5     1.5       ./root-join-read/build61/build61-lsvetoU238-master.root
+B        MS        1       lsveto      U238      U238      U238     8.64e-2   1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoU238-master.root
+B        MS        2       lsveto      U238      U238      U238     8.64e-2   1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoU238-master.root
+B        MS        3       lsveto      U238      U238      U238     8.64e-2   1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoU238-master.root
+B        MS        4       lsveto      U238      U238      U238     8.64e-2   1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoU238-master.root
+B        MS        5       lsveto      U238      U238      U238     8.64e-2   1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoU238-master.root
+B        MS        6       lsveto      U238      U238      U238     8.64e-2   1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoU238-master.root
+B        MS        7       lsveto      U238      U238      U238     8.64e-2   1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoU238-master.root
+B        MS        8       lsveto      U238      U238      U238     8.64e-2   1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoU238-master.root
 
-B        MS        1       lsveto      Th232     Th232     Th232    1.62e-2   1e-4     0.5     1.5       ./root-join-read/build61/build61-lsvetoTh232-master.root
-B        MS        2       lsveto      Th232     Th232     Th232    1.62e-2   1e-4     0.5     1.5       ./root-join-read/build61/build61-lsvetoTh232-master.root
-B        MS        3       lsveto      Th232     Th232     Th232    1.62e-2   1e-4     0.5     1.5       ./root-join-read/build61/build61-lsvetoTh232-master.root
-B        MS        4       lsveto      Th232     Th232     Th232    1.62e-2   1e-4     0.5     1.5       ./root-join-read/build61/build61-lsvetoTh232-master.root
-B        MS        5       lsveto      Th232     Th232     Th232    1.62e-2   1e-4     0.5     1.5       ./root-join-read/build61/build61-lsvetoTh232-master.root
-B        MS        6       lsveto      Th232     Th232     Th232    1.62e-2   1e-4     0.5     1.5       ./root-join-read/build61/build61-lsvetoTh232-master.root
-B        MS        7       lsveto      Th232     Th232     Th232    1.62e-2   1e-4     0.5     1.5       ./root-join-read/build61/build61-lsvetoTh232-master.root
-B        MS        8       lsveto      Th232     Th232     Th232    1.62e-2   1e-4     0.5     1.5       ./root-join-read/build61/build61-lsvetoTh232-master.root
+B        MS        1       lsveto      Th232     Th232     Th232    1.62e-2   1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoTh232-master.root
+B        MS        2       lsveto      Th232     Th232     Th232    1.62e-2   1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoTh232-master.root
+B        MS        3       lsveto      Th232     Th232     Th232    1.62e-2   1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoTh232-master.root
+B        MS        4       lsveto      Th232     Th232     Th232    1.62e-2   1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoTh232-master.root
+B        MS        5       lsveto      Th232     Th232     Th232    1.62e-2   1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoTh232-master.root
+B        MS        6       lsveto      Th232     Th232     Th232    1.62e-2   1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoTh232-master.root
+B        MS        7       lsveto      Th232     Th232     Th232    1.62e-2   1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoTh232-master.root
+B        MS        8       lsveto      Th232     Th232     Th232    1.62e-2   1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoTh232-master.root
 """
-B        MS        1       lsvetoair   U238      U238      U238     1.0      1e-4     0.5     1.5        ./root-join-read/build61/build61-lsvetoair-master.root
-B        MS        2       lsvetoair   U238      U238      U238     1.0      1e-4     0.5     1.5        ./root-join-read/build61/build61-lsvetoair-master.root
-B        MS        3       lsvetoair   U238      U238      U238     1.0      1e-4     0.5     1.5        ./root-join-read/build61/build61-lsvetoair-master.root
-B        MS        4       lsvetoair   U238      U238      U238     1.0      1e-4     0.5     1.5        ./root-join-read/build61/build61-lsvetoair-master.root
-B        MS        5       lsvetoair   U238      U238      U238     1.0      1e-4     0.5     1.5        ./root-join-read/build61/build61-lsvetoair-master.root
-B        MS        6       lsvetoair   U238      U238      U238     1.0      1e-4     0.5     1.5        ./root-join-read/build61/build61-lsvetoair-master.root
-B        MS        7       lsvetoair   U238      U238      U238     1.0      1e-4     0.5     1.5        ./root-join-read/build61/build61-lsvetoair-master.root
-B        MS        8       lsvetoair   U238      U238      U238     1.0      1e-4     0.5     1.5        ./root-join-read/build61/build61-lsvetoair-master.root
+B        MS        1       lsvetoair   U238      U238      U238     1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-lsvetoair-master.root
+B        MS        2       lsvetoair   U238      U238      U238     1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-lsvetoair-master.root
+B        MS        3       lsvetoair   U238      U238      U238     1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-lsvetoair-master.root
+B        MS        4       lsvetoair   U238      U238      U238     1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-lsvetoair-master.root
+B        MS        5       lsvetoair   U238      U238      U238     1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-lsvetoair-master.root
+B        MS        6       lsvetoair   U238      U238      U238     1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-lsvetoair-master.root
+B        MS        7       lsvetoair   U238      U238      U238     1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-lsvetoair-master.root
+B        MS        8       lsvetoair   U238      U238      U238     1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-lsvetoair-master.root
 
-B        MS        1       lsvetoair   Th232     Th232     Th232    1.0      1e-4     0.5     1.5        ./root-join-read/build61/build61-lsvetoair-master.root
-B        MS        2       lsvetoair   Th232     Th232     Th232    1.0      1e-4     0.5     1.5        ./root-join-read/build61/build61-lsvetoair-master.root
-B        MS        3       lsvetoair   Th232     Th232     Th232    1.0      1e-4     0.5     1.5        ./root-join-read/build61/build61-lsvetoair-master.root
-B        MS        4       lsvetoair   Th232     Th232     Th232    1.0      1e-4     0.5     1.5        ./root-join-read/build61/build61-lsvetoair-master.root
-B        MS        5       lsvetoair   Th232     Th232     Th232    1.0      1e-4     0.5     1.5        ./root-join-read/build61/build61-lsvetoair-master.root
-B        MS        6       lsvetoair   Th232     Th232     Th232    1.0      1e-4     0.5     1.5        ./root-join-read/build61/build61-lsvetoair-master.root
-B        MS        7       lsvetoair   Th232     Th232     Th232    1.0      1e-4     0.5     1.5        ./root-join-read/build61/build61-lsvetoair-master.root
-B        MS        8       lsvetoair   Th232     Th232     Th232    1.0      1e-4     0.5     1.5        ./root-join-read/build61/build61-lsvetoair-master.root
+B        MS        1       lsvetoair   Th232     Th232     Th232    1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-lsvetoair-master.root
+B        MS        2       lsvetoair   Th232     Th232     Th232    1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-lsvetoair-master.root
+B        MS        3       lsvetoair   Th232     Th232     Th232    1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-lsvetoair-master.root
+B        MS        4       lsvetoair   Th232     Th232     Th232    1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-lsvetoair-master.root
+B        MS        5       lsvetoair   Th232     Th232     Th232    1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-lsvetoair-master.root
+B        MS        6       lsvetoair   Th232     Th232     Th232    1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-lsvetoair-master.root
+B        MS        7       lsvetoair   Th232     Th232     Th232    1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-lsvetoair-master.root
+B        MS        8       lsvetoair   Th232     Th232     Th232    1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-lsvetoair-master.root
 
-B        MS        1       airshield   U238      U238      U238     1.0      1e-4     0.5     1.5        ./root-join-read/build61/build61-airshield-master.root
-B        MS        2       airshield   U238      U238      U238     1.0      1e-4     0.5     1.5        ./root-join-read/build61/build61-airshield-master.root
-B        MS        3       airshield   U238      U238      U238     1.0      1e-4     0.5     1.5        ./root-join-read/build61/build61-airshield-master.root
-B        MS        4       airshield   U238      U238      U238     1.0      1e-4     0.5     1.5        ./root-join-read/build61/build61-airshield-master.root
-B        MS        5       airshield   U238      U238      U238     1.0      1e-4     0.5     1.5        ./root-join-read/build61/build61-airshield-master.root
-B        MS        6       airshield   U238      U238      U238     1.0      1e-4     0.5     1.5        ./root-join-read/build61/build61-airshield-master.root
-B        MS        7       airshield   U238      U238      U238     1.0      1e-4     0.5     1.5        ./root-join-read/build61/build61-airshield-master.root
-B        MS        8       airshield   U238      U238      U238     1.0      1e-4     0.5     1.5        ./root-join-read/build61/build61-airshield-master.root
+B        MS        1       airshield   U238      U238      U238     1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-airshield-master.root
+B        MS        2       airshield   U238      U238      U238     1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-airshield-master.root
+B        MS        3       airshield   U238      U238      U238     1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-airshield-master.root
+B        MS        4       airshield   U238      U238      U238     1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-airshield-master.root
+B        MS        5       airshield   U238      U238      U238     1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-airshield-master.root
+B        MS        6       airshield   U238      U238      U238     1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-airshield-master.root
+B        MS        7       airshield   U238      U238      U238     1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-airshield-master.root
+B        MS        8       airshield   U238      U238      U238     1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-airshield-master.root
 
-B        MS        1       airshield   Th232     Th232     Th232    1.0      1e-4     0.5     1.5        ./root-join-read/build61/build61-airshield-master.root
-B        MS        2       airshield   Th232     Th232     Th232    1.0      1e-4     0.5     1.5        ./root-join-read/build61/build61-airshield-master.root
-B        MS        3       airshield   Th232     Th232     Th232    1.0      1e-4     0.5     1.5        ./root-join-read/build61/build61-airshield-master.root
-B        MS        4       airshield   Th232     Th232     Th232    1.0      1e-4     0.5     1.5        ./root-join-read/build61/build61-airshield-master.root
-B        MS        5       airshield   Th232     Th232     Th232    1.0      1e-4     0.5     1.5        ./root-join-read/build61/build61-airshield-master.root
-B        MS        6       airshield   Th232     Th232     Th232    1.0      1e-4     0.5     1.5        ./root-join-read/build61/build61-airshield-master.root
-B        MS        7       airshield   Th232     Th232     Th232    1.0      1e-4     0.5     1.5        ./root-join-read/build61/build61-airshield-master.root
-B        MS        8       airshield   Th232     Th232     Th232    1.0      1e-4     0.5     1.5        ./root-join-read/build61/build61-airshield-master.root
+B        MS        1       airshield   Th232     Th232     Th232    1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-airshield-master.root
+B        MS        2       airshield   Th232     Th232     Th232    1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-airshield-master.root
+B        MS        3       airshield   Th232     Th232     Th232    1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-airshield-master.root
+B        MS        4       airshield   Th232     Th232     Th232    1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-airshield-master.root
+B        MS        5       airshield   Th232     Th232     Th232    1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-airshield-master.root
+B        MS        6       airshield   Th232     Th232     Th232    1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-airshield-master.root
+B        MS        7       airshield   Th232     Th232     Th232    1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-airshield-master.root
+B        MS        8       airshield   Th232     Th232     Th232    1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-airshield-master.root
 
-B        MS        1       steel       U238      U238      U238     1.0      1e-4     0.5     1.5        ./root-join-read/build61/build61-steel-master.root
-B        MS        2       steel       U238      U238      U238     1.0      1e-4     0.5     1.5        ./root-join-read/build61/build61-steel-master.root
-B        MS        3       steel       U238      U238      U238     1.0      1e-4     0.5     1.5        ./root-join-read/build61/build61-steel-master.root
-B        MS        4       steel       U238      U238      U238     1.0      1e-4     0.5     1.5        ./root-join-read/build61/build61-steel-master.root
-B        MS        5       steel       U238      U238      U238     1.0      1e-4     0.5     1.5        ./root-join-read/build61/build61-steel-master.root
-B        MS        6       steel       U238      U238      U238     1.0      1e-4     0.5     1.5        ./root-join-read/build61/build61-steel-master.root
-B        MS        7       steel       U238      U238      U238     1.0      1e-4     0.5     1.5        ./root-join-read/build61/build61-steel-master.root
-B        MS        8       steel       U238      U238      U238     1.0      1e-4     0.5     1.5        ./root-join-read/build61/build61-steel-master.root
+B        MS        1       steel       U238      U238      U238     1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-steel-master.root
+B        MS        2       steel       U238      U238      U238     1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-steel-master.root
+B        MS        3       steel       U238      U238      U238     1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-steel-master.root
+B        MS        4       steel       U238      U238      U238     1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-steel-master.root
+B        MS        5       steel       U238      U238      U238     1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-steel-master.root
+B        MS        6       steel       U238      U238      U238     1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-steel-master.root
+B        MS        7       steel       U238      U238      U238     1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-steel-master.root
+B        MS        8       steel       U238      U238      U238     1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-steel-master.root
 
-B        MS        1       steel       Th232     Th232     Th232    1.0      1e-4     0.5     1.5        ./root-join-read/build61/build61-steel-master.root
-B        MS        2       steel       Th232     Th232     Th232    1.0      1e-4     0.5     1.5        ./root-join-read/build61/build61-steel-master.root
-B        MS        3       steel       Th232     Th232     Th232    1.0      1e-4     0.5     1.5        ./root-join-read/build61/build61-steel-master.root
-B        MS        4       steel       Th232     Th232     Th232    1.0      1e-4     0.5     1.5        ./root-join-read/build61/build61-steel-master.root
-B        MS        5       steel       Th232     Th232     Th232    1.0      1e-4     0.5     1.5        ./root-join-read/build61/build61-steel-master.root
-B        MS        6       steel       Th232     Th232     Th232    1.0      1e-4     0.5     1.5        ./root-join-read/build61/build61-steel-master.root
-B        MS        7       steel       Th232     Th232     Th232    1.0      1e-4     0.5     1.5        ./root-join-read/build61/build61-steel-master.root
-B        MS        8       steel       Th232     Th232     Th232    1.0      1e-4     0.5     1.5        ./root-join-read/build61/build61-steel-master.root
+B        MS        1       steel       Th232     Th232     Th232    1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-steel-master.root
+B        MS        2       steel       Th232     Th232     Th232    1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-steel-master.root
+B        MS        3       steel       Th232     Th232     Th232    1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-steel-master.root
+B        MS        4       steel       Th232     Th232     Th232    1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-steel-master.root
+B        MS        5       steel       Th232     Th232     Th232    1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-steel-master.root
+B        MS        6       steel       Th232     Th232     Th232    1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-steel-master.root
+B        MS        7       steel       Th232     Th232     Th232    1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-steel-master.root
+B        MS        8       steel       Th232     Th232     Th232    1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-steel-master.root
 

@@ -9,7 +9,7 @@ V = 'v61'
 
 # change functions to use Estella's new pmt_id variable
 # 
-# version: 2017-04-03
+# version: 2017-04-04
 #
 # note: run 1616 is the first run after calibration-campaign-2
 # 
@@ -37,15 +37,14 @@ from funcs61 import *
 
 ### extra notes to add to the saved plot file names? [0, 'something']
 note=0
-#note = 'just-bkgs'
-#note = 'refit-bkgs'
-
+#note = 'fit-lsveto'
 
 ### backgrounds file to use?
-mcfile = 'backgrounds61.txt'
+#mcfile = 'backgrounds61.txt'
 #mcfile = 'backgrounds61b.txt'
+#mcfile = 'backgrounds61d.txt'
 #mcfile = 'backgrounds61-updated.txt'
-
+mcfile = 'backgrounds62.txt'
 
 ### force reuse of all joined rootfiles in mcfile? [0,1,2]
 ### nice for debugging
@@ -64,9 +63,24 @@ mychans = 0
 # seems to help doing 'MS' over 'SM' ???
 mychans = 'MS'
 
+### use fit bounds from backgrounds file? [0,1,2]
+### [0] use otherBnds specified below (as a scaling)
+### [1] use the bounds specified in backgrounds file (as percent)
+### [2] use the newBounds specified below (as percent)
+useBounds = 1
+### new bounds to overwrite from file (as a percent of activity)
+newBounds = [0.1, 10]
+### else use these other bounds (as a raw scaling factor)
+otherBnds = [0.01, 10]
+
+### fitting ranges
+### lo and hi energy fit ranges
+fLo  = [ 20,  160]
+fHiE = [100, 2400]
+
 ### plotting ranges
 ### lo and hi energy ranges
-loer = [0, 200]
+loer = [0,  200]
 hier = [0, 3000]
 
 ### individual plots for all crystals? [0,1]
@@ -199,11 +213,11 @@ def _myself_(argv):
     #=================================================================
     
     #fLo = [10, 100]
-    fLo = [20, 180]
+    #fLo = [20, 180]
     fLoBins = fLo[1]-fLo[0]
     
     #fHiE = [400, 2000]
-    fHiE = [300, 2400]
+    #fHiE = [300, 2400]
     fHi = [fHiE[0]/hiEfitRebin, fHiE[1]/hiEfitRebin]
     fHiBins = fHi[1]-fHi[0]
     
@@ -242,6 +256,7 @@ def _myself_(argv):
     ### here's the fitting part!!!
     ##################################################################
     ### only do the fit if you have signals and data!
+    resultsfile = ''
     fitting=0
     if len(sigs) > 0:
         fitting=1
@@ -454,16 +469,19 @@ def _myself_(argv):
                         for C in chans:
                             sigs[fskey+'-c'+C+'-e0']['fitscale'] = sigs[fskey+'-c'+C+'-e0']['scale']
                             sigs[fskey+'-c'+C+'-e1']['fitscale'] = sigs[fskey+'-c'+C+'-e1']['scale']
+
                     
-                    
-                    #renorm = sigs[fskey+'-c'+C+'-e0']['scale'] / sigs[fskey+'-c'+C+'-e0']['fitscale']
+                    ### define our scaled bounds
+                    #---------------------------------------------------------------------
                     renorm = sigs[fskey+'-c'+chans[0]+'-e0']['scale'] / sigs[fskey+'-c'+chans[0]+'-e0']['fitscale']
                     
-                    ### use bounds from backgrounds files
-                    #bounds.append([renorm * sigs[fskey+'-c'+C+'-e0']['info']['fbnd'][0],
-                    #               renorm * sigs[fskey+'-c'+C+'-e0']['info']['fbnd'][1]])
+                    if useBounds == 2:
+                        sigs[fskey+'-c'+chans[0]+'-e0']['info']['fbnd'] = newBounds
+                    
                     bounds.append([renorm * sigs[fskey+'-c'+chans[0]+'-e0']['info']['fbnd'][0],
                                    renorm * sigs[fskey+'-c'+chans[0]+'-e0']['info']['fbnd'][1]])
+                    #---------------------------------------------------------------------
+
                     
                     #sigObj[i].Add(fitsigs[fskey]['hist']) # add to the TFractionFitter object
                     sigObj[-1].Add(fitsigs[fskey]['hist']) # add to the TFractionFitter object
@@ -483,22 +501,17 @@ def _myself_(argv):
             fitresults[str(i)].append('lo-E fit range = '+str(fLo[0])+' - '+str(fLo[1])+' keV')
             fitresults[str(i)].append('hi-E fit range = '+str(fHiE[0])+' - '+str(fHiE[1])+' keV')
             
-            #fitresults.append('MC fit constrained to 0.0001 - 10.0')
-
             
             ### set fit bounds!!!
             #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            #for l in range(len(uniqSig)):
             ### seems like Constrain starts with param=1
             ### l=0 sets all params to the same constrain
             ### very confusing
             for l in range(len(bounds)):
-                ### use numbers from backgrounds file
-                #fit[-1].Constrain(l+1, bounds[l][0], bounds[l][1])
-                ### or force other less strict contraints
-                fit[-1].Constrain(l+1, 0.01, 10.0)
-                #fit[-1].Constrain(l+1, 0.001, 100.0)
-            
+                if useBounds:
+                    fit[-1].Constrain(l+1, bounds[l][0], bounds[l][1])
+                else:
+                    fit[-1].Constrain(l+1, otherBnds[0], otherBnds[1])
             #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             
             
@@ -582,27 +595,13 @@ def _myself_(argv):
                                 E = str(E)
                                 #print fskey, sigs[fskey+'-c'+C+'-e'+E]['info']['acti']
                                 fitresults[str(i)].append('fit-activ '+fskey+' '
-                                                          +str(round(sigs[fskey+'-c'+C+'-e'+E]['info']['acti'],2))
+                                                          +str(round(sigs[fskey+'-c'+C+'-e'+E]['info']['acti'], 3))
                                                           +' mBq')
                                 finit=0
             #print '\n'
             fitresults[str(i)].append('\n')
 
             
-        #-------------------------------------------------------------
-        ### sort all the fitresults
-        #resultskeys=[]
-        #for rskey in fitresults:
-        #    resultskeys.append(rskey)
-        #resultskeys.sort()
-
-        ### print out the goods
-        #for key in resultskeys:
-        #    for line in fitresults[key]:
-        #        print line
-        #-------------------------------------------------------------
-        
-
         save = ''
         if local: save += 'local'
         else:     save += 'on-cup'
@@ -612,6 +611,7 @@ def _myself_(argv):
         save += '_hiEfit-'+str(int(fHiE[0]))+'-'+str(int(fHiE[1]))
         save += '_hiEfitRebin-'+str(hiEfitRebin)
         save += '_fitRebinScale'+str(fitRebinScale)
+        save += '_useBounds'+str(useBounds)
         save += '_mcscale'+str(mcscale)
         save += '_mcsumw2'+str(mcsumw2)
         save += '_datsumw2'+str(datsumw2)
@@ -641,7 +641,7 @@ def _myself_(argv):
         
         ### create the updated backgrounds file
         newbkgs = './plots/'+mcfile[:-4]+'-updated.txt'
-        updateBkgsFile61(mcfile, resultsfile, newbkgs, BF='F')
+        updateBkgsFile61(mcfile, resultsfile, newbkgs, BF='B')
 
         ### create the background model table
         outtable = newbkgs[:-4]+'-table.txt'
@@ -757,17 +757,19 @@ def _myself_(argv):
             #print 'INFO:','fit = crystal-'+str(i+1),'pval =',pval,'chi2 =',chi2,'ndf =',ndf,'igood =',igood
             fitchi2ndfv2=chi2/ndf
             #---------------------------------------------------------
-
+            
             
             ftotal[i].Draw('same')
-            #flegs[i].AddEntry(ftotal[i], space+'Fit Total', lopt)
+                        
             ### chi2/ndf from the fit results
             flegs[i].AddEntry(ftotal[i], space+'Fit Total (chi2/ndf = '+str(round(fitchi2ndf[i],2))+')', lopt)
+            
             ### chi2/ndf from the Chi2TestX function
-            flegs[i].AddEntry(ftotal[i], space+'Fit Total (chi2/ndf = '+str(round(fitchi2ndfv2,2))+')', lopt)
+            #flegs[i].AddEntry(ftotal[i], space+'Fit Total (chi2/ndf = '+str(round(fitchi2ndfv2,2))+')', lopt)
+            
             flegs[i].Draw('same')
             
-
+            
             ### fit residuals plots
             #-------------------------------------------------------------
             fbotpad[i].cd()
@@ -819,6 +821,7 @@ def _myself_(argv):
         fcanv.Print('./plots/'+save+'.png')
         
     ### end of fitting bit if you have signals
+    
     
     
     # plot the lo and hi energy histograms for all channels
@@ -1143,6 +1146,7 @@ def _myself_(argv):
             save += '_hiEfit-'+str(int(fHiE[0]))+'-'+str(int(fHiE[1]))
             save += '_hiEfitRebin-'+str(hiEfitRebin)
             save += '_fitRebinScale'+str(fitRebinScale)
+            save += '_useBounds'+str(useBounds)
             save += '_mcscale'+str(mcscale)
             save += '_mcsumw2'+str(mcsumw2)
             save += '_datsumw2'+str(datsumw2)

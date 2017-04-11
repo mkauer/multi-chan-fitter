@@ -201,6 +201,7 @@ def buildData60(info, data):
                     data[key]['info'] = info
                     data[key]['hist'] = deepcopy(TH1F(rfile.Get(key)))
                     #data[key]['hist'].Sumw2()
+                                        
                 except:
                     print "WARNING: could not find hist -->",key
 
@@ -343,6 +344,15 @@ def buildData60(info, data):
                     data[key]['hist'] = histo
                     #data[key]['hist'].Sumw2()
 
+                    
+                    ### last and first bin excess test
+                    ### needs a newer version of root??
+                    ### maybe the processing is wrong? - pushpa?
+                    #-------------------------------------------------
+                    #data[key]['hist'].ClearUnderflowAndOverflow()
+                    #-------------------------------------------------
+
+                    
                     subruns = nfiles
                     key2 = key+'_subruns'
                     temp2 = TH1F(key2,'subruns',1,0,1)

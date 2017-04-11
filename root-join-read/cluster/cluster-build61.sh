@@ -1,7 +1,10 @@
 #!/bin/bash
 
-# 2017-03-26
+# 2017-04-10
 
+
+# + add data1544
+# ~ mv data to data1546
 # ~ break down jobs by isotope
 # ~ testing new variables
 # ~ new primPMTid pmt cuts
@@ -28,7 +31,8 @@ clustdir=$base/cluster
 builddir=$base/$build
 joinscript=$base/$join
 
-for mcfile in data airshield internalNa22 internalI125 internalK40 internalTh232 internalU238 internalPb210 internalsurfPb210 lsvetoK40 lsvetoU238 lsvetoTh232 lsvetoair pmtK40 pmtU238 pmtPb210 pmtTh232 steel
+#for mcfile in data1546 airshield internalNa22 internalI125 internalK40 internalTh232 internalU238 internalPb210 internalsurfPb210 lsvetoK40 lsvetoU238 lsvetoTh232 lsvetoair pmtK40 pmtU238 pmtPb210 pmtTh232 steel
+for mcfile in data1544 data1546
 do
     file="$clustdir/$build-$mcfile.sh"
     cat > $file <<EOF

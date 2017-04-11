@@ -6,10 +6,11 @@
 # 
 # Works with v60 and later versions
 # 
-# version: 2017-04-03
+# version: 2017-04-04
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# + do not append background activity if fit result is 0.0
 # + added outputModelTable61()
 # + added updateBkgsFile61()
 # ~ change the signal [S] format to [F] format for "Fit"
@@ -453,7 +454,12 @@ def scaleSigs61(sigkeys, sigs):
     return sigs
 
 
-def updateBkgsFile61(bkgsfile, resultsfile, newbkgs, BF='F'):
+def updateBkgsFile61(bkgsfile, resultsfile, newbkgs, BF='B'):
+
+    for thisfile in [bkgsfile, resultsfile]:
+        if not os.path.exists(thisfile):
+            print 'WARNING: file not found -->', thisfile
+            return
     
     with open(bkgsfile) as fbkgs:
         bkgslines = fbkgs.read().splitlines()
@@ -496,29 +502,26 @@ def updateBkgsFile61(bkgsfile, resultsfile, newbkgs, BF='F'):
                     if len(fbits[1].split('-')[2].split('_')) > 1:
                         chsp = fbits[1].split('-')[2].split('_')[1]
                     acti = str(fbits[2])
-                    #print xstal,loca,isot
 
                     if bbits[2] == xstal and bbits[3] == loca and bbits[5].startswith(chst):
                         if chsp and bbits[6] == chsp:
-                            #print bbits
-                            #print fbits
                             for i in range(len(bbits)):
                                 if i == 0:
                                     output.write(BF+'\t')
                                 elif i == 7:
-                                    output.write(acti+'\t')
+                                    if acti != '0.0': output.write(acti+'\t')
+                                    else: output.write(bbits[i]+'\t')
                                 else:
                                     output.write(bbits[i]+'\t')
                             output.write('\n')
                             replaced = 1
                         elif not chsp:
-                            #print bbits
-                            #print fbits
                             for i in range(len(bbits)):
                                 if i == 0:
                                     output.write(BF+'\t')
                                 elif i == 7:
-                                    output.write(acti+'\t')
+                                    if acti != '0.0': output.write(acti+'\t')
+                                    else: output.write(bbits[i]+'\t')
                                 else:
                                     output.write(bbits[i]+'\t')
                             output.write('\n')
@@ -539,6 +542,10 @@ def updateBkgsFile61(bkgsfile, resultsfile, newbkgs, BF='F'):
 
 
 def outputModelTable61(modelfile, outtable):
+    
+    if not os.path.exists(modelfile):
+        print 'WARNING: file not found -->', modelfile
+        return
     
     #model = "./backgrounds61-updated.txt"
     mlines = readFile(modelfile)
@@ -566,7 +573,6 @@ def outputModelTable61(modelfile, outtable):
                 else:
                     #print bits[2], bits[3]+'-'+bits[5]+'_'+bits[6], bits[7], 'mBq'
                     table[str(xstal)][str(bits[3]+'-'+bits[5]+'_'+bits[6])] = bits[7]
-        #print ''
 
     
     ### sort the keys
