@@ -1,8 +1,9 @@
 # -*- sh -*-
 
-# version 2017-04-04
+# version 2017-04-10
 
 
+# ~ data reuse rootfile is now data1546
 # + added some fit activities for Na22 and I125
 # ~ switch signal [S] to signal [F] for "Fit"
 # + reprocessed everything into build61
@@ -63,14 +64,14 @@
 # bsdr   chan     xstl     loca       isof      chst      chsp      acti       erro      lbnd      hbnd        file
 # ----   -----    ----    --------   ------    ------    ------    --------   -------   -------   ------      --------
 
-DR       MS        1       data        1546      V00-02-03    ./root-join-read/build61/build61-data-master.root
-DR       MS        2       data        1546      V00-02-03    ./root-join-read/build61/build61-data-master.root
-DR       MS        3       data        1546      V00-02-03    ./root-join-read/build61/build61-data-master.root
-DR       MS        4       data        1546      V00-02-03    ./root-join-read/build61/build61-data-master.root
-DR       MS        5       data        1546      V00-02-03    ./root-join-read/build61/build61-data-master.root
-DR       MS        6       data        1546      V00-02-03    ./root-join-read/build61/build61-data-master.root
-DR       MS        7       data        1546      V00-02-03    ./root-join-read/build61/build61-data-master.root
-DR       MS        8       data        1546      V00-02-03    ./root-join-read/build61/build61-data-master.root
+DR       MS        1       data        1546      V00-02-03    ./root-join-read/build61/build61-data1546-master.root
+DR       MS        2       data        1546      V00-02-03    ./root-join-read/build61/build61-data1546-master.root
+DR       MS        3       data        1546      V00-02-03    ./root-join-read/build61/build61-data1546-master.root
+DR       MS        4       data        1546      V00-02-03    ./root-join-read/build61/build61-data1546-master.root
+DR       MS        5       data        1546      V00-02-03    ./root-join-read/build61/build61-data1546-master.root
+DR       MS        6       data        1546      V00-02-03    ./root-join-read/build61/build61-data1546-master.root
+DR       MS        7       data        1546      V00-02-03    ./root-join-read/build61/build61-data1546-master.root
+DR       MS        8       data        1546      V00-02-03    ./root-join-read/build61/build61-data1546-master.root
 
 B	MS	1	internal	Na22	Na22	Na22	1.27	1e-4	0.69	1.31	./root-join-read/build61/build61-internalNa22-master.root	
 B	MS	2	internal	Na22	Na22	Na22	1.03	1e-4	0.69	1.31	./root-join-read/build61/build61-internalNa22-master.root	

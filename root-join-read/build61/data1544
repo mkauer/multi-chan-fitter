@@ -1,14 +1,14 @@
 # -*- sh -*-
 
-# version 2017-04-10
+# version 2017-04-12
 
-# bsdr   chan     xstl     loca       isof      chst      chsp      acti       erro      lbnd      hbnd        file
-# ----   -----    ----    --------   ------    ------    ------    --------   -------   -------   ------      --------
-D        A        1       data        1544      V00-02-03    ./root-join-read/build40/build40-backgrounds40-test.root
-D        A        2       data        1544      V00-02-03    ./root-join-read/build40/build40-backgrounds40-test.root
-D        A        3       data        1544      V00-02-03    ./root-join-read/build40/build40-backgrounds40-test.root
-D        A        4       data        1544      V00-02-03    ./root-join-read/build40/build40-backgrounds40-test.root
-D        A        5       data        1544      V00-02-03    ./root-join-read/build40/build40-backgrounds40-test.root
-D        A        6       data        1544      V00-02-03    ./root-join-read/build40/build40-backgrounds40-test.root
-D        A        7       data        1544      V00-02-03    ./root-join-read/build40/build40-backgrounds40-test.root
-D        A        8       data        1544      V00-02-03    ./root-join-read/build40/build40-backgrounds40-test.root
+# bsdr   chan     xstl     loca       run       version       file
+# ----   -----    ----    --------   ------    ----------    ----------
+D        MSA       1       data       1544      V00-02-03    dummy.root
+D        MSA       2       data       1544      V00-02-03    dummy.root
+D        MSA       3       data       1544      V00-02-03    dummy.root
+D        MSA       4       data       1544      V00-02-03    dummy.root
+D        MSA       5       data       1544      V00-02-03    dummy.root
+D        MSA       6       data       1544      V00-02-03    dummy.root
+D        MSA       7       data       1544      V00-02-03    dummy.root
+D        MSA       8       data       1544      V00-02-03    dummy.root

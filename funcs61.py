@@ -6,10 +6,12 @@
 # 
 # Works with v60 and later versions
 # 
-# version: 2017-04-04
+# version: 2017-04-12
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# + change data path to the new V00-03-02 version in buildData61()
+# + add buildData61()
 # + do not append background activity if fit result is 0.0
 # + added outputModelTable61()
 # + added updateBkgsFile61()
@@ -58,6 +60,7 @@ def build61(infile = 'backgrounds61.txt', freuse=0, fchans=0):
 
         if 'D' in info['type']:
             data = buildData60(info, data)
+            #data = buildData61(info, data)
 
         elif 'B' in info['type']:
             bkgs = buildMC61(info, bkgs)
@@ -83,11 +86,11 @@ def buildMC61(info, mc):
                 rootfile = info['rootfile']
             else:
                 print 'WARNING: no rootfile specified in backgrounds file'
-                return data
+                return mc
 
             if not os.path.exists(rootfile):
                 print 'WARNING: rootfile not found -->', rootfile
-                return data
+                return mc
 
             rfile = TFile(rootfile, "READ")
 
@@ -609,4 +612,207 @@ def outputModelTable61(modelfile, outtable):
     tfile.close()
     return
 
+
+def buildData61(info, data):
+
+    for c in info['chans']:
+        info['chan'] = c
+        
+        if info['reuse']:
+
+            if info['rootfile']:
+                rootfile = info['rootfile']
+                #print 'INFO: using rootfile -->',rootfile
+            else:
+                print 'WARNING: no rootfile specified in backgrounds file'
+                return data
+
+            if not os.path.exists(rootfile):
+                print 'WARNING: rootfile not found -->', rootfile
+                return data
+
+            rfile = TFile(rootfile, "READ")
+
+            for e in range(2):
+                key  = info['key']
+                key += '-c'+info['chan']
+                key += '-e'+str(e)
+                #print key
+                try:
+                    data[key] = {}
+                    data[key]['info'] = info
+                    data[key]['hist'] = deepcopy(TH1F(rfile.Get(key)))
+                    #data[key]['hist'].Sumw2()
+                                        
+                except:
+                    print "WARNING: could not find hist -->",key
+
+                try:
+                    data[key]['subruns_hist'] = deepcopy(TH1F(rfile.Get(key+'_subruns')))
+                    data[key]['subruns'] = data[key]['subruns_hist'].GetBinContent(1)
+                except:
+                    print "WARNING: could not find subruns_hist -->",key+'_subruns'
+
+                try:
+                    data[key]['runtime_hist'] = deepcopy(TH1F(rfile.Get(key+'_runtime')))
+                    data[key]['runtime'] = data[key]['runtime_hist'].GetBinContent(1)
+                except:
+                    print "WARNING: could not find runtime_hist -->",key+'_runtime'
+
+                #except:
+                #    del data[key]
+                #    print "WARNING: could not find hist -->",key
+                #    return data
+
+            #return data
+
+        else:
+            local = amLocal()
+
+            ### will need to do this dynamically eventually
+            ### run 1324 has 1 hour subruns
+            ### run 1544 has 2 hour subruns
+            ### run 1546 has 2 hour subruns
+            subrunTime = float(2.) # in hours
+            
+            ### changed data path to new MRGD version
+            path1 = 0
+            if local: path1 = '/home/mkauer/COSINE/CUP/mc-fitting/data/phys/'
+            else:     path1 = '/data/COSINE/MRGD/phys/'
+            path2 = str(info['build'])+'/'
+            path3 = '*'+str(info['run'])+'*root*'
+            
+            chain = TChain("ntp","")
+            nfiles=0
+            nfiles = chain.Add(path1+path2+path3)
+            
+            if nfiles > 0:
+                print nfiles,'data files found'
+                for e in range(2):
+                    
+                    par = histparam(e)
+                    i = info['xstl'] - 1
+                    
+                    key  = info['key']
+                    key += '-c'+info['chan']
+                    key += '-e'+str(e)
+                    
+                    run = int(info['run'])
+                    
+                    data[key] = {}
+                    data[key]['info'] = info
+                    
+                    histo = TH1F(key, longNames(i), par[0], par[1], par[2])
+
+
+                    ### old calib
+                    edep, selection = calib60a(i,e)
+                    ### new calib
+                    #edep, selection = calib60b(i,e)
+
+
+                    ### reminder - [A]All-hits, [S]Single-hits, [M]Multi-hits
+                    #-------------------------------------------------------------------------
+                    if info['chan'] == 'A':
+                        chanCut = TCut('(1)')
+
+                    elif info['chan'] == 'S':
+                        edepcuts = ''
+                        nclustercuts = ''
+                        for j in range(8):
+                            if j != i:
+                                edepcuts += '('+edep+' <= 0.0) && '
+                                nclustercuts += '(crystal'+str(j+1)+'.'+'nc'+' < 4) && '
+
+                        ### remove extra '&&' or '||'
+                        edepcuts = edepcuts[:-4]
+                        nclustercuts = nclustercuts[:-4]
+
+                        ### liquid scint veto cut - from Pushpa
+                        #lsvetocut = '(BLSveto.Charge/110. < 50.)'
+                        lsvetocut = '(BLSveto.Charge/110. < 20.)'
+
+                        ### my cuts
+                        #chanCut = TCut('(('+edepcuts+') && ('+nclustercuts+') && ('+lsvetocut+'))')
+                        ### Pushpa cuts
+                        chanCut = TCut('(('+nclustercuts+') && ('+lsvetocut+'))')
+
+
+                    elif info['chan'] == 'M':
+                        edepcuts = ''
+                        nclustercuts = ''
+                        for j in range(8):
+                            if j != i:
+                                edepcuts += '(crystal'+str(j+1)+'.'+str(edep)+' > 0.0) || '
+                                nclustercuts += '(crystal'+str(j+1)+'.'+'nc'+' >= 4) || '
+
+                        ### remove extra '&&' or '||'
+                        edepcuts = edepcuts[:-4]
+                        nclustercuts = nclustercuts[:-4]
+
+                        ### liquid scint veto cut - from Pushpa
+                        #lsvetocut = '(BLSveto.Charge/110. > 50.)'
+                        lsvetocut = '(BLSveto.Charge/110. > 20.)'
+
+                        ### my cuts
+                        #chanCut = TCut('(('+edepcuts+') || ('+nclustercuts+') || ('+lsvetocut+'))')
+                        ### Pushpa cuts
+                        chanCut = TCut('(('+nclustercuts+') || ('+lsvetocut+'))')
+
+                    else:
+                        print 'ERROR: I do not know what to do with channel -->',info['chan']
+                        print 'Available channels are [A]All-hits, [S]Single-hits, [M]Multi-hits'
+                        sys.exit()
+
+
+                    ### Pushpa's noise cut
+                    noiseCut = TCut('('+noiseCuts60(i,e)+')')
+
+
+                    ### combine all cuts
+                    masterCut = TCut('('
+                                     +chanCut.GetTitle()+' && '
+                                     +noiseCut.GetTitle()
+                                     +')')
+                    
+                    
+                    ###-----------------------------------------------------------------------
+                    chain.Draw(selection+' >> '+key, masterCut)
+                    ###-----------------------------------------------------------------------
+
+                    #histo.SetLineColor(kBlack)
+                    #histo.SetMarkerColor(kBlack)
+                    #histo.SetLineWidth(1)
+
+                    data[key]['hist'] = histo
+                    #data[key]['hist'].Sumw2()
+
+                    
+                    ### last and first bin excess test
+                    ### needs a newer version of root??
+                    ### maybe the processing is wrong? - pushpa?
+                    #-------------------------------------------------
+                    #data[key]['hist'].ClearUnderflowAndOverflow()
+                    #-------------------------------------------------
+
+                    
+                    subruns = nfiles
+                    key2 = key+'_subruns'
+                    temp2 = TH1F(key2,'subruns',1,0,1)
+                    temp2.SetBinContent(1, subruns)
+                    data[key]['subruns_hist'] = temp2
+                    data[key]['subruns'] = subruns
+
+                    runtime = subruns*subrunTime*60.*60.
+                    key3 = key+'_runtime'
+                    temp3 = TH1F(key3,'runtime',1,0,1)
+                    temp3.SetBinContent(1, runtime)
+                    data[key]['runtime_hist'] = temp3
+                    data[key]['runtime'] = runtime
+
+            else:
+                print 'ERROR: No data files found... quitting...'
+                sys.exit()
+
+    return data
 

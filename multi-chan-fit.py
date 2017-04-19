@@ -37,21 +37,18 @@ from funcs61 import *
 
 ### extra notes to add to the saved plot file names? [0, 'something']
 note=0
-#note = 'fit-lsveto'
+#note = 'new'
 
 ### backgrounds file to use?
-#mcfile = 'backgrounds61.txt'
-#mcfile = 'backgrounds61b.txt'
-#mcfile = 'backgrounds61d.txt'
-#mcfile = 'backgrounds61-updated.txt'
-mcfile = 'backgrounds62.txt'
+#mcfile = 'backgrounds62.txt'
+mcfile = 'backgrounds63.txt'
 
 ### force reuse of all joined rootfiles in mcfile? [0,1,2]
 ### nice for debugging
 ### [0] default - use whatever is specified in the backgrounds file
 ### [1] forces reusing of all data/bkgs/sigs
 ### [2] forces NOT reusing any data/bkgs/sigs
-reuse = 1
+reuse = 0
 
 ### force a particular set of hit chan data? [0,1,2,3]
 ### nice for debugging
@@ -84,9 +81,9 @@ loer = [0,  200]
 hier = [0, 3000]
 
 ### individual plots for all crystals? [0,1]
-indi = 1
+indi = 0
 ### just plot individual for crystals? [1-8]
-justthese = [1,2,3,4,5,6,7,8]
+#justthese = [1,2,3,4,5,6,7,8]
 justthese = [3]
 
 ### rebin the hi-E final plots [1,inf]

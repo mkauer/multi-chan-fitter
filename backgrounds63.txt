@@ -1,8 +1,8 @@
 # -*- sh -*-
 
-# version 2017-04-14
+# version 2017-04-18
 
-
+# + add in cosmogenics Te121m, Te123m, Te125m, Te127m
 # + add in run 1544 V00-02-03
 # ~ data reuse rootfile is now data1546
 # ~ tweak bounds for the pmts
@@ -86,6 +86,7 @@ DR       MS        6       data        1546      V00-02-03    ./root-join-read/b
 DR       MS        7       data        1546      V00-02-03    ./root-join-read/build61/build61-data1546-master.root
 DR       MS        8       data        1546      V00-02-03    ./root-join-read/build61/build61-data1546-master.root
 """
+"""
 B	MS	1	internal	Na22	Na22	Na22	1.27	1e-4	0.69	1.31	./root-join-read/build61/build61-internalNa22-master.root	
 B	MS	2	internal	Na22	Na22	Na22	1.03	1e-4	0.69	1.31	./root-join-read/build61/build61-internalNa22-master.root	
 B	MS	3	internal	Na22	Na22	Na22	1.05	1e-4	0.69	1.31	./root-join-read/build61/build61-internalNa22-master.root	
@@ -103,24 +104,61 @@ B	MS	5	internal	I125	I125	I125	0.29	1e-4	0.69	1.31	./root-join-read/build61/buil
 B	MS	6	internal	I125	I125	I125	0.29	1e-4	0.69	1.31	./root-join-read/build61/build61-internalI125-master.root	
 B	MS	7	internal	I125	I125	I125	0.28	1e-4	0.69	1.31	./root-join-read/build61/build61-internalI125-master.root	
 B	MS	8	internal	I125	I125	I125	0.28	1e-4	0.69	1.31	./root-join-read/build61/build61-internalI125-master.root	
+"""
+B	MS	1	internal	Te121m	Te121	Te121	0.1	1e-4	0.69	1.31	./root-join-read/build61/build61-internalTe121m-master.root	
+B	MS	2	internal	Te121m	Te121	Te121	0.1	1e-4	0.69	1.31	./root-join-read/build61/build61-internalTe121m-master.root	
+B	MS	3	internal	Te121m	Te121	Te121	0.1	1e-4	0.69	1.31	./root-join-read/build61/build61-internalTe121m-master.root	
+B	MS	4	internal	Te121m	Te121	Te121	0.1	1e-4	0.69	1.31	./root-join-read/build61/build61-internalTe121m-master.root	
+B	MS	5	internal	Te121m	Te121	Te121	0.1	1e-4	0.69	1.31	./root-join-read/build61/build61-internalTe121m-master.root	
+B	MS	6	internal	Te121m	Te121	Te121	0.1	1e-4	0.69	1.31	./root-join-read/build61/build61-internalTe121m-master.root	
+B	MS	7	internal	Te121m	Te121	Te121	0.1	1e-4	0.69	1.31	./root-join-read/build61/build61-internalTe121m-master.root	
+B	MS	8	internal	Te121m	Te121	Te121	0.1	1e-4	0.69	1.31	./root-join-read/build61/build61-internalTe121m-master.root	
 
-B        MS        1       internal    K40       K40       K40      1.302     1e-4     0.69     1.31       ./root-join-read/build61/build61-internalK40-master.root
-B        MS        2       internal    K40       K40       K40      2.481     1e-4     0.69     1.31       ./root-join-read/build61/build61-internalK40-master.root
-B        MS        3       internal    K40       K40       K40      1.233     1e-4     0.69     1.31       ./root-join-read/build61/build61-internalK40-master.root
-B        MS        4       internal    K40       K40       K40      1.185     1e-4     0.69     1.31       ./root-join-read/build61/build61-internalK40-master.root
-B        MS        5       internal    K40       K40       K40      2.604     1e-4     0.69     1.31       ./root-join-read/build61/build61-internalK40-master.root
-B        MS        6       internal    K40       K40       K40      0.366     1e-4     0.69     1.31       ./root-join-read/build61/build61-internalK40-master.root
-B        MS        7       internal    K40       K40       K40      0.564     1e-4     0.69     1.31       ./root-join-read/build61/build61-internalK40-master.root
-B        MS        8       internal    K40       K40       K40      1.685     1e-4     0.69     1.31       ./root-join-read/build61/build61-internalK40-master.root
+B	MS	1	internal	Te123m	Te123	Te123	0.1	1e-4	0.69	1.31	./root-join-read/build61/build61-internalTe123m-master.root	
+B	MS	2	internal	Te123m	Te123	Te123	0.1	1e-4	0.69	1.31	./root-join-read/build61/build61-internalTe123m-master.root	
+B	MS	3	internal	Te123m	Te123	Te123	0.1	1e-4	0.69	1.31	./root-join-read/build61/build61-internalTe123m-master.root	
+B	MS	4	internal	Te123m	Te123	Te123	0.1	1e-4	0.69	1.31	./root-join-read/build61/build61-internalTe123m-master.root	
+B	MS	5	internal	Te123m	Te123	Te123	0.1	1e-4	0.69	1.31	./root-join-read/build61/build61-internalTe123m-master.root	
+B	MS	6	internal	Te123m	Te123	Te123	0.1	1e-4	0.69	1.31	./root-join-read/build61/build61-internalTe123m-master.root	
+B	MS	7	internal	Te123m	Te123	Te123	0.1	1e-4	0.69	1.31	./root-join-read/build61/build61-internalTe123m-master.root	
+B	MS	8	internal	Te123m	Te123	Te123	0.1	1e-4	0.69	1.31	./root-join-read/build61/build61-internalTe123m-master.root	
 
-B        MS        1       internal    U238      U238      Rn222    2.48e-4   1e-4     0.69     1.31       ./root-join-read/build61/build61-internalU238-master.root
-B        MS        2       internal    U238      U238      Rn222    1.48e-3   1e-4     0.69     1.31       ./root-join-read/build61/build61-internalU238-master.root
-B        MS        3       internal    U238      U238      Rn222    4.96e-4   1e-4     0.69     1.31       ./root-join-read/build61/build61-internalU238-master.root
-B        MS        4       internal    U238      U238      Rn222    4.96e-4   1e-4     0.69     1.31       ./root-join-read/build61/build61-internalU238-master.root
-B        MS        5       internal    U238      U238      Rn222    1.48e-3   1e-4     0.69     1.31       ./root-join-read/build61/build61-internalU238-master.root
-B        MS        6       internal    U238      U238      Rn222    2.23e-4   1e-4     0.69     1.31       ./root-join-read/build61/build61-internalU238-master.root
-B        MS        7       internal    U238      U238      Rn222    2.23e-4   1e-4     0.69     1.31       ./root-join-read/build61/build61-internalU238-master.root
-B        MS        8       internal    U238      U238      Rn222    1.48e-3   1e-4     0.69     1.31       ./root-join-read/build61/build61-internalU238-master.root
+B	MS	1	internal	Te125m	Te125	Te125	0.1	1e-4	0.69	1.31	./root-join-read/build61/build61-internalTe125m-master.root	
+B	MS	2	internal	Te125m	Te125	Te125	0.1	1e-4	0.69	1.31	./root-join-read/build61/build61-internalTe125m-master.root	
+B	MS	3	internal	Te125m	Te125	Te125	0.1	1e-4	0.69	1.31	./root-join-read/build61/build61-internalTe125m-master.root	
+B	MS	4	internal	Te125m	Te125	Te125	0.1	1e-4	0.69	1.31	./root-join-read/build61/build61-internalTe125m-master.root	
+B	MS	5	internal	Te125m	Te125	Te125	0.1	1e-4	0.69	1.31	./root-join-read/build61/build61-internalTe125m-master.root	
+B	MS	6	internal	Te125m	Te125	Te125	0.1	1e-4	0.69	1.31	./root-join-read/build61/build61-internalTe125m-master.root	
+B	MS	7	internal	Te125m	Te125	Te125	0.1	1e-4	0.69	1.31	./root-join-read/build61/build61-internalTe125m-master.root	
+B	MS	8	internal	Te125m	Te125	Te125	0.1	1e-4	0.69	1.31	./root-join-read/build61/build61-internalTe125m-master.root	
+
+B	MS	1	internal	Te127m	Te127	Te127	0.1	1e-4	0.69	1.31	./root-join-read/build61/build61-internalTe127m-master.root	
+B	MS	2	internal	Te127m	Te127	Te127	0.1	1e-4	0.69	1.31	./root-join-read/build61/build61-internalTe127m-master.root	
+B	MS	3	internal	Te127m	Te127	Te127	0.1	1e-4	0.69	1.31	./root-join-read/build61/build61-internalTe127m-master.root	
+B	MS	4	internal	Te127m	Te127	Te127	0.1	1e-4	0.69	1.31	./root-join-read/build61/build61-internalTe127m-master.root	
+B	MS	5	internal	Te127m	Te127	Te127	0.1	1e-4	0.69	1.31	./root-join-read/build61/build61-internalTe127m-master.root	
+B	MS	6	internal	Te127m	Te127	Te127	0.1	1e-4	0.69	1.31	./root-join-read/build61/build61-internalTe127m-master.root	
+B	MS	7	internal	Te127m	Te127	Te127	0.1	1e-4	0.69	1.31	./root-join-read/build61/build61-internalTe127m-master.root	
+B	MS	8	internal	Te127m	Te127	Te127	0.1	1e-4	0.69	1.31	./root-join-read/build61/build61-internalTe127m-master.root	
+
+"""
+B       MS      1       internal    K40       K40       K40      1.302     1e-4     0.69     1.31       ./root-join-read/build61/build61-internalK40-master.root
+B       MS      2       internal    K40       K40       K40      2.481     1e-4     0.69     1.31       ./root-join-read/build61/build61-internalK40-master.root
+B       MS      3       internal    K40       K40       K40      1.233     1e-4     0.69     1.31       ./root-join-read/build61/build61-internalK40-master.root
+B       MS      4       internal    K40       K40       K40      1.185     1e-4     0.69     1.31       ./root-join-read/build61/build61-internalK40-master.root
+B       MS      5       internal    K40       K40       K40      2.604     1e-4     0.69     1.31       ./root-join-read/build61/build61-internalK40-master.root
+B       MS      6       internal    K40       K40       K40      0.366     1e-4     0.69     1.31       ./root-join-read/build61/build61-internalK40-master.root
+B       MS      7       internal    K40       K40       K40      0.564     1e-4     0.69     1.31       ./root-join-read/build61/build61-internalK40-master.root
+B       MS      8       internal    K40       K40       K40      1.685     1e-4     0.69     1.31       ./root-join-read/build61/build61-internalK40-master.root
+
+B       MS      1       internal    U238      U238      Rn222    2.48e-4   1e-4     0.69     1.31       ./root-join-read/build61/build61-internalU238-master.root
+B       MS      2       internal    U238      U238      Rn222    1.48e-3   1e-4     0.69     1.31       ./root-join-read/build61/build61-internalU238-master.root
+B       MS      3       internal    U238      U238      Rn222    4.96e-4   1e-4     0.69     1.31       ./root-join-read/build61/build61-internalU238-master.root
+B       MS      4       internal    U238      U238      Rn222    4.96e-4   1e-4     0.69     1.31       ./root-join-read/build61/build61-internalU238-master.root
+B       MS      5       internal    U238      U238      Rn222    1.48e-3   1e-4     0.69     1.31       ./root-join-read/build61/build61-internalU238-master.root
+B       MS      6       internal    U238      U238      Rn222    2.23e-4   1e-4     0.69     1.31       ./root-join-read/build61/build61-internalU238-master.root
+B       MS      7       internal    U238      U238      Rn222    2.23e-4   1e-4     0.69     1.31       ./root-join-read/build61/build61-internalU238-master.root
+B       MS      8       internal    U238      U238      Rn222    1.48e-3   1e-4     0.69     1.31       ./root-join-read/build61/build61-internalU238-master.root
 
 F	MS	1	internal	Pb210	Pb210	Pb210	3.529	1e-4	0.69	1.31	./root-join-read/build61/build61-internalPb210-master.root	
 F	MS	2	internal	Pb210	Pb210	Pb210	2.404	1e-4	0.69	1.31	./root-join-read/build61/build61-internalPb210-master.root	
@@ -211,6 +249,7 @@ B        MS        5       lsveto      Th232     Th232     Th232    1.62e-2   1e
 B        MS        6       lsveto      Th232     Th232     Th232    1.62e-2   1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoTh232-master.root
 B        MS        7       lsveto      Th232     Th232     Th232    1.62e-2   1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoTh232-master.root
 B        MS        8       lsveto      Th232     Th232     Th232    1.62e-2   1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoTh232-master.root
+"""
 """
 B        MS        1       lsvetoair   U238      U238      U238     1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-lsvetoair-master.root
 B        MS        2       lsvetoair   U238      U238      U238     1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-lsvetoair-master.root

@@ -12,9 +12,22 @@
 # ====================================================================
 
 
+# 2017-04-18
+# --------------------------------------------------------------------
+# + added in Te121m, Te123m, Te125m, Te127m
+# ~ fix bug in buildMC61() returning 'data' and not 'mc'
+
+
+# 2017-04-12
+# --------------------------------------------------------------------
+# + change data path to the new V00-03-02 version in buildData61()
+# + add buildData61()
+
+
 # 2017-04-10
 # --------------------------------------------------------------------
-# + new joined data rootfiles for run 1546 and 1544
+# ~ tweak backgrounds files for new reuse rootfiles for data1546
+# + new joined61 data rootfiles for run 1546 and 1544
 # + backgrounds62.txt
 
 
