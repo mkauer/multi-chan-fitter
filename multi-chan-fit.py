@@ -48,7 +48,7 @@ mcfile = 'backgrounds63.txt'
 ### [0] default - use whatever is specified in the backgrounds file
 ### [1] forces reusing of all data/bkgs/sigs
 ### [2] forces NOT reusing any data/bkgs/sigs
-reuse = 0
+reuse = 1
 
 ### force a particular set of hit chan data? [0,1,2,3]
 ### nice for debugging
