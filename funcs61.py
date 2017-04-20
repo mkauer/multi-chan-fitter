@@ -344,7 +344,7 @@ def scaleBkgs61(bkgs):
         #pmts = 16.
         pmts = 2.
         lskg = 1800.
-        
+
         generated = float(bkgs[key]['generated'])
         if generated < 1:
             print "WARNING: 0 events generated for -->", key

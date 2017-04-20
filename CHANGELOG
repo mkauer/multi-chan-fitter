@@ -14,8 +14,16 @@
 
 # 2017-04-19
 # --------------------------------------------------------------------
+# ~ fixed the problem - I wasn't using my new buildMC62() - oops
+# ~ testing new groupNo selection on PMT U238 and Th232 with v61 and v62
+#   something wonky going on...
+# ~ changed 62-new-bkgs-format.py to use new funcs62.py and build62()
+# + new build62() to use getInfo62()
+# + new getInfo62() for the 'chsp' 'GRND' option
+# + new funcs62.py with new funcs for GRND chsp value
+# ~ change backgrounds chsp format to GRND for ground state
+# V switch to 62-new-bkgs-format.py
 # + cut release v6.1
-
 
 
 # 2017-04-18

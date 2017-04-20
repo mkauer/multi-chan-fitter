@@ -3,13 +3,13 @@
 ######################################################################
 # Matt Kauer - mkauer@physics.wisc.edu
 ######################################################################
-# 61-new-pmt-id.py
+# 62-new-bkgs-format.py
 
-V = 'v61'
+V = 'v62'
 
 # change functions to use Estella's new pmt_id variable
 # 
-# version: 2017-04-04
+# version: 2017-04-19
 #
 # note: run 1616 is the first run after calibration-campaign-2
 # 
@@ -29,7 +29,7 @@ ROOT.gErrorIgnoreLevel = kWarning
 
 sys.path.append("/home/mkauer/COSINE/CUP/mc-fitting/")
 sys.path.append("/home/mkauer/mc-fitting/")
-from funcs61 import *
+from funcs62 import *
 
 
 ### user inputs
@@ -41,14 +41,15 @@ note=0
 
 ### backgrounds file to use?
 #mcfile = 'backgrounds62.txt'
-mcfile = 'backgrounds63.txt'
+#mcfile = 'backgrounds63.txt'
+mcfile = 'backgrounds64.txt'
 
 ### force reuse of all joined rootfiles in mcfile? [0,1,2]
 ### nice for debugging
 ### [0] default - use whatever is specified in the backgrounds file
 ### [1] forces reusing of all data/bkgs/sigs
 ### [2] forces NOT reusing any data/bkgs/sigs
-reuse = 1
+reuse = 0
 
 ### force a particular set of hit chan data? [0,1,2,3]
 ### nice for debugging
@@ -81,7 +82,7 @@ loer = [0,  200]
 hier = [0, 3000]
 
 ### individual plots for all crystals? [0,1]
-indi = 0
+indi = 1
 ### just plot individual for crystals? [1-8]
 #justthese = [1,2,3,4,5,6,7,8]
 justthese = [3]
@@ -165,7 +166,7 @@ def _myself_(argv):
     ### where everything gets loaded into dictionary
     #-----------------------------------------------------------------
     #-----------------------------------------------------------------
-    data, bkgs, sigs = build61(mcfile, reuse, mychans)
+    data, bkgs, sigs = build62(mcfile, reuse, mychans)
     datkeys, bakkeys, sigkeys = sortKeys(data, bkgs, sigs)
     #-----------------------------------------------------------------
     #-----------------------------------------------------------------
@@ -978,7 +979,7 @@ def _myself_(argv):
                         cname = key.split('-')[1]+'-'+key.split('-')[2]
                         bkgs[key]['hist'].SetMarkerColor(uniqColor[cname])
                         bkgs[key]['hist'].SetLineColor(uniqColor[cname])
-
+                                                
                         # don't think I need this anymore
                         #if dru1 or dru2:
                         #    druScale = data['x'+str(i+1)+'-data'+'-e'+str(E)]['druScale']
