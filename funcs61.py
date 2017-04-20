@@ -816,3 +816,35 @@ def buildData61(info, data):
 
     return data
 
+
+def groupNum(info):
+    
+    # internal U238 "groupNo"
+    # -----------------------------
+    # 11: U238  -> Th230
+    # 12: Th230 -> Ra226
+    # 13: Ra226 -> Rn222
+    # 14: Rn222 -> Pb210
+    # 15: Pb210 -> ground
+    
+    # internal Th232 "groupNo"
+    # -----------------------------
+    # 21: Th232 -> Ra228
+    # 22: Ra228 -> Th228
+    # 23: Th228 -> ground
+    
+    """
+    brokenChainCut = TCut('(1)')
+    if info['chst'] == 'U238' and info['chsp'] == 'Rn222':
+        brokenChainCut = TCut('((groupNo >= 11) && (groupNo <= 14))')
+    if info['chst'] == 'Pb210' and info['chsp'] == 'Pb210':
+        brokenChainCut = TCut('(groupNo == 15)')
+    """             
+
+    ### This is slightly cryptic, maybe I should tweak the backgrounds format
+    # If 'chst' is the same as 'chsp' it assumes the whole chain from 'chst' to ground-state
+    # Maybe I should just specify it that way.
+
+    
+    return
+
