@@ -14,7 +14,7 @@
 
 # 2017-05-22
 # --------------------------------------------------------------------
-# 
+# + cut release v6.2
 # ~ renamed some backgrounds files
 # ~ fixed a couple bugs with doing fits to just some (not all 8) crystals
 # + new joined rootfiles for internal and pmt U238_Pb210
