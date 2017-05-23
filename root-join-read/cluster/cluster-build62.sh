@@ -1,7 +1,8 @@
 #!/bin/bash
 
-# 2017-05-16
+# 2017-05-23
 
+# + added support for including other pmts ie 'extpmt'
 # + split internal u238 and th232
 # + split pmt u238 and th232
 # ~ switch to join62.py
@@ -34,7 +35,7 @@ clustdir=$base/cluster
 builddir=$base/$build
 joinscript=$base/$join
 
-for mcfile in internalU238_Pb210 pmtU238_Pb210 
+for mcfile in extpmtU238 extpmtTh232 extpmtK40
 do
     file="$clustdir/$build-$mcfile.sh"
     cat > $file <<EOF

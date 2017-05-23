@@ -3,13 +3,13 @@
 ######################################################################
 # Matt Kauer - mkauer@physics.wisc.edu
 ######################################################################
-# 62-new-bkgs-format.py
+# 63-extpmt.py
 
-V = 'v62'
+V = 'v63'
 
-# change functions to use Estella's new pmt_id variable
+# get other pmt backgrounds included... again...
 # 
-# version: 2017-05-22
+# version: 2017-05-23
 #
 # note: run 1616 is the first run after calibration-campaign-2
 # 
@@ -29,7 +29,7 @@ ROOT.gErrorIgnoreLevel = kWarning
 
 sys.path.append("/home/mkauer/COSINE/CUP/mc-fitting/")
 sys.path.append("/home/mkauer/mc-fitting/")
-from funcs62 import *
+from funcs63 import *
 
 
 ### user inputs
@@ -40,11 +40,13 @@ note=0
 #note = 'b623'
 #note = 'b624'
 #note = 'b625'
+#note = 'not-split'
 
 ### backgrounds file to use?
 #mcfile = 'backgrounds623-broken-internal.txt'
-mcfile = 'backgrounds624-new-mc.txt'
+#mcfile = 'backgrounds624-new-mc.txt'
 #mcfile = 'backgrounds625-fitting.txt'
+mcfile = 'backgrounds630-extpmts.txt'
 
 ### force reuse of all joined rootfiles in mcfile? [0,1,2]
 ### nice for debugging
@@ -170,7 +172,7 @@ def _myself_(argv):
     ### where everything gets loaded into dictionary
     #-----------------------------------------------------------------
     #-----------------------------------------------------------------
-    data, bkgs, sigs = build62(mcfile, reuse, mychans)
+    data, bkgs, sigs = build63(mcfile, reuse, mychans)
     datkeys, bakkeys, sigkeys = sortKeys(data, bkgs, sigs)
     #-----------------------------------------------------------------
     #-----------------------------------------------------------------
@@ -193,8 +195,8 @@ def _myself_(argv):
     
     # scale into dru units
     if dru: data = dataDRU60(data)
-    bkgs = scaleBkgs61(bkgs)
-    sigs = scaleBkgs61(sigs)
+    bkgs = scaleBkgs63(bkgs)
+    sigs = scaleBkgs63(sigs)
     
     ### Number of colors
     Nc = len(uniqAll)
@@ -584,7 +586,7 @@ def _myself_(argv):
         #    print line
         
         ### scale the signals to mBq/kg
-        sigs = scaleSigs61(sigkeys, sigs)
+        sigs = scaleSigs63(sigkeys, sigs)
         
         ### print the fit activities
         for i in range(8):
