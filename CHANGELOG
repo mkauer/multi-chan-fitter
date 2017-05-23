@@ -12,6 +12,24 @@
 # ====================================================================
 
 
+# 2017-05-22
+# --------------------------------------------------------------------
+# 
+# ~ renamed some backgrounds files
+# ~ fixed a couple bugs with doing fits to just some (not all 8) crystals
+# + new joined rootfiles for internal and pmt U238_Pb210
+# ~ fixed bug in code where U238_Rn222 was not including Rn222 decays
+# + added in new build62 broken chain Internal U238 and Th232
+#   processed rootfiles
+
+
+# 2017-04-23
+# --------------------------------------------------------------------
+# + added option to show the legends on the plots
+# + added in new build62 broken chain PMT U238 and Th232
+#   processed rootfiles
+
+
 # 2017-04-19
 # --------------------------------------------------------------------
 # ~ fixed the problem - I wasn't using my new buildMC62() - oops

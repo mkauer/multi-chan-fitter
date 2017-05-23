@@ -570,7 +570,7 @@ def outputModelTable61(modelfile, outtable):
             if 'D' in bits[0]: continue 
             
             if int(bits[2]) == xstal:
-                if bits[5] == bits[6]:
+                if bits[5] == bits[6] or bits[6] == 'GRND':
                     #print bits[2], bits[3]+'-'+bits[5], bits[7], 'mBq'
                     table[str(xstal)][str(bits[3]+'-'+bits[5])] = bits[7]
                 else:
@@ -583,7 +583,7 @@ def outputModelTable61(modelfile, outtable):
     for key in table['1']:
         isokeys.append(key)
     isokeys.sort()
-    iN = len(isokeys)
+    #N = len(isokeys)
     
     
     ### fill in the table txt file

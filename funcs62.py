@@ -10,7 +10,7 @@
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
-
+# ~ go to < groupNo instead of <= to groupNo?
 # ~ change build62() to use buildMC62()
 # + new build62() to use getInfo62()
 # + new getInfo62() for the 'chsp' 'GRND' option
@@ -175,14 +175,6 @@ def groupNum62(info):
     # 22: Ra228 -> Th228
     # 23: Th228 -> ground
     
-    """
-    brokenChainCut = TCut('(1)')
-    if info['chst'] == 'U238' and info['chsp'] == 'Rn222':
-        brokenChainCut = TCut('((groupNo >= 11) && (groupNo <= 14))')
-    if info['chst'] == 'Pb210' and info['chsp'] == 'Pb210':
-        brokenChainCut = TCut('(groupNo == 15)')
-    """             
-
     if   info['chst'] == 'U238':  start = 11
     elif info['chst'] == 'Th230': start = 12
     elif info['chst'] == 'Ra226': start = 13
@@ -366,8 +358,11 @@ def buildMC62(info, mc):
                     #eventTypeCut = TCut('(event_info.Type > 10) || (evt_Type > 10)')
                     eventTypeCut = TCut('(event_info.Type > 10)')
 
+
+
                     
                     #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                    #   CRITIAL POINT IN THE SIM !!!
                     #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                     """
                     brokenChainCut = TCut('(1)')
@@ -379,10 +374,28 @@ def buildMC62(info, mc):
                     brokenChainCut = TCut('(1)')
                     groupCuts = groupNum62(info)
                     if groupCuts:
-                        print 'INFO:', info['isof'], 'chan start =', info['chst'], 'chan stop =', info['chsp'], 'groupNo start =', groupCuts[0], 'groupNo stop =', groupCuts[1]
-                        brokenChainCut = TCut('((groupNo >= '+str(groupCuts[0])+') && (groupNo <= '+str(groupCuts[1])+'))')
+                        print 'INFO:',info['isof'],\
+                            'chan start =',info['chst'],\
+                            'chan stop =',info['chsp'],\
+                            'groupNo start =',groupCuts[0],\
+                            'groupNo stop =',groupCuts[1]
+
+                        ### this is what i used before but it might be wrong??
+                        ### it should probably be 'groupNo < number' instead of 'groupNo <= number' ???
+                        # include last group
+                        #brokenChainCut = TCut('((groupNo >= '+str(groupCuts[0])+') && (groupNo <= '+str(groupCuts[1])+'))')
+
+                        ### I think it actually needs to exclude the last decay product groupNo - not sure??
+                        ### minor change '<=' to '<' but I think it's a big difference... 
+                        # do not include last group
+                        brokenChainCut = TCut('((groupNo >= '+str(groupCuts[0])+') && (groupNo < '+str(groupCuts[1])+'))')
+
+                        ### not sure how this groupNo thing works - I need to ask Eunju for details!
+                        
                     #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                     #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
                     
                     
                     ### create a hist of the generated events

@@ -9,7 +9,7 @@ V = 'v62'
 
 # change functions to use Estella's new pmt_id variable
 # 
-# version: 2017-04-19
+# version: 2017-05-22
 #
 # note: run 1616 is the first run after calibration-campaign-2
 # 
@@ -37,23 +37,24 @@ from funcs62 import *
 
 ### extra notes to add to the saved plot file names? [0, 'something']
 note=0
-#note = 'new'
+#note = 'b623'
+#note = 'b624'
+#note = 'b625'
 
 ### backgrounds file to use?
-#mcfile = 'backgrounds62.txt'
-#mcfile = 'backgrounds63.txt'
-mcfile = 'backgrounds64.txt'
+#mcfile = 'backgrounds623-broken-internal.txt'
+mcfile = 'backgrounds624-new-mc.txt'
+#mcfile = 'backgrounds625-fitting.txt'
 
 ### force reuse of all joined rootfiles in mcfile? [0,1,2]
 ### nice for debugging
 ### [0] default - use whatever is specified in the backgrounds file
 ### [1] forces reusing of all data/bkgs/sigs
 ### [2] forces NOT reusing any data/bkgs/sigs
-reuse = 0
+reuse = 1
 
 ### force a particular set of hit chan data? [0,1,2,3]
 ### nice for debugging
-mychans = 0
 ### [ 0 ] default - use whatever is specified in the backgrounds file
 ### ['A'] force all-hit data selection channel
 ### ['S'] force single-hit data selection channel
@@ -61,20 +62,23 @@ mychans = 0
 # seems to help doing 'MS' over 'SM' ???
 mychans = 'MS'
 
+### show the legends? [0,1]
+showlegs = 0
+
 ### use fit bounds from backgrounds file? [0,1,2]
-### [0] use otherBnds specified below (as a scaling)
+### [0] use 'otherBnds' specified below (as a scaling)
 ### [1] use the bounds specified in backgrounds file (as percent)
-### [2] use the newBounds specified below (as percent)
+### [2] use 'newBounds' specified below (as percent)
 useBounds = 1
-### new bounds to overwrite from file (as a percent of activity)
-newBounds = [0.1, 10]
 ### else use these other bounds (as a raw scaling factor)
 otherBnds = [0.01, 10]
+### new bounds to overwrite from file (as a percent of activity)
+newBounds = [0.1, 10]
 
 ### fitting ranges
 ### lo and hi energy fit ranges
-fLo  = [ 20,  160]
-fHiE = [100, 2400]
+fLo  = [ 10,  160]
+fHiE = [200, 2300]
 
 ### plotting ranges
 ### lo and hi energy ranges
@@ -85,7 +89,7 @@ hier = [0, 3000]
 indi = 1
 ### just plot individual for crystals? [1-8]
 #justthese = [1,2,3,4,5,6,7,8]
-justthese = [3]
+justthese = [3,7]
 
 ### rebin the hi-E final plots [1,inf]
 hiEplotRebin = 10
@@ -751,7 +755,10 @@ def _myself_(argv):
             chi2  = ROOT.Double(0.0)
             ndf   = ROOT.Long(0)
             igood = ROOT.Long(0)
-            pval  = fitdata[i].Chi2TestX(ftotal[i], chi2, ndf, igood, chiopt)
+            try:
+                pval  = fitdata[i].Chi2TestX(ftotal[i], chi2, ndf, igood, chiopt)
+            except:
+                pass
             #print 'INFO:','fit = crystal-'+str(i+1),'pval =',pval,'chi2 =',chi2,'ndf =',ndf,'igood =',igood
             fitchi2ndfv2=chi2/ndf
             #---------------------------------------------------------
@@ -760,11 +767,14 @@ def _myself_(argv):
             ftotal[i].Draw('same')
                         
             ### chi2/ndf from the fit results
-            flegs[i].AddEntry(ftotal[i], space+'Fit Total (chi2/ndf = '+str(round(fitchi2ndf[i],2))+')', lopt)
+            try:
+                flegs[i].AddEntry(ftotal[i], space+'Fit Total (chi2/ndf = '+str(round(fitchi2ndf[i],2))+')', lopt)
+            except:
+                pass
             
             ### chi2/ndf from the Chi2TestX function
             #flegs[i].AddEntry(ftotal[i], space+'Fit Total (chi2/ndf = '+str(round(fitchi2ndfv2,2))+')', lopt)
-            
+
             flegs[i].Draw('same')
             
             
@@ -1081,7 +1091,9 @@ def _myself_(argv):
                     #legs[C][E][i].AddEntry(total[C][E][i], 'Total MC', lopt)
                     legs[C][E][i].AddEntry(total[C][E][i], 'Total MC (chi2/ndf = '+str(round(chi2/ndf,2))+')', lopt)
 
-                legs[C][E][i].Draw('same')
+                ### show the legends?
+                if showlegs:
+                    legs[C][E][i].Draw('same')
 
 
                 ### try to get the residuals in!
