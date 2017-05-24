@@ -14,6 +14,7 @@
 
 # 2017-05-24
 # --------------------------------------------------------------------
+# ~ default bkg model looks complete at this point
 # ~ found/fixed bug with primPMTid vs primPMTid[0]
 # + new build63 rootfiles
 

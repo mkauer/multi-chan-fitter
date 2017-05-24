@@ -89,7 +89,7 @@ hier = [0, 3000]
 indi = 1
 ### just plot individual for crystals? [1-8]
 #justthese = [1,2,3,4,5,6,7,8]
-justthese = [3]
+justthese = [3,7]
 
 ### rebin the hi-E final plots [1,inf]
 hiEplotRebin = 10

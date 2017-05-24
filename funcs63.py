@@ -10,7 +10,9 @@
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
-# ~ found/fixed bug with primPMTid vs primPMTid[0]
+# ~ found bug with primPMTid vs primPMTid[0]
+#   already correct for here but Pushpa was using primPMTid and that
+#   is overcounting the number of events
 # ~ BIG bug fixed - wasn't selecting volumeCut for non-internal mc!
 # ~ updating for new 'extpmt' syntax
 # ~ go to < groupNo instead of <= to groupNo?
@@ -170,8 +172,8 @@ def buildMC63(info, mc):
 
                     elif info['chan'] == 'S':
                         ### main single/multi hit cut
-                        hitCut = '((singleHitTag['+str(i)+'] > 0.0) && (multipleHitTag['+str(i)+'] < 0.0))'
-                        #hitCut = '((singleHitTag['+str(i)+'] == 1.0))'
+                        #hitCut = '((singleHitTag['+str(i)+'] > 0.0) && (multipleHitTag['+str(i)+'] < 0.0))'
+                        hitCut = '((singleHitTag['+str(i)+'] == 1.0))'
                         ### do i have the single multi hit cuts wrong??
                         #hitCut = '((singleHitTag['+str(i)+'] > 0.0))'
                         #hitCut = '((singleHitTag['+str(i)+'] < 0.0))'
@@ -188,8 +190,8 @@ def buildMC63(info, mc):
                         
                     elif info['chan'] == 'M':
                         ### main single/multi hit cut
-                        hitCut = '((singleHitTag['+str(i)+'] < 0.0) && (multipleHitTag['+str(i)+'] > 0.0))'
-                        #hitCut = '((multipleHitTag['+str(i)+'] == 1.0))'
+                        #hitCut = '((singleHitTag['+str(i)+'] < 0.0) && (multipleHitTag['+str(i)+'] > 0.0))'
+                        hitCut = '((multipleHitTag['+str(i)+'] == 1.0))'
                         ### do i have the single multi hit cuts wrong??
                         #hitCut = '((multipleHitTag['+str(i)+'] > 0.0))'
                         #hitCut = '((multipleHitTag['+str(i)+'] < 0.0))'
@@ -215,7 +217,7 @@ def buildMC63(info, mc):
                     
                     pmt1 = str((int(info['xstl'])*2)-2)
                     pmt2 = str((int(info['xstl'])*2)-1)
-                    print pmt1,pmt2
+                    #print pmt1,pmt2
                     
                     volumeCut = TCut('(1)')
                     if   info['loca'] == 'internal':
@@ -226,11 +228,16 @@ def buildMC63(info, mc):
                     
                     elif info['loca'] == 'pmt':
                         volumeCut = TCut('((primPMTid[0] == '+pmt1+') || (primPMTid[0] == '+pmt2+'))')
-                        #volumeCut = TCut('((primPMTid == '+pmt1+') || (primPMTid == '+pmt2+'))')
                     
                     elif info['loca'] == 'extpmt':
                         volumeCut = TCut('((primPMTid[0] != '+pmt1+') && (primPMTid[0] != '+pmt2+'))')
-                        #volumeCut = TCut('((primPMTid != '+pmt1+') && (primPMTid != '+pmt2+'))')
+                        """
+                        tcan = TCanvas('tcan','tcan',800,600)
+                        testing = TH2I('testing','primPMTid[1] : primPMTid[0]',17,0,17,17,0,17)
+                        chain.Draw('primPMTid[1] : primPMTid[0] >> testing')
+                        testing.Draw()
+                        raw_input('enter to continue')
+                        """
                     
                     elif info['loca'] == 'lsveto':
                         volumeCut = TCut('(primVolumeName == "lsveto")')
