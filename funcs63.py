@@ -6,10 +6,11 @@
 # 
 # Works with v63 and later versions
 # 
-# version: 2017-05-23
+# version: 2017-05-24
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# ~ found/fixed bug with primPMTid vs primPMTid[0]
 # ~ BIG bug fixed - wasn't selecting volumeCut for non-internal mc!
 # ~ updating for new 'extpmt' syntax
 # ~ go to < groupNo instead of <= to groupNo?
@@ -210,8 +211,12 @@ def buildMC63(info, mc):
                         
                     #=====================================================================================
                     #=====================================================================================
-
-
+                    
+                    
+                    pmt1 = str((int(info['xstl'])*2)-2)
+                    pmt2 = str((int(info['xstl'])*2)-1)
+                    print pmt1,pmt2
+                    
                     volumeCut = TCut('(1)')
                     if   info['loca'] == 'internal':
                         volumeCut = TCut('(primVolumeName == "'+volumeNames(i)+'")')
@@ -220,11 +225,12 @@ def buildMC63(info, mc):
                         volumeCut = TCut('(primVolumeName == "'+volumeNames(i)+'")')
                     
                     elif info['loca'] == 'pmt':
-                        volumeCut = TCut('((primPMTid[0] == '+str((int(info['xstl'])*2)-2)+') || (primPMTid[0] == '+str((int(info['xstl'])*2)-1)+'))')
-
+                        volumeCut = TCut('((primPMTid[0] == '+pmt1+') || (primPMTid[0] == '+pmt2+'))')
+                        #volumeCut = TCut('((primPMTid == '+pmt1+') || (primPMTid == '+pmt2+'))')
+                    
                     elif info['loca'] == 'extpmt':
-                        #volumeCut = TCut('!((primPMTid[0] == '+str((int(info['xstl'])*2)-2)+') || (primPMTid[0] == '+str((int(info['xstl'])*2)-1)+'))')
-                        volumeCut = TCut('((primPMTid[0] != '+str((int(info['xstl'])*2)-2)+') && (primPMTid[0] != '+str((int(info['xstl'])*2)-1)+'))')
+                        volumeCut = TCut('((primPMTid[0] != '+pmt1+') && (primPMTid[0] != '+pmt2+'))')
+                        #volumeCut = TCut('((primPMTid != '+pmt1+') && (primPMTid != '+pmt2+'))')
                     
                     elif info['loca'] == 'lsveto':
                         volumeCut = TCut('(primVolumeName == "lsveto")')

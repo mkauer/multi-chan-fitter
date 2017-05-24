@@ -9,7 +9,7 @@ V = 'v63'
 
 # get other pmt backgrounds included... again...
 # 
-# version: 2017-05-23
+# version: 2017-05-24
 #
 # note: run 1616 is the first run after calibration-campaign-2
 # 
@@ -37,21 +37,21 @@ from funcs63 import *
 
 ### extra notes to add to the saved plot file names? [0, 'something']
 note=0
-#note='AND'
+#note='primPMTid[0]'
 
 ### backgrounds file to use?
 #mcfile = 'backgrounds623-broken-internal.txt'
 #mcfile = 'backgrounds624-new-mc.txt'
 #mcfile = 'backgrounds625-fitting.txt'
-#mcfile = 'backgrounds630-extpmts.txt'
-mcfile = 'backgrounds630-extpmts-C3.txt'
+mcfile = 'backgrounds630-extpmts.txt'
+#mcfile = 'backgrounds630-extpmts-C3.txt'
 
 ### force reuse of all joined rootfiles in mcfile? [0,1,2]
 ### nice for debugging
 ### [0] default - use whatever is specified in the backgrounds file
 ### [1] forces reusing of all data/bkgs/sigs
 ### [2] forces NOT reusing any data/bkgs/sigs
-reuse = 0
+reuse = 1
 
 ### force a particular set of hit chan data? [0,1,2,3]
 ### nice for debugging

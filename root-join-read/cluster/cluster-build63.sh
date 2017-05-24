@@ -36,7 +36,7 @@ clustdir=$base/cluster
 builddir=$base/$build
 joinscript=$base/$join
 
-for mcfile in `ls $builddir`
+for mcfile in internalK40_GRND internalTh232_GRND pmtK40_GRND pmtTh232_GRND 
 do
     file="$clustdir/$build-$mcfile.sh"
     cat > $file <<EOF
