@@ -3,6 +3,7 @@
 # version 2017-05-24
 
 
+# ~ currently set for the default bkg model
 # + new build63 rootfiles
 # ~ updating for new 'extpmt' syntax
 # ~ changed PMT Pb210 to 1.76 mBq/pmt
