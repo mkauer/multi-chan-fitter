@@ -1,0 +1,20 @@
+
+Broken Chain help for the Sim files...
+
+
+internal U238 "groupNo"
+-----------------------------
+11: U238  -> Th230
+12: Th230 -> Ra226
+13: Ra226 -> Rn222
+14: Rn222 -> Pb210
+15: Pb210 -> GRND
+
+
+internal Th232 "groupNo"
+-----------------------------
+21: Th232 -> Ra228
+22: Ra228 -> Th228
+23: Th228 -> GRND
+
+
