@@ -37,13 +37,14 @@ from funcs63 import *
 
 ### extra notes to add to the saved plot file names? [0, 'something']
 note=0
-note='u238_grnd'
+#note='AND'
 
 ### backgrounds file to use?
 #mcfile = 'backgrounds623-broken-internal.txt'
 #mcfile = 'backgrounds624-new-mc.txt'
 #mcfile = 'backgrounds625-fitting.txt'
-mcfile = 'backgrounds630-extpmts.txt'
+#mcfile = 'backgrounds630-extpmts.txt'
+mcfile = 'backgrounds630-extpmts-C3.txt'
 
 ### force reuse of all joined rootfiles in mcfile? [0,1,2]
 ### nice for debugging
@@ -62,7 +63,7 @@ reuse = 0
 mychans = 'MS'
 
 ### show the legends? [0,1]
-showlegs = 0
+showlegs = 1
 
 ### use fit bounds from backgrounds file? [0,1,2]
 ### [0] use 'otherBnds' specified below (as a scaling)
@@ -88,7 +89,7 @@ hier = [0, 3000]
 indi = 1
 ### just plot individual for crystals? [1-8]
 #justthese = [1,2,3,4,5,6,7,8]
-justthese = [3,7]
+justthese = [3]
 
 ### rebin the hi-E final plots [1,inf]
 hiEplotRebin = 10

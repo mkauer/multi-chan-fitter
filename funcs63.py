@@ -153,35 +153,63 @@ def buildMC63(info, mc):
                     par = histparam(e)
                     histo = TH1F(key, longNames(i), par[0], par[1], par[2])
 
-                    energyCut = TCut('(edep['+str(i)+']*1000. > 0.0)')
 
+                    ### totally hacking away at this bit of code
+                    #=====================================================================================
+                    #=====================================================================================
+
+                    energyCut = TCut('(edep['+str(i)+']*1000. > 0.0)')
+                    ### do we need an energy cut?
+                    ### yes needed to get the generated events normalization right!!!
+                    ### will this circumvent the primVolumeName bug? - NOPE!
+                    #energyCut = TCut('(1)')
+                    
                     if info['chan'] == 'A':
                         chanCut = TCut('(1)')
 
                     elif info['chan'] == 'S':
                         ### main single/multi hit cut
-                        edepcuts = '((singleHitTag['+str(i)+'] > 0.0) && (multipleHitTag['+str(i)+'] < 0.0))'
-
+                        hitCut = '((singleHitTag['+str(i)+'] > 0.0) && (multipleHitTag['+str(i)+'] < 0.0))'
+                        #hitCut = '((singleHitTag['+str(i)+'] == 1.0))'
+                        ### do i have the single multi hit cuts wrong??
+                        #hitCut = '((singleHitTag['+str(i)+'] > 0.0))'
+                        #hitCut = '((singleHitTag['+str(i)+'] < 0.0))'
+                        
                         ### liquid scint veto cut - from Estella
                         lsvetocut = '(edep[8]*1000. < 20.0)'
-
-                        #chanCut = TCut('(('+edepcuts+'))')
-                        chanCut = TCut('(('+edepcuts+') && ('+lsvetocut+'))')
-
+                        #lsvetocut = '(edep[8]*1000. < 50.0)'
+                        ### do we need a lsveto cut for MC?
+                        #lsvetocut = '(1)'
+                        
+                        chanCut = TCut('(('+hitCut+') && ('+lsvetocut+'))')
+                        ### skip the lsvetocut because it's always 1
+                        #chanCut = TCut('(('+hitCut+'))')
+                        
                     elif info['chan'] == 'M':
                         ### main single/multi hit cut
-                        edepcuts = '((singleHitTag['+str(i)+'] < 0.0) && (multipleHitTag['+str(i)+'] > 0.0))'
-
+                        hitCut = '((singleHitTag['+str(i)+'] < 0.0) && (multipleHitTag['+str(i)+'] > 0.0))'
+                        #hitCut = '((multipleHitTag['+str(i)+'] == 1.0))'
+                        ### do i have the single multi hit cuts wrong??
+                        #hitCut = '((multipleHitTag['+str(i)+'] > 0.0))'
+                        #hitCut = '((multipleHitTag['+str(i)+'] < 0.0))'
+                        
                         ### liquid scint veto cut - from Estella
                         lsvetocut = '(edep[8]*1000. > 20.0)'
-
-                        #chanCut = TCut('(('+edepcuts+'))')
-                        chanCut = TCut('(('+edepcuts+') || ('+lsvetocut+'))')
-
+                        #lsvetocut = '(edep[8]*1000. > 50.0)'
+                        #lsvetocut = '(1)'
+                        
+                        chanCut = TCut('(('+hitCut+') || ('+lsvetocut+'))')
+                        #chanCut = TCut('(('+hitCut+') && ('+lsvetocut+'))')
+                        ### skip the lsvetocut because it's always 1
+                        #chanCut = TCut('(('+hitCut+'))')
+                        
                     else:
                         print 'ERROR: I do not know what to do with channel -->',info['chan']
                         print 'Available channels are [A]All-hits, [S]Single-hits, [M]Multi-hits'
                         sys.exit()
+                        
+                    #=====================================================================================
+                    #=====================================================================================
 
 
                     volumeCut = TCut('(1)')
@@ -210,7 +238,8 @@ def buildMC63(info, mc):
                     elif info['loca'] == 'steel':
                         # Not sure this works the way I think it should?
                         # I want all volumes except for the blank volume
-                        volumeCut = TCut('(primVolumeName != "")')
+                        #volumeCut = TCut('(primVolumeName != "")')
+                        volumeCut = TCut('(1)')
 
                     else:
                         print "WARNING: No selection criteria for  --> ", info['loca']
@@ -326,6 +355,7 @@ def buildMC63(info, mc):
                                      brokenChainCut.GetTitle()+' && '+
                                      chanCut.GetTitle()
                                      +')')
+                    ### need the volumeCut for the pmt selection
                     if 'pmt' in info['loca']:
                         masterCut = TCut('('+
                                          energyCut.GetTitle()+' && '+

@@ -96,7 +96,7 @@ DR       MS        6       data        1546      V00-02-03    ./root-join-read/b
 DR       MS        7       data        1546      V00-02-03    ./root-join-read/build61/build61-data1546-master.root
 DR       MS        8       data        1546      V00-02-03    ./root-join-read/build61/build61-data1546-master.root
 """
-
+"""
 B	MS	1	internal	Na22	Na22	GRND	1.27	1e-4	0.69	1.31	./root-join-read/build61/build61-internalNa22-master.root	
 B	MS	2	internal	Na22	Na22	GRND	1.03	1e-4	0.69	1.31	./root-join-read/build61/build61-internalNa22-master.root	
 B	MS	3	internal	Na22	Na22	GRND	1.05	1e-4	0.69	1.31	./root-join-read/build61/build61-internalNa22-master.root	
@@ -213,7 +213,7 @@ B        MS        5       extpmt      K40       K40       GRND      58.0      1
 B        MS        6       extpmt      K40       K40       GRND      58.0      1e-4     0.11     5.11       ./root-join-read/build62/build62-extpmtK40-master.root
 B        MS        7       extpmt      K40       K40       GRND      58.0      1e-4     0.11     5.11       ./root-join-read/build62/build62-extpmtK40-master.root
 B        MS        8       extpmt      K40       K40       GRND      58.0      1e-4     0.11     5.11       ./root-join-read/build62/build62-extpmtK40-master.root
-"""
+
 B        MS        1       pmt         U238      U238      Pb210    25.0      1e-4     0.11     5.11       ./root-join-read/build62/build62-pmtU238_Pb210-master.root
 B        MS        2       pmt         U238      U238      Pb210    25.0      1e-4     0.11     5.11       ./root-join-read/build62/build62-pmtU238_Pb210-master.root
 B        MS        3       pmt         U238      U238      Pb210    25.0      1e-4     0.11     5.11       ./root-join-read/build62/build62-pmtU238_Pb210-master.root
@@ -249,7 +249,7 @@ B        MS        5       extpmt      U238      U238      GRND    25.0      1e-
 B        MS        6       extpmt      U238      U238      GRND    25.0      1e-4     0.11     5.11       ./root-join-read/build62/build62-extpmtU238-master.root
 B        MS        7       extpmt      U238      U238      GRND    25.0      1e-4     0.11     5.11       ./root-join-read/build62/build62-extpmtU238-master.root
 B        MS        8       extpmt      U238      U238      GRND    25.0      1e-4     0.11     5.11       ./root-join-read/build62/build62-extpmtU238-master.root
-
+"""
 B        MS        1       pmt         Th232     Th232     GRND    12.0      1e-4     0.11     5.11       ./root-join-read/build61/build61-pmtTh232-master.root
 B        MS        2       pmt         Th232     Th232     GRND    12.0      1e-4     0.11     5.11       ./root-join-read/build61/build61-pmtTh232-master.root
 B        MS        3       pmt         Th232     Th232     GRND    12.0      1e-4     0.11     5.11       ./root-join-read/build61/build61-pmtTh232-master.root
@@ -285,8 +285,8 @@ B        MS        5       lsveto      Th232     Th232     GRND     1.62e-2   1e
 B        MS        6       lsveto      Th232     Th232     GRND     1.62e-2   1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoTh232-master.root
 B        MS        7       lsveto      Th232     Th232     GRND     1.62e-2   1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoTh232-master.root
 B        MS        8       lsveto      Th232     Th232     GRND     1.62e-2   1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoTh232-master.root
-
-
+"""
+"""
 B        MS        1       lsveto      K40       K40       GRND     1.00e-3   1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoK40-master.root
 B        MS        2       lsveto      K40       K40       GRND     1.00e-3   1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoK40-master.root
 B        MS        3       lsveto      K40       K40       GRND     1.00e-3   1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoK40-master.root
