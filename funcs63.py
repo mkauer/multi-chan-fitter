@@ -10,6 +10,7 @@
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# ~ BIG bug fixed - wasn't selecting volumeCut for non-internal mc!
 # ~ updating for new 'extpmt' syntax
 # ~ go to < groupNo instead of <= to groupNo?
 # ~ change build62() to use buildMC62()
@@ -244,8 +245,8 @@ def buildMC63(info, mc):
                         print 'INFO:',info['isof'],\
                             'chan start =',info['chst'],\
                             'chan stop =',info['chsp'],\
-                            'groupNo start =',groupCuts[0],\
-                            'groupNo stop =',groupCuts[1]
+                            'groupNo start >=',groupCuts[0],\
+                            'groupNo stop <',groupCuts[1]
 
                         ### this is what i used before but it might be wrong??
                         ### it should probably be 'groupNo < number' instead of 'groupNo <= number' ???
@@ -325,6 +326,14 @@ def buildMC63(info, mc):
                                      brokenChainCut.GetTitle()+' && '+
                                      chanCut.GetTitle()
                                      +')')
+                    if 'pmt' in info['loca']:
+                        masterCut = TCut('('+
+                                         energyCut.GetTitle()+' && '+
+                                         volumeCut.GetTitle()+' && '+
+                                         eventTypeCut.GetTitle()+' && '+
+                                         brokenChainCut.GetTitle()+' && '+
+                                         chanCut.GetTitle()
+                                         +')')
                     #=====================================================================
                     #=====================================================================
                     

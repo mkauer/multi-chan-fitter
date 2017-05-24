@@ -14,6 +14,7 @@
 
 # 2017-05-23
 # --------------------------------------------------------------------
+# ~ BIG bug fixed - wasn't selecting volumeCut for non-internal mc!
 # + generated more rootfiles for the extpmt stuff
 # + new backgrounds630-extpmts.txt with extpmt stuff included
 # + new funcs63.py with new functions to handle 'extpmt' syntax

@@ -37,10 +37,7 @@ from funcs63 import *
 
 ### extra notes to add to the saved plot file names? [0, 'something']
 note=0
-#note = 'b623'
-#note = 'b624'
-#note = 'b625'
-#note = 'not-split'
+note='u238_grnd'
 
 ### backgrounds file to use?
 #mcfile = 'backgrounds623-broken-internal.txt'
@@ -53,7 +50,7 @@ mcfile = 'backgrounds630-extpmts.txt'
 ### [0] default - use whatever is specified in the backgrounds file
 ### [1] forces reusing of all data/bkgs/sigs
 ### [2] forces NOT reusing any data/bkgs/sigs
-reuse = 1
+reuse = 0
 
 ### force a particular set of hit chan data? [0,1,2,3]
 ### nice for debugging
@@ -141,17 +138,6 @@ gROOT.SetBatch(batch)
 
 def _myself_(argv):
 
-    ### some legends settings
-    #---------------------------------
-    # number of columns
-    lnc = 2
-    
-    if lnc==1: xlegstart = 0.65
-    if lnc==2: xlegstart = 0.40
-    ylegstop  = 0.89
-    ymultiply = 0.04 / float(lnc)
-    #---------------------------------
-    
     gStyle.SetPalette (1)
     gStyle.SetOptStat ('')
     gStyle.SetOptFit  (0)
@@ -207,9 +193,16 @@ def _myself_(argv):
     uniqColor = {}
     for i,key in enumerate(uniqAll):
         uniqColor[key] = cis[i]
-        
+
+
     ### legend length = MC + data + total
     Nlg = Nc+2
+    if Nlg > 8: lnc = 2
+    else: lnc = 1
+    if lnc==1: xlegstart = 0.65
+    if lnc==2: xlegstart = 0.40
+    ylegstop  = 0.89
+    ymultiply = 0.04 / float(lnc)
     
     
     ### set fit bounds for the fit
