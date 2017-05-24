@@ -36,7 +36,7 @@ clustdir=$base/cluster
 builddir=$base/$build
 joinscript=$base/$join
 
-for mcfile in extpmtU238 extpmtTh232 extpmtK40
+for mcfile in `ls $builddir`
 do
     file="$clustdir/$build-$mcfile.sh"
     cat > $file <<EOF
@@ -56,6 +56,7 @@ EOF
     qsub -q "short" $file
     
 done
+
 
 ### qsub -q
 # "very_short"
