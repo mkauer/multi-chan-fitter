@@ -1,8 +1,9 @@
 # -*- sh -*-
 
-# version 2017-05-24
+# version 2017-05-25
 
 
+# + add 200 ppb lsveto K40 = 6.19 mBq/kg
 # ~ currently set for the default bkg model
 # + new build63 rootfiles
 # ~ updating for new 'extpmt' syntax
@@ -296,16 +297,15 @@ B        MS        6       lsveto      Th232     Th232     GRND     1.62e-2   1e
 B        MS        7       lsveto      Th232     Th232     GRND     1.62e-2   1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoTh232-master.root
 B        MS        8       lsveto      Th232     Th232     GRND     1.62e-2   1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoTh232-master.root
 
+B        MS        1       lsveto      K40       K40       GRND     6.19     1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoK40-master.root
+B        MS        2       lsveto      K40       K40       GRND     6.19     1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoK40-master.root
+B        MS        3       lsveto      K40       K40       GRND     6.19     1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoK40-master.root
+B        MS        4       lsveto      K40       K40       GRND     6.19     1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoK40-master.root
+B        MS        5       lsveto      K40       K40       GRND     6.19     1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoK40-master.root
+B        MS        6       lsveto      K40       K40       GRND     6.19     1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoK40-master.root
+B        MS        7       lsveto      K40       K40       GRND     6.19     1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoK40-master.root
+B        MS        8       lsveto      K40       K40       GRND     6.19     1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoK40-master.root
 """
-B        MS        1       lsveto      K40       K40       GRND     1.00e-3   1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoK40-master.root
-B        MS        2       lsveto      K40       K40       GRND     1.00e-3   1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoK40-master.root
-B        MS        3       lsveto      K40       K40       GRND     1.00e-3   1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoK40-master.root
-B        MS        4       lsveto      K40       K40       GRND     1.00e-3   1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoK40-master.root
-B        MS        5       lsveto      K40       K40       GRND     1.00e-3   1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoK40-master.root
-B        MS        6       lsveto      K40       K40       GRND     1.00e-3   1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoK40-master.root
-B        MS        7       lsveto      K40       K40       GRND     1.00e-3   1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoK40-master.root
-B        MS        8       lsveto      K40       K40       GRND     1.00e-3   1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoK40-master.root
-
 B        MS        1       lsvetoair   U238      U238      GRND     1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-lsvetoair-master.root
 B        MS        2       lsvetoair   U238      U238      GRND     1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-lsvetoair-master.root
 B        MS        3       lsvetoair   U238      U238      GRND     1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-lsvetoair-master.root
