@@ -14,6 +14,7 @@
 
 # 2017-06-05
 # --------------------------------------------------------------------
+# V switch to 64-set1-bdt.py
 # + cut release v6.3
 # + add groupNo>1 for all MC in buildMC63()
 

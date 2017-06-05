@@ -3,16 +3,14 @@
 ######################################################################
 # Matt Kauer - mkauer@physics.wisc.edu
 ######################################################################
-# 63-extpmt.py
+# 64-set1-bdt.py
 
-V = 'v63'
+V = 'v64'
 
-# get other pmt backgrounds included... again...
+# Use set1 files and new BDT event selection
 # 
 # version: 2017-06-05
 #
-# note: run 1616 is the first run after calibration-campaign-2
-# 
 # see CHANGELOG for changes
 ######################################################################
 
@@ -29,7 +27,7 @@ ROOT.gErrorIgnoreLevel = kWarning
 
 sys.path.append("/home/mkauer/COSINE/CUP/mc-fitting/")
 sys.path.append("/home/mkauer/mc-fitting/")
-from funcs63 import *
+from funcs64 import *
 
 
 ### user inputs
@@ -45,7 +43,8 @@ note=0
 #mcfile = 'backgrounds625-fitting.txt'
 
 ### default bkgs
-mcfile = 'backgrounds630-extpmts.txt'
+#mcfile = 'backgrounds630-extpmts.txt'
+mcfile = 'backgrounds640.txt'
 
 ### for fitting
 #mcfile = 'backgrounds630-extpmts-C3.txt'
