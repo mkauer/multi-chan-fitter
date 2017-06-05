@@ -9,7 +9,7 @@ V = 'v63'
 
 # get other pmt backgrounds included... again...
 # 
-# version: 2017-05-24
+# version: 2017-06-05
 #
 # note: run 1616 is the first run after calibration-campaign-2
 # 
@@ -43,8 +43,15 @@ note=0
 #mcfile = 'backgrounds623-broken-internal.txt'
 #mcfile = 'backgrounds624-new-mc.txt'
 #mcfile = 'backgrounds625-fitting.txt'
+
+### default bkgs
 mcfile = 'backgrounds630-extpmts.txt'
+
+### for fitting
 #mcfile = 'backgrounds630-extpmts-C3.txt'
+#mcfile = 'backgrounds630-extpmts-C7.txt'
+#mcfile = 'backgrounds630-extpmts-C7-update.txt'
+
 
 ### force reuse of all joined rootfiles in mcfile? [0,1,2]
 ### nice for debugging
@@ -73,7 +80,7 @@ useBounds = 1
 ### else use these other bounds (as a raw scaling factor)
 otherBnds = [0.01, 10]
 ### new bounds to overwrite from file (as a percent of activity)
-newBounds = [0.1, 10]
+newBounds = [0.0, 100]
 
 ### fitting ranges
 ### lo and hi energy fit ranges
@@ -89,7 +96,7 @@ hier = [0, 3000]
 indi = 1
 ### just plot individual for crystals? [1-8]
 #justthese = [1,2,3,4,5,6,7,8]
-justthese = [3,7]
+justthese = [7]
 
 ### rebin the hi-E final plots [1,inf]
 hiEplotRebin = 10
@@ -106,11 +113,11 @@ mcscale = 1
 
 ### This doesn't seem to effect the fit results at all
 ### set MC sumw2()? [0,1]
-mcsumw2 = 0
+mcsumw2  = 0
 ### set data sumw2()? [0,1]
 datsumw2 = 0
 ### set error on the total? [0,1]
-toterr = 0
+toterr   = 0
 
 ### I don't understand why this is effecting the fit so much
 ### But it does help the fit converage and especially with multi-chan
@@ -387,6 +394,7 @@ def _myself_(argv):
         for i in range(8):
 
             fitresults[str(i)] = []
+            fitchi2ndf.append(-1)
             
             ### Do a per crystal unique of the signals to see how many
             ### signal channels each crystal fit will have
@@ -489,17 +497,12 @@ def _myself_(argv):
             fit.append(TFractionFitter(fitdata[i], sigObj[-1])) # create the TFF data and MC objects
             #fit.append(TFractionFitter(fitdata[i], sigObj[-1], "Q")) # create the TFF data and MC objects
             
-            ### for some reason on CUP the fit status gets returned as a pointer
-            ### like <ROOT.TFitResultPtr object at 0x37246c0>
-            #fitresults.append('NaI-C'+str(i+1)+' fit completed with status '+str(status))
-            #fitresults.append('NaI-C'+str(i+1)+' fit results')
-            #fitresults[str(i)].append('NaI-C'+str(i+1)+' fit results')
+            ### Print out the fit infos
             fitresults[str(i)].append('Crystal-'+str(i+1)+' fit results')
-
+            fitresults[str(i)].append('channels fit = '+mychans)
             fitresults[str(i)].append('lo-E fit range = '+str(fLo[0])+' - '+str(fLo[1])+' keV')
             fitresults[str(i)].append('hi-E fit range = '+str(fHiE[0])+' - '+str(fHiE[1])+' keV')
-            
-            
+
             ### set fit bounds!!!
             #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             ### seems like Constrain starts with param=1
@@ -512,10 +515,8 @@ def _myself_(argv):
                     fit[-1].Constrain(l+1, otherBnds[0], otherBnds[1])
             #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             
-            
             #fit[i].SetRangeX(fmin, fmax) # set global range, should be the same as fmin and fmax?
             fit[-1].SetRangeX(fmin, fmax) # set global range, should be the same as fmin and fmax?
-
 
             ### try doing the fit
             #------------------------------
@@ -523,21 +524,18 @@ def _myself_(argv):
             status = fit[-1].Fit()
             #------------------------------
 
-
             #chi2 = fit[i].GetChisquare()
             #ndf  = fit[i].GetNDF()
             #pval = fit[i].GetProb()
             chi2 = fit[-1].GetChisquare()
             ndf  = fit[-1].GetNDF()
             pval = fit[-1].GetProb()
-
-            fitchi2ndf.append(chi2/ndf)
-
-            ### for some reason on CUP the fit status gets returned as a pointer
-            ### like <ROOT.TFitResultPtr object at 0x37246c0>
+            
+            fitresults[str(i)].append('fit status = '+str(status))
+            #fitchi2ndf.append(chi2/ndf)
+            fitchi2ndf[-1] = (chi2/ndf)
             #fitresults.append('chi2/ndf = '+str(round(chi2,2))+'/'+str(ndf)+' = '+str(round(chi2/float(ndf),2)))
             fitresults[str(i)].append('chi2/ndf = '+str(round(chi2,2))+'/'+str(ndf)+' = '+str(round(chi2/float(ndf),2)))
-
             #fitresults[str(i)].append('p-value = '+str(pval))
 
             count = 0
@@ -592,9 +590,10 @@ def _myself_(argv):
                             if finit:
                                 E = str(E)
                                 #print fskey, sigs[fskey+'-c'+C+'-e'+E]['info']['acti']
-                                fitresults[str(i)].append('fit-activ '+fskey+' '
-                                                          +str(round(sigs[fskey+'-c'+C+'-e'+E]['info']['acti'], 3))
-                                                          +' mBq')
+                                #fitresults[str(i)].append('fit-activ '+fskey+' '
+                                #    +str(round(sigs[fskey+'-c'+C+'-e'+E]['info']['acti'], 3))+' mBq')
+                                fitresults[str(i)].append('fit '+fskey+' = '
+                                    +str(sigs[fskey+'-c'+C+'-e'+E]['info']['acti'])+' mBq')
                                 finit=0
             #print '\n'
             fitresults[str(i)].append('\n')
@@ -638,12 +637,15 @@ def _myself_(argv):
         outfile.close()
         
         ### create the updated backgrounds file
-        newbkgs = './plots/'+mcfile[:-4]+'-updated.txt'
-        updateBkgsFile61(mcfile, resultsfile, newbkgs, BF='B')
-
+        #if 'update' in mcfile:
+        #    newbkgs = mcfile
+        #else:
+        newbkgs = './plots/'+mcfile[:-4]+'-update.txt'
+        updateBkgsFile63(mcfile, resultsfile, newbkgs, BF='F')
+        
         ### create the background model table
-        outtable = newbkgs[:-4]+'-table.txt'
-        outputModelTable61(newbkgs, outtable)
+        #outtable = newbkgs[:-4]+'-table.txt'
+        #outputModelTable61(newbkgs, outtable)
         #-------------------------------------------------------------
         
         

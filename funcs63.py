@@ -6,10 +6,14 @@
 # 
 # Works with v63 and later versions
 # 
-# version: 2017-05-24
+# version: 2017-06-05
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# + add groupNo>1 for all MC in buildMC63()
+# + new updateBkgsFile63() to work with new results print out
+# + new outputModelTable63() to work with the new results format
+# + outputModel63.py works when not all crystals are in the bkgs file
 # ~ found bug with primPMTid vs primPMTid[0]
 #   already correct for here but Pushpa was using primPMTid and that
 #   is overcounting the number of events
@@ -90,7 +94,8 @@ def buildMC63(info, mc):
 
             if not os.path.exists(rootfile):
                 print 'WARNING: rootfile not found -->', rootfile
-                return mc
+                sys.exit()
+                #return mc
 
             rfile = TFile(rootfile, "READ")
 
@@ -274,13 +279,6 @@ def buildMC63(info, mc):
                     #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                     #   CRITIAL POINT IN THE SIM !!!
                     #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-                    """
-                    brokenChainCut = TCut('(1)')
-                    if info['chst'] == 'U238' and info['chsp'] == 'Rn222':
-                        brokenChainCut = TCut('((groupNo >= 11) && (groupNo <= 14))')
-                    if info['chst'] == 'Pb210' and info['chsp'] == 'Pb210':
-                        brokenChainCut = TCut('(groupNo == 15)')
-                    """
                     brokenChainCut = TCut('(1)')
                     groupCuts = groupNum62(info)
                     if groupCuts:
@@ -300,8 +298,10 @@ def buildMC63(info, mc):
                         # do not include last group
                         brokenChainCut = TCut('((groupNo >= '+str(groupCuts[0])+') && (groupNo < '+str(groupCuts[1])+'))')
 
-                        ### not sure how this groupNo thing works - I need to ask Eunju for details!
-                        
+                    ### not sure how this groupNo thing works - I need to ask Eunju for details!
+                    ### everything should have groupNo > 1 right?
+                    else:
+                        brokenChainCut = TCut('(groupNo > 1)')
                     #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                     #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -523,4 +523,158 @@ def scaleSigs63(sigkeys, sigs):
             continue
 
     return sigs
+
+
+def updateBkgsFile63(bkgsfile, resultsfile, newbkgs, BF='B'):
+
+    for thisfile in [bkgsfile, resultsfile]:
+        if not os.path.exists(thisfile):
+            print 'WARNING: file not found -->', thisfile
+            return
+    
+    with open(bkgsfile) as fbkgs:
+        bkgslines = fbkgs.read().splitlines()
+    fbkgs.close()
+
+    with open(resultsfile) as ffits:
+        fitlines = ffits.read().splitlines()
+    ffits.close()
+
+    output = open(newbkgs, 'w')
+    
+    for bline in bkgslines:
+        #bline = bline.strip()
+        if not bline:
+            output.write('\n')
+            continue
+        if bline.startswith('#'):
+            if 'version' in bline:
+                output.write('# GENERATED backgrounds file from fit!\n')
+            else:
+                output.write(bline+'\n')
+            continue
+        bbits = bline.split()
+        if len(bbits) < 12:
+            output.write(bline+'\n')
+            continue
+
+        replaced = 0
+        for fline in fitlines:
+            if not replaced:
+                fline = fline.strip()
+                if not fline: continue
+                fbits = fline.split()
+                #if len(fbits) == 4 and fbits[0] == 'fit-activ':
+                if fbits[-1] == 'mBq':
+                    #print fbits
+                    xstal = fbits[1].split('-')[0].split('x')[1]
+                    loca  = fbits[1].split('-')[1]
+                    chst  = fbits[1].split('-')[2].split('_')[0]
+                    chsp  = 0
+                    if len(fbits[1].split('-')[2].split('_')) > 1:
+                        chsp = fbits[1].split('-')[2].split('_')[1]
+                    acti = str(fbits[3])
+
+                    if bbits[2] == xstal and bbits[3] == loca and bbits[5].startswith(chst):
+                        if chsp and bbits[6] == chsp:
+                            for i in range(len(bbits)):
+                                if i == 0:
+                                    output.write(BF+'\t')
+                                elif i == 7:
+                                    if acti != '0.0': output.write(acti+'\t')
+                                    else: output.write(bbits[i]+'\t')
+                                else:
+                                    output.write(bbits[i]+'\t')
+                            output.write('\n')
+                            replaced = 1
+                        elif not chsp:
+                            for i in range(len(bbits)):
+                                if i == 0:
+                                    output.write(BF+'\t')
+                                elif i == 7:
+                                    if acti != '0.0': output.write(acti+'\t')
+                                    else: output.write(bbits[i]+'\t')
+                                else:
+                                    output.write(bbits[i]+'\t')
+                            output.write('\n')
+                            replaced = 1
+                        else:
+                            print '!!!!!!! - could not match'
+                            print fline
+                            print 'to'
+                            print bline
+                            print ''
+
+        
+        if not replaced:
+            output.write(bline+'\n')
+
+    output.close()
+    return
+
+
+def outputModelTable63(modelfile, outtable):
+    
+    if not os.path.exists(modelfile):
+        print 'WARNING: file not found -->', modelfile
+        return
+    
+    mlines = readFile(modelfile)
+    tfile = open(outtable, 'w')
+    
+    ### build the table/dict needed
+    table = {}
+    for line in mlines:
+        bits = line.split()
+
+        if 'D' in bits[0]: continue
+
+        xstal = str(bits[2])
+        try:
+            test = table[str(xstal)]
+        except:
+            table[str(xstal)] = {}
+        
+        if bits[5] == bits[6] or bits[6] == 'GRND':
+            table[str(xstal)][str(bits[3]+'-'+bits[5])] = bits[7]
+        else:
+            table[str(xstal)][str(bits[3]+'-'+bits[5]+'_'+bits[6])] = bits[7]
+
+    
+    ### sort the keys
+    isokeys=[]
+    for key in table[str(xstal)]:
+        isokeys.append(key)
+    isokeys.sort()
+    
+    
+    ### fill in the table txt file
+    #+++++++++++++++++++++++++++++++++++++++++++++++
+    ### write location
+    tfile.write('Crystal'+'\t')
+    for key in isokeys:
+        tfile.write(key.split('-')[0]+'\t')
+    tfile.write('\n')
+    
+    ### write the isotope
+    tfile.write(''+'\t')
+    for key in isokeys:
+        tfile.write(key.split('-')[1]+'\t')
+    tfile.write('\n')
+    
+    ### write the activity
+    for i in range(8):
+        xstal = str(i+1)
+        try:
+            test = table[str(xstal)]
+            tfile.write('C'+xstal+'\t')
+            for key in isokeys:
+                tfile.write(table[xstal][key]+'\t')
+            tfile.write('\n')
+        except:
+            continue
+    
+        
+    tfile.close()
+    return
 

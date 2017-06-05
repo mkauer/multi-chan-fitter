@@ -12,6 +12,20 @@
 # ====================================================================
 
 
+# 2017-06-05
+# --------------------------------------------------------------------
+# + cut release v6.3
+# + add groupNo>1 for all MC in buildMC63()
+
+
+# 2017-06-02
+# --------------------------------------------------------------------
+# + new updateBkgsFile63() to work with new results print out
+# ~ fixed issue with chi2/ndf not showing up in the fit results plots
+# + add more info to the fit results print out
+# + outputModel63.py works when not all crystals are in the bkgs file
+
+
 # 2017-05-25
 # --------------------------------------------------------------------
 # + add 200 ppb lsveto K40 = 6.19 mBq/kg
