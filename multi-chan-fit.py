@@ -9,7 +9,7 @@ V = 'v64'
 
 # Use set1 files and new BDT event selection
 # 
-# version: 2017-06-05
+# version: 2017-06-06
 #
 # see CHANGELOG for changes
 ######################################################################
@@ -35,29 +35,17 @@ from funcs64 import *
 
 ### extra notes to add to the saved plot file names? [0, 'something']
 note=0
-#note='primPMTid[0]'
+#note='rebin'
 
-### backgrounds file to use?
-#mcfile = 'backgrounds623-broken-internal.txt'
-#mcfile = 'backgrounds624-new-mc.txt'
-#mcfile = 'backgrounds625-fitting.txt'
-
-### default bkgs
-#mcfile = 'backgrounds630-extpmts.txt'
+### backgrounds file
 mcfile = 'backgrounds640.txt'
-
-### for fitting
-#mcfile = 'backgrounds630-extpmts-C3.txt'
-#mcfile = 'backgrounds630-extpmts-C7.txt'
-#mcfile = 'backgrounds630-extpmts-C7-update.txt'
-
 
 ### force reuse of all joined rootfiles in mcfile? [0,1,2]
 ### nice for debugging
 ### [0] default - use whatever is specified in the backgrounds file
 ### [1] forces reusing of all data/bkgs/sigs
 ### [2] forces NOT reusing any data/bkgs/sigs
-reuse = 1
+reuse = 0
 
 ### force a particular set of hit chan data? [0,1,2,3]
 ### nice for debugging
@@ -75,7 +63,7 @@ showlegs = 1
 ### [0] use 'otherBnds' specified below (as a scaling)
 ### [1] use the bounds specified in backgrounds file (as percent)
 ### [2] use 'newBounds' specified below (as percent)
-useBounds = 1
+useBounds = 2
 ### else use these other bounds (as a raw scaling factor)
 otherBnds = [0.01, 10]
 ### new bounds to overwrite from file (as a percent of activity)
@@ -83,25 +71,28 @@ newBounds = [0.0, 100]
 
 ### fitting ranges
 ### lo and hi energy fit ranges
-fLo  = [ 10,  160]
+#fLo  = [ 5,  90]
+fLoE = [ 5,  90]
 fHiE = [200, 2300]
+
+### rebin the histos for fitting [1,inf]
+loEfitRebin = 10
+hiEfitRebin = 20
 
 ### plotting ranges
 ### lo and hi energy ranges
-loer = [0,  200]
+loer = [0,  100]
 hier = [0, 3000]
+
+### rebin the final plots [1,inf]
+loEplotRebin = 10
+hiEplotRebin = 20
 
 ### individual plots for all crystals? [0,1]
 indi = 1
 ### just plot individual for crystals? [1-8]
 #justthese = [1,2,3,4,5,6,7,8]
 justthese = [7]
-
-### rebin the hi-E final plots [1,inf]
-hiEplotRebin = 10
-
-### rebin the hi-E histo for fitting [1,inf]
-hiEfitRebin = 10
 
 ### scale to dru?
 dru = 1
@@ -125,7 +116,7 @@ fitRebinScale = 1
 
 ### chi2 test option
 ### ["UU", "UW", "WW", "NORM"]
-chiopt = 'UW'
+chiopt = 'WU'
 
 #================================================================
 
@@ -165,15 +156,18 @@ def _myself_(argv):
     ### where everything gets loaded into dictionary
     #-----------------------------------------------------------------
     #-----------------------------------------------------------------
-    data, bkgs, sigs = build63(mcfile, reuse, mychans)
+    data, bkgs, sigs = build64(mcfile, reuse, mychans)
     datkeys, bakkeys, sigkeys = sortKeys(data, bkgs, sigs)
     #-----------------------------------------------------------------
     #-----------------------------------------------------------------
     
-    
-    # assume all data is using same run and channels
-    runNum = data[datkeys[0]]['info']['run']
+    #getPars(data[datkeys[0]]['hist'])
+
+    # assume all data is using same run, channels, and hist params
+    #runNum = data[datkeys[0]]['info']['run']
+    runtag = data[datkeys[0]]['info']['tag']
     chans  = data[datkeys[0]]['info']['chans']
+    params = globalParams(data)
     
     ### find unique names for color scheme?
     ### "internal-K40" for example
@@ -187,9 +181,9 @@ def _myself_(argv):
     print 'INFO: Unique bkgs and sigs =',uniqAll
     
     # scale into dru units
-    if dru: data = dataDRU60(data)
-    bkgs = scaleBkgs63(bkgs)
-    sigs = scaleBkgs63(sigs)
+    if dru: data = dataDRU64(data)
+    bkgs = scaleBkgs64(bkgs)
+    sigs = scaleBkgs64(sigs)
     
     ### Number of colors
     Nc = len(uniqAll)
@@ -215,17 +209,23 @@ def _myself_(argv):
     ### set fit bounds for the fit
     #=================================================================
     #=================================================================
+
+    # NOTE: These need to be integers!!!
+    # Can probably set all TH1F to TH1I
     
     #fLo = [10, 100]
     #fLo = [20, 180]
+    bpkvLo = params[0][3]
+    fLo = [int(fLoE[0]*bpkvLo/loEfitRebin), int(fLoE[1]*bpkvLo/loEfitRebin)]
     fLoBins = fLo[1]-fLo[0]
     
     #fHiE = [400, 2000]
     #fHiE = [300, 2400]
-    fHi = [fHiE[0]/hiEfitRebin, fHiE[1]/hiEfitRebin]
+    bpkvHi = params[1][3]
+    fHi = [int(fHiE[0]*bpkvHi/hiEfitRebin), int(fHiE[1]*bpkvHi/hiEfitRebin)]
     fHiBins = fHi[1]-fHi[0]
     
-    fbins = fLoBins+fHiBins
+    fbins = int(fLoBins+fHiBins)
     
     fmin=0
     fmax=fbins
@@ -237,23 +237,29 @@ def _myself_(argv):
     ### to work right - they need their own memory space
     #-----------------------------------------------------------------
     ### init dict for rebinned data
-    rdata = {}
+    rldata = {}
+    rhdata = {}
     for dkey in datkeys:
         #print dkey
-        rdata[dkey] = {}
+        rldata[dkey] = {}
+        rhdata[dkey] = {}
         
     ### init dict for rebinned backgrounds
-    rbkgs = {}
+    rlbkgs = {}
+    rhbkgs = {}
     for bkey in bakkeys:
         #print bkey
-        rbkgs[bkey] = {}
-
+        rlbkgs[bkey] = {}
+        rhbkgs[bkey] = {}
+        
     # init dict for rebinned MC/signals 
-    rsigs = {}
+    rlsigs = {}
+    rhsigs = {}
     for skey in sigkeys:
         #print skey
-        rsigs[skey] = {}
-
+        rlsigs[skey] = {}
+        rhsigs[skey] = {}
+        
     #-----------------------------------------------------------------
     
     
@@ -275,15 +281,18 @@ def _myself_(argv):
         for i in range(8):
             
             fdata = TH1F('fdata'+str(i), cnames(i)+' - multi-chan fit', fbins,0,fbins)
+            #fdata = TH1I('fdata'+str(i), cnames(i)+' - multi-chan fit', fbins,0,fbins)
             fitdata.append(fdata)
             
             tot = TH1F('ftotal'+str(i), longNames(i), fbins,0,fbins)
+            #tot = TH1I('ftotal'+str(i), longNames(i), fbins,0,fbins)
             tot.SetLineColor(kGray+1)
             tot.SetMarkerColor(kGray+1)
             tot.SetLineWidth(1)
             ftotal.append(tot)
             
             res = TH1F('fresid'+str(i), longNames(i), fbins,0,fbins)
+            #res = TH1I('fresid'+str(i), longNames(i), fbins,0,fbins)
             res.SetLineColor(kBlack)
             res.SetMarkerColor(kBlack)
             res.SetLineWidth(1)
@@ -299,17 +308,20 @@ def _myself_(argv):
                 #-----------------------------------------------------------------------------
                 for dkey in datkeys:
                     if 'x'+str(i+1) in dkey and '-c'+C in dkey and '-e0' in dkey:
+                        rldata[dkey]['hist'] = copy.deepcopy(data[dkey]['hist'])
+                        rldata[dkey]['hist'].Rebin(loEfitRebin)
+                        if fitRebinScale: rldata[dkey]['hist'].Scale(1./loEfitRebin)
                         for n in range(fLoBins):
                             fitdata[i].SetBinContent(n+1, fitdata[i].GetBinContent(n+1)
-                                                     + data[dkey]['hist'].GetBinContent(fLo[0]+n))
+                                        + rldata[dkey]['hist'].GetBinContent(fLo[0]+n))
                     if 'x'+str(i+1) in dkey and '-c'+C in dkey and '-e1' in dkey:
-                        rdata[dkey]['hist'] = copy.deepcopy(data[dkey]['hist'])
-                        rdata[dkey]['hist'].Rebin(hiEfitRebin)
-                        if fitRebinScale: rdata[dkey]['hist'].Scale(1./hiEfitRebin)
+                        rhdata[dkey]['hist'] = copy.deepcopy(data[dkey]['hist'])
+                        rhdata[dkey]['hist'].Rebin(hiEfitRebin)
+                        if fitRebinScale: rhdata[dkey]['hist'].Scale(1./hiEfitRebin)
                         r = 0
                         for n in range(fLoBins,fbins):
                             fitdata[i].SetBinContent(n+1, fitdata[i].GetBinContent(n+1)
-                                                     + rdata[dkey]['hist'].GetBinContent(fHi[0]+r))
+                                        + rhdata[dkey]['hist'].GetBinContent(fHi[0]+r))
                             r += 1
                 
                 for skey in sigkeys:
@@ -320,19 +332,22 @@ def _myself_(argv):
                             fsig = TH1F(fskey, fskey, fbins, 0, fbins)
                             fitsigs[fskey] = {}
                             fitsigs[fskey]['hist'] = fsig
+                        rlsigs[skey]['hist'] = copy.deepcopy(sigs[skey]['hist'])
+                        rlsigs[skey]['hist'].Rebin(loEfitRebin)
+                        if fitRebinScale: rlsigs[skey]['hist'].Scale(1./loEfitRebin)
                         for n in range(fLoBins):
                             fitsigs[fskey]['hist'].SetBinContent(n+1, fitsigs[fskey]['hist'].GetBinContent(n+1)
-                                                                 + sigs[skey]['hist'].GetBinContent(fLo[0]+n))
+                                                    + rlsigs[skey]['hist'].GetBinContent(fLo[0]+n))
                     if 'x'+str(i+1) in skey and '-c'+C in skey and '-e1' in skey:
-                        rsigs[skey]['hist'] = copy.deepcopy(sigs[skey]['hist'])
-                        rsigs[skey]['hist'].Rebin(hiEfitRebin)
-                        if fitRebinScale: rsigs[skey]['hist'].Scale(1./hiEfitRebin)
+                        rhsigs[skey]['hist'] = copy.deepcopy(sigs[skey]['hist'])
+                        rhsigs[skey]['hist'].Rebin(hiEfitRebin)
+                        if fitRebinScale: rhsigs[skey]['hist'].Scale(1./hiEfitRebin)
                         #fskey = skey.split('-e1')[0]
                         fskey = skey.split('-c')[0]
                         r = 0
                         for n in range(fLoBins,fbins):
                             fitsigs[fskey]['hist'].SetBinContent(n+1, fitsigs[fskey]['hist'].GetBinContent(n+1)
-                                                                 + rsigs[skey]['hist'].GetBinContent(fHi[0]+r))
+                                                    + rhsigs[skey]['hist'].GetBinContent(fHi[0]+r))
                             r += 1
                 sinit=0
                 
@@ -344,19 +359,22 @@ def _myself_(argv):
                             fbak = TH1F(fbkey, fbkey, fbins, 0, fbins)
                             fitbkgs[fbkey] = {}
                             fitbkgs[fbkey]['hist'] = fbak
+                        rlbkgs[bkey]['hist'] = copy.deepcopy(bkgs[bkey]['hist'])
+                        rlbkgs[bkey]['hist'].Rebin(loEfitRebin)
+                        if fitRebinScale: rlbkgs[bkey]['hist'].Scale(1./loEfitRebin)
                         for n in range(fLoBins):
                             fitbkgs[fbkey]['hist'].SetBinContent(n+1, fitbkgs[fbkey]['hist'].GetBinContent(n+1)
-                                                                 + bkgs[bkey]['hist'].GetBinContent(fLo[0]+n))
+                                                    + rlbkgs[bkey]['hist'].GetBinContent(fLo[0]+n))
                     if 'x'+str(i+1) in bkey and '-c'+C in bkey and '-e1' in bkey:
-                        rbkgs[bkey]['hist'] = copy.deepcopy(bkgs[bkey]['hist'])
-                        rbkgs[bkey]['hist'].Rebin(hiEfitRebin)
-                        if fitRebinScale: rbkgs[bkey]['hist'].Scale(1./hiEfitRebin)
+                        rhbkgs[bkey]['hist'] = copy.deepcopy(bkgs[bkey]['hist'])
+                        rhbkgs[bkey]['hist'].Rebin(hiEfitRebin)
+                        if fitRebinScale: rhbkgs[bkey]['hist'].Scale(1./hiEfitRebin)
                         #fbkey = bkey.split('-e1')[0]
                         fbkey = bkey.split('-c')[0]
                         r = 0
                         for n in range(fLoBins,fbins):
                             fitbkgs[fbkey]['hist'].SetBinContent(n+1, fitbkgs[fbkey]['hist'].GetBinContent(n+1)
-                                                                 + rbkgs[bkey]['hist'].GetBinContent(fHi[0]+r))
+                                                    + rhbkgs[bkey]['hist'].GetBinContent(fHi[0]+r))
                             r += 1
                 binit=0
                 
@@ -369,7 +387,7 @@ def _myself_(argv):
                 #-------------------------------------------------------------------
 
             
-
+        
         ### sort all the fbakkeys
         fbakkeys=[]
         for fbkey in fitbkgs:
@@ -388,6 +406,7 @@ def _myself_(argv):
         #fitresults = []
         fitresults = {}
         fitchi2ndf = []
+        wasFit = []
         
         ### set up the fitting object for TFractionFitter
         for i in range(8):
@@ -499,7 +518,7 @@ def _myself_(argv):
             ### Print out the fit infos
             fitresults[str(i)].append('Crystal-'+str(i+1)+' fit results')
             fitresults[str(i)].append('channels fit = '+mychans)
-            fitresults[str(i)].append('lo-E fit range = '+str(fLo[0])+' - '+str(fLo[1])+' keV')
+            fitresults[str(i)].append('lo-E fit range = '+str(fLoE[0])+' - '+str(fLoE[1])+' keV')
             fitresults[str(i)].append('hi-E fit range = '+str(fHiE[0])+' - '+str(fHiE[1])+' keV')
 
             ### set fit bounds!!!
@@ -521,6 +540,7 @@ def _myself_(argv):
             #------------------------------
             #status = fit[i].Fit()
             status = fit[-1].Fit()
+            wasFit.append(i)
             #------------------------------
 
             #chi2 = fit[i].GetChisquare()
@@ -577,10 +597,12 @@ def _myself_(argv):
         #    print line
         
         ### scale the signals to mBq/kg
-        sigs = scaleSigs63(sigkeys, sigs)
+        sigs = scaleSigs64(sigkeys, sigs)
         
         ### print the fit activities
         for i in range(8):
+            if i not in wasFit:
+                continue
             for fskey in fsigkeys:
                 if 'x'+str(i+1) in fskey:
                     finit=1
@@ -601,7 +623,7 @@ def _myself_(argv):
         save = ''
         if local: save += 'local'
         else:     save += 'on-cup'
-        save += '_'+str(runNum)
+        save += '_'+str(runtag)
         save += '_Nchan-fit'
         save += '_loEfit-'+str(int(fLo[0]))+'-'+str(int(fLo[1]))
         save += '_hiEfit-'+str(int(fHiE[0]))+'-'+str(int(fHiE[1]))
@@ -752,27 +774,25 @@ def _myself_(argv):
             chi2  = ROOT.Double(0.0)
             ndf   = ROOT.Long(0)
             igood = ROOT.Long(0)
-            try:
-                pval  = fitdata[i].Chi2TestX(ftotal[i], chi2, ndf, igood, chiopt)
-            except:
-                pass
-            #print 'INFO:','fit = crystal-'+str(i+1),'pval =',pval,'chi2 =',chi2,'ndf =',ndf,'igood =',igood
-            fitchi2ndfv2=chi2/ndf
+            fitchi2ndfv2 = -1
+            if i in wasFit:
+                pval = fitdata[i].Chi2TestX(ftotal[i], chi2, ndf, igood, chiopt)
+                fitchi2ndfv2 = chi2/ndf
             #---------------------------------------------------------
-            
             
             ftotal[i].Draw('same')
                         
             ### chi2/ndf from the fit results
             try:
+                # returned from fit
                 flegs[i].AddEntry(ftotal[i], space+'Fit Total (chi2/ndf = '+str(round(fitchi2ndf[i],2))+')', lopt)
+                # calc by Chi2TestX()
+                #flegs[i].AddEntry(ftotal[i], space+'Fit Total (chi2/ndf = '+str(round(fitchi2ndfv2,2))+')', lopt)
             except:
                 pass
-            
-            ### chi2/ndf from the Chi2TestX function
-            #flegs[i].AddEntry(ftotal[i], space+'Fit Total (chi2/ndf = '+str(round(fitchi2ndfv2,2))+')', lopt)
 
-            flegs[i].Draw('same')
+            if i in wasFit:
+                flegs[i].Draw('same')
             
             
             ### fit residuals plots
@@ -855,11 +875,14 @@ def _myself_(argv):
     total  = [[[] for x in range(numE)] for x in range(numC)]
     resid  = [[[] for x in range(numE)] for x in range(numC)]
 
-
+    plotRebin = 1
     for C, chan in enumerate(chans): 
     
         for E in range(numE):
 
+            if E: plotRebin = hiEplotRebin
+            else: plotRebin = loEplotRebin
+            
             # have the plotting be seperated out from the 8 crystal loop
             canvs[C][E] = TCanvas('canv'+chan+str(E), 'canv'+chan+str(E), 0, 0, 1400, 900)
             canvs[C][E].Divide(4,2)
@@ -871,9 +894,9 @@ def _myself_(argv):
             legs2[C][E]  = []
             zeros[C][E]  = []
 
-            total[C][E]  = makeTotal60(chan,E)
-            resid[C][E]  = makeResid60(chan,E)
-
+            total[C][E]  = makeTotal64(chan, E, params[E])
+            resid[C][E]  = makeResid64(chan, E, params[E])
+            
             font=63
             size=13
             yoff=4.2
@@ -881,13 +904,13 @@ def _myself_(argv):
             for i in range(8):
                 
                 canvs[C][E].cd(i+1)
-
+                
                 fraction = 0.3
                 pad1 = TPad('pad1'+chan+str(E),'pad1'+chan+str(E),0,fraction,1,1)
                 toppad[C][E].append(pad1)
                 pad2 = TPad('pad2'+chan+str(E),'pad2'+chan+str(E),0,0,1,fraction)
                 botpad[C][E].append(pad2)
-
+                
                 toppad[C][E][i].SetBottomMargin(0.01)
                 toppad[C][E][i].SetBorderMode(0)
                 toppad[C][E][i].SetLogy()
@@ -897,8 +920,8 @@ def _myself_(argv):
                 botpad[C][E][i].SetLogy()
                 toppad[C][E][i].Draw()
                 botpad[C][E][i].Draw()
+                
                 toppad[C][E][i].cd()
-
                 ylegstart = (ylegstop-(Nlg*ymultiply))
                 leg = TLegend(xlegstart, ylegstart, 0.94, ylegstop)
                 space = '  '
@@ -908,16 +931,18 @@ def _myself_(argv):
                 legs[C][E][i].SetNColumns(lnc)
                 lopt = 'LPE'
                 
-                for dkey in datkeys:
-                    if 'x'+str(i+1) in dkey and '-c'+chan in dkey and '-e'+str(E) in dkey:
-                        data[dkey]['hist'].GetYaxis().SetTitle('arb. counts')
+                dataFound = 0
+                for key in datkeys:
+                    if 'x'+str(i+1) in key and '-c'+chan in key and '-e'+str(E) in key:
+
+                        dkey = key
+                        dataFound = dkey
+                        
                         if dru:
                             data[dkey]['hist'].GetYaxis().SetTitle('counts / day / kg / keV  (dru)')
+                        else:
+                            data[dkey]['hist'].GetYaxis().SetTitle('arb. counts')
 
-                        #newTitle = str(longNames(i)+'  '+energyNames(E)+'  '+chanNames(chan))
-                        #newTitle = str(energyNames(E)+'  '+chanNames(chan)+'  '+longNames(i))
-                        #newTitle = str(chanNames(chan)+'  '+energyNames(E)+'  '+longNames(i))
-                        #newTitle = str(cnames(i)+'  '+energyNames(E)+'  '+chanNames(chan)+'  '+detailNames(i)+'  '+str(cmass(i))+'kg')
                         newTitle = str('crystal-'+str(i+1)+'   '
                                        +energyNames(E)+'   '
                                        +chanNames(chan)+'   '
@@ -925,33 +950,17 @@ def _myself_(argv):
                                        +str(cmass(i))+'kg')
                         
                         data[dkey]['hist'].SetTitle(newTitle)
+                        data[dkey]['hist'].Rebin(plotRebin)
+                        data[dkey]['hist'].Scale(1./float(plotRebin))
                         
-                #---------------------------------------------------------
-                if E and hiEplotRebin:
-                    for dkey in datkeys:
-                        if 'x'+str(i+1) in dkey and '-c'+chan in dkey and '-e'+str(E) in dkey:
-                            data[dkey]['hist'].Rebin(hiEplotRebin)
-                            data[dkey]['hist'].Scale(1./float(hiEplotRebin))
-
-                    total[C][E][i].Rebin(hiEplotRebin)
-                    total[C][E][i].Scale(1./float(hiEplotRebin))
-                    #total[C][E][i].Sumw2()
-
-                    resid[C][E][i].Rebin(hiEplotRebin)
-                    resid[C][E][i].Scale(1./float(hiEplotRebin))
-                    #resid[C][E][i].Sumw2()
-                #---------------------------------------------------------
-                for key in datkeys:
-                    if 'x'+str(i+1) in key and '-c'+chan in key and '-e'+str(E) in key:
-
-                        ### needed for Chi2TestX()
-                        ### and needed later too
-                        dkey = key
-
-                        #if dru1 or dru2:
-                            #druScale = data['x'+str(i+1)+'-data'+'-e'+str(E)]['druScale']
-                            #druScale = data[key]['druScale']
-
+                        total[C][E][i].Rebin(plotRebin)
+                        total[C][E][i].Scale(1./float(plotRebin))
+                        #total[C][E][i].Sumw2()
+                        
+                        resid[C][E][i].Rebin(plotRebin)
+                        resid[C][E][i].Scale(1./float(plotRebin))
+                        #resid[C][E][i].Sumw2()
+                        
                         data[dkey]['hist'].SetMarkerColor(kBlack)
                         data[dkey]['hist'].SetLineColor(kBlack)
                         data[dkey]['hist'].SetLineWidth(1)
@@ -975,9 +984,9 @@ def _myself_(argv):
 
                         data[dkey]['hist'].Draw()
                         days = round(data[dkey]['runtime']/86400.,2)
-                        #legs[C][E][i].AddEntry(data[key]['hist'], 'data', lopt)
-                        #legs[C][E][i].AddEntry(data[dkey]['hist'], 'data ('+str(days)+' days)', lopt)
+
                         legs[C][E][i].AddEntry(data[dkey]['hist'], dkey+' ('+str(days)+' days)', lopt)
+
 
                 for key in bakkeys:
                     if 'x'+str(i+1) in key and '-c'+chan in key and '-e'+str(E) in key:
@@ -993,10 +1002,10 @@ def _myself_(argv):
                         #if dru2:
                         #    bkgs[key]['hist'].Scale(druScale)
 
-                        if E and hiEplotRebin:
-                            bkgs[key]['hist'].Rebin(hiEplotRebin)
-                            bkgs[key]['hist'].Scale(1./float(hiEplotRebin))
-                            #bkgs[key]['hist'].Sumw2()
+                        #if E and plotRebin:
+                        bkgs[key]['hist'].Rebin(plotRebin)
+                        bkgs[key]['hist'].Scale(1./float(plotRebin))
+                        #bkgs[key]['hist'].Sumw2()
 
                         ### temp - don't draw MC if you just want to show data
                         bkgs[key]['hist'].Draw('same')
@@ -1007,36 +1016,37 @@ def _myself_(argv):
                         ### create the legend entry for MC
                         #legs[C][E][i].AddEntry(bkgs[key]['hist'], space+key, lopt)
 
+                
                 for key in sigkeys:
                     if 'x'+str(i+1) in key and '-c'+chan in key and '-e'+str(E) in key:
+                        if i in wasFit:
+                            # find the unique name for color and set color
+                            cname = key.split('-')[1]+'-'+key.split('-')[2]
+                            sigs[key]['hist'].SetMarkerColor(uniqColor[cname])
+                            sigs[key]['hist'].SetLineColor(uniqColor[cname])
 
-                        # find the unique name for color and set color
-                        cname = key.split('-')[1]+'-'+key.split('-')[2]
-                        sigs[key]['hist'].SetMarkerColor(uniqColor[cname])
-                        sigs[key]['hist'].SetLineColor(uniqColor[cname])
+                            # don't think I need this anymore
+                            #if dru1 or dru2:
+                            #    druScale = data['x'+str(i+1)+'-data'+'-e'+str(E)]['druScale']
+                            #if dru2:
+                            #    sigs[key]['hist'].Scale(druScale)
 
-                        # don't think I need this anymore
-                        #if dru1 or dru2:
-                        #    druScale = data['x'+str(i+1)+'-data'+'-e'+str(E)]['druScale']
-                        #if dru2:
-                        #    sigs[key]['hist'].Scale(druScale)
-
-                        if E and hiEplotRebin:
-                            sigs[key]['hist'].Rebin(hiEplotRebin)
-                            sigs[key]['hist'].Scale(1./float(hiEplotRebin))
+                            #if E and plotRebin:
+                            sigs[key]['hist'].Rebin(plotRebin)
+                            sigs[key]['hist'].Scale(1./float(plotRebin))
                             #sigs[key]['hist'].Sumw2()
 
-                        ### set range
-                        #sigs[key]['hist'].SetAxisRange(1,1000,'y')
+                            ### set range
+                            #sigs[key]['hist'].SetAxisRange(1,1000,'y')
 
-                        ### draw sigs
-                        sigs[key]['hist'].Draw('same')
+                            ### draw sigs
+                            sigs[key]['hist'].Draw('same')
 
-                        ### add MC to total MC hist
-                        total[C][E][i].Add(sigs[key]['hist'])
+                            ### add MC to total MC hist
+                            total[C][E][i].Add(sigs[key]['hist'])
 
-                        ### create the legend entry for MC
-                        #legs[C][E][i].AddEntry(sigs[key]['hist'], space+key, lopt)
+                            ### create the legend entry for MC
+                            #legs[C][E][i].AddEntry(sigs[key]['hist'], space+key, lopt)
 
 
                 # add legend entries in order
@@ -1052,7 +1062,7 @@ def _myself_(argv):
                             activ = '('+str(sigs[skey]['info']['acti'])+') '
                             legs[C][E][i].AddEntry(sigs[skey]['hist'], activ+skey, lopt)
 
-
+                
                 ### you need to scale the error by the dru scaling and/or the rebinning
                 #-----------------------------------------------------------------------------
                 #total[C][E][i].Sumw2()
@@ -1064,19 +1074,23 @@ def _myself_(argv):
                             total[C][E][i].SetBinError(n+1, total[C][E][i].GetBinError(n+1)*data[dkey]['druScale'])
                     else:
                         for n in range(total[C][E][i].GetNbinsX()):
-                            total[C][E][i].SetBinError(n+1, total[C][E][i].GetBinError(n+1)/(float(hiEplotRebin)/math.sqrt(2.)))
+                            total[C][E][i].SetBinError(n+1, total[C][E][i].GetBinError(n+1)/(float(plotRebin)/math.sqrt(2.)))
                 
                 
                 ### chi2 test
                 ### get the chi2 of the total mc compared to data
                 #=============================================================================
                 #-----------------------------------------------------------------------------
-                chi2  = ROOT.Double(0.0)
-                ndf   = ROOT.Long(0)
+                chi2  = ROOT.Double(-1)
+                ndf   = ROOT.Long(1)
                 igood = ROOT.Long(0)
-                pval  = data[dkey]['hist'].Chi2TestX(total[C][E][i], chi2, ndf, igood, chiopt)
-                #print 'INFO:',dkey,'pval =',pval,'chi2 =',chi2,'ndf =',ndf,'igood =',igood
-                #print 'INFO: Total MC chi2/ndf =',chi2/ndf
+                #print 'THIS ONE???'
+                #print dkey, data[dkey]['hist'].GetNbinsX()
+                #print total[C][E][i].GetNbinsX()
+                if dataFound:
+                    pval  = data[dkey]['hist'].Chi2TestX(total[C][E][i], chi2, ndf, igood, chiopt)
+                    #print 'INFO:',dkey,'pval =',pval,'chi2 =',chi2,'ndf =',ndf,'igood =',igood
+                    #print 'INFO: Total MC chi2/ndf =',chi2/ndf
                 #-----------------------------------------------------------------------------
                 #=============================================================================
 
@@ -1089,7 +1103,7 @@ def _myself_(argv):
                     legs[C][E][i].AddEntry(total[C][E][i], 'Total MC (chi2/ndf = '+str(round(chi2/ndf,2))+')', lopt)
 
                 ### show the legends?
-                if showlegs:
+                if showlegs and dataFound:
                     legs[C][E][i].Draw('same')
 
 
@@ -1102,9 +1116,10 @@ def _myself_(argv):
                 legs2[C][E][i].SetBorderSize(0)
                 lopt = 'LPE'
 
-                #resid[C][E][i].Divide(data['x'+str(i+1)+'-data'+'-e'+str(E)]['hist'], total[C][E][i])
-                resid[C][E][i].Divide(data[dkey]['hist'], total[C][E][i])
-                #resid[C][E][i].Divide(total[C][E][i], data['x'+str(i+1)+'-data'+'-e'+str(E)]['hist'])
+                if dataFound:
+                    #resid[C][E][i].Divide(data['x'+str(i+1)+'-data'+'-e'+str(E)]['hist'], total[C][E][i])
+                    resid[C][E][i].Divide(data[dkey]['hist'], total[C][E][i])
+                    #resid[C][E][i].Divide(total[C][E][i], data['x'+str(i+1)+'-data'+'-e'+str(E)]['hist'])
 
                 resid[C][E][i].SetTitle('')
                 resid[C][E][i].SetXTitle('Energy (keVee)')
@@ -1131,14 +1146,15 @@ def _myself_(argv):
                 resid[C][E][i].SetAxisRange(0.1,10,'y')
                 resid[C][E][i].Draw()
 
-                par = histparam(E)
+                #par = histparam(E)
+                par = params[E]
                 # set my line to '1'
                 zero = TLine(par[1], 1, par[2], 1)
                 zeros[C][E].append(zero)
                 zeros[C][E][i].SetLineColor(kRed)
                 zeros[C][E][i].SetLineWidth(1)
                 zeros[C][E][i].Draw()
-
+                
                 #legs2[C][E][i].AddEntry(resid[C][E][i],space+'data / MC',lopt)
                 #legs2[C][E][i].Draw()
                 #---------------------------------------------------------
@@ -1147,7 +1163,7 @@ def _myself_(argv):
             save = ''
             if local: save += 'local'
             else: save += 'on-cup'
-            save += '_'+str(runNum)
+            save += '_'+str(runtag)
             save += '_E'+str(E)
             save += '_loEfit-'+str(int(fLo[0]))+'-'+str(int(fLo[1]))
             save += '_hiEfit-'+str(int(fHiE[0]))+'-'+str(int(fHiE[1]))

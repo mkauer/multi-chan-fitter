@@ -12,8 +12,26 @@
 # ====================================================================
 
 
+# 2017-06-06
+# --------------------------------------------------------------------
+# ~ changed default histogram binning parameters
+# + rebinning option for low energy fits and final plots
+# + added histparam64()
+# + added makeTotal64(), makeResid64(), and globalParams()
+# ~ scaling functions now get histogram params to determine keV per bin
+# ~ tweaked histparam() to also return bins per keV
+# + added getPars(), dataDRU64(), scaleBkgs64(), and scaleSigs64()
+# ~ more cleanup for when not plotting all 8 crystals
+# ~ cleaned up code to get rid of chi2 errors
+
+
 # 2017-06-05
 # --------------------------------------------------------------------
+# + added BDT cuts in cutsBDT()
+# ~ moved old data cuts to cutsOld()
+# + added set1.dat with list of run files
+# ~ new data format in the backgrounds file
+# + added getInfo64(), build64(), buildData64(), buildMC64()
 # V switch to 64-set1-bdt.py
 # + cut release v6.3
 # + add groupNo>1 for all MC in buildMC63()

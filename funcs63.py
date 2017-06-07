@@ -6,10 +6,11 @@
 # 
 # Works with v63 and later versions
 # 
-# version: 2017-06-05
+# version: 2017-06-06
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# ~ tweaked updateBkgsFile63()
 # + add groupNo>1 for all MC in buildMC63()
 # + new updateBkgsFile63() to work with new results print out
 # + new outputModelTable63() to work with the new results format
@@ -554,10 +555,13 @@ def updateBkgsFile63(bkgsfile, resultsfile, newbkgs, BF='B'):
                 output.write(bline+'\n')
             continue
         bbits = bline.split()
-        if len(bbits) < 12:
+        #if len(bbits) < 12:
+        #    output.write(bline+'\n')
+        #    continue
+        if 'F' not in bbits[0]:
             output.write(bline+'\n')
             continue
-
+        
         replaced = 0
         for fline in fitlines:
             if not replaced:
@@ -570,23 +574,27 @@ def updateBkgsFile63(bkgsfile, resultsfile, newbkgs, BF='B'):
                     xstal = fbits[1].split('-')[0].split('x')[1]
                     loca  = fbits[1].split('-')[1]
                     chst  = fbits[1].split('-')[2].split('_')[0]
-                    chsp  = 0
-                    if len(fbits[1].split('-')[2].split('_')) > 1:
-                        chsp = fbits[1].split('-')[2].split('_')[1]
-                    acti = str(fbits[3])
-
-                    if bbits[2] == xstal and bbits[3] == loca and bbits[5].startswith(chst):
-                        if chsp and bbits[6] == chsp:
-                            for i in range(len(bbits)):
-                                if i == 0:
-                                    output.write(BF+'\t')
-                                elif i == 7:
-                                    if acti != '0.0': output.write(acti+'\t')
-                                    else: output.write(bbits[i]+'\t')
-                                else:
-                                    output.write(bbits[i]+'\t')
-                            output.write('\n')
-                            replaced = 1
+                    chsp  = fbits[1].split('-')[2].split('_')[1]
+                    #print 'HELP',chst
+                    #chsp  = 0
+                    #if len(fbits[1].split('-')[2].split('_')) > 1:
+                    #    chsp = fbits[1].split('-')[2].split('_')[1]
+                    acti  = str(fbits[-2])
+                    
+                    #if bbits[2] == xstal and bbits[3] == loca and bbits[5].startswith(chst):
+                    if bbits[2] == xstal and bbits[3] == loca and bbits[5] == chst and bbits[6] == chsp:
+                        #if chsp and bbits[6] == chsp:
+                        for i in range(len(bbits)):
+                            if i == 0:
+                                output.write(BF+'\t')
+                            elif i == 7:
+                                if acti != '0.0': output.write(acti+'\t')
+                                else: output.write(bbits[i]+'\t')
+                            else:
+                                output.write(bbits[i]+'\t')
+                        output.write('\n')
+                        replaced = 1
+                        """
                         elif not chsp:
                             for i in range(len(bbits)):
                                 if i == 0:
@@ -598,16 +606,22 @@ def updateBkgsFile63(bkgsfile, resultsfile, newbkgs, BF='B'):
                                     output.write(bbits[i]+'\t')
                             output.write('\n')
                             replaced = 1
+                        
                         else:
                             print '!!!!!!! - could not match'
                             print fline
                             print 'to'
                             print bline
                             print ''
-
+                        """
         
         if not replaced:
             output.write(bline+'\n')
+            print '!!!!!!! - could not match'
+            print fline
+            print 'to'
+            print bline
+            print ''
 
     output.close()
     return

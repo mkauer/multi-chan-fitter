@@ -6,10 +6,11 @@
 # 
 # Works with v60 and later versions
 # 
-# version: 2017-03-24
+# version: 2017-06-06
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# ~ tweaked histparam() to also return bins per keV
 # ~ fixed sim path+name so not to combine lsveto and lsvetoair
 # ~ tweaked longNames() in funcs60.py
 # + detailNames() to funcs60.py
@@ -38,6 +39,26 @@ from copy import deepcopy
 import numpy as np
 from ROOT import *
 import ROOT
+
+
+def histparam(energy=0):
+    """
+    Global default histogram parameters for:
+    number of bins, min, max, and bins/keV
+    """
+    if energy:
+        hmin = 0
+        hmax = 3000
+        bpkv = 1
+        bins = (hmax-hmin)*bpkv
+    else:
+        hmin = 0
+        hmax = 200
+        bpkv = 1
+        bins = (hmax-hmin)*bpkv
+
+    pars = [bins, hmin, hmax, bpkv]
+    return pars
 
 
 def getInfo60(line, freuse=0, fchans=0):
@@ -956,21 +977,6 @@ def sortKeys(data, bkgs, sigs):
     sigkeys.sort()
 
     return datkeys, bakkeys, sigkeys
-
-
-def histparam(energy=0):
-    """
-    Histogram parameters for number of bins, min, and max in keV
-    """
-    if energy:
-        hmin = 0
-        hmax = 3000
-        bins = (hmax-hmin)
-    else:
-        hmin = 0
-        hmax = 200
-        bins = (hmax-hmin)
-    return [bins, hmin, hmax]
 
 
 def names(i):
