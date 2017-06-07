@@ -83,15 +83,15 @@
 # dbfr   chan     xstl     loca       isof      chst      chsp      acti       erro      lbnd      hbnd        file
 # ----   -----    ----    --------   ------    ------    ------    --------   -------   -------   ------      --------
 
-#D       MS        1     ./set1.dat      set1      ./root-join-read/build64/build64-set1.root
-#D       MS        2     ./set1.dat      set1      ./root-join-read/build64/build64-set1.root
-#D       MS        3     ./set1.dat      set1      ./root-join-read/build64/build64-set1.root
-#D       MS        4     ./set1.dat      set1      ./root-join-read/build64/build64-set1.root
-#D       MS        5     ./set1.dat      set1      ./root-join-read/build64/build64-set1.root
-#D       MS        6     ./set1.dat      set1      ./root-join-read/build64/build64-set1.root
+D       MS        1     ./set1.dat      set1      ./root-join-read/build64/build64-set1.root
+D       MS        2     ./set1.dat      set1      ./root-join-read/build64/build64-set1.root
+D       MS        3     ./set1.dat      set1      ./root-join-read/build64/build64-set1.root
+D       MS        4     ./set1.dat      set1      ./root-join-read/build64/build64-set1.root
+D       MS        5     ./set1.dat      set1      ./root-join-read/build64/build64-set1.root
+D       MS        6     ./set1.dat      set1      ./root-join-read/build64/build64-set1.root
 D       MS        7     ./set1.dat      set1      ./root-join-read/build64/build64-set1.root
-#D       MS        8     ./set1.dat      set1      ./root-join-read/build64/build64-set1.root
-"""
+D       MS        8     ./set1.dat      set1      ./root-join-read/build64/build64-set1.root
+
 B	MS	1	internal	Na22	Na22	GRND	1.27	1e-4	0.69	1.31	./root-join-read/build61/build61-internalNa22-master.root	
 B	MS	2	internal	Na22	Na22	GRND	1.03	1e-4	0.69	1.31	./root-join-read/build61/build61-internalNa22-master.root	
 B	MS	3	internal	Na22	Na22	GRND	1.05	1e-4	0.69	1.31	./root-join-read/build61/build61-internalNa22-master.root	
@@ -145,96 +145,96 @@ B	MS	5	internal	Te127m	Te127	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build61/b
 B	MS	6	internal	Te127m	Te127	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build61/build61-internalTe127m-master.root	
 B	MS	7	internal	Te127m	Te127	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build61/build61-internalTe127m-master.root	
 B	MS	8	internal	Te127m	Te127	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build61/build61-internalTe127m-master.root	
+
+B       MS      1       internal    K40       K40       GRND      1.302     1e-4     0.69     1.31       ./root-join-read/build63/build63-internalK40_GRND-master.root
+B       MS      2       internal    K40       K40       GRND      2.481     1e-4     0.69     1.31       ./root-join-read/build63/build63-internalK40_GRND-master.root
+B       MS      3       internal    K40       K40       GRND      1.233     1e-4     0.69     1.31       ./root-join-read/build63/build63-internalK40_GRND-master.root
+B       MS      4       internal    K40       K40       GRND      1.185     1e-4     0.69     1.31       ./root-join-read/build63/build63-internalK40_GRND-master.root
+B       MS      5       internal    K40       K40       GRND      2.604     1e-4     0.69     1.31       ./root-join-read/build63/build63-internalK40_GRND-master.root
+B       MS      6       internal    K40       K40       GRND      0.366     1e-4     0.69     1.31       ./root-join-read/build63/build63-internalK40_GRND-master.root
+B       MS      7       internal    K40       K40       GRND      0.564     1e-4     0.69     1.31       ./root-join-read/build63/build63-internalK40_GRND-master.root
+B       MS      8       internal    K40       K40       GRND      1.685     1e-4     0.69     1.31       ./root-join-read/build63/build63-internalK40_GRND-master.root
 """
-#B       MS      1       internal    K40       K40       GRND      1.302     1e-4     0.69     1.31       ./root-join-read/build63/build63-internalK40_GRND-master.root
-#B       MS      2       internal    K40       K40       GRND      2.481     1e-4     0.69     1.31       ./root-join-read/build63/build63-internalK40_GRND-master.root
-#B       MS      3       internal    K40       K40       GRND      1.233     1e-4     0.69     1.31       ./root-join-read/build63/build63-internalK40_GRND-master.root
-#B       MS      4       internal    K40       K40       GRND      1.185     1e-4     0.69     1.31       ./root-join-read/build63/build63-internalK40_GRND-master.root
-#B       MS      5       internal    K40       K40       GRND      2.604     1e-4     0.69     1.31       ./root-join-read/build63/build63-internalK40_GRND-master.root
-#B       MS      6       internal    K40       K40       GRND      0.366     1e-4     0.69     1.31       ./root-join-read/build63/build63-internalK40_GRND-master.root
-F       MS      7       internal    K40       K40       GRND      0.564     1e-4     0.69     1.31       ./root-join-read/build63/build63-internalK40_GRND-master.root
-#B       MS      8       internal    K40       K40       GRND      1.685     1e-4     0.69     1.31       ./root-join-read/build63/build63-internalK40_GRND-master.root
+B       MS      1       internal    U238      U238      GRND    2.48e-4   1e-4     0.69     1.31       ./root-join-read/build63/build63-internalU238_GRND-master.root
+B       MS      2       internal    U238      U238      GRND    1.48e-3   1e-4     0.69     1.31       ./root-join-read/build63/build63-internalU238_GRND-master.root
+B       MS      3       internal    U238      U238      GRND    4.96e-4   1e-4     0.69     1.31       ./root-join-read/build63/build63-internalU238_GRND-master.root
+B       MS      4       internal    U238      U238      GRND    4.96e-4   1e-4     0.69     1.31       ./root-join-read/build63/build63-internalU238_GRND-master.root
+B       MS      5       internal    U238      U238      GRND    1.48e-3   1e-4     0.69     1.31       ./root-join-read/build63/build63-internalU238_GRND-master.root
+B       MS      6       internal    U238      U238      GRND    2.23e-4   1e-4     0.69     1.31       ./root-join-read/build63/build63-internalU238_GRND-master.root
+B       MS      7       internal    U238      U238      GRND    2.23e-4   1e-4     0.69     1.31       ./root-join-read/build63/build63-internalU238_GRND-master.root
+B       MS      8       internal    U238      U238      GRND    1.48e-3   1e-4     0.69     1.31       ./root-join-read/build63/build63-internalU238_GRND-master.root
+"""
+B       MS      1       internal    U238      U238      Pb210    2.48e-4   1e-4     0.69     1.31       ./root-join-read/build63/build63-internalU238_Pb210-master.root
+B       MS      2       internal    U238      U238      Pb210    1.48e-3   1e-4     0.69     1.31       ./root-join-read/build63/build63-internalU238_Pb210-master.root
+B       MS      3       internal    U238      U238      Pb210    4.96e-4   1e-4     0.69     1.31       ./root-join-read/build63/build63-internalU238_Pb210-master.root
+B       MS      4       internal    U238      U238      Pb210    4.96e-4   1e-4     0.69     1.31       ./root-join-read/build63/build63-internalU238_Pb210-master.root
+B       MS      5       internal    U238      U238      Pb210    1.48e-3   1e-4     0.69     1.31       ./root-join-read/build63/build63-internalU238_Pb210-master.root
+B       MS      6       internal    U238      U238      Pb210    2.23e-4   1e-4     0.69     1.31       ./root-join-read/build63/build63-internalU238_Pb210-master.root
+B       MS      7       internal    U238      U238      Pb210    2.23e-4   1e-4     0.69     1.31       ./root-join-read/build63/build63-internalU238_Pb210-master.root
+B       MS      8       internal    U238      U238      Pb210    1.48e-3   1e-4     0.69     1.31       ./root-join-read/build63/build63-internalU238_Pb210-master.root
 
-#B       MS      1       internal    U238      U238      GRND    2.48e-4   1e-4     0.69     1.31       ./root-join-read/build63/build63-internalU238_GRND-master.root
-#B       MS      2       internal    U238      U238      GRND    1.48e-3   1e-4     0.69     1.31       ./root-join-read/build63/build63-internalU238_GRND-master.root
-#B       MS      3       internal    U238      U238      GRND    4.96e-4   1e-4     0.69     1.31       ./root-join-read/build63/build63-internalU238_GRND-master.root
-#B       MS      4       internal    U238      U238      GRND    4.96e-4   1e-4     0.69     1.31       ./root-join-read/build63/build63-internalU238_GRND-master.root
-#B       MS      5       internal    U238      U238      GRND    1.48e-3   1e-4     0.69     1.31       ./root-join-read/build63/build63-internalU238_GRND-master.root
-#B       MS      6       internal    U238      U238      GRND    2.23e-4   1e-4     0.69     1.31       ./root-join-read/build63/build63-internalU238_GRND-master.root
-#B       MS      7       internal    U238      U238      GRND    2.23e-4   1e-4     0.69     1.31       ./root-join-read/build63/build63-internalU238_GRND-master.root
-#B       MS      8       internal    U238      U238      GRND    1.48e-3   1e-4     0.69     1.31       ./root-join-read/build63/build63-internalU238_GRND-master.root
+B	MS	1	internal	Pb210	Pb210	GRND	3.529	1e-4	0.69	1.31	./root-join-read/build63/build63-internalPb210_GRND-master.root	
+B	MS	2	internal	Pb210	Pb210	GRND	2.404	1e-4	0.69	1.31	./root-join-read/build63/build63-internalPb210_GRND-master.root	
+B	MS	3	internal	Pb210	Pb210	GRND	0.996	1e-4	0.69	1.31	./root-join-read/build63/build63-internalPb210_GRND-master.root	
+B	MS	4	internal	Pb210	Pb210	GRND	0.969	1e-4	0.69	1.31	./root-join-read/build63/build63-internalPb210_GRND-master.root	
+B	MS	5	internal	Pb210	Pb210	GRND	2.649	1e-4	0.69	1.31	./root-join-read/build63/build63-internalPb210_GRND-master.root	
+B	MS	6	internal	Pb210	Pb210	GRND	1.991	1e-4	0.69	1.31	./root-join-read/build63/build63-internalPb210_GRND-master.root	
+B	MS	7	internal	Pb210	Pb210	GRND	2.017	1e-4	0.69	1.31	./root-join-read/build63/build63-internalPb210_GRND-master.root	
+B	MS	8	internal	Pb210	Pb210	GRND	2.648	1e-4	0.69	1.31	./root-join-read/build63/build63-internalPb210_GRND-master.root	
 
-#B       MS      1       internal    U238      U238      Pb210    2.48e-4   1e-4     0.69     1.31       ./root-join-read/build63/build63-internalU238_Pb210-master.root
-#B       MS      2       internal    U238      U238      Pb210    1.48e-3   1e-4     0.69     1.31       ./root-join-read/build63/build63-internalU238_Pb210-master.root
-#B       MS      3       internal    U238      U238      Pb210    4.96e-4   1e-4     0.69     1.31       ./root-join-read/build63/build63-internalU238_Pb210-master.root
-#B       MS      4       internal    U238      U238      Pb210    4.96e-4   1e-4     0.69     1.31       ./root-join-read/build63/build63-internalU238_Pb210-master.root
-#B       MS      5       internal    U238      U238      Pb210    1.48e-3   1e-4     0.69     1.31       ./root-join-read/build63/build63-internalU238_Pb210-master.root
-#B       MS      6       internal    U238      U238      Pb210    2.23e-4   1e-4     0.69     1.31       ./root-join-read/build63/build63-internalU238_Pb210-master.root
-F       MS      7       internal    U238      U238      Pb210    2.23e-4   1e-4     0.69     1.31       ./root-join-read/build63/build63-internalU238_Pb210-master.root
-#B       MS      8       internal    U238      U238      Pb210    1.48e-3   1e-4     0.69     1.31       ./root-join-read/build63/build63-internalU238_Pb210-master.root
+B       MS      1       internal    Th232     Th232     GRND    5.37e-3   1e-4     0.69     1.31       ./root-join-read/build63/build63-internalTh232_GRND-master.root
+B       MS      2       internal    Th232     Th232     GRND    2.60e-3   1e-4     0.69     1.31       ./root-join-read/build63/build63-internalTh232_GRND-master.root
+B       MS      3       internal    Th232     Th232     GRND    1.80e-3   1e-4     0.69     1.31       ./root-join-read/build63/build63-internalTh232_GRND-master.root
+B       MS      4       internal    Th232     Th232     GRND    1.23e-3   1e-4     0.69     1.31       ./root-join-read/build63/build63-internalTh232_GRND-master.root
+B       MS      5       internal    Th232     Th232     GRND    9.60e-3   1e-4     0.69     1.31       ./root-join-read/build63/build63-internalTh232_GRND-master.root
+B       MS      6       internal    Th232     Th232     GRND    2.30e-3   1e-4     0.69     1.31       ./root-join-read/build63/build63-internalTh232_GRND-master.root
+B       MS      7       internal    Th232     Th232     GRND    2.50e-3   1e-4     0.69     1.31       ./root-join-read/build63/build63-internalTh232_GRND-master.root
+B       MS      8       internal    Th232     Th232     GRND    5.70e-3   1e-4     0.69     1.31       ./root-join-read/build63/build63-internalTh232_GRND-master.root
 
-#B	MS	1	internal	Pb210	Pb210	GRND	3.529	1e-4	0.69	1.31	./root-join-read/build63/build63-internalPb210_GRND-master.root	
-#B	MS	2	internal	Pb210	Pb210	GRND	2.404	1e-4	0.69	1.31	./root-join-read/build63/build63-internalPb210_GRND-master.root	
-#B	MS	3	internal	Pb210	Pb210	GRND	0.996	1e-4	0.69	1.31	./root-join-read/build63/build63-internalPb210_GRND-master.root	
-#B	MS	4	internal	Pb210	Pb210	GRND	0.969	1e-4	0.69	1.31	./root-join-read/build63/build63-internalPb210_GRND-master.root	
-#B	MS	5	internal	Pb210	Pb210	GRND	2.649	1e-4	0.69	1.31	./root-join-read/build63/build63-internalPb210_GRND-master.root	
-#B	MS	6	internal	Pb210	Pb210	GRND	1.991	1e-4	0.69	1.31	./root-join-read/build63/build63-internalPb210_GRND-master.root	
-F	MS	7	internal	Pb210	Pb210	GRND	2.017	1e-4	0.69	1.31	./root-join-read/build63/build63-internalPb210_GRND-master.root	
-#B	MS	8	internal	Pb210	Pb210	GRND	2.648	1e-4	0.69	1.31	./root-join-read/build63/build63-internalPb210_GRND-master.root	
+B	MS	1	internalsurf	Pb210	Pb210	GRND	0.138	1e-4	0.69	1.31	./root-join-read/build61/build61-internalsurfPb210-master.root	
+B	MS	2	internalsurf	Pb210	Pb210	GRND	0.138	1e-4	0.69	1.31	./root-join-read/build61/build61-internalsurfPb210-master.root	
+B	MS	3	internalsurf	Pb210	Pb210	GRND	0.209	1e-4	0.69	1.31	./root-join-read/build61/build61-internalsurfPb210-master.root	
+B	MS	4	internalsurf	Pb210	Pb210	GRND	0.262	1e-4	0.69	1.31	./root-join-read/build61/build61-internalsurfPb210-master.root	
+B	MS	5	internalsurf	Pb210	Pb210	GRND	0.262	1e-4	0.69	1.31	./root-join-read/build61/build61-internalsurfPb210-master.root	
+B	MS	6	internalsurf	Pb210	Pb210	GRND	0.174	1e-4	0.69	1.31	./root-join-read/build61/build61-internalsurfPb210-master.root	
+B	MS	7	internalsurf	Pb210	Pb210   GRND	0.138	1e-4	0.69	1.31	./root-join-read/build61/build61-internalsurfPb210-master.root	
+B	MS	8	internalsurf	Pb210	Pb210	GRND	0.262	1e-4	0.69	1.31	./root-join-read/build61/build61-internalsurfPb210-master.root	
 
-#B       MS      1       internal    Th232     Th232     GRND    5.37e-3   1e-4     0.69     1.31       ./root-join-read/build63/build63-internalTh232_GRND-master.root
-#B       MS      2       internal    Th232     Th232     GRND    2.60e-3   1e-4     0.69     1.31       ./root-join-read/build63/build63-internalTh232_GRND-master.root
-#B       MS      3       internal    Th232     Th232     GRND    1.80e-3   1e-4     0.69     1.31       ./root-join-read/build63/build63-internalTh232_GRND-master.root
-#B       MS      4       internal    Th232     Th232     GRND    1.23e-3   1e-4     0.69     1.31       ./root-join-read/build63/build63-internalTh232_GRND-master.root
-#B       MS      5       internal    Th232     Th232     GRND    9.60e-3   1e-4     0.69     1.31       ./root-join-read/build63/build63-internalTh232_GRND-master.root
-#B       MS      6       internal    Th232     Th232     GRND    2.30e-3   1e-4     0.69     1.31       ./root-join-read/build63/build63-internalTh232_GRND-master.root
-F       MS      7       internal    Th232     Th232     GRND    2.50e-3   1e-4     0.69     1.31       ./root-join-read/build63/build63-internalTh232_GRND-master.root
-#B       MS      8       internal    Th232     Th232     GRND    5.70e-3   1e-4     0.69     1.31       ./root-join-read/build63/build63-internalTh232_GRND-master.root
+B        MS        1       pmt         K40       K40       GRND      58.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtK40_GRND-master.root
+B        MS        2       pmt         K40       K40       GRND      58.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtK40_GRND-master.root
+B        MS        3       pmt         K40       K40       GRND      58.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtK40_GRND-master.root
+B        MS        4       pmt         K40       K40       GRND      58.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtK40_GRND-master.root
+B        MS        5       pmt         K40       K40       GRND      58.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtK40_GRND-master.root
+B        MS        6       pmt         K40       K40       GRND      58.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtK40_GRND-master.root
+B        MS        7       pmt         K40       K40       GRND      58.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtK40_GRND-master.root
+B        MS        8       pmt         K40       K40       GRND      58.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtK40_GRND-master.root
 
-#B	MS	1	internalsurf	Pb210	Pb210	GRND	0.138	1e-4	0.69	1.31	./root-join-read/build61/build61-internalsurfPb210-master.root	
-#B	MS	2	internalsurf	Pb210	Pb210	GRND	0.138	1e-4	0.69	1.31	./root-join-read/build61/build61-internalsurfPb210-master.root	
-#B	MS	3	internalsurf	Pb210	Pb210	GRND	0.209	1e-4	0.69	1.31	./root-join-read/build61/build61-internalsurfPb210-master.root	
-#B	MS	4	internalsurf	Pb210	Pb210	GRND	0.262	1e-4	0.69	1.31	./root-join-read/build61/build61-internalsurfPb210-master.root	
-#B	MS	5	internalsurf	Pb210	Pb210	GRND	0.262	1e-4	0.69	1.31	./root-join-read/build61/build61-internalsurfPb210-master.root	
-#B	MS	6	internalsurf	Pb210	Pb210	GRND	0.174	1e-4	0.69	1.31	./root-join-read/build61/build61-internalsurfPb210-master.root	
-F	MS	7	internalsurf	Pb210	Pb210   GRND	0.138	1e-4	0.69	1.31	./root-join-read/build61/build61-internalsurfPb210-master.root	
-#B	MS	8	internalsurf	Pb210	Pb210	GRND	0.262	1e-4	0.69	1.31	./root-join-read/build61/build61-internalsurfPb210-master.root	
-
-#B        MS        1       pmt         K40       K40       GRND      58.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtK40_GRND-master.root
-#B        MS        2       pmt         K40       K40       GRND      58.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtK40_GRND-master.root
-#B        MS        3       pmt         K40       K40       GRND      58.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtK40_GRND-master.root
-#B        MS        4       pmt         K40       K40       GRND      58.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtK40_GRND-master.root
-#B        MS        5       pmt         K40       K40       GRND      58.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtK40_GRND-master.root
-#B        MS        6       pmt         K40       K40       GRND      58.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtK40_GRND-master.root
-F        MS        7       pmt         K40       K40       GRND      58.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtK40_GRND-master.root
-#B        MS        8       pmt         K40       K40       GRND      58.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtK40_GRND-master.root
-
-#B        MS        1       extpmt      K40       K40       GRND      58.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-extpmtK40_GRND-master.root
-#B        MS        2       extpmt      K40       K40       GRND      58.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-extpmtK40_GRND-master.root
-#B        MS        3       extpmt      K40       K40       GRND      58.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-extpmtK40_GRND-master.root
-#B        MS        4       extpmt      K40       K40       GRND      58.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-extpmtK40_GRND-master.root
-#B        MS        5       extpmt      K40       K40       GRND      58.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-extpmtK40_GRND-master.root
-#B        MS        6       extpmt      K40       K40       GRND      58.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-extpmtK40_GRND-master.root
+B        MS        1       extpmt      K40       K40       GRND      58.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-extpmtK40_GRND-master.root
+B        MS        2       extpmt      K40       K40       GRND      58.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-extpmtK40_GRND-master.root
+B        MS        3       extpmt      K40       K40       GRND      58.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-extpmtK40_GRND-master.root
+B        MS        4       extpmt      K40       K40       GRND      58.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-extpmtK40_GRND-master.root
+B        MS        5       extpmt      K40       K40       GRND      58.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-extpmtK40_GRND-master.root
+B        MS        6       extpmt      K40       K40       GRND      58.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-extpmtK40_GRND-master.root
 B        MS        7       extpmt      K40       K40       GRND      58.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-extpmtK40_GRND-master.root
-#B        MS        8       extpmt      K40       K40       GRND      58.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-extpmtK40_GRND-master.root
+B        MS        8       extpmt      K40       K40       GRND      58.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-extpmtK40_GRND-master.root
 
-#B        MS        1       pmt         U238      U238      Pb210    25.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtU238_Pb210-master.root
-#B        MS        2       pmt         U238      U238      Pb210    25.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtU238_Pb210-master.root
-#B        MS        3       pmt         U238      U238      Pb210    25.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtU238_Pb210-master.root
-#B        MS        4       pmt         U238      U238      Pb210    25.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtU238_Pb210-master.root
-#B        MS        5       pmt         U238      U238      Pb210    25.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtU238_Pb210-master.root
-#B        MS        6       pmt         U238      U238      Pb210    25.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtU238_Pb210-master.root
-F        MS        7       pmt         U238      U238      Pb210    25.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtU238_Pb210-master.root
-#B        MS        8       pmt         U238      U238      Pb210    25.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtU238_Pb210-master.root
+B        MS        1       pmt         U238      U238      Pb210    25.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtU238_Pb210-master.root
+B        MS        2       pmt         U238      U238      Pb210    25.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtU238_Pb210-master.root
+B        MS        3       pmt         U238      U238      Pb210    25.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtU238_Pb210-master.root
+B        MS        4       pmt         U238      U238      Pb210    25.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtU238_Pb210-master.root
+B        MS        5       pmt         U238      U238      Pb210    25.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtU238_Pb210-master.root
+B        MS        6       pmt         U238      U238      Pb210    25.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtU238_Pb210-master.root
+B        MS        7       pmt         U238      U238      Pb210    25.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtU238_Pb210-master.root
+B        MS        8       pmt         U238      U238      Pb210    25.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtU238_Pb210-master.root
 
-#B        MS        1       pmt         U238      Pb210     GRND    1.76      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtPb210_GRND-master.root
-#B        MS        2       pmt         U238      Pb210     GRND    1.76      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtPb210_GRND-master.root
-#B        MS        3       pmt         U238      Pb210     GRND    1.76      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtPb210_GRND-master.root
-#B        MS        4       pmt         U238      Pb210     GRND    1.76      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtPb210_GRND-master.root
-#B        MS        5       pmt         U238      Pb210     GRND    1.76      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtPb210_GRND-master.root
-#B        MS        6       pmt         U238      Pb210     GRND    1.76      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtPb210_GRND-master.root
-F        MS        7       pmt         U238      Pb210     GRND    1.76      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtPb210_GRND-master.root
-#B        MS        8       pmt         U238      Pb210     GRND    1.76      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtPb210_GRND-master.root
+B        MS        1       pmt         U238      Pb210     GRND    1.76      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtPb210_GRND-master.root
+B        MS        2       pmt         U238      Pb210     GRND    1.76      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtPb210_GRND-master.root
+B        MS        3       pmt         U238      Pb210     GRND    1.76      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtPb210_GRND-master.root
+B        MS        4       pmt         U238      Pb210     GRND    1.76      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtPb210_GRND-master.root
+B        MS        5       pmt         U238      Pb210     GRND    1.76      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtPb210_GRND-master.root
+B        MS        6       pmt         U238      Pb210     GRND    1.76      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtPb210_GRND-master.root
+B        MS        7       pmt         U238      Pb210     GRND    1.76      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtPb210_GRND-master.root
+B        MS        8       pmt         U238      Pb210     GRND    1.76      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtPb210_GRND-master.root
 """
 B        MS        1       pmt         U238      U238      GRND    25.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtU238_GRND-master.root
 B        MS        2       pmt         U238      U238      GRND    25.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtU238_GRND-master.root
@@ -245,34 +245,33 @@ B        MS        6       pmt         U238      U238      GRND    25.0      1e-
 B        MS        7       pmt         U238      U238      GRND    25.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtU238_GRND-master.root
 B        MS        8       pmt         U238      U238      GRND    25.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtU238_GRND-master.root
 """
-
-#B        MS        1       extpmt      U238      U238      GRND    25.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-extpmtU238_GRND-master.root
-#B        MS        2       extpmt      U238      U238      GRND    25.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-extpmtU238_GRND-master.root
-#B        MS        3       extpmt      U238      U238      GRND    25.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-extpmtU238_GRND-master.root
-#B        MS        4       extpmt      U238      U238      GRND    25.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-extpmtU238_GRND-master.root
-#B        MS        5       extpmt      U238      U238      GRND    25.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-extpmtU238_GRND-master.root
-#B        MS        6       extpmt      U238      U238      GRND    25.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-extpmtU238_GRND-master.root
+B        MS        1       extpmt      U238      U238      GRND    25.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-extpmtU238_GRND-master.root
+B        MS        2       extpmt      U238      U238      GRND    25.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-extpmtU238_GRND-master.root
+B        MS        3       extpmt      U238      U238      GRND    25.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-extpmtU238_GRND-master.root
+B        MS        4       extpmt      U238      U238      GRND    25.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-extpmtU238_GRND-master.root
+B        MS        5       extpmt      U238      U238      GRND    25.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-extpmtU238_GRND-master.root
+B        MS        6       extpmt      U238      U238      GRND    25.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-extpmtU238_GRND-master.root
 B        MS        7       extpmt      U238      U238      GRND    25.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-extpmtU238_GRND-master.root
-#B        MS        8       extpmt      U238      U238      GRND    25.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-extpmtU238_GRND-master.root
+B        MS        8       extpmt      U238      U238      GRND    25.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-extpmtU238_GRND-master.root
 
-#B        MS        1       pmt         Th232     Th232     GRND    12.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtTh232_GRND-master.root
-#B        MS        2       pmt         Th232     Th232     GRND    12.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtTh232_GRND-master.root
-#B        MS        3       pmt         Th232     Th232     GRND    12.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtTh232_GRND-master.root
-#B        MS        4       pmt         Th232     Th232     GRND    12.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtTh232_GRND-master.root
-#B        MS        5       pmt         Th232     Th232     GRND    12.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtTh232_GRND-master.root
-#B        MS        6       pmt         Th232     Th232     GRND    12.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtTh232_GRND-master.root
-F        MS        7       pmt         Th232     Th232     GRND    12.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtTh232_GRND-master.root
-#B        MS        8       pmt         Th232     Th232     GRND    12.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtTh232_GRND-master.root
+B        MS        1       pmt         Th232     Th232     GRND    12.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtTh232_GRND-master.root
+B        MS        2       pmt         Th232     Th232     GRND    12.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtTh232_GRND-master.root
+B        MS        3       pmt         Th232     Th232     GRND    12.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtTh232_GRND-master.root
+B        MS        4       pmt         Th232     Th232     GRND    12.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtTh232_GRND-master.root
+B        MS        5       pmt         Th232     Th232     GRND    12.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtTh232_GRND-master.root
+B        MS        6       pmt         Th232     Th232     GRND    12.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtTh232_GRND-master.root
+B        MS        7       pmt         Th232     Th232     GRND    12.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtTh232_GRND-master.root
+B        MS        8       pmt         Th232     Th232     GRND    12.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-pmtTh232_GRND-master.root
 
-#B        MS        1       extpmt      Th232     Th232     GRND    12.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-extpmtTh232_GRND-master.root
-#B        MS        2       extpmt      Th232     Th232     GRND    12.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-extpmtTh232_GRND-master.root
-#B        MS        3       extpmt      Th232     Th232     GRND    12.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-extpmtTh232_GRND-master.root
-#B        MS        4       extpmt      Th232     Th232     GRND    12.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-extpmtTh232_GRND-master.root
-#B        MS        5       extpmt      Th232     Th232     GRND    12.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-extpmtTh232_GRND-master.root
-#B        MS        6       extpmt      Th232     Th232     GRND    12.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-extpmtTh232_GRND-master.root
+B        MS        1       extpmt      Th232     Th232     GRND    12.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-extpmtTh232_GRND-master.root
+B        MS        2       extpmt      Th232     Th232     GRND    12.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-extpmtTh232_GRND-master.root
+B        MS        3       extpmt      Th232     Th232     GRND    12.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-extpmtTh232_GRND-master.root
+B        MS        4       extpmt      Th232     Th232     GRND    12.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-extpmtTh232_GRND-master.root
+B        MS        5       extpmt      Th232     Th232     GRND    12.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-extpmtTh232_GRND-master.root
+B        MS        6       extpmt      Th232     Th232     GRND    12.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-extpmtTh232_GRND-master.root
 B        MS        7       extpmt      Th232     Th232     GRND    12.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-extpmtTh232_GRND-master.root
-#B        MS        8       extpmt      Th232     Th232     GRND    12.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-extpmtTh232_GRND-master.root
-"""
+B        MS        8       extpmt      Th232     Th232     GRND    12.0      1e-4     0.11     5.11       ./root-join-read/build63/build63-extpmtTh232_GRND-master.root
+
 B        MS        1       lsveto      U238      U238      GRND     8.64e-2   1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoU238-master.root
 B        MS        2       lsveto      U238      U238      GRND     8.64e-2   1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoU238-master.root
 B        MS        3       lsveto      U238      U238      GRND     8.64e-2   1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoU238-master.root
@@ -290,8 +289,7 @@ B        MS        5       lsveto      Th232     Th232     GRND     1.62e-2   1e
 B        MS        6       lsveto      Th232     Th232     GRND     1.62e-2   1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoTh232-master.root
 B        MS        7       lsveto      Th232     Th232     GRND     1.62e-2   1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoTh232-master.root
 B        MS        8       lsveto      Th232     Th232     GRND     1.62e-2   1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoTh232-master.root
-
-
+"""
 B        MS        1       lsveto      K40       K40       GRND     6.19     1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoK40-master.root
 B        MS        2       lsveto      K40       K40       GRND     6.19     1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoK40-master.root
 B        MS        3       lsveto      K40       K40       GRND     6.19     1e-4     0.69     1.31       ./root-join-read/build61/build61-lsvetoK40-master.root

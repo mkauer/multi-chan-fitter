@@ -9,7 +9,7 @@ V = 'v64'
 
 # Use set1 files and new BDT event selection
 # 
-# version: 2017-06-06
+# version: 2017-06-07
 #
 # see CHANGELOG for changes
 ######################################################################
@@ -39,6 +39,8 @@ note=0
 
 ### backgrounds file
 mcfile = 'backgrounds640.txt'
+mcfile = 'backgrounds640-test.txt'
+
 
 ### force reuse of all joined rootfiles in mcfile? [0,1,2]
 ### nice for debugging
@@ -58,6 +60,8 @@ mychans = 'MS'
 
 ### show the legends? [0,1]
 showlegs = 1
+### plot components in groups? [0,1]
+groups = 1
 
 ### use fit bounds from backgrounds file? [0,1,2]
 ### [0] use 'otherBnds' specified below (as a scaling)
@@ -76,8 +80,8 @@ fLoE = [ 5,  90]
 fHiE = [200, 2300]
 
 ### rebin the histos for fitting [1,inf]
-loEfitRebin = 10
-hiEfitRebin = 20
+loEfitRebin = 6
+hiEfitRebin = 10
 
 ### plotting ranges
 ### lo and hi energy ranges
@@ -85,8 +89,8 @@ loer = [0,  100]
 hier = [0, 3000]
 
 ### rebin the final plots [1,inf]
-loEplotRebin = 10
-hiEplotRebin = 20
+loEplotRebin = 6
+hiEplotRebin = 10
 
 ### individual plots for all crystals? [0,1]
 indi = 1
@@ -123,13 +127,8 @@ chiopt = 'WU'
 
 ### automated selections...
 #==================================================
-### figure out if running on laptop or at CUP
-### master.cunpa.ibs
-local = amLocal()
-### 0 = show-plots -- 1 = dont-show-plots
 batch = 0
-if not local:
-    batch = 1
+if onCup(): batch = 1
 gROOT.SetBatch(batch)
 #==================================================
 
@@ -195,7 +194,10 @@ def _myself_(argv):
     for i,key in enumerate(uniqAll):
         uniqColor[key] = cis[i]
 
-
+    ### colors for groups
+    #gcs, gis = rainbow(5)
+    gis = [kRed, kOrange, kGreen+1, kBlue, kViolet]
+    
     ### legend length = MC + data + total
     Nlg = Nc+2
     if Nlg > 8: lnc = 2
@@ -211,7 +213,7 @@ def _myself_(argv):
     #=================================================================
 
     # NOTE: These need to be integers!!!
-    # Can probably set all TH1F to TH1I
+    # Can probably set all TH1F to TH1I?
     
     #fLo = [10, 100]
     #fLo = [20, 180]
@@ -621,8 +623,8 @@ def _myself_(argv):
 
             
         save = ''
-        if local: save += 'local'
-        else:     save += 'on-cup'
+        #if local: save += 'local'
+        #else:     save += 'on-cup'
         save += '_'+str(runtag)
         save += '_Nchan-fit'
         save += '_loEfit-'+str(int(fLo[0]))+'-'+str(int(fLo[1]))
@@ -875,6 +877,9 @@ def _myself_(argv):
     total  = [[[] for x in range(numE)] for x in range(numC)]
     resid  = [[[] for x in range(numE)] for x in range(numC)]
 
+    gbkgs  = [[[{} for x in range(8)] for x in range(numE)] for x in range(numC)]
+    gsigs  = [[[{} for x in range(8)] for x in range(numE)] for x in range(numC)]
+    
     plotRebin = 1
     for C, chan in enumerate(chans): 
     
@@ -922,8 +927,12 @@ def _myself_(argv):
                 botpad[C][E][i].Draw()
                 
                 toppad[C][E][i].cd()
-                ylegstart = (ylegstop-(Nlg*ymultiply))
-                leg = TLegend(xlegstart, ylegstart, 0.94, ylegstop)
+                if groups:
+                    leg = TLegend(0.55, 0.65, 0.94, ylegstop)
+                    lnc = 2
+                else:
+                    ylegstart = (ylegstop-(Nlg*ymultiply))
+                    leg = TLegend(xlegstart, ylegstart, 0.94, ylegstop)
                 space = '  '
                 legs[C][E].append(leg)
                 legs[C][E][i].SetFillColor(0)
@@ -960,7 +969,9 @@ def _myself_(argv):
                         resid[C][E][i].Rebin(plotRebin)
                         resid[C][E][i].Scale(1./float(plotRebin))
                         #resid[C][E][i].Sumw2()
-                        
+
+                        #data[dkey]['hist'].SetMarkerStyle(8)
+                        #data[dkey]['hist'].SetMarkerSize(.6)
                         data[dkey]['hist'].SetMarkerColor(kBlack)
                         data[dkey]['hist'].SetLineColor(kBlack)
                         data[dkey]['hist'].SetLineWidth(1)
@@ -981,11 +992,17 @@ def _myself_(argv):
                         if dru:
                             if E: data[dkey]['hist'].SetAxisRange(2e-3, 2e1, 'y')
                             else: data[dkey]['hist'].SetAxisRange(2e-2, 3e2, 'y')
-
-                        data[dkey]['hist'].Draw()
+                        
+                        #popt = 'P E1'
+                        #popt = 'HIST'
+                        popt = ''
+                        data[dkey]['hist'].Draw(popt)
                         days = round(data[dkey]['runtime']/86400.,2)
 
-                        legs[C][E][i].AddEntry(data[dkey]['hist'], dkey+' ('+str(days)+' days)', lopt)
+                        if groups:
+                            legs[C][E][i].AddEntry(data[dkey]['hist'], 'Data', lopt)
+                        else:
+                            legs[C][E][i].AddEntry(data[dkey]['hist'], dkey+' ('+str(days)+' days)', lopt)
 
 
                 for key in bakkeys:
@@ -1001,14 +1018,26 @@ def _myself_(argv):
                         #    druScale = data['x'+str(i+1)+'-data'+'-e'+str(E)]['druScale']
                         #if dru2:
                         #    bkgs[key]['hist'].Scale(druScale)
-
+                        
                         #if E and plotRebin:
                         bkgs[key]['hist'].Rebin(plotRebin)
                         bkgs[key]['hist'].Scale(1./float(plotRebin))
                         #bkgs[key]['hist'].Sumw2()
-
-                        ### temp - don't draw MC if you just want to show data
-                        bkgs[key]['hist'].Draw('same')
+                        
+                        if groups:
+                            if bkgs[key]['info']['group'] == 'none':
+                                try:
+                                    gbkgs[C][E][i]['none'][key] = bkgs[key]['hist']
+                                except:
+                                    gbkgs[C][E][i]['none'] = {}
+                                    gbkgs[C][E][i]['none'][key] = bkgs[key]['hist']
+                            else:
+                                try:
+                                    gbkgs[C][E][i][bkgs[key]['info']['group']].Add(bkgs[key]['hist'])
+                                except:
+                                    gbkgs[C][E][i][bkgs[key]['info']['group']] = bkgs[key]['hist']
+                        else:
+                            bkgs[key]['hist'].Draw('same')
 
                         ### add MC to total MC hist
                         total[C][E][i].Add(bkgs[key]['hist'])
@@ -1016,7 +1045,6 @@ def _myself_(argv):
                         ### create the legend entry for MC
                         #legs[C][E][i].AddEntry(bkgs[key]['hist'], space+key, lopt)
 
-                
                 for key in sigkeys:
                     if 'x'+str(i+1) in key and '-c'+chan in key and '-e'+str(E) in key:
                         if i in wasFit:
@@ -1038,29 +1066,52 @@ def _myself_(argv):
 
                             ### set range
                             #sigs[key]['hist'].SetAxisRange(1,1000,'y')
-
-                            ### draw sigs
-                            sigs[key]['hist'].Draw('same')
-
+                            
+                            if groups:
+                                if sigs[key]['info']['group'] == 'none':
+                                    try:
+                                        gbkgs[C][E][i]['none'][key] = sigs[key]['hist']
+                                    except:
+                                        gbkgs[C][E][i]['none'] = {}
+                                        gbkgs[C][E][i]['none'][key] = sigs[key]['hist']
+                                else:
+                                    try:
+                                        gbkgs[C][E][i][sigs[key]['info']['group']].Add(sigs[key]['hist'])
+                                    except:
+                                        gbkgs[C][E][i][sigs[key]['info']['group']] = sigs[key]['hist']
+                            else:
+                                sigs[key]['hist'].Draw('same')
+                            
                             ### add MC to total MC hist
                             total[C][E][i].Add(sigs[key]['hist'])
 
                             ### create the legend entry for MC
                             #legs[C][E][i].AddEntry(sigs[key]['hist'], space+key, lopt)
 
-
-                # add legend entries in order
-                for name in uniqAll:
-                    for bkey in bakkeys:
-                        if name in bkey and 'x'+str(i+1) in bkey and '-c'+chan in bkey and '-e'+str(E) in bkey:
-                            #legs[C][E][i].AddEntry(bkgs[bkey]['hist'], space+bkey, lopt)
-                            activ = '('+str(bkgs[bkey]['info']['acti'])+') '
-                            legs[C][E][i].AddEntry(bkgs[bkey]['hist'], activ+bkey, lopt)
-                    for skey in sigkeys:
-                        if name in skey and 'x'+str(i+1) in skey and '-c'+chan in skey and '-e'+str(E) in skey:
-                            #legs[C][E][i].AddEntry(sigs[skey]['hist'], space+skey, lopt)
-                            activ = '('+str(sigs[skey]['info']['acti'])+') '
-                            legs[C][E][i].AddEntry(sigs[skey]['hist'], activ+skey, lopt)
+                if groups:
+                    for c, group in enumerate(gbkgs[C][E][i]):
+                        if group == 'none':
+                            for key in gbkgs[C][E][i]['none']:
+                                gbkgs[C][E][i]['none'][key].Draw('same')
+                                legs[C][E][i].AddEntry(gbkgs[C][E][i]['none'][key], key, lopt)
+                        else:
+                            gbkgs[C][E][i][group].SetMarkerColor(gis[c])
+                            gbkgs[C][E][i][group].SetLineColor(gis[c])
+                            gbkgs[C][E][i][group].Draw('same')
+                            legs[C][E][i].AddEntry(gbkgs[C][E][i][group], group, lopt)
+                else:
+                    # add legend entries in order
+                    for name in uniqAll:
+                        for bkey in bakkeys:
+                            if name in bkey and 'x'+str(i+1) in bkey and '-c'+chan in bkey and '-e'+str(E) in bkey:
+                                #legs[C][E][i].AddEntry(bkgs[bkey]['hist'], space+bkey, lopt)
+                                activ = '('+str(bkgs[bkey]['info']['acti'])+') '
+                                legs[C][E][i].AddEntry(bkgs[bkey]['hist'], activ+bkey, lopt)
+                        for skey in sigkeys:
+                            if name in skey and 'x'+str(i+1) in skey and '-c'+chan in skey and '-e'+str(E) in skey:
+                                #legs[C][E][i].AddEntry(sigs[skey]['hist'], space+skey, lopt)
+                                activ = '('+str(sigs[skey]['info']['acti'])+') '
+                                legs[C][E][i].AddEntry(sigs[skey]['hist'], activ+skey, lopt)
 
                 
                 ### you need to scale the error by the dru scaling and/or the rebinning
@@ -1097,10 +1148,13 @@ def _myself_(argv):
 
 
                 #-----------------------------------------------------------------------------
-                if len(bkgs) + len(sigs) > 0:        
+                if len(bkgs) + len(sigs) > 0:
+                    total[C][E][i].SetLineWidth(1)
                     total[C][E][i].Draw('same')
-                    #legs[C][E][i].AddEntry(total[C][E][i], 'Total MC', lopt)
-                    legs[C][E][i].AddEntry(total[C][E][i], 'Total MC (chi2/ndf = '+str(round(chi2/ndf,2))+')', lopt)
+                    if groups:
+                        legs[C][E][i].AddEntry(total[C][E][i], 'Total', lopt)
+                    else:
+                        legs[C][E][i].AddEntry(total[C][E][i], 'Total MC (chi2/ndf = '+str(round(chi2/ndf,2))+')', lopt)
 
                 ### show the legends?
                 if showlegs and dataFound:
@@ -1161,8 +1215,8 @@ def _myself_(argv):
             
 
             save = ''
-            if local: save += 'local'
-            else: save += 'on-cup'
+            #if local: save += 'local'
+            #else: save += 'on-cup'
             save += '_'+str(runtag)
             save += '_E'+str(E)
             save += '_loEfit-'+str(int(fLo[0]))+'-'+str(int(fLo[1]))

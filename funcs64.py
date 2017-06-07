@@ -6,10 +6,18 @@
 # 
 # Works with v64 and later versions
 # 
-# version: 2017-06-06
+# version: 2017-06-07
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# + added setGroup() to start organizing things into groups
+# + added chan [A] cuts to cutsBDT()
+# ~ cleaned up some print statements
+# ~ itterate over channels after reading in rootfiles - this should
+#   speed up the processing time
+# + added onCup() and baseDir() to make paths a little easier
+# ~ change data[key][runtime] to use real duration
+# + added getDuration() to get duration of data rootfiles
 # + added histparam64()
 # + added makeTotal64(), makeResid64(), and globalParams()
 # ~ add _GRND back to histo keys
@@ -44,12 +52,12 @@ def histparam64(E):
     if E:
         hmin = 0
         hmax = 4000
-        bpkv = 2
+        bpkv = 1
         bins = (hmax-hmin)*bpkv
     else:
         hmin = 0
         hmax = 200
-        bpkv = 10
+        bpkv = 12
         bins = (hmax-hmin)*bpkv
 
     pars = [bins, hmin, hmax, bpkv]
@@ -91,7 +99,11 @@ def getInfo64(line, freuse=0, fchans=0):
     
     # reuse rootfile name
     if 'root' in str(bits[-1]):
-        info['rootfile'] = str(bits[-1])
+        temp = str(bits[-1])
+        for i in range(2):
+            if '.' in temp[0] or '/' in temp[0]:
+                temp = temp[1:]
+        info['rootfile'] = temp
     else:
         info['rootfile'] = 0
 
@@ -99,7 +111,11 @@ def getInfo64(line, freuse=0, fchans=0):
     if 'D' in info['type']:
         
         ### data file
-        info['file'] = str(bits[3])
+        temp = str(bits[3])
+        for i in range(2):
+            if '.' in temp[0] or '/' in temp[0]:
+                temp = temp[1:]
+        info['file'] = temp
         
         ### data tag
         info['tag'] = str(bits[4])
@@ -145,8 +161,22 @@ def getInfo64(line, freuse=0, fchans=0):
         #else: key += '-'+info['chst']+'_'+info['chsp']
         key += '-'+info['chst']+'_'+info['chsp']
         info['key'] = key
+
+        ### assign a plotting group to the isotope-location
+        info['group'] = setGroup(info)
         
     return info
+
+
+def setGroup(info):
+    if info['loca'] == 'internal':
+        if info['isof'] in ['I125','Te121m','Te123m','Te125m','Te127']:
+            return 'cosmo'
+        else: return 'internal'
+    elif 'pmt' in info['loca']: return 'pmt'
+    elif 'surf' in info['loca']: return 'surf'
+    elif info['loca'] == 'lsveto': return 'lsveto'
+    else: return 'none'
 
 
 def build64(infile = 'backgrounds640.txt', freuse=0, fchans=0):
@@ -176,21 +206,24 @@ def build64(infile = 'backgrounds640.txt', freuse=0, fchans=0):
 
 
 def buildData64(info, data):
-
+    
+    base = baseDir()
+    """
     for c in info['chans']:
         info['chan'] = c
-        
         if info['reuse']:
-
-            if info['rootfile']:
-                rootfile = info['rootfile']
-                #print 'INFO: using rootfile -->',rootfile
-            else:
-                print 'WARNING: no rootfile specified in backgrounds file'
+    """
+    if info['reuse']:
+        for c in info['chans']:
+            info['chan'] = c
+            
+            if not info['rootfile']:
+                print 'ERROR: no rootfile specified in backgrounds file'
                 sys.exit()
 
+            rootfile = base+info['rootfile']
             if not os.path.exists(rootfile):
-                print 'WARNING: rootfile not found -->', rootfile
+                print 'ERROR: rootfile not found -->', rootfile
                 sys.exit()
 
             rfile = TFile(rootfile, "READ")
@@ -207,57 +240,49 @@ def buildData64(info, data):
                     data[key]['pars'] = getPars(data[key]['hist'])
                     #data[key]['hist'].Sumw2()
                 except:
-                    print "WARNING: could not find hist -->",key
+                    print "ERROR: could not find hist -->",key
                     sys.exit()
                     
                 try:
                     data[key]['subruns_hist'] = deepcopy(TH1F(rfile.Get(key+'_subruns')))
                     data[key]['subruns'] = data[key]['subruns_hist'].GetBinContent(1)
                 except:
-                    print "WARNING: could not find subruns_hist -->",key+'_subruns'
+                    print "ERROR: could not find subruns_hist -->",key+'_subruns'
                     sys.exit()
                     
                 try:
                     data[key]['runtime_hist'] = deepcopy(TH1F(rfile.Get(key+'_runtime')))
                     data[key]['runtime'] = data[key]['runtime_hist'].GetBinContent(1)
                 except:
-                    print "WARNING: could not find runtime_hist -->",key+'_runtime'
+                    print "ERROR: could not find runtime_hist -->",key+'_runtime'
                     sys.exit()
 
-        else:
+    else:
+        
+        runfile = base+info['file']
+        #print 'looking for -->',runfile
+        if not os.path.exists(runfile):
+            print 'ERROR: runfile not found -->', runfile
+            sys.exit()
 
-            runfile = info['file']
-            print 'looking for -->',runfile
-            if not os.path.exists(runfile):
-                print 'WARNING: runfile not found -->', runfile
-                sys.exit()
+        runtime = 0.
+        nfiles = 0
+        chain = TChain("ntp","")
+        for line in readFile(runfile):
+            if not onCup(): fpath = '/home/mkauer/COSINE/CUP/mc-fitting'+line
+            else: fpath = line
+            #print 'looking for -->',fpath
+            if not os.path.exists(fpath):
+                continue
+            else:
+                #print 'adding -->',fpath
+                runtime += getDuration(fpath)
+                nfiles += chain.Add(fpath)
 
-            local = amLocal()
-
-            nfiles=0
-            chain = TChain("ntp","")
-            for line in readFile(runfile):
-                if local: fpath = '/home/mkauer/COSINE/CUP/mc-fitting'+line
-                else: fpath = line
-
-                #print 'looking for -->',fpath
-                
-                if not os.path.exists(fpath):
-                    continue
-                else:
-                    print 'adding -->',fpath
-                    nfiles += chain.Add(fpath)
-
-            
-            ### will need to do this dynamically eventually
-            ### run 1324 has 1 hour subruns
-            ### run 1544 has 2 hour subruns
-            ### run 1546 has 2 hour subruns
-            subrunTime = float(2.) # in hours
-            
-            
-            if nfiles > 0:
-                print nfiles,'data files found'
+        if nfiles > 0:
+            print 'INFO:',nfiles,'files found for data',info['tag']
+            for c in info['chans']:
+                info['chan'] = c
                 for e in range(2):
 
                     # DEFINE HIST AND KEY
@@ -289,15 +314,10 @@ def buildData64(info, data):
                     
                     # DEFINE CUTS
                     #-----------------------------------------------------------------------
-                    ### grab event selection criteria
-                    # old cuts
-                    masterCut = cutsOld(i,c,e)
-
-                    ### BDT cuts
-                    # only low energy
-                    # only crystal 7 so far
                     if (i+1 == 7) and (e == 0):
                         masterCut = cutsBDT(i,c,e)
+                    else:
+                        masterCut = cutsOld(i,c,e)
                     #-----------------------------------------------------------------------
                     
                     
@@ -319,7 +339,7 @@ def buildData64(info, data):
                     data[key]['subruns_hist'] = temp2
                     data[key]['subruns'] = subruns
                     
-                    runtime = subruns*subrunTime*60.*60.
+                    #runtime = subruns*subrunTime*60.*60.
                     key3 = key+'_runtime'
                     temp3 = TH1F(key3,'runtime',1,0,1)
                     temp3.SetBinContent(1, runtime)
@@ -327,25 +347,29 @@ def buildData64(info, data):
                     data[key]['runtime'] = runtime
                     #-----------------------------------------------------------------------
                     
-            else:
-                print 'ERROR: No data files found... quitting...'
-                sys.exit()
+        else:
+            print 'ERROR: No data files found... quitting...'
+            sys.exit()
 
     return data
 
 
 def cutsOld(i,c,e):
     
+    ### Pushpa's noise cut
+    noiseCut = TCut('('+noiseCuts60(i,e)+')')
+    
     if c == 'A':
-        chanCut = TCut('(1)')
-
+        #chanCut = TCut('(1)')
+        return noiseCut
+    
     elif c == 'S':
         edepcuts = ''
         nclustercuts = ''
         for j in range(8):
             if j != i:
                 #edepcuts += '('+edep+' <= 0.0) && '
-                nclustercuts += '(crystal'+str(j+1)+'.'+'nc'+' < 4) && '
+                nclustercuts += '(crystal'+str(j+1)+'.nc < 4) && '
 
         ### remove extra '&&' or '||'
         #edepcuts = edepcuts[:-4]
@@ -360,13 +384,16 @@ def cutsOld(i,c,e):
         ### Pushpa cuts
         chanCut = TCut('(('+nclustercuts+') && ('+lsvetocut+'))')
 
+        masterCut = TCut('('+chanCut.GetTitle()+' && '+noiseCut.GetTitle()+')')
+        return masterCut
+    
     elif c == 'M':
         edepcuts = ''
         nclustercuts = ''
         for j in range(8):
             if j != i:
                 #edepcuts += '(crystal'+str(j+1)+'.'+str(edep)+' > 0.0) || '
-                nclustercuts += '(crystal'+str(j+1)+'.'+'nc'+' >= 4) || '
+                nclustercuts += '(crystal'+str(j+1)+'.nc > 4) || '
 
         ### remove extra '&&' or '||'
         #edepcuts = edepcuts[:-4]
@@ -381,26 +408,31 @@ def cutsOld(i,c,e):
         ### Pushpa cuts
         chanCut = TCut('(('+nclustercuts+') || ('+lsvetocut+'))')
 
+        masterCut = TCut('('+chanCut.GetTitle()+' && '+noiseCut.GetTitle()+')')
+        return masterCut
+
     else:
         print 'ERROR: I do not know what to do with channel -->',c
         print 'Available channels are [A]All-hits, [S]Single-hits, [M]Multi-hits'
         sys.exit()
-
-    ### Pushpa's noise cut
-    noiseCut = TCut('('+noiseCuts60(i,e)+')')
-
-    ### combine all cuts
-    masterCut = TCut('('+chanCut.GetTitle()+' && '+noiseCut.GetTitle()+')')
-    
-    return masterCut
 
 
 def cutsBDT(i,c,e):
     """
     From: https://cupwiki.ibs.re.kr/Kims/SET1EventSelection
     """
-    
-    if c == 'S':
+    if c == 'A':
+        coinc  = '(BLSVeto_isCoincident == 1)'
+        muons  = '(BMuon_totalDeltaT0/1.e6 > 30)'
+        bdt    = '(crystal'+str(i+1)+'.bdt > -0.03)'
+        charge = '(crystal'+str(i+1)+'.rqcn >= 0)'
+        nc     = '(pmt'+str(i+1)+'1.nc > 1 && pmt'+str(i+1)+'2.nc > 1)'
+        
+        #masterCut = TCut('(1)')
+        masterCut = TCut(coinc+' && '+muons+' && '+bdt+' && '+charge+' && '+nc)
+        return masterCut
+        
+    elif c == 'S':
         coinc  = '(BLSVeto_isCoincident == 1)'
         muons  = '(BMuon_totalDeltaT0/1.e6 > 30)'
         bdt    = '(crystal'+str(i+1)+'.bdt > -0.03)'
@@ -444,22 +476,25 @@ def cutsBDT(i,c,e):
 
 def buildMC64(info, mc):
 
+    base = baseDir()
+    """
     for c in info['chans']:
         info['chan'] = c
-    
         if info['reuse']:
-            if info['rootfile']:
-                rootfile = info['rootfile']
-            else:
-                print 'WARNING: no rootfile specified in backgrounds file'
-                sys.exit()
-                #return mc
+    """
+    if info['reuse']:
+        for c in info['chans']:
+            info['chan'] = c
             
-            if not os.path.exists(rootfile):
-                print 'WARNING: rootfile not found -->', rootfile
+            if not info['rootfile']:
+                print 'ERROR: no rootfile specified in backgrounds file'
                 sys.exit()
-                #return mc
-
+            
+            rootfile = base+info['rootfile']
+            if not os.path.exists(rootfile):
+                print 'ERROR: rootfile not found -->', rootfile
+                sys.exit()
+            
             rfile = TFile(rootfile, "READ")
 
             for e in range(2):
@@ -474,7 +509,7 @@ def buildMC64(info, mc):
                     mc[key]['pars'] = getPars(mc[key]['hist'])
                     #mc[key]['hist'].Sumw2()
                 except:
-                    print "WARNING: could not find hist -->",key
+                    print "ERROR: could not find hist -->",key
                     sys.exit()
                     
                 try:
@@ -482,37 +517,38 @@ def buildMC64(info, mc):
                     #mc[key]['generated'] = mc[key]['generated_hist'].GetBinContent(1)
                     mc[key]['generated'] = mc[key]['generated_hist'].GetEntries()
                 except:
-                    print "WARNING: could not find generated_hist -->",key+'_generated'
+                    print "ERROR: could not find generated_hist -->",key+'_generated'
                     sys.exit()
-                    
         
-        else:
-            local = amLocal()
-            
-            ### top level path to the MC
-            path1 = 0
-            if local: path1 = '/home/mkauer/COSINE/CUP/mc-fitting/sim/newGeometry/'
-            else: path1 = '/data/MC/KIMS-NaI/user-scratch/sim/processed/newGeometry/'
+    else:
 
-            location = info['loca']
-            if location == 'extpmt': location = 'pmt'
-            
-            ### 2nd level path to the specific files
-            #path2 = info['isof']+'/set2/'+'*'+info['loca']+info['isof']+'*root'
-            path2 = info['isof']+'/set2/'+'*'+location+info['isof']+'*root'
-            
-            # but there will be a few exceptions...
-            if location == 'internalsurf':
-                #path2 = info['isof']+'/set2/surf/10um/'+'*'+info['loca']+'*'+info['isof']+'*'+'C'+str(info['xstl'])+'*root'
-                path2 = info['isof']+'/set2/surf/10um/'+'*'+location+'*'+info['isof']+'*'+'C'+str(info['xstl'])+'*root'
-            
-            
-            chain  = TChain("MC","")
-            nfiles = 0
-            nfiles = chain.Add(path1+path2)
-            
-            if nfiles > 0:
-                print nfiles,'MC files found for', info['loca'], info['isof']
+        if onCup():
+            path1 = '/data/MC/KIMS-NaI/user-scratch/sim/processed/newGeometry/'
+        else:
+            path1 = '/home/mkauer/COSINE/CUP/mc-fitting/sim/newGeometry/'
+
+        location = info['loca']
+        if location == 'extpmt': location = 'pmt'
+
+        ### 2nd level path to the specific files
+        #path2 = info['isof']+'/set2/'+'*'+info['loca']+info['isof']+'*root'
+        path2 = info['isof']+'/set2/'+'*'+location+info['isof']+'*root'
+
+        # but there will be a few exceptions...
+        if location == 'internalsurf':
+            #path2 = info['isof']+'/set2/surf/10um/'+'*'+info['loca']+'*'+info['isof']+'*'+'C'+str(info['xstl'])+'*root'
+            path2 = info['isof']+'/set2/surf/10um/'+'*'+location+'*'+info['isof']+'*'+'C'+str(info['xstl'])+'*root'
+
+        chain  = TChain("MC","")
+        nfiles = 0
+        nfiles = chain.Add(path1+path2)
+        
+        if nfiles > 0:
+            print 'INFO:',nfiles,'files found for', info['loca'], info['isof']
+
+            for c in info['chans']:
+                info['chan'] = c
+                
                 for e in range(2):
                     
                     # DEFINE HIST AND KEY
@@ -650,13 +686,16 @@ def buildMC64(info, mc):
                     #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                     brokenChainCut = TCut('(1)')
                     groupCuts = groupNum62(info)
+                    
                     if groupCuts:
+                        """
                         print 'INFO:',info['isof'],\
                             'chan start =',info['chst'],\
                             'chan stop =',info['chsp'],\
                             'groupNo start >=',groupCuts[0],\
                             'groupNo stop <',groupCuts[1]
-
+                        """
+                        
                         ### this is what i used before but it might be wrong??
                         ### it should probably be 'groupNo < number' instead of 'groupNo <= number' ???
                         # include last group
@@ -763,10 +802,11 @@ def buildMC64(info, mc):
                     #mc[key]['hist'].Sumw2()
 
                     
-            else:
-                #print 'WARNING:', loca, isof, 'not found...'
-                print 'ERROR: No MC files found for',info['loca'], info['isof'],'... quitting...'
-                sys.exit()
+        else:
+            #print 'WARNING:', loca, isof, 'not found...'
+            print 'ERROR: No MC files found for',info['loca'], info['isof'],'... quitting...'
+            sys.exit()
+    
     return mc
 
 
@@ -966,4 +1006,49 @@ def globalParams(data):
     params = [par0, par1]
     return params
 
+
+def getDuration(rootfile):
+
+    chain = TChain('ntp','')
+    chain.Add(rootfile)
+    entries = chain.GetEntries()
+
+    ### only second precission
+    #var = "eventsec"
+    #norm = 1.
+
+    ### has nano-sec precission
+    var = "trgtime"
+    norm = 1.e9
+    
+    chain.GetEntry(0)
+    start = float(chain.GetLeaf(var).GetValue())
+    chain.GetEntry(entries-1)
+    stop = float(chain.GetLeaf(var).GetValue())
+    duration = (stop-start)/norm
+    #print var, start, stop, duration
+    
+    return duration
+
+
+def baseDir():
+    """
+    Define your main basedir paths here
+    """
+    if onCup():
+        return '/home/mkauer/mc-fitting/'
+    else:
+        return '/home/mkauer/COSINE/CUP/mc-fitting/'
+
+
+def onCup():
+    """
+    Check to see if running on cup
+    """
+    import socket
+    ### master.cunpa.ibs
+    if 'cunpa' in str(socket.gethostname()):
+        return 1
+    else:
+        return 0
 

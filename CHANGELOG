@@ -12,6 +12,21 @@
 # ====================================================================
 
 
+# 2017-06-07
+# --------------------------------------------------------------------
+# ~ tweak legend size
+# + add groups to the legends
+# + start working on plotting bkgs and sigs in groups
+# + added setGroup() to start organizing things into groups
+# + added chan [A] cuts to cutsBDT()
+# ~ cleaned up some print statements
+# ~ itterate over channels after reading in rootfiles - this should
+#   speed up the processing time
+# + added onCup() and baseDir() to make paths a little easier
+# ~ change data[key][runtime] to use real duration
+# + added getDuration() to get duration of data rootfiles
+
+
 # 2017-06-06
 # --------------------------------------------------------------------
 # ~ changed default histogram binning parameters
