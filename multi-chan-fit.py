@@ -3,11 +3,12 @@
 ######################################################################
 # Matt Kauer - mkauer@physics.wisc.edu
 ######################################################################
-# 64-set1-bdt.py
+# 70-extend-histos.py
 
-V = 'v64'
+V = 'v70'
 
-# Use set1 files and new BDT event selection
+# Extend single/multi hit histos instead of stacking them
+# This should reduce biasing
 # 
 # version: 2017-06-14
 #
