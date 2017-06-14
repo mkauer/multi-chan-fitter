@@ -38,8 +38,8 @@ note=0
 #note='OLD'
 
 ### backgrounds file
-#mcfile = 'backgrounds640.txt'
-mcfile = 'backgrounds640-C7.txt'
+mcfile = 'backgrounds640.txt'
+#mcfile = 'backgrounds640-C7.txt'
 
 
 ### force reuse of all joined rootfiles in mcfile? [0,1,2]
