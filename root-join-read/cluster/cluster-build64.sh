@@ -1,7 +1,9 @@
 #!/bin/bash
 
-# 2017-06-06
+# 2017-06-14
 
+# + add LIST of files to cat and process
+# ~ split data into crystal numbers
 # ~ changed default histogram parameters
 # ~ BIG bug fixed - wasn't selecting volumeCut for non-internal mc!
 # + added support for including other pmts ie 'extpmt'
@@ -37,8 +39,12 @@ clustdir=$base/cluster
 builddir=$base/$build
 joinscript=$base/$join
 
-for mcfile in internalK40_GRND internalTh232_GRND pmtK40_GRND pmtTh232_GRND 
+#for mcfile in `ls $builddir`
+#for mcfile in dataset1
+#for num in 1 2 3 4 5 6 7 8
+for mcfile in `cat LIST`
 do
+    #mcfile="c$num-dataset1"
     file="$clustdir/$build-$mcfile.sh"
     cat > $file <<EOF
 #!/bin/bash

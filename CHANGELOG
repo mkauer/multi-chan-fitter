@@ -12,6 +12,27 @@
 # ====================================================================
 
 
+# 2017-06-14
+# --------------------------------------------------------------------
+# + cut release v6.4
+# + added new calib64() and resol64()
+
+
+# 2017-06-12
+# --------------------------------------------------------------------
+# ~ split data in build64 into crystal number to speed up processing
+# ~ added the alpha cut back in
+# ~ pushpa fixed merging issue with rqtD1_5
+
+
+# 2017-06-08
+# --------------------------------------------------------------------
+# ~ temp got rid of alpha cut
+# ~ should NOT be doing groupNo > 1 cut
+# ~ change cut to crystalX.rqcn > -1
+# ~ fixed a few more plotting bugs
+
+
 # 2017-06-07
 # --------------------------------------------------------------------
 # ~ tweak legend size

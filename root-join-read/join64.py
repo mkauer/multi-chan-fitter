@@ -35,7 +35,7 @@ def _myself_(argv):
     if len(sys.argv)>1:
         mcfile = str(sys.argv[1])
     else:
-        print "ERROR: specify a backgrounds file or 'data' for data"
+        print "ERROR: specify a backgrounds or data file"
         return
     
     build = 'build64'
@@ -47,13 +47,10 @@ def _myself_(argv):
     
     fname = mcfile.split('/')[-1]
     
-    if local: ver = 'test'
-    else: ver = 'master'
-    
-    rootfile = build+'-'+fname+'-'+ver+'.root'
+    rootfile = build+'-'+fname+'.root'
     rfile = TFile(outpath+rootfile, 'RECREATE')
     
-    data1, bkgs1, sigs1 = build64(mcfile, 2, 'MSA')
+    data, bkgs, sigs = build64(mcfile, 2, 'MS')
     
     rfile.Write()
     rfile.Close()

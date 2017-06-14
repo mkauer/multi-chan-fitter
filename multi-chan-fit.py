@@ -9,7 +9,7 @@ V = 'v64'
 
 # Use set1 files and new BDT event selection
 # 
-# version: 2017-06-07
+# version: 2017-06-14
 #
 # see CHANGELOG for changes
 ######################################################################
@@ -35,11 +35,11 @@ from funcs64 import *
 
 ### extra notes to add to the saved plot file names? [0, 'something']
 note=0
-#note='rebin'
+#note='OLD'
 
 ### backgrounds file
-mcfile = 'backgrounds640.txt'
-mcfile = 'backgrounds640-test.txt'
+#mcfile = 'backgrounds640.txt'
+mcfile = 'backgrounds640-C7.txt'
 
 
 ### force reuse of all joined rootfiles in mcfile? [0,1,2]
@@ -47,7 +47,7 @@ mcfile = 'backgrounds640-test.txt'
 ### [0] default - use whatever is specified in the backgrounds file
 ### [1] forces reusing of all data/bkgs/sigs
 ### [2] forces NOT reusing any data/bkgs/sigs
-reuse = 0
+reuse = 1
 
 ### force a particular set of hit chan data? [0,1,2,3]
 ### nice for debugging
@@ -61,13 +61,13 @@ mychans = 'MS'
 ### show the legends? [0,1]
 showlegs = 1
 ### plot components in groups? [0,1]
-groups = 1
+ingroups = 1
 
 ### use fit bounds from backgrounds file? [0,1,2]
 ### [0] use 'otherBnds' specified below (as a scaling)
 ### [1] use the bounds specified in backgrounds file (as percent)
 ### [2] use 'newBounds' specified below (as percent)
-useBounds = 2
+useBounds = 1
 ### else use these other bounds (as a raw scaling factor)
 otherBnds = [0.01, 10]
 ### new bounds to overwrite from file (as a percent of activity)
@@ -75,21 +75,21 @@ newBounds = [0.0, 100]
 
 ### fitting ranges
 ### lo and hi energy fit ranges
-#fLo  = [ 5,  90]
-fLoE = [ 5,  90]
-fHiE = [200, 2300]
+fLoE = [  6,   96]
+fHiE = [200, 2000]
 
 ### rebin the histos for fitting [1,inf]
-loEfitRebin = 6
+loEfitRebin = 4
 hiEfitRebin = 10
 
 ### plotting ranges
 ### lo and hi energy ranges
 loer = [0,  100]
 hier = [0, 3000]
+eran = [loer, hier]
 
 ### rebin the final plots [1,inf]
-loEplotRebin = 6
+loEplotRebin = 4
 hiEplotRebin = 10
 
 ### individual plots for all crystals? [0,1]
@@ -211,24 +211,16 @@ def _myself_(argv):
     ### set fit bounds for the fit
     #=================================================================
     #=================================================================
-
     # NOTE: These need to be integers!!!
-    # Can probably set all TH1F to TH1I?
-    
-    #fLo = [10, 100]
-    #fLo = [20, 180]
     bpkvLo = params[0][3]
     fLo = [int(fLoE[0]*bpkvLo/loEfitRebin), int(fLoE[1]*bpkvLo/loEfitRebin)]
     fLoBins = fLo[1]-fLo[0]
     
-    #fHiE = [400, 2000]
-    #fHiE = [300, 2400]
     bpkvHi = params[1][3]
     fHi = [int(fHiE[0]*bpkvHi/hiEfitRebin), int(fHiE[1]*bpkvHi/hiEfitRebin)]
     fHiBins = fHi[1]-fHi[0]
     
     fbins = int(fLoBins+fHiBins)
-    
     fmin=0
     fmax=fbins
     #=================================================================
@@ -625,7 +617,7 @@ def _myself_(argv):
         save = ''
         #if local: save += 'local'
         #else:     save += 'on-cup'
-        save += '_'+str(runtag)
+        save += str(runtag)
         save += '_Nchan-fit'
         save += '_loEfit-'+str(int(fLo[0]))+'-'+str(int(fLo[1]))
         save += '_hiEfit-'+str(int(fHiE[0]))+'-'+str(int(fHiE[1]))
@@ -927,7 +919,7 @@ def _myself_(argv):
                 botpad[C][E][i].Draw()
                 
                 toppad[C][E][i].cd()
-                if groups:
+                if ingroups:
                     leg = TLegend(0.55, 0.65, 0.94, ylegstop)
                     lnc = 2
                 else:
@@ -940,28 +932,40 @@ def _myself_(argv):
                 legs[C][E][i].SetNColumns(lnc)
                 lopt = 'LPE'
                 
-                dataFound = 0
+                total[C][E][i].Rebin(plotRebin)
+                #total[C][E][i].Scale(1./float(plotRebin))
+                #total[C][E][i].Sumw2()
+                
+                resid[C][E][i].Rebin(plotRebin)
+                #resid[C][E][i].Scale(1./float(plotRebin))
+                #resid[C][E][i].Sumw2()
+                
+                dkey = 0
                 for key in datkeys:
                     if 'x'+str(i+1) in key and '-c'+chan in key and '-e'+str(E) in key:
-
-                        dkey = key
-                        dataFound = dkey
                         
+                        dkey = key
+                                                
                         if dru:
                             data[dkey]['hist'].GetYaxis().SetTitle('counts / day / kg / keV  (dru)')
                         else:
                             data[dkey]['hist'].GetYaxis().SetTitle('arb. counts')
 
+                        newTitle = str('C'+str(i+1)+'   '
+                                    +chanNames(chan)+'   '
+                                    +energyNames(E))
+                        """
                         newTitle = str('crystal-'+str(i+1)+'   '
-                                       +energyNames(E)+'   '
-                                       +chanNames(chan)+'   '
-                                       +detailNames(i)+'   '
-                                       +str(cmass(i))+'kg')
+                                    +energyNames(E)+'   '
+                                    +chanNames(chan)+'   '
+                                    +detailNames(i)+'   '
+                                    +str(cmass(i))+'kg')
+                        """
                         
                         data[dkey]['hist'].SetTitle(newTitle)
                         data[dkey]['hist'].Rebin(plotRebin)
                         data[dkey]['hist'].Scale(1./float(plotRebin))
-                        
+                        """
                         total[C][E][i].Rebin(plotRebin)
                         total[C][E][i].Scale(1./float(plotRebin))
                         #total[C][E][i].Sumw2()
@@ -969,7 +973,7 @@ def _myself_(argv):
                         resid[C][E][i].Rebin(plotRebin)
                         resid[C][E][i].Scale(1./float(plotRebin))
                         #resid[C][E][i].Sumw2()
-
+                        """
                         #data[dkey]['hist'].SetMarkerStyle(8)
                         #data[dkey]['hist'].SetMarkerSize(.6)
                         data[dkey]['hist'].SetMarkerColor(kBlack)
@@ -990,8 +994,9 @@ def _myself_(argv):
                         else: data[dkey]['hist'].SetAxisRange(loer[0], loer[1], 'x')
 
                         if dru:
+                            #data[dkey]['hist'].SetAxisRange(2e-3, 2e1, 'y')
                             if E: data[dkey]['hist'].SetAxisRange(2e-3, 2e1, 'y')
-                            else: data[dkey]['hist'].SetAxisRange(2e-2, 3e2, 'y')
+                            else: data[dkey]['hist'].SetAxisRange(2e-3, 3e2, 'y')
                         
                         #popt = 'P E1'
                         #popt = 'HIST'
@@ -999,12 +1004,12 @@ def _myself_(argv):
                         data[dkey]['hist'].Draw(popt)
                         days = round(data[dkey]['runtime']/86400.,2)
 
-                        if groups:
+                        if ingroups:
                             legs[C][E][i].AddEntry(data[dkey]['hist'], 'Data', lopt)
                         else:
                             legs[C][E][i].AddEntry(data[dkey]['hist'], dkey+' ('+str(days)+' days)', lopt)
 
-
+                tcount = 0
                 for key in bakkeys:
                     if 'x'+str(i+1) in key and '-c'+chan in key and '-e'+str(E) in key:
 
@@ -1024,7 +1029,7 @@ def _myself_(argv):
                         bkgs[key]['hist'].Scale(1./float(plotRebin))
                         #bkgs[key]['hist'].Sumw2()
                         
-                        if groups:
+                        if ingroups:
                             if bkgs[key]['info']['group'] == 'none':
                                 try:
                                     gbkgs[C][E][i]['none'][key] = bkgs[key]['hist']
@@ -1041,7 +1046,8 @@ def _myself_(argv):
 
                         ### add MC to total MC hist
                         total[C][E][i].Add(bkgs[key]['hist'])
-
+                        tcount += 1
+                        
                         ### create the legend entry for MC
                         #legs[C][E][i].AddEntry(bkgs[key]['hist'], space+key, lopt)
 
@@ -1067,7 +1073,7 @@ def _myself_(argv):
                             ### set range
                             #sigs[key]['hist'].SetAxisRange(1,1000,'y')
                             
-                            if groups:
+                            if ingroups:
                                 if sigs[key]['info']['group'] == 'none':
                                     try:
                                         gbkgs[C][E][i]['none'][key] = sigs[key]['hist']
@@ -1084,11 +1090,12 @@ def _myself_(argv):
                             
                             ### add MC to total MC hist
                             total[C][E][i].Add(sigs[key]['hist'])
-
+                            tcount += 1
+                            
                             ### create the legend entry for MC
                             #legs[C][E][i].AddEntry(sigs[key]['hist'], space+key, lopt)
 
-                if groups:
+                if ingroups:
                     for c, group in enumerate(gbkgs[C][E][i]):
                         if group == 'none':
                             for key in gbkgs[C][E][i]['none']:
@@ -1138,7 +1145,7 @@ def _myself_(argv):
                 #print 'THIS ONE???'
                 #print dkey, data[dkey]['hist'].GetNbinsX()
                 #print total[C][E][i].GetNbinsX()
-                if dataFound:
+                if dkey and tcount:
                     pval  = data[dkey]['hist'].Chi2TestX(total[C][E][i], chi2, ndf, igood, chiopt)
                     #print 'INFO:',dkey,'pval =',pval,'chi2 =',chi2,'ndf =',ndf,'igood =',igood
                     #print 'INFO: Total MC chi2/ndf =',chi2/ndf
@@ -1148,16 +1155,17 @@ def _myself_(argv):
 
 
                 #-----------------------------------------------------------------------------
-                if len(bkgs) + len(sigs) > 0:
+                # still draw total even if nothing so hist box is created
+                total[C][E][i].Draw('same')
+                if tcount:
                     total[C][E][i].SetLineWidth(1)
-                    total[C][E][i].Draw('same')
-                    if groups:
+                    if ingroups:
                         legs[C][E][i].AddEntry(total[C][E][i], 'Total', lopt)
                     else:
                         legs[C][E][i].AddEntry(total[C][E][i], 'Total MC (chi2/ndf = '+str(round(chi2/ndf,2))+')', lopt)
 
                 ### show the legends?
-                if showlegs and dataFound:
+                if showlegs and dkey:
                     legs[C][E][i].Draw('same')
 
 
@@ -1170,7 +1178,7 @@ def _myself_(argv):
                 legs2[C][E][i].SetBorderSize(0)
                 lopt = 'LPE'
 
-                if dataFound:
+                if tcount and dkey:
                     #resid[C][E][i].Divide(data['x'+str(i+1)+'-data'+'-e'+str(E)]['hist'], total[C][E][i])
                     resid[C][E][i].Divide(data[dkey]['hist'], total[C][E][i])
                     #resid[C][E][i].Divide(total[C][E][i], data['x'+str(i+1)+'-data'+'-e'+str(E)]['hist'])
@@ -1200,10 +1208,8 @@ def _myself_(argv):
                 resid[C][E][i].SetAxisRange(0.1,10,'y')
                 resid[C][E][i].Draw()
 
-                #par = histparam(E)
-                par = params[E]
                 # set my line to '1'
-                zero = TLine(par[1], 1, par[2], 1)
+                zero = TLine(eran[E][0], 1, eran[E][1], 1)
                 zeros[C][E].append(zero)
                 zeros[C][E][i].SetLineColor(kRed)
                 zeros[C][E][i].SetLineWidth(1)
@@ -1217,7 +1223,7 @@ def _myself_(argv):
             save = ''
             #if local: save += 'local'
             #else: save += 'on-cup'
-            save += '_'+str(runtag)
+            save += str(runtag)
             save += '_E'+str(E)
             save += '_loEfit-'+str(int(fLo[0]))+'-'+str(int(fLo[1]))
             save += '_hiEfit-'+str(int(fHiE[0]))+'-'+str(int(fHiE[1]))

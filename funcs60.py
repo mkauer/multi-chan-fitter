@@ -807,7 +807,7 @@ def calib60b(i, E=0):
     Return the crystal calibrations
     """
     # from Pushpa
-    # https://cupwiki.ibs.re.kr/Kims/NaICalibration?validation_key=fae031e9908735aeff81aacfcbf83931
+    # https://cupwiki.ibs.re.kr/Kims/NaICalibration
     
     # adc = pmtX1.rqcD1_5+pmtX2.rqcD1_5
     # E = (adc+[0])*[1]

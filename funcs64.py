@@ -6,10 +6,13 @@
 # 
 # Works with v64 and later versions
 # 
-# version: 2017-06-07
+# version: 2017-06-14
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# + added new calib64() and resol64()
+# ~ should NOT be doing groupNo > 1 cut
+# ~ change cut to crystalX.rqcn > -1
 # + added setGroup() to start organizing things into groups
 # + added chan [A] cuts to cutsBDT()
 # ~ cleaned up some print statements
@@ -208,11 +211,7 @@ def build64(infile = 'backgrounds640.txt', freuse=0, fchans=0):
 def buildData64(info, data):
     
     base = baseDir()
-    """
-    for c in info['chans']:
-        info['chan'] = c
-        if info['reuse']:
-    """
+
     if info['reuse']:
         for c in info['chans']:
             info['chan'] = c
@@ -306,9 +305,11 @@ def buildData64(info, data):
                     #-----------------------------------------------------------------------
                     ### calibrate the lo/hi energy data
                     # old calib
-                    edep, selection = calib60a(i,e)
+                    #edep, selection = calib60a(i,e)
                     # new calib
                     #edep, selection = calib60b(i,e)
+                    # newer calib
+                    edep, selection = calib64(i,e)
                     #-----------------------------------------------------------------------
                     
                     
@@ -357,7 +358,13 @@ def buildData64(info, data):
 def cutsOld(i,c,e):
     
     ### Pushpa's noise cut
+    #-----------------------------------------------
+    # skip hi energy until rqtD1_5 thing is fixed
+    #if e:
+    #    noiseCut = TCut('(1)')
+    #else:
     noiseCut = TCut('('+noiseCuts60(i,e)+')')
+    #-----------------------------------------------
     
     if c == 'A':
         #chanCut = TCut('(1)')
@@ -421,24 +428,20 @@ def cutsBDT(i,c,e):
     """
     From: https://cupwiki.ibs.re.kr/Kims/SET1EventSelection
     """
+
+    ### global noise cuts
+    coinc  = '(BLSVeto_isCoincident == 1)'
+    muons  = '(BMuon_totalDeltaT0/1.e6 > 30)'
+    bdt    = '(crystal'+str(i+1)+'.bdt > -0.03)'
+    charge = '(crystal'+str(i+1)+'.rqcn > -1)'
+    nc     = '(pmt'+str(i+1)+'1.nc > 1 && pmt'+str(i+1)+'2.nc > 1)'
+    
+    noiseCut = coinc+' && '+muons+' && '+bdt+' && '+charge+' && '+nc
+    
     if c == 'A':
-        coinc  = '(BLSVeto_isCoincident == 1)'
-        muons  = '(BMuon_totalDeltaT0/1.e6 > 30)'
-        bdt    = '(crystal'+str(i+1)+'.bdt > -0.03)'
-        charge = '(crystal'+str(i+1)+'.rqcn >= 0)'
-        nc     = '(pmt'+str(i+1)+'1.nc > 1 && pmt'+str(i+1)+'2.nc > 1)'
-        
-        #masterCut = TCut('(1)')
-        masterCut = TCut(coinc+' && '+muons+' && '+bdt+' && '+charge+' && '+nc)
-        return masterCut
+        return TCut(noiseCut)
         
     elif c == 'S':
-        coinc  = '(BLSVeto_isCoincident == 1)'
-        muons  = '(BMuon_totalDeltaT0/1.e6 > 30)'
-        bdt    = '(crystal'+str(i+1)+'.bdt > -0.03)'
-        charge = '(crystal'+str(i+1)+'.rqcn >= 0)'
-        nc     = '(pmt'+str(i+1)+'1.nc > 1 && pmt'+str(i+1)+'2.nc > 1)'
-        
         lsveto = '(BLSVeto_Charge/143.8 < 20)'
         hits   = '('
         for j in range(8):
@@ -447,16 +450,10 @@ def cutsBDT(i,c,e):
         ### remove extra '&&' or '||'
         hits = hits[:-4]+')'
         
-        masterCut = TCut(coinc+' && '+muons+' && '+bdt+' && '+charge+' && '+nc+' && '+lsveto+' && '+hits)
+        masterCut = TCut(noiseCut+' && '+'('+lsveto+' && '+hits+')')
         return masterCut
     
     elif c == 'M':
-        coinc  = '(BLSVeto_isCoincident == 1)'
-        muons  = '(BMuon_totalDeltaT0/1.e6 > 30)'
-        bdt    = '(crystal'+str(i+1)+'.bdt > -0.03)'
-        charge = '(crystal'+str(i+1)+'.rqcn >= 0)'
-        nc     = '(pmt'+str(i+1)+'1.nc > 1 && pmt'+str(i+1)+'2.nc > 1)'
-        
         lsveto = '(BLSVeto_Charge/143.8 > 20)'
         hits   = '('
         for j in range(8):
@@ -464,8 +461,8 @@ def cutsBDT(i,c,e):
                 hits += '(crystal'+str(j+1)+'.'+'nc'+' > 4) || '
         ### remove extra '&&' or '||'
         hits = hits[:-4]+')'
-
-        masterCut = TCut(coinc+' && '+muons+' && '+bdt+' && '+charge+' && '+nc+' && '+'('+lsveto+' || '+hits+')')
+        
+        masterCut = TCut(noiseCut+' && '+'('+lsveto+' || '+hits+')')
         return masterCut
     
     else:
@@ -477,11 +474,7 @@ def cutsBDT(i,c,e):
 def buildMC64(info, mc):
 
     base = baseDir()
-    """
-    for c in info['chans']:
-        info['chan'] = c
-        if info['reuse']:
-    """
+
     if info['reuse']:
         for c in info['chans']:
             info['chan'] = c
@@ -708,8 +701,9 @@ def buildMC64(info, mc):
 
                     ### not sure how this groupNo thing works - I need to ask Eunju for details!
                     ### everything should have groupNo > 1 right?
-                    else:
-                        brokenChainCut = TCut('(groupNo > 1)')
+                    ### NO! Cosmogenics are groupNo == 1
+                    #else:
+                    #    brokenChainCut = TCut('(groupNo > 1)')
                     #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                     #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -761,7 +755,8 @@ def buildMC64(info, mc):
                     ### using Box-Muller for resolution smearing method
                     ### setting "rng" as the smearing alias
                     chain.SetAlias('rng','sin(2.*pi*rndm)*sqrt(-2.*log(rndm))')
-                    resolFunc = resol60(i,e)
+                    #resolFunc = resol60(i,e)
+                    resolFunc = resol64(i,e)
                     chain.SetAlias('sigma', resolFunc)
 
                     
@@ -1051,4 +1046,73 @@ def onCup():
         return 1
     else:
         return 0
+
+
+def calib64(i, E=0):
+    """
+    https://cupwiki.ibs.re.kr/Kims/NaICalibration
+    """
+    
+    # adc = crystalX.qc5
+    # E = adc * cal
+    loE = [
+        0.000109373,
+ 	0.000108797,
+ 	0.000117414,
+ 	0.000114566,
+ 	0.000296300,
+ 	0.000118527,
+ 	0.000113608,
+ 	0.000401190
+    ]
+
+    c7 = [566.5, 9144.0]
+
+    if E:
+        edep = '(crystal'+str(i+1)+'.energyD)'
+        selection = '('+edep+')'
+    else:
+        edep = '(crystal'+str(i+1)+'.qc5)'
+        selection = '('+edep+'*'+str(loE[i])+')'
+        if str(i) == str(6):
+            selection = '(('+edep+'-'+str(c7[0])+')/'+str(c7[1])+')'
+
+    return edep, selection
+
+
+def resol64(i, E=0):
+    """
+    https://cupwiki.ibs.re.kr/Kims/NaICalibration
+    """
+        
+    # res = p[0]/sqrt(x) + p[1]
+    hiEresol = [
+        [0.6729, 0.009374],
+	[0.6531, 0.006627],
+	[0.5926, 0.009506],
+	[0.7227, 0.004790],
+        [1.7, 0.0], # tweaking C5
+	[0.6498, 0.009670],
+	[0.7034, 0.007812],
+        [2.4, 0.0] # tweaking C8
+    ]
+    
+    loEresol = [
+        [0.2413,  0.01799],
+	[0.2951,  0.01427],
+	[0.3106,  0.007894],
+	[0.3894, -0.001437],
+        [0.8, 0.0], # tweaking C5
+	[0.3620,  0.0006355],
+	[0.3042,  0.009784],
+        [1.3, 0.0] # tweaking C8
+    ]
+    
+    if E:
+        p0, p1 = hiEresol[int(i)]
+    else:
+        p0, p1 = loEresol[int(i)]
+
+    selection = '(('+str(p0)+'/sqrt(edep['+str(i)+']*1000.)) + '+str(p1)+')'
+    return selection
 
