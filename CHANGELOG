@@ -12,6 +12,14 @@
 # ====================================================================
 
 
+# 2017-06-16
+# --------------------------------------------------------------------
+# ~ more tweaks to how legends are displayed
+# + option to either stack or extend the histos for fitting
+# ~ now fit results of 'MS' and 'SM' are more consistent!!!
+# + have the histo extending finally working!
+
+
 # 2017-06-14
 # --------------------------------------------------------------------
 # V switch to 70-extend-histos.py
