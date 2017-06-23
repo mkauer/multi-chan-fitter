@@ -12,6 +12,20 @@
 # ====================================================================
 
 
+# 2017-06-22
+# --------------------------------------------------------------------
+# ~ fixed bug with dru scaling vs not scaling
+# ~ fixed another big bug with bkgs being subtracted twice
+# ~ include the primVolumeName cut now for all MC!
+# + new funcs70.py
+
+
+# 2017-06-21
+# --------------------------------------------------------------------
+# ~ mega revamp of the surface component syntax
+# ~ fixed AGAIN the bug with the primVolumeName cuts!
+
+
 # 2017-06-16
 # --------------------------------------------------------------------
 # ~ more tweaks to how legends are displayed

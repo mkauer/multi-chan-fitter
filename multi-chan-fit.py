@@ -10,7 +10,7 @@ V = 'v70'
 # Extend single/multi hit histos instead of stacking them
 # This should reduce biasing
 # 
-# version: 2017-06-16
+# version: 2017-06-22
 #
 # see CHANGELOG for changes
 ######################################################################
@@ -28,7 +28,7 @@ ROOT.gErrorIgnoreLevel = kWarning
 
 sys.path.append("/home/mkauer/COSINE/CUP/mc-fitting/")
 sys.path.append("/home/mkauer/mc-fitting/")
-from funcs64 import *
+from funcs70 import *
 
 
 ### user inputs
@@ -36,7 +36,7 @@ from funcs64 import *
 
 ### extra notes to add to the saved plot file names? [0, 'something']
 note=0
-#note='OLD'
+#note='no-dru'
 
 ### backgrounds file
 #mcfile = 'backgrounds640.txt'
@@ -62,20 +62,23 @@ mychans = 'SM'
 ### [1] for extending
 extend = 1
 
+### show the total? [0,1]
+showTotal = 1
 ### show the legends? [0,1]
 showlegs = 1
 ### plot components in groups? [0,1]
 ingroups = 1
 
-### use fit bounds from backgrounds file? [0,1,2]
-### [0] use 'otherBnds' specified below (as a scaling)
+### use fit bounds from backgrounds file? [0,1,2,3]
+### [0] no limits at all!
 ### [1] use the bounds specified in backgrounds file (as percent)
 ### [2] use 'newBounds' specified below (as percent)
-useBounds = 1
-### else use these other bounds (as a raw scaling factor)
-otherBnds = [0.01, 10]
+### [3] use 'otherBnds' specified below (as a scaling)
+useBounds = 3
 ### new bounds to overwrite from file (as a percent of activity)
-newBounds = [0.0, 100]
+newBounds = [0.001, 100]
+### else use these other bounds (as a raw scaling factor)
+otherBnds = [1.e-12, 1.e4]
 
 ### fitting ranges
 ### lo and hi energy fit ranges
@@ -119,8 +122,9 @@ toterr   = 0
 
 ### I don't understand why this is effecting the fit so much
 ### But it does help the fit converage and especially with multi-chan
-### scale data and mc hi-E hists to 1/hiEfitRebin factor? [0,1]
-fitRebinScale = 1
+### scale data and mc by 1/fitRebin factor? [0,1]
+loEfitRebinScale = 0
+hiEfitRebinScale = 0
 
 ### chi2 test option
 ### ["UU", "UW", "WW", "NORM"]
@@ -159,7 +163,7 @@ def _myself_(argv):
     ### where everything gets loaded into dictionary
     #-----------------------------------------------------------------
     #-----------------------------------------------------------------
-    data, bkgs, sigs = build64(mcfile, reuse, mychans)
+    data, bkgs, sigs, runtime = build70(mcfile, reuse, mychans)
     datkeys, bakkeys, sigkeys = sortKeys(data, bkgs, sigs)
     #-----------------------------------------------------------------
     #-----------------------------------------------------------------
@@ -168,10 +172,15 @@ def _myself_(argv):
 
     # assume all data is using same run, channels, and hist params
     #runNum = data[datkeys[0]]['info']['run']
-    runtag = data[datkeys[0]]['info']['tag']
-    chans  = data[datkeys[0]]['info']['chans']
-    params = globalParams(data)
-    
+    try: runtag = data[datkeys[0]]['info']['tag']
+    except: runtag = 'none'
+    try:
+        chans  = data[datkeys[0]]['info']['chans']
+        params = globalParams(data)
+    except:
+        chans  = bkgs[bakkeys[0]]['info']['chans']
+        params = globalParams(bkgs)
+        
     ### find unique names for color scheme?
     ### "internal-K40" for example
     uniqAll = []
@@ -184,9 +193,14 @@ def _myself_(argv):
     print 'INFO: Unique bkgs and sigs =',uniqAll
     
     # scale into dru units
-    if dru: data = dataDRU64(data)
-    bkgs = scaleBkgs64(bkgs)
-    sigs = scaleBkgs64(sigs)
+    if dru:
+        data = scaleData70(data, 1)
+        bkgs = scaleBkgs70(bkgs)
+        sigs = scaleBkgs70(sigs)
+    else:
+        data = scaleData70(data, 0)
+        bkgs = scaleBkgs70(bkgs, runtime)
+        sigs = scaleBkgs70(sigs, runtime)
     
     ### Number of colors
     Nc = len(uniqAll)
@@ -200,7 +214,8 @@ def _myself_(argv):
 
     ### colors for groups
     #gcs, gis = rainbow(5)
-    gis = [kRed, kOrange, kGreen+1, kBlue, kViolet]
+    gis = [kRed, kOrange, kGreen+1, kBlue, kViolet,
+           kRed, kOrange, kGreen+1, kBlue, kViolet]
     
     ### legend length = MC + data + total
     Nlg = Nc+2
@@ -315,7 +330,7 @@ def _myself_(argv):
                     if 'x'+str(i+1) in dkey and '-c'+C in dkey and '-e0' in dkey:
                         rldata[dkey]['hist'] = copy.deepcopy(data[dkey]['hist'])
                         rldata[dkey]['hist'].Rebin(loEfitRebin)
-                        if fitRebinScale: rldata[dkey]['hist'].Scale(1./loEfitRebin)
+                        if loEfitRebinScale: rldata[dkey]['hist'].Scale(1./loEfitRebin)
                         for n in range(fLoBins):
                             if extend:
                                 fitdata[i].SetBinContent(n+1+(fbins*nc), fitdata[i].GetBinContent(n+1+(fbins*nc))
@@ -327,7 +342,7 @@ def _myself_(argv):
                     if 'x'+str(i+1) in dkey and '-c'+C in dkey and '-e1' in dkey:
                         rhdata[dkey]['hist'] = copy.deepcopy(data[dkey]['hist'])
                         rhdata[dkey]['hist'].Rebin(hiEfitRebin)
-                        if fitRebinScale: rhdata[dkey]['hist'].Scale(1./hiEfitRebin)
+                        if hiEfitRebinScale: rhdata[dkey]['hist'].Scale(1./hiEfitRebin)
                         r = 0
                         for n in range(fLoBins,fbins):
                             if extend:
@@ -363,7 +378,7 @@ def _myself_(argv):
                             fitsigs[fskey]['hist'] = fsig
                         rlsigs[skey]['hist'] = copy.deepcopy(sigs[skey]['hist'])
                         rlsigs[skey]['hist'].Rebin(loEfitRebin)
-                        if fitRebinScale: rlsigs[skey]['hist'].Scale(1./loEfitRebin)
+                        if loEfitRebinScale: rlsigs[skey]['hist'].Scale(1./loEfitRebin)
                         for n in range(fLoBins):
                             if extend:
                                 fitsigs[fskey]['hist'].SetBinContent(n+1+(fbins*nc),
@@ -377,7 +392,7 @@ def _myself_(argv):
                     if 'x'+str(i+1) in skey and '-c'+C in skey and '-e1' in skey:
                         rhsigs[skey]['hist'] = copy.deepcopy(sigs[skey]['hist'])
                         rhsigs[skey]['hist'].Rebin(hiEfitRebin)
-                        if fitRebinScale: rhsigs[skey]['hist'].Scale(1./hiEfitRebin)
+                        if hiEfitRebinScale: rhsigs[skey]['hist'].Scale(1./hiEfitRebin)
                         #fskey = skey.split('-e1')[0]
                         fskey = skey.split('-c')[0]
                         r = 0
@@ -404,7 +419,7 @@ def _myself_(argv):
                             fitbkgs[fbkey]['hist'] = fbak
                         rlbkgs[bkey]['hist'] = copy.deepcopy(bkgs[bkey]['hist'])
                         rlbkgs[bkey]['hist'].Rebin(loEfitRebin)
-                        if fitRebinScale: rlbkgs[bkey]['hist'].Scale(1./loEfitRebin)
+                        if loEfitRebinScale: rlbkgs[bkey]['hist'].Scale(1./loEfitRebin)
                         for n in range(fLoBins):
                             if extend:
                                 fitbkgs[fbkey]['hist'].SetBinContent(n+1+(fbins*nc),
@@ -418,7 +433,7 @@ def _myself_(argv):
                     if 'x'+str(i+1) in bkey and '-c'+C in bkey and '-e1' in bkey:
                         rhbkgs[bkey]['hist'] = copy.deepcopy(bkgs[bkey]['hist'])
                         rhbkgs[bkey]['hist'].Rebin(hiEfitRebin)
-                        if fitRebinScale: rhbkgs[bkey]['hist'].Scale(1./hiEfitRebin)
+                        if hiEfitRebinScale: rhbkgs[bkey]['hist'].Scale(1./hiEfitRebin)
                         #fbkey = bkey.split('-e1')[0]
                         fbkey = bkey.split('-c')[0]
                         r = 0
@@ -434,15 +449,22 @@ def _myself_(argv):
                             r += 1
                 binit=0
                 
-                
-                ### subtract fixed MC from data
-                #-------------------------------------------------------------------
-                for key in fitbkgs:
-                    if 'x'+str(i+1) in key:
-                        fitdata[i].Add(fitbkgs[key]['hist'], -1)
-                #-------------------------------------------------------------------
 
-            
+            ### subtract fixed MC from data
+            #-------------------------------------------------------------------
+            for key in fitbkgs:
+                if 'x'+str(i+1) in key:
+                    fitdata[i].Add(fitbkgs[key]['hist'], -1)
+            """
+            if i==6:
+                tmpcan = TCanvas('tmpcan','tmpcan',800,600)
+                fitdata[i].Draw()
+                tmpcan.Update()
+                raw_input('Enter to continue')
+            """
+            #-------------------------------------------------------------------
+
+
         
         ### sort all the fbakkeys
         fbakkeys=[]
@@ -587,9 +609,9 @@ def _myself_(argv):
             ### l=0 sets all params to the same constrain
             ### very confusing
             for l in range(len(bounds)):
-                if useBounds:
+                if useBounds==1 or useBounds==2:
                     fit[-1].Constrain(l+1, bounds[l][0], bounds[l][1])
-                else:
+                if useBounds==3:
                     fit[-1].Constrain(l+1, otherBnds[0], otherBnds[1])
             #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             
@@ -657,7 +679,8 @@ def _myself_(argv):
         #    print line
         
         ### scale the signals to mBq/kg
-        sigs = scaleSigs64(sigkeys, sigs)
+        if dru: sigs = scaleSigs70(sigkeys, sigs)
+        else: sigs = scaleSigs70(sigkeys, sigs, runtime)
         
         ### print the fit activities
         for i in range(8):
@@ -689,7 +712,8 @@ def _myself_(argv):
         save += '_hiEfit-'+str(int(fHiE[0]))+'-'+str(int(fHiE[1]))
         save += '_loEfitRebin-'+str(loEfitRebin)
         save += '_hiEfitRebin-'+str(hiEfitRebin)
-        save += '_fitRebinScale'+str(fitRebinScale)
+        save += '_loEfitRebinScale'+str(loEfitRebinScale)
+        save += '_hiEfitRebinScale'+str(hiEfitRebinScale)
         save += '_useBounds'+str(useBounds)
         save += '_mcscale'+str(mcscale)
         save += '_mcsumw2'+str(mcsumw2)
@@ -924,12 +948,16 @@ def _myself_(argv):
                 sepFitPlot.Update()
                 fisave  = ''
                 fisave += 'x'+str(i+1)
-                fisave += '-fit'
-                fisave += '-cs'+str(chans)
-                fisave += '-ext'+str(extend)
+                fisave += '_fit'
+                fisave += '_loEfRS'+str(loEfitRebinScale)
+                fisave += '_hiEfRS'+str(hiEfitRebinScale)
+                fisave += '_mcscale'+str(mcscale)
+                fisave += '_dru'+str(dru)
+                #fisave += '_cs'+str(chans)
+                fisave += '_ext'+str(extend)
                 if note: fisave += '_'+str(note)
                 fisave += '_'+str(V)
-
+                
                 try: sepFitPlot.Print(str('./plots/'+fisave+'.png'))
                 except: pass
             try: del sepFitPlot
@@ -1032,6 +1060,11 @@ def _myself_(argv):
                 total[C][E][i].Rebin(plotRebin)
                 #total[C][E][i].Scale(1./float(plotRebin))
                 #total[C][E][i].Sumw2()
+                #if dru:
+                if E: total[C][E][i].SetAxisRange(2e-3, 2e1, 'y')
+                else: total[C][E][i].SetAxisRange(2e-3, 3e2, 'y')
+                # just draw to show plots
+                if not showTotal: total[C][E][i].Draw()
                 
                 resid[C][E][i].Rebin(plotRebin)
                 #resid[C][E][i].Scale(1./float(plotRebin))
@@ -1090,41 +1123,43 @@ def _myself_(argv):
                         if E: data[dkey]['hist'].SetAxisRange(hier[0], hier[1], 'x')
                         else: data[dkey]['hist'].SetAxisRange(loer[0], loer[1], 'x')
 
-                        if dru:
+                        #if dru:
                             #data[dkey]['hist'].SetAxisRange(2e-3, 2e1, 'y')
-                            if E: data[dkey]['hist'].SetAxisRange(2e-3, 2e1, 'y')
-                            else: data[dkey]['hist'].SetAxisRange(2e-3, 3e2, 'y')
+                        if E: data[dkey]['hist'].SetAxisRange(2e-3, 2e1, 'y')
+                        else: data[dkey]['hist'].SetAxisRange(2e-3, 3e2, 'y')
                         
                         #popt = 'P E1'
                         #popt = 'HIST'
                         popt = ''
-                        data[dkey]['hist'].Draw(popt)
-                        days = round(data[dkey]['runtime']/86400.,2)
-
+                        data[dkey]['hist'].Draw()
+                        #days = round(data[dkey]['runtime']/86400.,2)
+                        days = round(runtime/86400.,2)
+                        
                         if ingroups:
                             legs[C][E][i].AddEntry(data[dkey]['hist'], 'Data', lopt)
                         else:
                             legs[C][E][i].AddEntry(data[dkey]['hist'], dkey+' ('+str(days)+' days)', lopt)
 
                 tcount = 0
+                bkey = 0
                 for key in bakkeys:
                     if 'x'+str(i+1) in key and '-c'+chan in key and '-e'+str(E) in key:
 
+                        bkey = key
+                        
                         # find the unique name for color and set color
                         cname = key.split('-')[1]+'-'+key.split('-')[2]
                         bkgs[key]['hist'].SetMarkerColor(uniqColor[cname])
                         bkgs[key]['hist'].SetLineColor(uniqColor[cname])
                         
-                        # don't think I need this anymore
-                        #if dru1 or dru2:
-                        #    druScale = data['x'+str(i+1)+'-data'+'-e'+str(E)]['druScale']
-                        #if dru2:
-                        #    bkgs[key]['hist'].Scale(druScale)
-                        
                         #if E and plotRebin:
                         bkgs[key]['hist'].Rebin(plotRebin)
                         bkgs[key]['hist'].Scale(1./float(plotRebin))
                         #bkgs[key]['hist'].Sumw2()
+                        
+                        #if dru:
+                        if E: bkgs[key]['hist'].SetAxisRange(2e-3, 2e1, 'y')
+                        else: bkgs[key]['hist'].SetAxisRange(2e-3, 3e2, 'y')
                         
                         if ingroups:
                             if bkgs[key]['info']['group'] == 'none':
@@ -1148,8 +1183,12 @@ def _myself_(argv):
                         ### create the legend entry for MC
                         #legs[C][E][i].AddEntry(bkgs[key]['hist'], key, lopt)
 
+                skey = 0
                 for key in sigkeys:
                     if 'x'+str(i+1) in key and '-c'+chan in key and '-e'+str(E) in key:
+
+                        skey = key
+                        
                         if i in wasFit:
                             # find the unique name for color and set color
                             cname = key.split('-')[1]+'-'+key.split('-')[2]
@@ -1253,16 +1292,17 @@ def _myself_(argv):
 
                 #-----------------------------------------------------------------------------
                 # still draw total even if nothing so hist box is created
-                total[C][E][i].Draw('same')
-                if tcount:
-                    total[C][E][i].SetLineWidth(1)
-                    if ingroups:
-                        legs[C][E][i].AddEntry(total[C][E][i], 'Total', lopt)
-                    else:
-                        legs[C][E][i].AddEntry(total[C][E][i], 'Total MC (chi2/ndf = '+str(round(chi2/ndf,2))+')', lopt)
+                if showTotal:
+                    total[C][E][i].Draw('same')
+                    if tcount:
+                        total[C][E][i].SetLineWidth(1)
+                        if ingroups:
+                            legs[C][E][i].AddEntry(total[C][E][i], 'Total', lopt)
+                        else:
+                            legs[C][E][i].AddEntry(total[C][E][i], 'Total MC (chi2/ndf = '+str(round(chi2/ndf,2))+')', lopt)
 
                 ### show the legends?
-                if showlegs and dkey:
+                if showlegs and (dkey or bkey):
                     legs[C][E][i].Draw('same')
 
 
@@ -1326,7 +1366,8 @@ def _myself_(argv):
             save += '_hiEfit-'+str(int(fHiE[0]))+'-'+str(int(fHiE[1]))
             save += '_loEfitRebin-'+str(loEfitRebin)
             save += '_hiEfitRebin-'+str(hiEfitRebin)
-            save += '_fitRebinScale'+str(fitRebinScale)
+            save += '_loEfitRebinScale'+str(loEfitRebinScale)
+            save += '_hiEfitRebinScale'+str(hiEfitRebinScale)
             save += '_useBounds'+str(useBounds)
             save += '_mcscale'+str(mcscale)
             save += '_mcsumw2'+str(mcsumw2)

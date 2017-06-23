@@ -1,39 +1,17 @@
 #!/usr/bin/env python
 ######################################################################
-# funcs64.py
+# funcs70.py
 # 
-# New data format and selection criteria
+# New funcs for extending histos
 # 
-# Works with v64 and later versions
+# Works with v70 and later versions
 # 
-# version: 2017-06-21
+# version: 2017-06-22
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
-# ~ mega revamp of the surface component syntax
-# ~ fixed AGAIN the bug with the primVolumeName cuts!
-# + added new calib64() and resol64()
-# ~ should NOT be doing groupNo > 1 cut
-# ~ change cut to crystalX.rqcn > -1
-# + added setGroup() to start organizing things into groups
-# + added chan [A] cuts to cutsBDT()
-# ~ cleaned up some print statements
-# ~ itterate over channels after reading in rootfiles - this should
-#   speed up the processing time
-# + added onCup() and baseDir() to make paths a little easier
-# ~ change data[key][runtime] to use real duration
-# + added getDuration() to get duration of data rootfiles
-# + added histparam64()
-# + added makeTotal64(), makeResid64(), and globalParams()
-# ~ add _GRND back to histo keys
-# ~ scaling functions now get histogram params to determine keV per bin
-# ~ tweaked histparam() to also return bins per keV
-# + added getPars(), dataDRU64(), scaleBkgs64(), and scaleSigs64()
-# + add BDT cuts in cutsBDT()
-# ~ move old data cuts to cutsOld()
-# + added set1.dat with list of run files
-# ~ new data format in the backgrounds file
-#
+# + include the volume cut for all things!
+# 
 # email me: mkauer@physics.wisc.edu
 ######################################################################
 
@@ -46,147 +24,10 @@ import ROOT
 
 sys.path.append("/home/mkauer/COSINE/CUP/mc-fitting/")
 sys.path.append("/home/mkauer/mc-fitting/")
-from funcs63 import *
+from funcs64 import *
 
 
-def histparam64(E):
-    """
-    Global default histogram parameters for:
-    number of bins, min, max, and bins/keV
-    """
-    if E:
-        hmin = 0
-        hmax = 4000
-        bpkv = 1
-        bins = (hmax-hmin)*bpkv
-    else:
-        hmin = 0
-        hmax = 200
-        bpkv = 12
-        bins = (hmax-hmin)*bpkv
-
-    pars = [bins, hmin, hmax, bpkv]
-    return pars
-
-
-def getInfo64(line, freuse=0, fchans=0):
-    
-    info={}
-    
-    info['line'] = line
-    
-    bits = line.split()
-    #bits = [x.strip() for x in bits]
-    
-    # data type
-    info['type'] = str(bits[0])
-    
-    #-----------------------------------------------------------------
-    # reuse a joined rootfile
-    if 'R' in info['type']: info['reuse'] = 1
-    else: info['reuse'] = 0
-    # force reuse of everything - nice for debugging
-    if freuse == 1: info['reuse'] = 1
-    # force not reuse of everything - nice for debugging
-    if freuse == 2: info['reuse'] = 0
-    #-----------------------------------------------------------------
-    
-    #-----------------------------------------------------------------
-    # channel
-    info['chans'] = str(bits[1])
-    # force a channel(s) of data selection
-    if fchans:
-        info['chans'] = fchans
-    #-----------------------------------------------------------------
-    
-    # crystal
-    info['xstl'] = int(bits[2])
-    
-    # reuse rootfile name
-    if 'root' in str(bits[-1]):
-        temp = str(bits[-1])
-        for i in range(2):
-            if '.' in temp[0] or '/' in temp[0]:
-                temp = temp[1:]
-        info['rootfile'] = temp
-    else:
-        info['rootfile'] = 0
-
-
-    if 'D' in info['type']:
-        
-        ### data file
-        temp = str(bits[3])
-        for i in range(2):
-            if '.' in temp[0] or '/' in temp[0]:
-                temp = temp[1:]
-        info['file'] = temp
-        
-        ### data tag
-        info['tag'] = str(bits[4])
-
-        ### processing version
-        #info['build'] = str(bits[5])
-
-        ### build the histo key
-        key  = 'x'+str(info['xstl'])
-        key += '-data'
-        key += '-'+str(info['tag'])
-        #key += '-c'+info['chan']
-        info['key'] = key
-        
-    else:
-        
-        ### background location help
-        info['floca'] = str(bits[3])
-        # without any '-' for hist key help
-        info['loca'] = str(bits[3]).replace('-','')
-        
-        ### top level isotope file name
-        info['isof'] = str(bits[4])
-
-        ### isotope chain break start
-        info['chst'] = str(bits[5])
-
-        ### isotope chain break stop
-        info['chsp'] = str(bits[6])
-
-        ### activity
-        info['acti'] = float(bits[7])
-
-        ### error on activity
-        info['erro'] = float(bits[8])
-
-        ### fit bounds
-        info['fbnd'] = [float(bits[9]), float(bits[10])]
-
-        ### build the histo key
-        key  = 'x'+str(info['xstl'])
-        key += '-'+info['loca']
-        #if info['chst'] == info['chsp']: key += '-'+info['chst']
-        #if info['chsp'] == 'GRND': key += '-'+info['chst']
-        #else: key += '-'+info['chst']+'_'+info['chsp']
-        key += '-'+info['chst']+'_'+info['chsp']
-        info['key'] = key
-
-        ### assign a plotting group to the isotope-location
-        info['group'] = setGroup(info)
-        
-    return info
-
-
-def setGroup(info):
-    if info['loca'] == 'internal':
-        if info['isof'] in ['I125','Te121m','Te123m','Te125m','Te127']:
-            return 'cosmo'
-        else: return 'internal'
-    elif 'pmt' in info['loca']: return 'pmt'
-    elif 'surf' in info['loca']: return 'surf'
-    elif info['loca'] == 'lsveto': return 'lsveto'
-    else: return 'none'
-
-
-def build64(infile = 'backgrounds640.txt', freuse=0, fchans=0):
+def build70(infile = 'backgrounds640.txt', freuse=0, fchans=0):
 
     data = {}
     bkgs = {}
@@ -196,286 +37,23 @@ def build64(infile = 'backgrounds640.txt', freuse=0, fchans=0):
         info = getInfo64(line, freuse, fchans)
         
         if 'D' in info['type']:
-            data = buildData64(info, data)
+            data, runtime = buildData70(info, data)
             
         elif 'B' in info['type']:
-            bkgs = buildMC64(info, bkgs)
+            bkgs = buildMC70(info, bkgs)
             
         elif 'F' in info['type']:
-            sigs = buildMC64(info, sigs)
+            sigs = buildMC70(info, sigs)
             
         else:
             print 'WARNING: I do not know what to do with type',info['type'], 'in line:'
             print info['line']
             continue
         
-    return data, bkgs, sigs
+    return data, bkgs, sigs, runtime
 
 
-def buildData64(info, data):
-    
-    base = baseDir()
-
-    if info['reuse']:
-        for c in info['chans']:
-            info['chan'] = c
-            
-            if not info['rootfile']:
-                print 'ERROR: no rootfile specified in backgrounds file'
-                sys.exit()
-
-            rootfile = base+info['rootfile']
-            if not os.path.exists(rootfile):
-                print 'ERROR: rootfile not found -->', rootfile
-                sys.exit()
-
-            rfile = TFile(rootfile, "READ")
-
-            for e in range(2):
-                key  = info['key']
-                key += '-c'+str(c)
-                key += '-e'+str(e)
-                #print key
-                try:
-                    data[key] = {}
-                    data[key]['info'] = info
-                    data[key]['hist'] = deepcopy(TH1F(rfile.Get(key)))
-                    data[key]['pars'] = getPars(data[key]['hist'])
-                    #data[key]['hist'].Sumw2()
-                except:
-                    print "ERROR: could not find hist -->",key
-                    sys.exit()
-                    
-                try:
-                    data[key]['subruns_hist'] = deepcopy(TH1F(rfile.Get(key+'_subruns')))
-                    data[key]['subruns'] = data[key]['subruns_hist'].GetBinContent(1)
-                except:
-                    print "ERROR: could not find subruns_hist -->",key+'_subruns'
-                    sys.exit()
-                    
-                try:
-                    data[key]['runtime_hist'] = deepcopy(TH1F(rfile.Get(key+'_runtime')))
-                    data[key]['runtime'] = data[key]['runtime_hist'].GetBinContent(1)
-                except:
-                    print "ERROR: could not find runtime_hist -->",key+'_runtime'
-                    sys.exit()
-
-    else:
-        
-        runfile = base+info['file']
-        #print 'looking for -->',runfile
-        if not os.path.exists(runfile):
-            print 'ERROR: runfile not found -->', runfile
-            sys.exit()
-
-        runtime = 0.
-        nfiles = 0
-        chain = TChain("ntp","")
-        for line in readFile(runfile):
-            if not onCup(): fpath = '/home/mkauer/COSINE/CUP/mc-fitting'+line
-            else: fpath = line
-            #print 'looking for -->',fpath
-            if not os.path.exists(fpath):
-                continue
-            else:
-                #print 'adding -->',fpath
-                runtime += getDuration(fpath)
-                nfiles += chain.Add(fpath)
-
-        if nfiles > 0:
-            print 'INFO:',nfiles,'files found for data',info['tag']
-            for c in info['chans']:
-                info['chan'] = c
-                for e in range(2):
-
-                    # DEFINE HIST AND KEY
-                    #-----------------------------------------------------------------------
-                    i = info['xstl'] - 1
-                    
-                    key  = info['key']
-                    key += '-c'+str(c)
-                    key += '-e'+str(e)
-                    
-                    data[key] = {}
-                    data[key]['info'] = info
-                    
-                    pars = histparam64(e)
-                    data[key]['pars'] = pars
-                    histo = TH1F(key, longNames(i), pars[0], pars[1], pars[2])
-                    #-----------------------------------------------------------------------
-                    
-                    
-                    # CALIBRATION
-                    #-----------------------------------------------------------------------
-                    ### calibrate the lo/hi energy data
-                    # old calib
-                    #edep, selection = calib60a(i,e)
-                    # new calib
-                    #edep, selection = calib60b(i,e)
-                    # newer calib
-                    edep, selection = calib64(i,e)
-                    #-----------------------------------------------------------------------
-                    
-                    
-                    # DEFINE CUTS
-                    #-----------------------------------------------------------------------
-                    if (i+1 == 7) and (e == 0):
-                        masterCut = cutsBDT(i,c,e)
-                    else:
-                        masterCut = cutsOld(i,c,e)
-                    #-----------------------------------------------------------------------
-                    
-                    
-                    # FILL HISTOS
-                    #-----------------------------------------------------------------------
-                    chain.Draw(selection+' >> '+key, masterCut)
-                    
-                    #histo.SetLineColor(kBlack)
-                    #histo.SetMarkerColor(kBlack)
-                    #histo.SetLineWidth(1)
-                    
-                    data[key]['hist'] = histo
-                    #data[key]['hist'].Sumw2()
-                    
-                    subruns = nfiles
-                    key2 = key+'_subruns'
-                    temp2 = TH1F(key2,'subruns',1,0,1)
-                    temp2.SetBinContent(1, subruns)
-                    data[key]['subruns_hist'] = temp2
-                    data[key]['subruns'] = subruns
-                    
-                    #runtime = subruns*subrunTime*60.*60.
-                    key3 = key+'_runtime'
-                    temp3 = TH1F(key3,'runtime',1,0,1)
-                    temp3.SetBinContent(1, runtime)
-                    data[key]['runtime_hist'] = temp3
-                    data[key]['runtime'] = runtime
-                    #-----------------------------------------------------------------------
-                    
-        else:
-            print 'ERROR: No data files found... quitting...'
-            sys.exit()
-
-    return data
-
-
-def cutsOld(i,c,e):
-    
-    ### Pushpa's noise cut
-    #-----------------------------------------------
-    # skip hi energy until rqtD1_5 thing is fixed
-    #if e:
-    #    noiseCut = TCut('(1)')
-    #else:
-    noiseCut = TCut('('+noiseCuts60(i,e)+')')
-    #-----------------------------------------------
-    
-    if c == 'A':
-        #chanCut = TCut('(1)')
-        return noiseCut
-    
-    elif c == 'S':
-        edepcuts = ''
-        nclustercuts = ''
-        for j in range(8):
-            if j != i:
-                #edepcuts += '('+edep+' <= 0.0) && '
-                nclustercuts += '(crystal'+str(j+1)+'.nc < 4) && '
-
-        ### remove extra '&&' or '||'
-        #edepcuts = edepcuts[:-4]
-        nclustercuts = nclustercuts[:-4]
-
-        ### liquid scint veto cut - from Pushpa
-        #lsvetocut = '(BLSveto.Charge/110. < 50.)'
-        lsvetocut = '(BLSVeto_Charge/110. < 20.)'
-
-        ### my cuts
-        #chanCut = TCut('(('+edepcuts+') && ('+nclustercuts+') && ('+lsvetocut+'))')
-        ### Pushpa cuts
-        chanCut = TCut('(('+nclustercuts+') && ('+lsvetocut+'))')
-
-        masterCut = TCut('('+chanCut.GetTitle()+' && '+noiseCut.GetTitle()+')')
-        return masterCut
-    
-    elif c == 'M':
-        edepcuts = ''
-        nclustercuts = ''
-        for j in range(8):
-            if j != i:
-                #edepcuts += '(crystal'+str(j+1)+'.'+str(edep)+' > 0.0) || '
-                nclustercuts += '(crystal'+str(j+1)+'.nc > 4) || '
-
-        ### remove extra '&&' or '||'
-        #edepcuts = edepcuts[:-4]
-        nclustercuts = nclustercuts[:-4]
-
-        ### liquid scint veto cut - from Pushpa
-        #lsvetocut = '(BLSveto.Charge/110. > 50.)'
-        lsvetocut = '(BLSVeto_Charge/110. > 20.)'
-
-        ### my cuts
-        #chanCut = TCut('(('+edepcuts+') || ('+nclustercuts+') || ('+lsvetocut+'))')
-        ### Pushpa cuts
-        chanCut = TCut('(('+nclustercuts+') || ('+lsvetocut+'))')
-
-        masterCut = TCut('('+chanCut.GetTitle()+' && '+noiseCut.GetTitle()+')')
-        return masterCut
-
-    else:
-        print 'ERROR: I do not know what to do with channel -->',c
-        print 'Available channels are [A]All-hits, [S]Single-hits, [M]Multi-hits'
-        sys.exit()
-
-
-def cutsBDT(i,c,e):
-    """
-    From: https://cupwiki.ibs.re.kr/Kims/SET1EventSelection
-    """
-
-    ### global noise cuts
-    coinc  = '(BLSVeto_isCoincident == 1)'
-    muons  = '(BMuon_totalDeltaT0/1.e6 > 30)'
-    bdt    = '(crystal'+str(i+1)+'.bdt > -0.03)'
-    charge = '(crystal'+str(i+1)+'.rqcn > -1)'
-    nc     = '(pmt'+str(i+1)+'1.nc > 1 && pmt'+str(i+1)+'2.nc > 1)'
-    
-    noiseCut = coinc+' && '+muons+' && '+bdt+' && '+charge+' && '+nc
-    
-    if c == 'A':
-        return TCut(noiseCut)
-        
-    elif c == 'S':
-        lsveto = '(BLSVeto_Charge/143.8 < 20)'
-        hits   = '('
-        for j in range(8):
-            if j != i:
-                hits += '(crystal'+str(j+1)+'.'+'nc'+' < 4) && '
-        ### remove extra '&&' or '||'
-        hits = hits[:-4]+')'
-        
-        masterCut = TCut(noiseCut+' && '+'('+lsveto+' && '+hits+')')
-        return masterCut
-    
-    elif c == 'M':
-        lsveto = '(BLSVeto_Charge/143.8 > 20)'
-        hits   = '('
-        for j in range(8):
-            if j != i:
-                hits += '(crystal'+str(j+1)+'.'+'nc'+' > 4) || '
-        ### remove extra '&&' or '||'
-        hits = hits[:-4]+')'
-        
-        masterCut = TCut(noiseCut+' && '+'('+lsveto+' || '+hits+')')
-        return masterCut
-    
-    else:
-        print 'ERROR: I do not know what to do with channel -->',c
-        print 'Available channels are [S]Single-hits, [M]Multi-hits'
-        sys.exit()
-
-
-def buildMC64(info, mc):
+def buildMC70(info, mc):
 
     base = baseDir()
 
@@ -783,7 +361,7 @@ def buildMC64(info, mc):
                     ### ie add the volume cut back in? - maybe not...
                     #=====================================================================
                     #=====================================================================
-                    """
+                    
                     masterCut = TCut('('+
                                      energyCut.GetTitle()+' && '+
                                      eventTypeCut.GetTitle()+' && '+
@@ -792,6 +370,7 @@ def buildMC64(info, mc):
                                      volumeCut.GetTitle()
                                      +')')
                     """
+                    ### keep old cuts for now
                     masterCut = TCut('('+
                                      energyCut.GetTitle()+' && '+
                                      #volumeCut.GetTitle()+' && '+
@@ -808,7 +387,7 @@ def buildMC64(info, mc):
                                          chanCut.GetTitle()+' && '+
                                          volumeCut.GetTitle()
                                          +')')
-                                        
+                    """
                     #=====================================================================
                     #=====================================================================
                     
@@ -834,7 +413,7 @@ def buildMC64(info, mc):
     return mc
 
 
-def scaleBkgs64(bkgs):
+def scaleBkgs70(bkgs,runtime=0):
     
     for key in bkgs:
         x = key.split('-')[0]
@@ -844,8 +423,9 @@ def scaleBkgs64(bkgs):
         #keVperBin = 1./float(getPars(bkgs[key]['hist'])[3])
         keVperBin = 1./float(bkgs[key]['pars'][3])
 
-        day       = 86400. # in seconds
-        
+        day = 86400. # in seconds
+        if runtime: day = runtime
+            
         xkgs      = cmass(int(x[-1])-1)
         pmts      = 2.
         extpmts   = 14.
@@ -903,7 +483,7 @@ def scaleBkgs64(bkgs):
     return bkgs
 
 
-def scaleSigs64(sigkeys, sigs):
+def scaleSigs70(sigkeys, sigs, runtime=0):
 
     for key in sigkeys:
         x = key.split('-')[0]
@@ -915,7 +495,8 @@ def scaleSigs64(sigkeys, sigs):
         #print '!!!!!!!!!!!!!!!',float(sigs[key]['pars'][3])
         #keVperBin = float(sigs[key]['pars'][3])
 
-        day       = 86400. # in seconds
+        day = 86400. # in seconds
+        if runtime: day = runtime
         
         xkgs      = cmass(int(x[-1])-1)
         pmts      = 2.
@@ -977,191 +558,167 @@ def scaleSigs64(sigkeys, sigs):
     return sigs
 
 
-def dataDRU64(data):
+def buildData70(info, data):
+    
+    base = baseDir()
+    runtime = 0.
+    
+    if info['reuse']:
+        for c in info['chans']:
+            info['chan'] = c
+            
+            if not info['rootfile']:
+                print 'ERROR: no rootfile specified in backgrounds file'
+                sys.exit()
+
+            rootfile = base+info['rootfile']
+            if not os.path.exists(rootfile):
+                print 'ERROR: rootfile not found -->', rootfile
+                sys.exit()
+
+            rfile = TFile(rootfile, "READ")
+
+            for e in range(2):
+                key  = info['key']
+                key += '-c'+str(c)
+                key += '-e'+str(e)
+                #print key
+                try:
+                    data[key] = {}
+                    data[key]['info'] = info
+                    data[key]['hist'] = deepcopy(TH1F(rfile.Get(key)))
+                    data[key]['pars'] = getPars(data[key]['hist'])
+                    #data[key]['hist'].Sumw2()
+                except:
+                    print "ERROR: could not find hist -->",key
+                    sys.exit()
+                    
+                try:
+                    data[key]['subruns_hist'] = deepcopy(TH1F(rfile.Get(key+'_subruns')))
+                    data[key]['subruns'] = data[key]['subruns_hist'].GetBinContent(1)
+                except:
+                    print "ERROR: could not find subruns_hist -->",key+'_subruns'
+                    sys.exit()
+                    
+                try:
+                    data[key]['runtime_hist'] = deepcopy(TH1F(rfile.Get(key+'_runtime')))
+                    data[key]['runtime'] = data[key]['runtime_hist'].GetBinContent(1)
+                    runtime = data[key]['runtime']
+                except:
+                    print "ERROR: could not find runtime_hist -->",key+'_runtime'
+                    sys.exit()
+
+    else:
+        
+        runfile = base+info['file']
+        #print 'looking for -->',runfile
+        if not os.path.exists(runfile):
+            print 'ERROR: runfile not found -->', runfile
+            sys.exit()
+
+        runtime = 0.
+        nfiles = 0
+        chain = TChain("ntp","")
+        for line in readFile(runfile):
+            if not onCup(): fpath = '/home/mkauer/COSINE/CUP/mc-fitting'+line
+            else: fpath = line
+            #print 'looking for -->',fpath
+            if not os.path.exists(fpath):
+                continue
+            else:
+                #print 'adding -->',fpath
+                runtime += getDuration(fpath)
+                nfiles += chain.Add(fpath)
+
+        if nfiles > 0:
+            print 'INFO:',nfiles,'files found for data',info['tag']
+            for c in info['chans']:
+                info['chan'] = c
+                for e in range(2):
+
+                    # DEFINE HIST AND KEY
+                    #-----------------------------------------------------------------------
+                    i = info['xstl'] - 1
+                    
+                    key  = info['key']
+                    key += '-c'+str(c)
+                    key += '-e'+str(e)
+                    
+                    data[key] = {}
+                    data[key]['info'] = info
+                    
+                    pars = histparam64(e)
+                    data[key]['pars'] = pars
+                    histo = TH1F(key, longNames(i), pars[0], pars[1], pars[2])
+                    #-----------------------------------------------------------------------
+                    
+                    
+                    # CALIBRATION
+                    #-----------------------------------------------------------------------
+                    ### calibrate the lo/hi energy data
+                    # old calib
+                    #edep, selection = calib60a(i,e)
+                    # new calib
+                    #edep, selection = calib60b(i,e)
+                    # newer calib
+                    edep, selection = calib64(i,e)
+                    #-----------------------------------------------------------------------
+                    
+                    
+                    # DEFINE CUTS
+                    #-----------------------------------------------------------------------
+                    if (i+1 == 7) and (e == 0):
+                        masterCut = cutsBDT(i,c,e)
+                    else:
+                        masterCut = cutsOld(i,c,e)
+                    #-----------------------------------------------------------------------
+                    
+                    
+                    # FILL HISTOS
+                    #-----------------------------------------------------------------------
+                    chain.Draw(selection+' >> '+key, masterCut)
+                    
+                    #histo.SetLineColor(kBlack)
+                    #histo.SetMarkerColor(kBlack)
+                    #histo.SetLineWidth(1)
+                    
+                    data[key]['hist'] = histo
+                    #data[key]['hist'].Sumw2()
+                    
+                    subruns = nfiles
+                    key2 = key+'_subruns'
+                    temp2 = TH1F(key2,'subruns',1,0,1)
+                    temp2.SetBinContent(1, subruns)
+                    data[key]['subruns_hist'] = temp2
+                    data[key]['subruns'] = subruns
+                    
+                    #runtime = subruns*subrunTime*60.*60.
+                    key3 = key+'_runtime'
+                    temp3 = TH1F(key3,'runtime',1,0,1)
+                    temp3.SetBinContent(1, runtime)
+                    data[key]['runtime_hist'] = temp3
+                    data[key]['runtime'] = runtime
+                    #-----------------------------------------------------------------------
+                    
+        else:
+            print 'ERROR: No data files found... quitting...'
+            sys.exit()
+
+    return data, runtime
+
+
+def scaleData70(data, dru=0):
     """
-    Scale data into DRU
+    Scale for DRU or not
     """
     for key in data:
         i = int(key.split('-')[0].split('x')[-1]) - 1
-        days = float((data[key]['runtime'])/(60.*60.*24.))
+        days = 1.
+        if dru: days = float((data[key]['runtime'])/(60.*60.*24.))
         kgs = float(cmass(i))
-        #keVperBin = 1./float(getPars(data[key]['hist'])[3])
         keVperBin = 1./float(data[key]['pars'][3])
-        #print key, keVperBin
         scale = float(1./(days*kgs*keVperBin))
-        print key, scale
         data[key]['hist'].Scale(scale)
         data[key]['druScale'] = scale
     return data
-
-
-def makeTotal64(chan, E, par):
-    total = []
-    #par = histparam(E)
-    for i in range(8):
-        key  = 'x'+str(i)
-        key += '-c'+chan
-        key += '-e'+str(E)
-        key += '-total'
-        tot = TH1F(key, longNames(i), par[0], par[1], par[2])
-        tot.SetLineColor(kGray+1)
-        tot.SetMarkerColor(kGray+1)
-        tot.SetLineWidth(1)
-        total.append(tot)
-    return total
-
-
-def makeResid64(chan, E, par):
-    resid = []
-    #par = histparam(E)
-    for i in range(8):
-        key  = 'x'+str(i)
-        key += '-c'+chan
-        key += '-e'+str(E)
-        key += '-resid'
-        res = TH1F(key, longNames(i), par[0], par[1], par[2])
-        res.SetLineColor(kBlack)
-        res.SetMarkerColor(kBlack)
-        res.SetLineWidth(1)
-        resid.append(res)
-    return resid
-
-
-def getPars(hist):
-    bins = hist.GetNbinsX()
-    hmin = hist.GetBinLowEdge(1)
-    hmax = hist.GetBinLowEdge(bins+1)
-    bpkv = bins/(hmax-hmin)
-    #print bins,hmin,hmax,bpkv
-    pars = [bins, hmin, hmax, bpkv]
-    return pars
-
-
-def globalParams(data):
-    par0=0
-    par1=0
-    for key in data:
-        if '-e0' in key and not par0:
-            par0 = getPars(data[key]['hist'])
-        if '-e1' in key and not par1:
-            par1 = getPars(data[key]['hist'])
-        if par0 and par1:
-            break
-    params = [par0, par1]
-    return params
-
-
-def getDuration(rootfile):
-
-    chain = TChain('ntp','')
-    chain.Add(rootfile)
-    entries = chain.GetEntries()
-
-    ### only second precission
-    #var = "eventsec"
-    #norm = 1.
-
-    ### has nano-sec precission
-    var = "trgtime"
-    norm = 1.e9
-    
-    chain.GetEntry(0)
-    start = float(chain.GetLeaf(var).GetValue())
-    chain.GetEntry(entries-1)
-    stop = float(chain.GetLeaf(var).GetValue())
-    duration = (stop-start)/norm
-    #print var, start, stop, duration
-    
-    return duration
-
-
-def baseDir():
-    """
-    Define your main basedir paths here
-    """
-    if onCup():
-        return '/home/mkauer/mc-fitting/'
-    else:
-        return '/home/mkauer/COSINE/CUP/mc-fitting/'
-
-
-def onCup():
-    """
-    Check to see if running on cup
-    """
-    import socket
-    ### master.cunpa.ibs
-    if 'cunpa' in str(socket.gethostname()):
-        return 1
-    else:
-        return 0
-
-
-def calib64(i, E=0):
-    """
-    https://cupwiki.ibs.re.kr/Kims/NaICalibration
-    """
-    
-    # adc = crystalX.qc5
-    # E = adc * cal
-    loE = [
-        0.000109373,
- 	0.000108797,
- 	0.000117414,
- 	0.000114566,
- 	0.000296300,
- 	0.000118527,
- 	0.000113608,
- 	0.000401190
-    ]
-
-    c7 = [566.5, 9144.0]
-
-    if E:
-        edep = '(crystal'+str(i+1)+'.energyD)'
-        selection = '('+edep+')'
-    else:
-        edep = '(crystal'+str(i+1)+'.qc5)'
-        selection = '('+edep+'*'+str(loE[i])+')'
-        if str(i) == str(6):
-            selection = '(('+edep+'-'+str(c7[0])+')/'+str(c7[1])+')'
-
-    return edep, selection
-
-
-def resol64(i, E=0):
-    """
-    https://cupwiki.ibs.re.kr/Kims/NaICalibration
-    """
-        
-    # res = p[0]/sqrt(x) + p[1]
-    hiEresol = [
-        [0.6729, 0.009374],
-	[0.6531, 0.006627],
-	[0.5926, 0.009506],
-	[0.7227, 0.004790],
-        [1.7, 0.0], # tweaking C5
-	[0.6498, 0.009670],
-	[0.7034, 0.007812],
-        [2.4, 0.0] # tweaking C8
-    ]
-    
-    loEresol = [
-        [0.2413,  0.01799],
-	[0.2951,  0.01427],
-	[0.3106,  0.007894],
-	[0.3894, -0.001437],
-        [0.8, 0.0], # tweaking C5
-	[0.3620,  0.0006355],
-	[0.3042,  0.009784],
-        [1.3, 0.0] # tweaking C8
-    ]
-    
-    if E:
-        p0, p1 = hiEresol[int(i)]
-    else:
-        p0, p1 = loEresol[int(i)]
-
-    selection = '(('+str(p0)+'/sqrt(edep['+str(i)+']*1000.)) + '+str(p1)+')'
-    return selection
 

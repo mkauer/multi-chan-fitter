@@ -95,9 +95,9 @@ D       MS      7     ./set1_00-03-08.dat      set1      ./root-join-read/build6
 D       MS      8     ./set1_00-03-08.dat      set1      ./root-join-read/build64/build64-c8-dataset1.root
 
 
-#BFR   chans   xstl      loca          isof     chst    chsp    acti    erro    lbnd    hbnd       rootfile
+#BBR   chans   xstl      loca          isof     chst    chsp    acti    erro    lbnd    hbnd       rootfile
 #---   -----   ----     --------       ------   ------  ------  -----   -----   -----   -----    --------------------------
-
+"""
 B	MS	1	internal	Na22	Na22	GRND	1.27	1e-4	0.69	1.31	./root-join-read/build64/build64-internalNa22_GRND.root	
 B	MS	2	internal	Na22	Na22	GRND	1.03	1e-4	0.69	1.31	./root-join-read/build64/build64-internalNa22_GRND.root	
 B	MS	3	internal	Na22	Na22	GRND	1.05	1e-4	0.69	1.31	./root-join-read/build64/build64-internalNa22_GRND.root	
@@ -151,7 +151,7 @@ B	MS	5	internal	Te127m	Te127	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build64/b
 B	MS	6	internal	Te127m	Te127	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build64/build64-internalTe127m_GRND.root	
 B	MS	7	internal	Te127m	Te127	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build64/build64-internalTe127m_GRND.root	
 B	MS	8	internal	Te127m	Te127	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build64/build64-internalTe127m_GRND.root	
-
+"""
 B       MS      1       internal    K40       K40       GRND      1.302     1e-4     0.69     1.31       ./root-join-read/build64/build64-internalK40_GRND.root
 B       MS      2       internal    K40       K40       GRND      2.481     1e-4     0.69     1.31       ./root-join-read/build64/build64-internalK40_GRND.root
 B       MS      3       internal    K40       K40       GRND      1.233     1e-4     0.69     1.31       ./root-join-read/build64/build64-internalK40_GRND.root
@@ -161,6 +161,7 @@ B       MS      6       internal    K40       K40       GRND      0.366     1e-4
 B       MS      7       internal    K40       K40       GRND      0.564     1e-4     0.69     1.31       ./root-join-read/build64/build64-internalK40_GRND.root
 B       MS      8       internal    K40       K40       GRND      1.685     1e-4     0.69     1.31       ./root-join-read/build64/build64-internalK40_GRND.root
 """
+
 B       MS      1       internal    U238      U238      GRND    2.48e-4   1e-4     0.69     1.31       ./root-join-read/build64/build64-internalU238_GRND.root
 B       MS      2       internal    U238      U238      GRND    1.48e-3   1e-4     0.69     1.31       ./root-join-read/build64/build64-internalU238_GRND.root
 B       MS      3       internal    U238      U238      GRND    4.96e-4   1e-4     0.69     1.31       ./root-join-read/build64/build64-internalU238_GRND.root
@@ -169,7 +170,8 @@ B       MS      5       internal    U238      U238      GRND    1.48e-3   1e-4  
 B       MS      6       internal    U238      U238      GRND    2.23e-4   1e-4     0.69     1.31       ./root-join-read/build64/build64-internalU238_GRND.root
 B       MS      7       internal    U238      U238      GRND    2.23e-4   1e-4     0.69     1.31       ./root-join-read/build64/build64-internalU238_GRND.root
 B       MS      8       internal    U238      U238      GRND    1.48e-3   1e-4     0.69     1.31       ./root-join-read/build64/build64-internalU238_GRND.root
-"""
+
+
 B       MS      1       internal    U238      U238      Pb210    2.48e-4   1e-4     0.69     1.31       ./root-join-read/build64/build64-internalU238_Pb210.root
 B       MS      2       internal    U238      U238      Pb210    1.48e-3   1e-4     0.69     1.31       ./root-join-read/build64/build64-internalU238_Pb210.root
 B       MS      3       internal    U238      U238      Pb210    4.96e-4   1e-4     0.69     1.31       ./root-join-read/build64/build64-internalU238_Pb210.root
@@ -196,7 +198,8 @@ B       MS      5       internal    Th232     Th232     GRND    9.60e-3   1e-4  
 B       MS      6       internal    Th232     Th232     GRND    2.30e-3   1e-4     0.69     1.31       ./root-join-read/build64/build64-internalTh232_GRND.root
 B       MS      7       internal    Th232     Th232     GRND    2.50e-3   1e-4     0.69     1.31       ./root-join-read/build64/build64-internalTh232_GRND.root
 B       MS      8       internal    Th232     Th232     GRND    5.70e-3   1e-4     0.69     1.31       ./root-join-read/build64/build64-internalTh232_GRND.root
-"""
+
+
 B	MS	1	internalsurf	Pb210	Pb210	GRND	0.138	1e-4	0.69	1.31	./root-join-read/build64/build64-internalsurfPb210_GRND.root	
 B	MS	2	internalsurf	Pb210	Pb210	GRND	0.138	1e-4	0.69	1.31	./root-join-read/build64/build64-internalsurfPb210_GRND.root	
 B	MS	3	internalsurf	Pb210	Pb210	GRND	0.209	1e-4	0.69	1.31	./root-join-read/build64/build64-internalsurfPb210_GRND.root	
@@ -206,6 +209,7 @@ B	MS	6	internalsurf	Pb210	Pb210	GRND	0.174	1e-4	0.69	1.31	./root-join-read/build
 B	MS	7	internalsurf	Pb210	Pb210   GRND	0.138	1e-4	0.69	1.31	./root-join-read/build64/build64-internalsurfPb210_GRND.root	
 B	MS	8	internalsurf	Pb210	Pb210	GRND	0.262	1e-4	0.69	1.31	./root-join-read/build64/build64-internalsurfPb210_GRND.root	
 """
+
 B        MS        1       pmt         K40       K40       GRND      58.0      1e-4     0.11     5.11       ./root-join-read/build64/build64-pmtK40_GRND.root
 B        MS        2       pmt         K40       K40       GRND      58.0      1e-4     0.11     5.11       ./root-join-read/build64/build64-pmtK40_GRND.root
 B        MS        3       pmt         K40       K40       GRND      58.0      1e-4     0.11     5.11       ./root-join-read/build64/build64-pmtK40_GRND.root
@@ -214,7 +218,7 @@ B        MS        5       pmt         K40       K40       GRND      58.0      1
 B        MS        6       pmt         K40       K40       GRND      58.0      1e-4     0.11     5.11       ./root-join-read/build64/build64-pmtK40_GRND.root
 B        MS        7       pmt         K40       K40       GRND      58.0      1e-4     0.11     5.11       ./root-join-read/build64/build64-pmtK40_GRND.root
 B        MS        8       pmt         K40       K40       GRND      58.0      1e-4     0.11     5.11       ./root-join-read/build64/build64-pmtK40_GRND.root
-
+"""
 B        MS        1       extpmt      K40       K40       GRND      58.0      1e-4     0.11     5.11       ./root-join-read/build64/build64-extpmtK40_GRND.root
 B        MS        2       extpmt      K40       K40       GRND      58.0      1e-4     0.11     5.11       ./root-join-read/build64/build64-extpmtK40_GRND.root
 B        MS        3       extpmt      K40       K40       GRND      58.0      1e-4     0.11     5.11       ./root-join-read/build64/build64-extpmtK40_GRND.root
@@ -259,7 +263,7 @@ B        MS        5       extpmt      U238      Pb210     GRND    1.76      1e-
 B        MS        6       extpmt      U238      Pb210     GRND    1.76      1e-4     0.11     5.11       ./root-join-read/build64/build64-extpmtPb210_GRND.root
 B        MS        7       extpmt      U238      Pb210     GRND    1.76      1e-4     0.11     5.11       ./root-join-read/build64/build64-extpmtPb210_GRND.root
 B        MS        8       extpmt      U238      Pb210     GRND    1.76      1e-4     0.11     5.11       ./root-join-read/build64/build64-extpmtPb210_GRND.root
-"""
+
 B        MS        1       pmt         U238      U238      GRND    25.0      1e-4     0.11     5.11       ./root-join-read/build64/build64-pmtU238_GRND.root
 B        MS        2       pmt         U238      U238      GRND    25.0      1e-4     0.11     5.11       ./root-join-read/build64/build64-pmtU238_GRND.root
 B        MS        3       pmt         U238      U238      GRND    25.0      1e-4     0.11     5.11       ./root-join-read/build64/build64-pmtU238_GRND.root
@@ -277,7 +281,7 @@ B        MS        5       extpmt      U238      U238      GRND    25.0      1e-
 B        MS        6       extpmt      U238      U238      GRND    25.0      1e-4     0.11     5.11       ./root-join-read/build64/build64-extpmtU238_GRND.root
 B        MS        7       extpmt      U238      U238      GRND    25.0      1e-4     0.11     5.11       ./root-join-read/build64/build64-extpmtU238_GRND.root
 B        MS        8       extpmt      U238      U238      GRND    25.0      1e-4     0.11     5.11       ./root-join-read/build64/build64-extpmtU238_GRND.root
-"""
+
 B        MS        1       pmt         Th232     Th232     GRND    12.0      1e-4     0.11     5.11       ./root-join-read/build64/build64-pmtTh232_GRND.root
 B        MS        2       pmt         Th232     Th232     GRND    12.0      1e-4     0.11     5.11       ./root-join-read/build64/build64-pmtTh232_GRND.root
 B        MS        3       pmt         Th232     Th232     GRND    12.0      1e-4     0.11     5.11       ./root-join-read/build64/build64-pmtTh232_GRND.root
@@ -314,15 +318,15 @@ B        MS        6       lsveto      Th232     Th232     GRND     1.62e-2   1e
 B        MS        7       lsveto      Th232     Th232     GRND     1.62e-2   1e-4     0.69     1.31       ./root-join-read/build64/build64-lsvetoTh232_GRND.root
 B        MS        8       lsveto      Th232     Th232     GRND     1.62e-2   1e-4     0.69     1.31       ./root-join-read/build64/build64-lsvetoTh232_GRND.root
 """
-B        MS        1       lsveto      K40       K40       GRND     1.19     1e-4     0.69     1.31       ./root-join-read/build64/build64-lsvetoK40_GRND.root
-B        MS        2       lsveto      K40       K40       GRND     1.19     1e-4     0.69     1.31       ./root-join-read/build64/build64-lsvetoK40_GRND.root
-B        MS        3       lsveto      K40       K40       GRND     1.19     1e-4     0.69     1.31       ./root-join-read/build64/build64-lsvetoK40_GRND.root
-B        MS        4       lsveto      K40       K40       GRND     1.19     1e-4     0.69     1.31       ./root-join-read/build64/build64-lsvetoK40_GRND.root
-B        MS        5       lsveto      K40       K40       GRND     1.19     1e-4     0.69     1.31       ./root-join-read/build64/build64-lsvetoK40_GRND.root
-B        MS        6       lsveto      K40       K40       GRND     1.19     1e-4     0.69     1.31       ./root-join-read/build64/build64-lsvetoK40_GRND.root
-B        MS        7       lsveto      K40       K40       GRND     1.19     1e-4     0.69     1.31       ./root-join-read/build64/build64-lsvetoK40_GRND.root
-B        MS        8       lsveto      K40       K40       GRND     1.19     1e-4     0.69     1.31       ./root-join-read/build64/build64-lsvetoK40_GRND.root
-
+B        MS        1       lsveto      K40       K40       GRND     6.19     1e-4     0.69     1.31       ./root-join-read/build64/build64-lsvetoK40_GRND.root
+B        MS        2       lsveto      K40       K40       GRND     6.19     1e-4     0.69     1.31       ./root-join-read/build64/build64-lsvetoK40_GRND.root
+B        MS        3       lsveto      K40       K40       GRND     6.19     1e-4     0.69     1.31       ./root-join-read/build64/build64-lsvetoK40_GRND.root
+B        MS        4       lsveto      K40       K40       GRND     6.19     1e-4     0.69     1.31       ./root-join-read/build64/build64-lsvetoK40_GRND.root
+B        MS        5       lsveto      K40       K40       GRND     6.19     1e-4     0.69     1.31       ./root-join-read/build64/build64-lsvetoK40_GRND.root
+B        MS        6       lsveto      K40       K40       GRND     6.19     1e-4     0.69     1.31       ./root-join-read/build64/build64-lsvetoK40_GRND.root
+B        MS        7       lsveto      K40       K40       GRND     6.19     1e-4     0.69     1.31       ./root-join-read/build64/build64-lsvetoK40_GRND.root
+B        MS        8       lsveto      K40       K40       GRND     6.19     1e-4     0.69     1.31       ./root-join-read/build64/build64-lsvetoK40_GRND.root
+"""
 B        MS        1       lsvetoair   U238      U238      GRND     1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-lsvetoair-master.root
 B        MS        2       lsvetoair   U238      U238      GRND     1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-lsvetoair-master.root
 B        MS        3       lsvetoair   U238      U238      GRND     1.0      1e-4     0.69     1.31        ./root-join-read/build61/build61-lsvetoair-master.root
