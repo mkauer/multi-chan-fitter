@@ -6,10 +6,11 @@
 # 
 # Works with v64 and later versions
 # 
-# version: 2017-06-21
+# version: 2017-06-26
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# ~ use 're' for the line splitting?
 # ~ mega revamp of the surface component syntax
 # ~ fixed AGAIN the bug with the primVolumeName cuts!
 # + added new calib64() and resol64()
@@ -76,7 +77,9 @@ def getInfo64(line, freuse=0, fchans=0):
     info['line'] = line
     
     bits = line.split()
-    #bits = [x.strip() for x in bits]
+    ### probably don't need to use 're' since split() is working fine
+    #import re
+    #bits = filter(None, re.split("[ \s\t]+", line.strip()))
     
     # data type
     info['type'] = str(bits[0])
@@ -177,7 +180,7 @@ def getInfo64(line, freuse=0, fchans=0):
 
 def setGroup(info):
     if info['loca'] == 'internal':
-        if info['isof'] in ['I125','Te121m','Te123m','Te125m','Te127']:
+        if info['isof'] in ['Na22','I125','Te121m','Te123m','Te125m','Te127']:
             return 'cosmo'
         else: return 'internal'
     elif 'pmt' in info['loca']: return 'pmt'

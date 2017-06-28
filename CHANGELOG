@@ -12,6 +12,30 @@
 # ====================================================================
 
 
+# 2017-06-27
+# --------------------------------------------------------------------
+# ~ find the average dru scaling in the fit distributions
+# ~ print out fit errors and add %.3e format to legend
+# ~ fit results are consistent between dru=0 and dru=1
+# ~ bounds do work correctly with dru=0 and dru=1
+# ~ now scale the chi2 by the dru scaling to normalize it correctly
+# ~ have to use mcscale=1 to get the fit fractions correct...
+#   until i eventually change that
+# ~ fixed legend ordering for bkgs and sigs
+# ~ changed signif figs to use the "%.3e" format
+# + added fit errors to the scaleSigs() function in funcs70.py
+
+
+# 2017-06-26
+# --------------------------------------------------------------------
+# ~ had to change the fskey splitting '-c' to
+#   not select cu-case or cu-surf, ie went to "-cS-e0"
+# + had added "re" for line splitting but probably don't need it
+# + new files for build70
+# + added new criteria for cu-case and teflon
+# + added new criteria for surface stuff
+
+
 # 2017-06-22
 # --------------------------------------------------------------------
 # ~ fixed bug with dru scaling vs not scaling

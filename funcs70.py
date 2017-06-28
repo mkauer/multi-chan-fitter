@@ -6,10 +6,12 @@
 # 
 # Works with v70 and later versions
 # 
-# version: 2017-06-22
+# version: 2017-06-27
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# + added fit errors to the signal scaling function
+# + added new criteria for surface things, teflon, and copper
 # + include the volume cut for all things!
 # 
 # email me: mkauer@physics.wisc.edu
@@ -32,6 +34,7 @@ def build70(infile = 'backgrounds640.txt', freuse=0, fchans=0):
     data = {}
     bkgs = {}
     sigs = {}
+    runtime = 0
     
     for line in readFile(infile):
         info = getInfo64(line, freuse, fchans)
@@ -96,29 +99,26 @@ def buildMC70(info, mc):
                     sys.exit()
         
     else:
-
+        
         if onCup():
             path1 = '/data/MC/KIMS-NaI/user-scratch/sim/processed/newGeometry/'
         else:
             path1 = '/home/mkauer/COSINE/CUP/mc-fitting/sim/newGeometry/'
-
+        
         location = info['floca']
         if location == 'extpmt':
             location = 'pmt'
-
-        ### 2nd level path to the specific files
-        #path2 = info['isof']+'/set2/'+'*'+info['loca']+info['isof']+'*root'
-        path2 = info['isof']+'/set2/'+'*'+location+info['isof']+'*root'
-
-        # But there will be a few exceptions...
-        # old format
-        #if location == 'internalsurf':
-        #    path2 = info['isof']+'/set2/surf/10um/'+'*'+location+'*'+info['isof']+'*'+'C'+str(info['xstl'])+'*root'
         
-        # new format
-        if 'surf' in location:
+        ### 2nd level path to the specific files
+        path2 = info['isof']+'/set2/'+'*'+location+info['isof']+'*root'
+        
+        if location == 'internal-surf-10um':
             path2 = info['isof']+'/set2/surf/10um/'+'*'+location+'-C'+str(info['xstl'])+'*root'
-            
+        if location == 'cu-surf-10um':
+            path2 = info['isof']+'/set2/surf/cu-10um/'+'*'+location+'-C'+str(info['xstl'])+'*root'
+        if location == 'teflon-surf-10um':
+            path2 = info['isof']+'/set2/surf/teflon-10um/'+'*'+location+'-C'+str(info['xstl'])+'*root'
+        
             
         chain  = TChain("MC","")
         nfiles = 0
@@ -220,10 +220,22 @@ def buildMC70(info, mc):
                     
                     volumeCut = TCut('(1)')
                     if info['loca'] == 'internal':
-                        volumeCut = TCut('(primVolumeName == "'+volumeNames(i)+'")')
-
+                        volumeCut = TCut('(primVolumeName == "NaIDet0'+str(i+1)+'Crystal")')
+                    
                     elif 'internalsurf' in info['loca']:
-                        volumeCut = TCut('(primVolumeName == "'+volumeNames(i)+'")')
+                        volumeCut = TCut('(primVolumeName == "NaIDet0'+str(i+1)+'Crystal")')
+                    
+                    elif 'cusurf' in info['loca']:
+                        volumeCut = TCut('(primVolumeName == "NaIDet0'+str(i+1)+'Case")')
+                    
+                    elif 'teflonsurf' in info['loca']:
+                        volumeCut = TCut('(primVolumeName == "NaIDet0'+str(i+1)+'Teflon")')
+                    
+                    elif info['loca'] == 'cucase':
+                        volumeCut = TCut('(primVolumeName == "NaIDet0'+str(i+1)+'Case")')
+                    
+                    elif info['loca'] == 'teflon':
+                        volumeCut = TCut('(primVolumeName == "NaIDet0'+str(i+1)+'Teflon")')
                     
                     elif info['loca'] == 'pmt':
                         volumeCut = TCut('((primPMTid[0] == '+pmt1+') || (primPMTid[0] == '+pmt2+'))')
@@ -240,7 +252,7 @@ def buildMC70(info, mc):
                     
                     elif info['loca'] == 'lsveto':
                         volumeCut = TCut('(primVolumeName == "lsveto")')
-
+                    
                     elif info['loca'] == 'lsvetoair':
                         volumeCut = TCut('((primVolumeName == "DetPMTCover") || (primVolumeName == "DetPMTEnvelope"))')
 
@@ -344,7 +356,7 @@ def buildMC70(info, mc):
                     
                     entries = temp2.GetEntries()
                     generated = mc[key]['generated']
-                    print '!!!! ',key2,'',generated,' generated events  (',entries,'entries )' 
+                    #print '!!!! ',key2,'',generated,' generated events  (',entries,'entries )' 
                     
                     #---------------------------------------------------------------------
                     
@@ -407,8 +419,9 @@ def buildMC70(info, mc):
                     
         else:
             #print 'WARNING:', loca, isof, 'not found...'
-            print 'ERROR: No MC files found for',info['loca'], info['isof'],'... quitting...'
-            sys.exit()
+            print 'WARNING: No MC files found for --> ',\
+                'x'+str(info['xstl']), info['floca'], info['isof']
+            #sys.exit()
     
     return mc
 
@@ -441,7 +454,18 @@ def scaleBkgs70(bkgs,runtime=0):
             bkgs[key]['hist'].Scale(scale)
             bkgs[key]['scale'] = scale
             
-        elif 'internalsurf' in loca:
+        #elif 'internalsurf' in loca:
+        elif 'surf' in loca:
+            scale = bkgs[key]['info']['acti'] * (xkgs) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
+            bkgs[key]['hist'].Scale(scale)
+            bkgs[key]['scale'] = scale
+            
+        elif loca == 'cucase':
+            scale = bkgs[key]['info']['acti'] * (xkgs) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
+            bkgs[key]['hist'].Scale(scale)
+            bkgs[key]['scale'] = scale
+            
+        elif loca == 'teflon':
             scale = bkgs[key]['info']['acti'] * (xkgs) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
             bkgs[key]['hist'].Scale(scale)
             bkgs[key]['scale'] = scale
@@ -490,10 +514,7 @@ def scaleSigs70(sigkeys, sigs, runtime=0):
         loca = key.split('-')[1]
         e = key.split('-')[-1]
 
-        #keVperBin = 1./float(getPars(sigs[key]['hist'])[3])
         keVperBin = 1./float(sigs[key]['pars'][3])
-        #print '!!!!!!!!!!!!!!!',float(sigs[key]['pars'][3])
-        #keVperBin = float(sigs[key]['pars'][3])
 
         day = 86400. # in seconds
         if runtime: day = runtime
@@ -508,48 +529,56 @@ def scaleSigs70(sigkeys, sigs, runtime=0):
             print "WARNING: 0 events generated for -->", key
             continue
         
-        # verbose?
-        V = 0
         
         if loca == 'internal':
             fitActivity = sigs[key]['fitscale'] * (1./xkgs) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
             sigs[key]['info']['acti'] = fitActivity
-            if V: print '!!!!', key, sigs[key]['info']['acti'],'mBq/kg'
+            sigs[key]['info']['erro'] = fitActivity * sigs[key]['fiterror']
             
-        elif 'internalsurf' in loca:
+        elif 'surf' in loca:
             fitActivity = sigs[key]['fitscale'] * (1./xkgs) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
             sigs[key]['info']['acti'] = fitActivity
-            if V: print '!!!!', key, sigs[key]['info']['acti'],'mBq/kg'
+            sigs[key]['info']['erro'] = fitActivity * sigs[key]['fiterror']
+            
+        elif loca == 'cucase':
+            fitActivity = sigs[key]['fitscale'] * (1./xkgs) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
+            sigs[key]['info']['acti'] = fitActivity
+            sigs[key]['info']['erro'] = fitActivity * sigs[key]['fiterror']
+            
+        elif loca == 'teflon':
+            fitActivity = sigs[key]['fitscale'] * (1./xkgs) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
+            sigs[key]['info']['acti'] = fitActivity
+            sigs[key]['info']['erro'] = fitActivity * sigs[key]['fiterror']
             
         elif loca == 'pmt':
             fitActivity = sigs[key]['fitscale'] * (1./pmts) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
             sigs[key]['info']['acti'] = fitActivity
-            if V: print '!!!!', key, sigs[key]['info']['acti'],'mBq/pmt'
-
+            sigs[key]['info']['erro'] = fitActivity * sigs[key]['fiterror']
+            
         elif loca == 'extpmt':
             fitActivity = sigs[key]['fitscale'] * (1./extpmts) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
             sigs[key]['info']['acti'] = fitActivity
-            if V: print '!!!!', key, sigs[key]['info']['acti'],'mBq/pmt'
+            sigs[key]['info']['erro'] = fitActivity * sigs[key]['fiterror']
             
         elif loca == 'lsveto':
             fitActivity = sigs[key]['fitscale'] * (1./lskg) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
             sigs[key]['info']['acti'] = fitActivity
-            if V: print '!!!!', key, sigs[key]['info']['acti'],'mBq/pmt'
+            sigs[key]['info']['erro'] = fitActivity * sigs[key]['fiterror']
             
         elif loca == 'lsvetoair':
             fitActivity = sigs[key]['fitscale'] * (1./xkgs) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
             sigs[key]['info']['acti'] = fitActivity
-            if V: print '!!!!', key, sigs[key]['info']['acti'],'mBq/pmt'
+            sigs[key]['info']['erro'] = fitActivity * sigs[key]['fiterror']
             
         elif loca == 'airshield':
             fitActivity = sigs[key]['fitscale'] * (1./xkgs) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
             sigs[key]['info']['acti'] = fitActivity
-            if V: print '!!!!', key, sigs[key]['info']['acti'],'mBq/pmt'
+            sigs[key]['info']['erro'] = fitActivity * sigs[key]['fiterror']
             
         elif loca == 'steel':
             fitActivity = sigs[key]['fitscale'] * (1./xkgs) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
             sigs[key]['info']['acti'] = fitActivity
-            if V: print '!!!!', key, sigs[key]['info']['acti'],'mBq/pmt'
+            sigs[key]['info']['erro'] = fitActivity * sigs[key]['fiterror']
             
         else:
             print "WARNING: No signal scaling for  --> ", loca
