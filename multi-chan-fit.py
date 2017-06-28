@@ -74,12 +74,11 @@ ingroups = 0
 ### [1] use bounds specified in backgrounds file (as percent of activity)
 ### [2] use 'newBounds' specified below (as percent of activity)
 ### [3] use 'otherBnds' specified below (as a fractional scaling)
-useBounds = 2
+useBounds = 1
 ### new bounds to overwrite from file (as a percent of activity)
-newBounds = [0.7, 100.3]
-### else use these other bounds (as a raw scaling factor)
-### can only be values between 0 and 1
-otherBnds = [0.1, 0.9]
+newBounds = [0.7, 1.3]
+### else use these other bounds (as fractional scaling)
+otherBnds = [1e-6, 0.9]
 
 ### fitting ranges
 ### lo and hi energy fit ranges
@@ -593,20 +592,42 @@ def _myself_(argv):
 
                     
                     ### rescale the bounds to the normalized fraction
+                    ### and save new values to the sigs info
                     #---------------------------------------------------------------------
-                    renorm = sigs[fskey+'-c'+chans[0]+'-e0']['scale'] / sigs[fskey+'-c'+chans[0]+'-e0']['fitscale']
-                    
-                    if useBounds == 2:
-                        sigs[fskey+'-c'+chans[0]+'-e0']['info']['fbnd'] = newBounds
-                    
-                    bounds.append([renorm * sigs[fskey+'-c'+chans[0]+'-e0']['info']['fbnd'][0],
-                                   renorm * sigs[fskey+'-c'+chans[0]+'-e0']['info']['fbnd'][1]])
+                    #useBounds=0
+                    for C in chans:
+                        for E in range(2):
+                            for k in range(2):
+                                E=str(E)
+                                renorm = sigs[fskey+'-c'+C+'-e'+E]['scale'] / sigs[fskey+'-c'+C+'-e'+E]['fitscale']
+
+                                sigs[fskey+'-c'+C+'-e'+E]['info']['newfbnd'] = [0,0]
+                                #print '!!!!!!!!!!!!!',fskey, sigs[fskey+'-c'+C+'-e'+E]['info']['acti']
+                                #print '!!!!!!!!!!!!!',fskey, sigs[fskey+'-c'+C+'-e'+E]['info']['acti']/renorm
+                                
+                                if useBounds == 0:
+                                    these = [0.00, 1.00]
+                                    sigs[fskey+'-c'+C+'-e'+E]['info']['fbnd'][k] = 1./renorm * these[k]
+                                    sigs[fskey+'-c'+C+'-e'+E]['info']['newfbnd'] = these
+                                elif useBounds == 1:
+                                    sigs[fskey+'-c'+C+'-e'+E]['info']['newfbnd'][k] = \
+                                        sigs[fskey+'-c'+C+'-e'+E]['info']['fbnd'][k] * renorm
+                                elif useBounds == 2:
+                                    sigs[fskey+'-c'+C+'-e'+E]['info']['fbnd'] = newBounds
+                                    sigs[fskey+'-c'+C+'-e'+E]['info']['newfbnd'][k] = \
+                                        newBounds[k] * renorm
+                                elif useBounds == 3:
+                                    sigs[fskey+'-c'+C+'-e'+E]['info']['fbnd'][k] = 1./renorm * otherBnds[k]
+                                    sigs[fskey+'-c'+C+'-e'+E]['info']['newfbnd'] = otherBnds
+                                else:
+                                    print 'ERROR: do not know what to do with useBounds =',useBounds
+                                    sys.exit()
+
+                    bounds.append(sigs[fskey+'-c'+chans[0]+'-e0']['info']['newfbnd'])
                     #---------------------------------------------------------------------
 
-                    
                     #sigObj[i].Add(fitsigs[fskey]['hist']) # add to the TFractionFitter object
                     sigObj[-1].Add(fitsigs[fskey]['hist']) # add to the TFractionFitter object
-            
 
             #fit.append(TFractionFitter(fitdata[i], sigObj[i])) # create the TFF data and MC objects
             fit.append(TFractionFitter(fitdata[i], sigObj[-1])) # create the TFF data and MC objects
@@ -628,12 +649,16 @@ def _myself_(argv):
             ### l=0 sets all params to the same constrain
             ### very confusing
             for l in range(len(bounds)):
+                fit[-1].Constrain(l+1, bounds[l][0], bounds[l][1])
+                """
                 if useBounds==0:
-                    fit[-1].Constrain(l+1, 0, 1)
+                    fit[-1].Constrain(l+1, 0.00, 1.00)
                 if useBounds==1 or useBounds==2:
+                    if bounds[l][1] > 1.0: bounds[l][1] = 1.00
                     fit[-1].Constrain(l+1, bounds[l][0], bounds[l][1])
                 if useBounds==3:
                     fit[-1].Constrain(l+1, otherBnds[0], otherBnds[1])
+                """
             #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             
             #fit[i].SetRangeX(fmin, fmax) # set global range, should be the same as fmin and fmax?
@@ -700,8 +725,14 @@ def _myself_(argv):
                             if finit:
                                 E = str(E)
                                 fitresults[str(i)].append('fit '+fskey+' = %.2e +/- %.2e mBq'
-                                            %(sigs[fskey+'-c'+C+'-e'+E]['info']['acti'],
-                                              sigs[fskey+'-c'+C+'-e'+E]['info']['erro']))
+                                            %(sigs[fskey+'-c'+C+'-e'+E]['info']['fitacti'],
+                                              sigs[fskey+'-c'+C+'-e'+E]['info']['fiterro']))
+                                fitresults[str(i)].append('    bounds = [%.2e,  %.2e]'
+                                            %(sigs[fskey+'-c'+C+'-e'+E]['info']['acti'] * \
+                                              sigs[fskey+'-c'+C+'-e'+E]['info']['fbnd'][0],
+                                              sigs[fskey+'-c'+C+'-e'+E]['info']['acti'] * \
+                                              sigs[fskey+'-c'+C+'-e'+E]['info']['fbnd'][1]))
+                                
                                 finit=0
             #print '\n'
             fitresults[str(i)].append('\n')
@@ -866,7 +897,7 @@ def _myself_(argv):
                 for fskey in fsigkeys:
                     if name in fskey and 'x'+str(i+1) in fskey:
                         flegs[i].AddEntry(fitsigs[fskey]['hist'], fskey, lopt)
-                        #activ = ' ('+str(sigs[name]['acti'])+')  '
+                        #activ = ' ('+str(sigs[name]['fitacti'])+')  '
                         #flegs[i].AddEntry(fitsigs[fskey]['hist'], activ+fskey, lopt)
 
             
@@ -1257,7 +1288,7 @@ def _myself_(argv):
                                 legs[C][E][i].AddEntry(bkgs[bkey]['hist'], activ+bkey, lopt)
                         for skey in sigkeys:
                             if skey == 'x'+str(i+1)+'-'+name+'-c'+chan+'-e'+str(E):
-                                activ = '(%.2e) '%(sigs[skey]['info']['acti'])
+                                activ = '(%.2e) '%(sigs[skey]['info']['fitacti'])
                                 legs[C][E][i].AddEntry(sigs[skey]['hist'], activ+skey, lopt)
                 
                 

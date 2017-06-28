@@ -532,53 +532,53 @@ def scaleSigs70(sigkeys, sigs, runtime=0):
         
         if loca == 'internal':
             fitActivity = sigs[key]['fitscale'] * (1./xkgs) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
-            sigs[key]['info']['acti'] = fitActivity
-            sigs[key]['info']['erro'] = fitActivity * sigs[key]['fiterror']
+            sigs[key]['info']['fitacti'] = fitActivity
+            sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
             
         elif 'surf' in loca:
             fitActivity = sigs[key]['fitscale'] * (1./xkgs) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
-            sigs[key]['info']['acti'] = fitActivity
-            sigs[key]['info']['erro'] = fitActivity * sigs[key]['fiterror']
+            sigs[key]['info']['fitacti'] = fitActivity
+            sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
             
         elif loca == 'cucase':
             fitActivity = sigs[key]['fitscale'] * (1./xkgs) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
-            sigs[key]['info']['acti'] = fitActivity
-            sigs[key]['info']['erro'] = fitActivity * sigs[key]['fiterror']
+            sigs[key]['info']['fitacti'] = fitActivity
+            sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
             
         elif loca == 'teflon':
             fitActivity = sigs[key]['fitscale'] * (1./xkgs) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
-            sigs[key]['info']['acti'] = fitActivity
-            sigs[key]['info']['erro'] = fitActivity * sigs[key]['fiterror']
+            sigs[key]['info']['fitacti'] = fitActivity
+            sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
             
         elif loca == 'pmt':
             fitActivity = sigs[key]['fitscale'] * (1./pmts) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
-            sigs[key]['info']['acti'] = fitActivity
-            sigs[key]['info']['erro'] = fitActivity * sigs[key]['fiterror']
+            sigs[key]['info']['fitacti'] = fitActivity
+            sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
             
         elif loca == 'extpmt':
             fitActivity = sigs[key]['fitscale'] * (1./extpmts) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
-            sigs[key]['info']['acti'] = fitActivity
-            sigs[key]['info']['erro'] = fitActivity * sigs[key]['fiterror']
+            sigs[key]['info']['fitacti'] = fitActivity
+            sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
             
         elif loca == 'lsveto':
             fitActivity = sigs[key]['fitscale'] * (1./lskg) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
-            sigs[key]['info']['acti'] = fitActivity
-            sigs[key]['info']['erro'] = fitActivity * sigs[key]['fiterror']
+            sigs[key]['info']['fitacti'] = fitActivity
+            sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
             
         elif loca == 'lsvetoair':
             fitActivity = sigs[key]['fitscale'] * (1./xkgs) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
-            sigs[key]['info']['acti'] = fitActivity
-            sigs[key]['info']['erro'] = fitActivity * sigs[key]['fiterror']
+            sigs[key]['info']['fitacti'] = fitActivity
+            sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
             
         elif loca == 'airshield':
             fitActivity = sigs[key]['fitscale'] * (1./xkgs) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
-            sigs[key]['info']['acti'] = fitActivity
-            sigs[key]['info']['erro'] = fitActivity * sigs[key]['fiterror']
+            sigs[key]['info']['fitacti'] = fitActivity
+            sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
             
         elif loca == 'steel':
             fitActivity = sigs[key]['fitscale'] * (1./xkgs) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
-            sigs[key]['info']['acti'] = fitActivity
-            sigs[key]['info']['erro'] = fitActivity * sigs[key]['fiterror']
+            sigs[key]['info']['fitacti'] = fitActivity
+            sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
             
         else:
             print "WARNING: No signal scaling for  --> ", loca

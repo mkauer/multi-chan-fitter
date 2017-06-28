@@ -14,6 +14,7 @@
 
 # 2017-06-27
 # --------------------------------------------------------------------
+# + now prints out the correct fit bounds being used
 # ~ find the average dru scaling in the fit distributions
 # ~ print out fit errors and add %.3e format to legend
 # ~ fit results are consistent between dru=0 and dru=1
