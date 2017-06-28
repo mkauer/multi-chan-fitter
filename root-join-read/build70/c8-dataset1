@@ -1,0 +1,7 @@
+# -*- sh -*-
+
+# version 2017-06-08
+
+# bsdr  chan    xstl      file                   tag        reuse
+# ----  -----   ----    ------------------      ------     ----------
+D       MS      8       ./set1_00-03-08.dat      set1      dummy.root

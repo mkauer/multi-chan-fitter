@@ -1,0 +1,10 @@
+# -*- sh -*-
+
+B  MS  1  cu-surf-10um  Pb210  Pb210  GRND  1.0  1.0  1.0  1.0  dummy.root
+B  MS  2  cu-surf-10um  Pb210  Pb210  GRND  1.0  1.0  1.0  1.0  dummy.root
+B  MS  3  cu-surf-10um  Pb210  Pb210  GRND  1.0  1.0  1.0  1.0  dummy.root
+B  MS  4  cu-surf-10um  Pb210  Pb210  GRND  1.0  1.0  1.0  1.0  dummy.root
+B  MS  5  cu-surf-10um  Pb210  Pb210  GRND  1.0  1.0  1.0  1.0  dummy.root
+B  MS  6  cu-surf-10um  Pb210  Pb210  GRND  1.0  1.0  1.0  1.0  dummy.root
+B  MS  7  cu-surf-10um  Pb210  Pb210  GRND  1.0  1.0  1.0  1.0  dummy.root
+B  MS  8  cu-surf-10um  Pb210  Pb210  GRND  1.0  1.0  1.0  1.0  dummy.root

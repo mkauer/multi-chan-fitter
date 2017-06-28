@@ -1,0 +1,14 @@
+# -*- sh -*-
+
+# version 2017-03-14
+
+# bsdr   chan   xstl    loca       isof      chst      chsp     acti    erro    lbnd   hbnd     file
+# ----   -----  ----   --------    ------    ------    ------   -----   -----   ----   ------   --------
+B        SMA      1     internal    Na22      Na22      GRND     1.0     0.1     0.5    1.5     dummy.root
+B        SMA      2     internal    Na22      Na22      GRND     1.0     0.1     0.5    1.5     dummy.root
+B        SMA      3     internal    Na22      Na22      GRND     1.0     0.1     0.5    1.5     dummy.root
+B        SMA      4     internal    Na22      Na22      GRND     1.0     0.1     0.5    1.5     dummy.root
+B        SMA      5     internal    Na22      Na22      GRND     1.0     0.1     0.5    1.5     dummy.root
+B        SMA      6     internal    Na22      Na22      GRND     1.0     0.1     0.5    1.5     dummy.root
+B        SMA      7     internal    Na22      Na22      GRND     1.0     0.1     0.5    1.5     dummy.root
+B        SMA      8     internal    Na22      Na22      GRND     1.0     0.1     0.5    1.5     dummy.root
