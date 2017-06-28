@@ -74,9 +74,9 @@ ingroups = 0
 ### [1] use bounds specified in backgrounds file (as percent of activity)
 ### [2] use 'newBounds' specified below (as percent of activity)
 ### [3] use 'otherBnds' specified below (as a fractional scaling)
-useBounds = 1
+useBounds = 2
 ### new bounds to overwrite from file (as a percent of activity)
-newBounds = [0.7, 1.3]
+newBounds = [0.7, 100.3]
 ### else use these other bounds (as a raw scaling factor)
 ### can only be values between 0 and 1
 otherBnds = [0.1, 0.9]
