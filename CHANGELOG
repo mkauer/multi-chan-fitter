@@ -12,6 +12,13 @@
 # ====================================================================
 
 
+# 2017-06-28
+# --------------------------------------------------------------------
+# + add cucase and teflon to surf group
+# ~ updated updateBkgsFile70()
+# ~ treat surface and bulk teflon and copper as a unit of 1
+
+
 # 2017-06-27
 # --------------------------------------------------------------------
 # + now prints out the correct fit bounds being used

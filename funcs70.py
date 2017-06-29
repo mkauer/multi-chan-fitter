@@ -6,10 +6,12 @@
 # 
 # Works with v70 and later versions
 # 
-# version: 2017-06-27
+# version: 2017-06-28
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# ~ updated updateBkgsFile70()
+# ~ treat surface and bulk teflon and copper as a unit of 1
 # + added fit errors to the signal scaling function
 # + added new criteria for surface things, teflon, and copper
 # + include the volume cut for all things!
@@ -433,17 +435,20 @@ def scaleBkgs70(bkgs,runtime=0):
         loca = key.split('-')[1]
         e = key.split('-')[-1]
         
-        #keVperBin = 1./float(getPars(bkgs[key]['hist'])[3])
         keVperBin = 1./float(bkgs[key]['pars'][3])
 
-        day = 86400. # in seconds
+        ### 1 day in seconds
+        day = 86400.
         if runtime: day = runtime
             
         xkgs      = cmass(int(x[-1])-1)
         pmts      = 2.
         extpmts   = 14.
         lskg      = 1800.
-
+        
+        ### treat the NaI surface and the copper and teflon as 1 unit
+        surf = 1.
+        
         generated = float(bkgs[key]['generated'])
         if generated < 1:
             print "WARNING: 0 events generated for -->", key
@@ -454,19 +459,18 @@ def scaleBkgs70(bkgs,runtime=0):
             bkgs[key]['hist'].Scale(scale)
             bkgs[key]['scale'] = scale
             
-        #elif 'internalsurf' in loca:
         elif 'surf' in loca:
-            scale = bkgs[key]['info']['acti'] * (xkgs) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
+            scale = bkgs[key]['info']['acti'] * (surf) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
             bkgs[key]['hist'].Scale(scale)
             bkgs[key]['scale'] = scale
             
         elif loca == 'cucase':
-            scale = bkgs[key]['info']['acti'] * (xkgs) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
+            scale = bkgs[key]['info']['acti'] * (surf) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
             bkgs[key]['hist'].Scale(scale)
             bkgs[key]['scale'] = scale
             
         elif loca == 'teflon':
-            scale = bkgs[key]['info']['acti'] * (xkgs) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
+            scale = bkgs[key]['info']['acti'] * (surf) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
             bkgs[key]['hist'].Scale(scale)
             bkgs[key]['scale'] = scale
             
@@ -516,7 +520,8 @@ def scaleSigs70(sigkeys, sigs, runtime=0):
 
         keVperBin = 1./float(sigs[key]['pars'][3])
 
-        day = 86400. # in seconds
+        ### 1 day in seconds
+        day = 86400.
         if runtime: day = runtime
         
         xkgs      = cmass(int(x[-1])-1)
@@ -524,11 +529,13 @@ def scaleSigs70(sigkeys, sigs, runtime=0):
         extpmts   = 14.
         lskg      = 1800.
         
+        ### treat the NaI surface and the copper and teflon as 1 unit
+        surf = 1.
+        
         generated = float(sigs[key]['generated'])
         if generated < 1:
             print "WARNING: 0 events generated for -->", key
             continue
-        
         
         if loca == 'internal':
             fitActivity = sigs[key]['fitscale'] * (1./xkgs) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
@@ -536,17 +543,17 @@ def scaleSigs70(sigkeys, sigs, runtime=0):
             sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
             
         elif 'surf' in loca:
-            fitActivity = sigs[key]['fitscale'] * (1./xkgs) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
+            fitActivity = sigs[key]['fitscale'] * (1./surf) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
             sigs[key]['info']['fitacti'] = fitActivity
             sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
             
         elif loca == 'cucase':
-            fitActivity = sigs[key]['fitscale'] * (1./xkgs) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
+            fitActivity = sigs[key]['fitscale'] * (1./surf) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
             sigs[key]['info']['fitacti'] = fitActivity
             sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
             
         elif loca == 'teflon':
-            fitActivity = sigs[key]['fitscale'] * (1./xkgs) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
+            fitActivity = sigs[key]['fitscale'] * (1./surf) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
             sigs[key]['info']['fitacti'] = fitActivity
             sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
             
@@ -750,4 +757,76 @@ def scaleData70(data, dru=0):
         data[key]['hist'].Scale(scale)
         data[key]['druScale'] = scale
     return data
+
+
+def updateBkgsFile70(bkgsfile, resultsfile, newbkgs, BF='B'):
+
+    for thisfile in [bkgsfile, resultsfile]:
+        if not os.path.exists(thisfile):
+            print 'WARNING: file not found -->', thisfile
+            return
+    
+    with open(bkgsfile) as fbkgs:
+        bkgslines = fbkgs.read().splitlines()
+    fbkgs.close()
+
+    with open(resultsfile) as ffits:
+        fitlines = ffits.read().splitlines()
+    ffits.close()
+
+    output = open(newbkgs, 'w')
+    
+    for bline in bkgslines:
+        #bline = bline.strip()
+        if not bline:
+            output.write('\n')
+            continue
+        if bline.startswith('#'):
+            if 'version' in bline:
+                output.write('# GENERATED backgrounds file from fit!\n')
+            else:
+                output.write(bline+'\n')
+            continue
+        bbits = bline.split()
+        if 'F' not in bbits[0]:
+            for bits in bbits:
+                output.write(bits+'\t')
+            output.write('\n')
+            continue
+        
+        replaced = 0
+        for fline in fitlines:
+            if not replaced:
+                fline = fline.strip()
+                if not fline: continue
+                fbits = fline.split()
+                if fbits[-1] == 'mBq' or fbits[-3] == 'mBq':
+                    xstal = fbits[1].split('-')[0].split('x')[1]
+                    loca  = fbits[1].split('-')[1]
+                    chst  = fbits[1].split('-')[2].split('_')[0]
+                    chsp  = fbits[1].split('-')[2].split('_')[1]
+                    acti  = str(fbits[3])
+                    
+                    if bbits[2] == xstal and bbits[3].replace('-','') == loca and bbits[5] == chst and bbits[6] == chsp:
+                        for i in range(len(bbits)):
+                            if i == 0:
+                                output.write(BF+'\t')
+                            elif i == 7:
+                                if acti != '0.0': output.write(acti+'\t')
+                                else: output.write(bbits[i]+'\t')
+                            else:
+                                output.write(bbits[i]+'\t')
+                        output.write('\n')
+                        replaced = 1
+        
+        if not replaced:
+            output.write(bline+'\n')
+            print '!!!!!!! - could not match'
+            print fline
+            print 'to'
+            print bline
+            print ''
+
+    output.close()
+    return
 

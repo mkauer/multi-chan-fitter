@@ -10,7 +10,7 @@ V = 'v70'
 # Extend single/multi hit histos instead of stacking them
 # This should reduce biasing
 # 
-# version: 2017-06-27
+# version: 2017-06-28
 #
 # see CHANGELOG for changes
 ######################################################################
@@ -40,7 +40,12 @@ note=0
 
 ### backgrounds file
 #mcfile = 'backgrounds700.txt'
-mcfile = 'backgrounds700-C7.txt'
+#mcfile = 'backgrounds700-C7.txt'
+#mcfile = 'backgrounds700-C7-update.txt'
+mcfile = 'backgrounds700-C7-update-surf.txt'
+
+### update backgrounds file with fit results
+upbak = 1
 
 ### force reuse of all joined rootfiles in mcfile? [0,1,2]
 ### nice for debugging
@@ -55,7 +60,7 @@ reuse = 1
 ### ['A'] force all-hit data selection channel
 ### ['S'] force single-hit data selection channel
 ### ['M'] force multi-hi data selection channel
-mychans = 'SM'
+mychans = 'S'
 
 ### decide to stack or extend the channels [0,1]
 ### [0] for stacking
@@ -67,7 +72,7 @@ showTotal = 1
 ### show the legends? [0,1]
 showlegs = 1
 ### plot components in groups? [0,1]
-ingroups = 0
+ingroups = 1
 
 ### use fit bounds from backgrounds file? [0,1,2,3]
 ### [0] max bounds are 0-1
@@ -83,7 +88,9 @@ otherBnds = [1e-6, 0.9]
 ### fitting ranges
 ### lo and hi energy fit ranges
 fLoE = [  6,   96]
-fHiE = [200, 2000]
+#fLoE = [  0,  100]
+#fHiE = [200, 2000]
+fHiE = [0, 0]
 
 ### rebin the histos for fitting [1,inf]
 loEfitRebin = 6
@@ -599,7 +606,7 @@ def _myself_(argv):
                         for E in range(2):
                             for k in range(2):
                                 E=str(E)
-                                renorm = sigs[fskey+'-c'+C+'-e'+E]['scale'] / sigs[fskey+'-c'+C+'-e'+E]['fitscale']
+                                renorm = sigs[fskey+'-c'+C+'-e'+E]['scale'] / float(sigs[fskey+'-c'+C+'-e'+E]['fitscale'])
 
                                 sigs[fskey+'-c'+C+'-e'+E]['info']['newfbnd'] = [0,0]
                                 #print '!!!!!!!!!!!!!',fskey, sigs[fskey+'-c'+C+'-e'+E]['info']['acti']
@@ -724,14 +731,15 @@ def _myself_(argv):
                         for E in range(2):
                             if finit:
                                 E = str(E)
-                                fitresults[str(i)].append('fit '+fskey+' = %.2e +/- %.2e mBq'
-                                            %(sigs[fskey+'-c'+C+'-e'+E]['info']['fitacti'],
-                                              sigs[fskey+'-c'+C+'-e'+E]['info']['fiterro']))
-                                fitresults[str(i)].append('    bounds = [%.2e,  %.2e]'
-                                            %(sigs[fskey+'-c'+C+'-e'+E]['info']['acti'] * \
-                                              sigs[fskey+'-c'+C+'-e'+E]['info']['fbnd'][0],
-                                              sigs[fskey+'-c'+C+'-e'+E]['info']['acti'] * \
-                                              sigs[fskey+'-c'+C+'-e'+E]['info']['fbnd'][1]))
+                                ### print out activity and error and bounds
+                                fitresults[str(i)].append(
+                                    'fit '+fskey+' = %.2e +/- %.2e mBq  (%.2e, %.2e) '
+                                    %(sigs[fskey+'-c'+C+'-e'+E]['info']['fitacti'],
+                                      sigs[fskey+'-c'+C+'-e'+E]['info']['fiterro'],
+                                      sigs[fskey+'-c'+C+'-e'+E]['info']['acti'] * \
+                                      sigs[fskey+'-c'+C+'-e'+E]['info']['fbnd'][0],
+                                      sigs[fskey+'-c'+C+'-e'+E]['info']['acti'] * \
+                                      sigs[fskey+'-c'+C+'-e'+E]['info']['fbnd'][1]))
                                 
                                 finit=0
             #print '\n'
@@ -780,8 +788,9 @@ def _myself_(argv):
         outfile.close()
         
         ### create the updated backgrounds file
-        #newbkgs = './plots/'+mcfile[:-4]+'-update.txt'
-        #updateBkgsFile63(mcfile, resultsfile, newbkgs, BF='F')
+        if upbak:
+            newbkgs = './plots/'+mcfile[:-4]+'-update.txt'
+            updateBkgsFile70(mcfile, resultsfile, newbkgs, BF='B')
         
         ### create the background model table
         #outtable = newbkgs[:-4]+'-table.txt'
@@ -1319,7 +1328,7 @@ def _myself_(argv):
                 if dkey and tcount:
                     pval  = data[dkey]['hist'].Chi2TestX(total[C][E][i], chi2, ndf, igood, chiopt)
                     #print 'INFO:',dkey,'pval =',pval,'chi2 =',chi2,'ndf =',ndf,'igood =',igood
-                    print 'INFO:',dkey,'total MC chi2/ndf =',chi2/data[dkey]['druScale']/ndf
+                    print 'INFO:',dkey,'total MC chi2/ndf =',round(chi2/data[dkey]['druScale']/ndf,2)
                 #-----------------------------------------------------------------------------
                 #=============================================================================
 

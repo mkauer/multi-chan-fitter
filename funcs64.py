@@ -6,10 +6,11 @@
 # 
 # Works with v64 and later versions
 # 
-# version: 2017-06-26
+# version: 2017-06-28
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# + add cucase and teflon to surf group
 # ~ use 're' for the line splitting?
 # ~ mega revamp of the surface component syntax
 # ~ fixed AGAIN the bug with the primVolumeName cuts!
@@ -185,6 +186,8 @@ def setGroup(info):
         else: return 'internal'
     elif 'pmt' in info['loca']: return 'pmt'
     elif 'surf' in info['loca']: return 'surf'
+    elif 'cucase' in info['loca']: return 'surf'
+    elif 'teflon' in info['loca']: return 'surf'
     elif info['loca'] == 'lsveto': return 'lsveto'
     else: return 'none'
 
