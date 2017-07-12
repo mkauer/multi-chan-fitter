@@ -1,8 +1,9 @@
 # -*- sh -*-
 
-# version 2017-06-26
+# version 2017-07-11
 
 
+# ~ fixed issue with Te names not showing the 'm'
 # + new bulk teflon and cu-case
 # + new internal, teflon, and copper surface Pb210
 # + all new build70 now with primVolumeName cuts corrected
@@ -120,41 +121,41 @@ B	MS	6	internal	I125	I125	GRND	0.29	1e-4	0.69	1.31	./root-join-read/build70/buil
 B	MS	7	internal	I125	I125	GRND	0.28	1e-4	0.69	1.31	./root-join-read/build70/build70-internalI125_GRND.root	
 B	MS	8	internal	I125	I125	GRND	0.28	1e-4	0.69	1.31	./root-join-read/build70/build70-internalI125_GRND.root	
 
-B	MS	1	internal	Te121m	Te121	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe121m_GRND.root	
-B	MS	2	internal	Te121m	Te121	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe121m_GRND.root	
-B	MS	3	internal	Te121m	Te121	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe121m_GRND.root	
-B	MS	4	internal	Te121m	Te121	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe121m_GRND.root	
-B	MS	5	internal	Te121m	Te121	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe121m_GRND.root	
-B	MS	6	internal	Te121m	Te121	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe121m_GRND.root	
-B	MS	7	internal	Te121m	Te121	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe121m_GRND.root	
-B	MS	8	internal	Te121m	Te121	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe121m_GRND.root	
+B	MS	1	internal	Te121m	Te121m	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe121m_GRND.root	
+B	MS	2	internal	Te121m	Te121m	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe121m_GRND.root	
+B	MS	3	internal	Te121m	Te121m	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe121m_GRND.root	
+B	MS	4	internal	Te121m	Te121m	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe121m_GRND.root	
+B	MS	5	internal	Te121m	Te121m	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe121m_GRND.root	
+B	MS	6	internal	Te121m	Te121m	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe121m_GRND.root	
+B	MS	7	internal	Te121m	Te121m	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe121m_GRND.root	
+B	MS	8	internal	Te121m	Te121m	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe121m_GRND.root	
 
-B	MS	1	internal	Te123m	Te123	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe123m_GRND.root	
-B	MS	2	internal	Te123m	Te123	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe123m_GRND.root	
-B	MS	3	internal	Te123m	Te123	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe123m_GRND.root	
-B	MS	4	internal	Te123m	Te123	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe123m_GRND.root	
-B	MS	5	internal	Te123m	Te123	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe123m_GRND.root	
-B	MS	6	internal	Te123m	Te123	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe123m_GRND.root	
-B	MS	7	internal	Te123m	Te123	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe123m_GRND.root	
-B	MS	8	internal	Te123m	Te123	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe123m_GRND.root	
+B	MS	1	internal	Te123m	Te123m	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe123m_GRND.root	
+B	MS	2	internal	Te123m	Te123m	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe123m_GRND.root	
+B	MS	3	internal	Te123m	Te123m	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe123m_GRND.root	
+B	MS	4	internal	Te123m	Te123m	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe123m_GRND.root	
+B	MS	5	internal	Te123m	Te123m	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe123m_GRND.root	
+B	MS	6	internal	Te123m	Te123m	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe123m_GRND.root	
+B	MS	7	internal	Te123m	Te123m	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe123m_GRND.root	
+B	MS	8	internal	Te123m	Te123m	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe123m_GRND.root	
 
-B	MS	1	internal	Te125m	Te125	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe125m_GRND.root	
-B	MS	2	internal	Te125m	Te125	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe125m_GRND.root	
-B	MS	3	internal	Te125m	Te125	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe125m_GRND.root	
-B	MS	4	internal	Te125m	Te125	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe125m_GRND.root	
-B	MS	5	internal	Te125m	Te125	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe125m_GRND.root	
-B	MS	6	internal	Te125m	Te125	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe125m_GRND.root	
-B	MS	7	internal	Te125m	Te125	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe125m_GRND.root	
-B	MS	8	internal	Te125m	Te125	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe125m_GRND.root	
+B	MS	1	internal	Te125m	Te125m	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe125m_GRND.root	
+B	MS	2	internal	Te125m	Te125m	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe125m_GRND.root	
+B	MS	3	internal	Te125m	Te125m	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe125m_GRND.root	
+B	MS	4	internal	Te125m	Te125m	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe125m_GRND.root	
+B	MS	5	internal	Te125m	Te125m	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe125m_GRND.root	
+B	MS	6	internal	Te125m	Te125m	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe125m_GRND.root	
+B	MS	7	internal	Te125m	Te125m	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe125m_GRND.root	
+B	MS	8	internal	Te125m	Te125m	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe125m_GRND.root	
 
-B	MS	1	internal	Te127m	Te127	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe127m_GRND.root	
-B	MS	2	internal	Te127m	Te127	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe127m_GRND.root	
-B	MS	3	internal	Te127m	Te127	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe127m_GRND.root	
-B	MS	4	internal	Te127m	Te127	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe127m_GRND.root	
-B	MS	5	internal	Te127m	Te127	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe127m_GRND.root	
-B	MS	6	internal	Te127m	Te127	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe127m_GRND.root	
-B	MS	7	internal	Te127m	Te127	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe127m_GRND.root	
-B	MS	8	internal	Te127m	Te127	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe127m_GRND.root	
+B	MS	1	internal	Te127m	Te127m	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe127m_GRND.root	
+B	MS	2	internal	Te127m	Te127m	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe127m_GRND.root	
+B	MS	3	internal	Te127m	Te127m	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe127m_GRND.root	
+B	MS	4	internal	Te127m	Te127m	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe127m_GRND.root	
+B	MS	5	internal	Te127m	Te127m	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe127m_GRND.root	
+B	MS	6	internal	Te127m	Te127m	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe127m_GRND.root	
+B	MS	7	internal	Te127m	Te127m	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe127m_GRND.root	
+B	MS	8	internal	Te127m	Te127m	GRND	0.11	1e-4	0.69	1.31	./root-join-read/build70/build70-internalTe127m_GRND.root	
 
 B       MS      1       internal    K40       K40       GRND      1.302     1e-4     0.69     1.31       ./root-join-read/build70/build70-internalK40_GRND.root
 B       MS      2       internal    K40       K40       GRND      2.481     1e-4     0.69     1.31       ./root-join-read/build70/build70-internalK40_GRND.root

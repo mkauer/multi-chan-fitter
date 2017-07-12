@@ -1,7 +1,9 @@
 #!/bin/bash
 
-# 2017-06-23
+# 2017-07-12
 
+# + add Cd109 and H3
+# ~ fixed issue with Te names not showing the 'm'
 # + add LIST of files to cat and process
 # ~ split data into crystal numbers
 # ~ changed default histogram parameters
@@ -42,7 +44,8 @@ joinscript=$base/$join
 #for mcfile in `ls $builddir`
 #for mcfile in dataset1
 #for num in 1 2 3 4 5 6 7 8
-for mcfile in `cat LIST2`
+#for mcfile in `cat TeXXXm`
+for mcfile in internalCd109_GRND internalH3_GRND
 do
     #mcfile="c$num-dataset1"
     file="$clustdir/$build-$mcfile.sh"

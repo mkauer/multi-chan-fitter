@@ -6,10 +6,17 @@
 # 
 # Works with v70 and later versions
 # 
-# version: 2017-06-28
+# version: 2017-07-12
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# + add uniqString() to unique 'SM' and 'S' for example
+# ~ (evt_Type > 10) still works with new rootfiles
+# ~ primParticalName is 'triton' for H3
+# ~ tweaks to buildMC70() to get Cd109 and H3 working
+# + new paths to pushpa's Cd109 and H3
+# ~ fixed issue with Te names not showing the 'm'
+# + added setBinError() to test different error schemes
 # ~ updated updateBkgsFile70()
 # ~ treat surface and bulk teflon and copper as a unit of 1
 # + added fit errors to the signal scaling function
@@ -102,10 +109,11 @@ def buildMC70(info, mc):
         
     else:
         
-        if onCup():
-            path1 = '/data/MC/KIMS-NaI/user-scratch/sim/processed/newGeometry/'
-        else:
-            path1 = '/home/mkauer/COSINE/CUP/mc-fitting/sim/newGeometry/'
+        path1 = '/data/MC/KIMS-NaI/user-scratch/sim/processed/newGeometry/'
+        if info['isof'] == 'Cd109' or info['isof'] == 'H3':
+            path1 = '/data/COSINE/WORK/pushpa/sim/process/Crystal7/'
+        if not onCup():
+            path1 = '/home/mkauer/COSINE/CUP/mc-fitting'+path1
         
         location = info['floca']
         if location == 'extpmt':
@@ -120,6 +128,9 @@ def buildMC70(info, mc):
             path2 = info['isof']+'/set2/surf/cu-10um/'+'*'+location+'-C'+str(info['xstl'])+'*root'
         if location == 'teflon-surf-10um':
             path2 = info['isof']+'/set2/surf/teflon-10um/'+'*'+location+'-C'+str(info['xstl'])+'*root'
+        
+        if info['isof'] == 'Cd109' or info['isof'] == 'H3':
+            path2 = '*'+info['isof']+'*.root'
         
             
         chain  = TChain("MC","")
@@ -273,16 +284,25 @@ def buildMC70(info, mc):
 
 
                     ### this is needed to get the generated event numbers right!
-                    motherIsoCut = TCut('(primParticleName == "'+info['chst']+'")')
-
-                    ### this is needed? to cut out crap events
-                    ### (event_info.Type) is new
+                    pname = info['chst']
+                    if info['chst'].startswith('Te') \
+                       and info['chst'].endswith('m'):
+                        pname = info['chst'][:-1]
+                    if info['chst'] == 'H3':
+                        pname = 'triton'
+                    #motherIsoCut = TCut('(primParticleName == "'+info['chst']+'")')
+                    motherIsoCut = TCut('(primParticleName == "'+pname+'")')
+                    
+                    
+                    ### This is needed to cut out crap events
                     ### (evt_Type) is old
-                    #eventTypeCut = TCut('(event_info.Type > 10) || (evt_Type > 10)')
-                    eventTypeCut = TCut('(event_info.Type > 10)')
-
-
-
+                    ### (event_info.Type) is new
+                    ### (evt_Type) still works with new files
+                    #eventTypeCut = TCut('(event_info.Type > 10)')
+                    #if info['isof'] == 'Cd109' or info['isof'] == 'H3':
+                    #    eventTypeCut = TCut('(evt_Type > 10)')
+                    eventTypeCut = TCut('(evt_Type > 10)')
+                    
                     
                     #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                     #   CRITIAL POINT IN THE SIM !!!
@@ -428,20 +448,42 @@ def buildMC70(info, mc):
     return mc
 
 
+def scaleData70(data, dru=0):
+    """
+    Scale for DRU or not
+    """
+    for key in data:
+        i = int(key.split('-')[0].split('x')[-1]) - 1
+        days = 1.
+        xkgs = 1.
+        keVperBin = 1.
+        if dru:
+            days = float((data[key]['runtime'])/86400.)
+        xkgs = float(cmass(i))
+        keVperBin = 1./float(data[key]['pars'][3])
+        scale = float(1./(days*xkgs*keVperBin))
+        data[key]['hist'].Scale(scale)
+        data[key]['druScale'] = scale
+    return data
+
+
 def scaleBkgs70(bkgs,runtime=0):
     
     for key in bkgs:
         x = key.split('-')[0]
         loca = key.split('-')[1]
         e = key.split('-')[-1]
-        
-        keVperBin = 1./float(bkgs[key]['pars'][3])
 
         ### 1 day in seconds
         day = 86400.
-        if runtime: day = runtime
-            
-        xkgs      = cmass(int(x[-1])-1)
+        xkgs = 1.
+        keVperBin = 1.
+        if runtime:
+            day = runtime
+        xkgs = cmass(int(x[-1])-1)
+        keVperBin = 1./float(bkgs[key]['pars'][3])
+
+        nmass     = cmass(int(x[-1])-1)
         pmts      = 2.
         extpmts   = 14.
         lskg      = 1800.
@@ -455,7 +497,7 @@ def scaleBkgs70(bkgs,runtime=0):
             continue
         
         if loca == 'internal':
-            scale = bkgs[key]['info']['acti'] * (xkgs) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
+            scale = bkgs[key]['info']['acti'] * (nmass) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
             bkgs[key]['hist'].Scale(scale)
             bkgs[key]['scale'] = scale
             
@@ -490,17 +532,17 @@ def scaleBkgs70(bkgs,runtime=0):
             bkgs[key]['scale'] = scale
             
         elif loca == 'lsvetoair':
-            scale = bkgs[key]['info']['acti'] * (xkgs) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
+            scale = bkgs[key]['info']['acti'] * (nmass) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
             bkgs[key]['hist'].Scale(scale)
             bkgs[key]['scale'] = scale
             
         elif loca == 'airshield':
-            scale = bkgs[key]['info']['acti'] * (xkgs) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
+            scale = bkgs[key]['info']['acti'] * (nmass) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
             bkgs[key]['hist'].Scale(scale)
             bkgs[key]['scale'] = scale
             
         elif loca == 'steel':
-            scale = bkgs[key]['info']['acti'] * (xkgs) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
+            scale = bkgs[key]['info']['acti'] * (nmass) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
             bkgs[key]['hist'].Scale(scale)
             bkgs[key]['scale'] = scale
             
@@ -518,13 +560,16 @@ def scaleSigs70(sigkeys, sigs, runtime=0):
         loca = key.split('-')[1]
         e = key.split('-')[-1]
 
-        keVperBin = 1./float(sigs[key]['pars'][3])
-
         ### 1 day in seconds
         day = 86400.
-        if runtime: day = runtime
-        
-        xkgs      = cmass(int(x[-1])-1)
+        xkgs = 1.
+        keVperBin = 1.
+        if runtime:
+            day = runtime
+        xkgs = cmass(int(x[-1])-1)
+        keVperBin = 1./float(sigs[key]['pars'][3])
+
+        nmass     = cmass(int(x[-1])-1)
         pmts      = 2.
         extpmts   = 14.
         lskg      = 1800.
@@ -538,7 +583,7 @@ def scaleSigs70(sigkeys, sigs, runtime=0):
             continue
         
         if loca == 'internal':
-            fitActivity = sigs[key]['fitscale'] * (1./xkgs) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
+            fitActivity = sigs[key]['fitscale'] * (1./nmass) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
             sigs[key]['info']['fitacti'] = fitActivity
             sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
             
@@ -573,17 +618,17 @@ def scaleSigs70(sigkeys, sigs, runtime=0):
             sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
             
         elif loca == 'lsvetoair':
-            fitActivity = sigs[key]['fitscale'] * (1./xkgs) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
+            fitActivity = sigs[key]['fitscale'] * (1./nmass) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
             sigs[key]['info']['fitacti'] = fitActivity
             sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
             
         elif loca == 'airshield':
-            fitActivity = sigs[key]['fitscale'] * (1./xkgs) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
+            fitActivity = sigs[key]['fitscale'] * (1./nmass) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
             sigs[key]['info']['fitacti'] = fitActivity
             sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
             
         elif loca == 'steel':
-            fitActivity = sigs[key]['fitscale'] * (1./xkgs) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
+            fitActivity = sigs[key]['fitscale'] * (1./nmass) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
             sigs[key]['info']['fitacti'] = fitActivity
             sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
             
@@ -743,22 +788,6 @@ def buildData70(info, data):
     return data, runtime
 
 
-def scaleData70(data, dru=0):
-    """
-    Scale for DRU or not
-    """
-    for key in data:
-        i = int(key.split('-')[0].split('x')[-1]) - 1
-        days = 1.
-        if dru: days = float((data[key]['runtime'])/(60.*60.*24.))
-        kgs = float(cmass(i))
-        keVperBin = 1./float(data[key]['pars'][3])
-        scale = float(1./(days*kgs*keVperBin))
-        data[key]['hist'].Scale(scale)
-        data[key]['druScale'] = scale
-    return data
-
-
 def updateBkgsFile70(bkgsfile, resultsfile, newbkgs, BF='B'):
 
     for thisfile in [bkgsfile, resultsfile]:
@@ -829,4 +858,20 @@ def updateBkgsFile70(bkgsfile, resultsfile, newbkgs, BF='B'):
 
     output.close()
     return
+
+
+def setBinError(histo):
+    for n in range(histo.GetNbinsX()+1):
+        #histo.SetBinError(n, 0.0)
+        histo.SetBinError(n, sqrt(histo.GetBinContent(n)))
+        
+    return histo
+
+
+def uniqString(string):
+    newstring=''
+    for char in string:
+        if char not in newstring:
+            newstring += char
+    return newstring
 

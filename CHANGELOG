@@ -12,6 +12,27 @@
 # ====================================================================
 
 
+# 2017-07-12
+# --------------------------------------------------------------------
+
+# ~ fixed BIG bug with fitting lower bound
+# ~ had to tweak the chans handling a bit
+# + add uniqString() to unique 'SM' and 'S' for example
+# ~ make separate fitchans and pltchans options
+# ~ (evt_Type > 10) still works with new rootfiles
+# + add I126 and Te121 to cosmo group
+# ~ primParticalName is 'triton' for H3
+# ~ tweaks to buildMC70() to get Cd109 and H3 working
+# + new paths to pushpa's Cd109 and H3
+
+
+# 2017-07-11
+# --------------------------------------------------------------------
+# ~ fixed issue with Te names not showing the 'm'
+# + add linear scale option to the residual plots
+# + added setBinError() to test different error schemes
+
+
 # 2017-06-28
 # --------------------------------------------------------------------
 # + add cucase and teflon to surf group

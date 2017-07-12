@@ -10,7 +10,7 @@ V = 'v70'
 # Extend single/multi hit histos instead of stacking them
 # This should reduce biasing
 # 
-# version: 2017-06-28
+# version: 2017-07-12
 #
 # see CHANGELOG for changes
 ######################################################################
@@ -33,19 +33,16 @@ from funcs70 import *
 
 ### user inputs
 #================================================================
-
 ### extra notes to add to the saved plot file names? [0, 'something']
-note=0
-#note='no-dru'
+note = 0
+#note = 'sqrtN-error'
 
 ### backgrounds file
 #mcfile = 'backgrounds700.txt'
 #mcfile = 'backgrounds700-C7.txt'
 #mcfile = 'backgrounds700-C7-update.txt'
-mcfile = 'backgrounds700-C7-update-surf.txt'
-
-### update backgrounds file with fit results
-upbak = 1
+#mcfile = 'backgrounds700-C7-update-surf.txt'
+mcfile = 'backgrounds700-C7-update-surf-update.txt'
 
 ### force reuse of all joined rootfiles in mcfile? [0,1,2]
 ### nice for debugging
@@ -54,13 +51,21 @@ upbak = 1
 ### [2] forces NOT reusing any data/bkgs/sigs
 reuse = 1
 
+### update backgrounds file with fit results
+updateMCfile = 1
+
+### set all errors on signal and data-bkgs to something defined
+### in function setBinError() [0,1]
+seterror = 0
+
 ### force a particular set of hit chan data? [0,1,2,3]
 ### nice for debugging
 ### [ 0 ] default - use whatever is specified in the backgrounds file
 ### ['A'] force all-hit data selection channel
 ### ['S'] force single-hit data selection channel
 ### ['M'] force multi-hi data selection channel
-mychans = 'S'
+pltchans = 'SM'
+fitchans = 'SM'
 
 ### decide to stack or extend the channels [0,1]
 ### [0] for stacking
@@ -87,10 +92,10 @@ otherBnds = [1e-6, 0.9]
 
 ### fitting ranges
 ### lo and hi energy fit ranges
-fLoE = [  6,   96]
-#fLoE = [  0,  100]
-#fHiE = [200, 2000]
-fHiE = [0, 0]
+fLoE = [6, 100]
+#fLoE = [0,0]
+fHiE = [200, 2900]
+#fHiE = [0,0]
 
 ### rebin the histos for fitting [1,inf]
 loEfitRebin = 6
@@ -98,13 +103,17 @@ hiEfitRebin = 10
 
 ### plotting ranges
 ### lo and hi energy ranges
-loer = [0,  100]
-hier = [0, 2000]
+loer = [0,  200]
+#loer = [0,  20]
+hier = [0, 3000]
 eran = [loer, hier]
 
 ### rebin the final plots [1,inf]
 loEplotRebin = 6
 hiEplotRebin = 10
+
+### use linear residual scale? [0,1]
+linres = 1
 
 ### individual plots for all crystals? [0,1]
 indi = 1
@@ -168,24 +177,30 @@ def _myself_(argv):
     ### where everything gets loaded into dictionary
     #-----------------------------------------------------------------
     #-----------------------------------------------------------------
-    data, bkgs, sigs, runtime = build70(mcfile, reuse, mychans)
+    allchans = uniqString(fitchans+pltchans)
+    #allchans = uniqString(pltchans+fitchans)
+    #print allchans
+    data, bkgs, sigs, runtime = build70(mcfile, reuse, allchans)
     datkeys, bakkeys, sigkeys = sortKeys(data, bkgs, sigs)
     #-----------------------------------------------------------------
     #-----------------------------------------------------------------
     
     #getPars(data[datkeys[0]]['hist'])
-
+    
     # assume all data is using same run, channels, and hist params
     #runNum = data[datkeys[0]]['info']['run']
     try: runtag = data[datkeys[0]]['info']['tag']
     except: runtag = 'none'
     try:
-        chans  = data[datkeys[0]]['info']['chans']
+        #allchans  = data[datkeys[0]]['info']['chans']
         params = globalParams(data)
     except:
-        chans  = bkgs[bakkeys[0]]['info']['chans']
+        #allchans  = bkgs[bakkeys[0]]['info']['chans']
         params = globalParams(bkgs)
-        
+
+    #print allchans
+    #sys.exit()
+    
     ### find unique names for color scheme?
     ### "internal-K40" for example
     uniqAll = []
@@ -249,9 +264,10 @@ def _myself_(argv):
     
     fmin = 0
     fmax = fbins
-    nchans = len(mychans)
+    #nchans = len(fitchans)
     if extend:
-        fmax = fbins*nchans
+        #fmax = fbins*nchans
+        fmax = fbins*len(fitchans)
     #=================================================================
     
 
@@ -331,7 +347,7 @@ def _myself_(argv):
             binit = 1
             tmpscale1 = 0
             tmpscale2 = 0
-            for nc, C in enumerate(chans):
+            for nc, C in enumerate(fitchans):
 
                 # build the histos for fitting
                 #-----------------------------------------------------------------------------
@@ -576,16 +592,21 @@ def _myself_(argv):
 
                     ### to scale or not to scale...
                     if mcscale:
-                        fitsigs[fskey]['hist'].Scale(dat_int/mc_int) # scale to data integral
-                        
-                        for C in chans:
+                        try:
+                            fitsigs[fskey]['hist'].Scale(dat_int/mc_int) # scale to data integral
+                        except:
+                            print 'ERROR: No events for --> ',fskey
+                            print '       Remove it from the fit!'
+                            sys.exit()
+                            
+                        for C in allchans:
                             sigs[fskey+'-c'+C+'-e0']['hist'].Scale(dat_int/mc_int) # make sure MC is scaled too
                             sigs[fskey+'-c'+C+'-e1']['hist'].Scale(dat_int/mc_int) # make sure MC is scaled too
-                            
+
                             ### v31 - save the scaling factors so you can convert to mBq/kg later
                             #sigs[fskey+'-e0']['fitscale'] = dat_int/mc_int
                             #sigs[fskey+'-e1']['fitscale'] = dat_int/mc_int
-                            
+
                             ### v42 version of fitscale
                             sigs[fskey+'-c'+C+'-e0']['fitscale'] = sigs[fskey+'-c'+C+'-e0']['scale'] * dat_int/mc_int
                             sigs[fskey+'-c'+C+'-e1']['fitscale'] = sigs[fskey+'-c'+C+'-e1']['scale'] * dat_int/mc_int
@@ -593,7 +614,7 @@ def _myself_(argv):
                     else:
                         ### why doesn't this work??
                         ### maybe it does now??
-                        for C in chans:
+                        for C in allchans:
                             sigs[fskey+'-c'+C+'-e0']['fitscale'] = sigs[fskey+'-c'+C+'-e0']['scale']
                             sigs[fskey+'-c'+C+'-e1']['fitscale'] = sigs[fskey+'-c'+C+'-e1']['scale']
 
@@ -602,15 +623,12 @@ def _myself_(argv):
                     ### and save new values to the sigs info
                     #---------------------------------------------------------------------
                     #useBounds=0
-                    for C in chans:
+                    for C in allchans:
                         for E in range(2):
+                            E=str(E)
+                            sigs[fskey+'-c'+C+'-e'+E]['info']['newfbnd'] = [0,0]
                             for k in range(2):
-                                E=str(E)
                                 renorm = sigs[fskey+'-c'+C+'-e'+E]['scale'] / float(sigs[fskey+'-c'+C+'-e'+E]['fitscale'])
-
-                                sigs[fskey+'-c'+C+'-e'+E]['info']['newfbnd'] = [0,0]
-                                #print '!!!!!!!!!!!!!',fskey, sigs[fskey+'-c'+C+'-e'+E]['info']['acti']
-                                #print '!!!!!!!!!!!!!',fskey, sigs[fskey+'-c'+C+'-e'+E]['info']['acti']/renorm
                                 
                                 if useBounds == 0:
                                     these = [0.00, 1.00]
@@ -629,13 +647,21 @@ def _myself_(argv):
                                 else:
                                     print 'ERROR: do not know what to do with useBounds =',useBounds
                                     sys.exit()
-
-                    bounds.append(sigs[fskey+'-c'+chans[0]+'-e0']['info']['newfbnd'])
+                            
+                    bounds.append(sigs[fskey+'-c'+fitchans[0]+'-e0']['info']['newfbnd'])
                     #---------------------------------------------------------------------
-
+                    
+                    
+                    ### set errors to zero
+                    if seterror:
+                        fitsigs[fskey]['hist'] = setBinError(fitsigs[fskey]['hist'])
+                    
                     #sigObj[i].Add(fitsigs[fskey]['hist']) # add to the TFractionFitter object
                     sigObj[-1].Add(fitsigs[fskey]['hist']) # add to the TFractionFitter object
 
+            if seterror:
+                fitdata[i] = setBinError(fitdata[i])
+                
             #fit.append(TFractionFitter(fitdata[i], sigObj[i])) # create the TFF data and MC objects
             fit.append(TFractionFitter(fitdata[i], sigObj[-1])) # create the TFF data and MC objects
             #fit.append(TFractionFitter(fitdata[i], sigObj[-1], "Q")) # create the TFF data and MC objects
@@ -643,7 +669,7 @@ def _myself_(argv):
             ### Print out the fit infos
             fitresults[str(i)].append('Crystal-'+str(i+1)+' fit results')
             fitresults[str(i)].append('version = '+V)
-            fitresults[str(i)].append('channels fit = '+mychans)
+            fitresults[str(i)].append('channels fit = '+fitchans)
             fitresults[str(i)].append('hist extend = '+str(extend))
             fitresults[str(i)].append('norm to dru = '+str(dru))
             fitresults[str(i)].append('scale mc = '+str(mcscale))
@@ -698,7 +724,7 @@ def _myself_(argv):
                     fit[-1].GetResult(count, fscale, ferror)
                     fitsigs[fskey]['hist'].Scale(fscale)
                     
-                    for C in chans:
+                    for C in allchans:
                         for E in range(2):
                             E = str(E)
 
@@ -727,7 +753,7 @@ def _myself_(argv):
             for fskey in fsigkeys:
                 if 'x'+str(i+1) in fskey:
                     finit=1
-                    for C in chans:
+                    for C in allchans:
                         for E in range(2):
                             if finit:
                                 E = str(E)
@@ -765,7 +791,7 @@ def _myself_(argv):
         save += '_loEplotRebin-'+str(loEplotRebin)
         save += '_hiEplotRebin-'+str(hiEplotRebin)
         save += '_reuse'+str(reuse)
-        save += '_chans'+str(chans)
+        save += '_chans'+str(fitchans)
         save += '_extend'+str(extend)
         if note: save += '_'+note
         save += '_'+V
@@ -788,7 +814,7 @@ def _myself_(argv):
         outfile.close()
         
         ### create the updated backgrounds file
-        if upbak:
+        if updateMCfile:
             newbkgs = './plots/'+mcfile[:-4]+'-update.txt'
             updateBkgsFile70(mcfile, resultsfile, newbkgs, BF='B')
         
@@ -832,14 +858,14 @@ def _myself_(argv):
             fbotpad[i].SetTopMargin(0.05)
             fbotpad[i].SetBottomMargin(0.3)
             fbotpad[i].SetBorderMode(0)
-            fbotpad[i].SetLogy()
+            fbotpad[i].SetLogy(1)
             ftoppad[i].Draw()
             fbotpad[i].Draw()
             ftoppad[i].cd()
             
-            if dru: fitdata[i].SetAxisRange(2e-3, 3e2, 'y')
+            if dru: fitdata[i].SetAxisRange(2e-3, 2e3, 'y')
             
-            newFitTitle = str('Crystal-'+str(i+1)+'   '+'Fit-chans-'+chans)
+            newFitTitle = str('Crystal-'+str(i+1)+'   '+'Fit-chans-'+fitchans)
             fitdata[i].SetTitle(newFitTitle)
 
             fitdata[i].SetLineColor(kBlack)
@@ -963,9 +989,13 @@ def _myself_(argv):
             fresid[i].GetYaxis().SetLabelFont(font)
             fresid[i].GetYaxis().SetLabelSize(size)
             fresid[i].GetYaxis().SetLabelOffset(0.01)
-            fresid[i].GetYaxis().SetNdivisions(505) # '5' secondary and '05' primary
+            # '5' secondary and '05' primary
+            fresid[i].GetYaxis().SetNdivisions(505)
             
             fresid[i].SetAxisRange(0.1,10,'y')
+            if linres:
+                fbotpad[i].SetLogy(0)
+                fresid[i].SetAxisRange(0,2,'y')
             fresid[i].Draw()
             
             ### set my line to '1'
@@ -983,7 +1013,9 @@ def _myself_(argv):
             if indi and i+1 in justthese:
                 ftpad=ftoppad[i].Clone()
                 fbpad=fbotpad[i].Clone()
-                sepFitPlot = TCanvas('ican-fit-'+str(chans)+str(i), 'ican-fit-'+str(chans)+str(i), 0, 0, 1400, 900)
+                sepFitPlot = TCanvas('ican-fit-'+str(fitchans)+str(i),
+                                     'ican-fit-'+str(fitchans)+str(i),
+                                     0, 0, 1400, 900)
                 ftpad.Draw()
                 fbpad.Draw()
                 sepFitPlot.Update()
@@ -994,7 +1026,7 @@ def _myself_(argv):
                 fisave += '_hiEfRS'+str(hiEfitRebinScale)
                 fisave += '_mcscale'+str(mcscale)
                 fisave += '_dru'+str(dru)
-                #fisave += '_cs'+str(chans)
+                #fisave += '_cs'+str(fitchans)
                 fisave += '_ext'+str(extend)
                 if note: fisave += '_'+str(note)
                 fisave += '_'+str(V)
@@ -1013,11 +1045,11 @@ def _myself_(argv):
     
     # plot the lo and hi energy histograms for all channels
     #=================================================================
-
+    
     # number of energy ranges (lo, hi)
     numE = 2
     # number of channels (all, single, multi, combos)
-    numC = len(chans)
+    numC = len(pltchans)
     
     canvs  = [[[] for x in range(numE)] for x in range(numC)]
 
@@ -1041,7 +1073,7 @@ def _myself_(argv):
     gsigs  = [[[{} for x in range(8)] for x in range(numE)] for x in range(numC)]
     
     plotRebin = 1
-    for C, chan in enumerate(chans): 
+    for C, chan in enumerate(pltchans): 
     
         for E in range(numE):
 
@@ -1049,7 +1081,9 @@ def _myself_(argv):
             else: plotRebin = loEplotRebin
             
             # have the plotting be seperated out from the 8 crystal loop
-            canvs[C][E] = TCanvas('canv'+chan+str(E), 'canv'+chan+str(E), 0, 0, 1400, 900)
+            canvs[C][E] = TCanvas('canv'+chan+str(E),
+                                  'canv'+chan+str(E),
+                                  0, 0, 1400, 900)
             canvs[C][E].Divide(4,2)
 
             toppad[C][E] = []
@@ -1078,11 +1112,16 @@ def _myself_(argv):
                 
                 toppad[C][E][i].SetBottomMargin(0.01)
                 toppad[C][E][i].SetBorderMode(0)
-                toppad[C][E][i].SetLogy()
+                
+                toppad[C][E][i].SetLogy(1)
+                
                 botpad[C][E][i].SetTopMargin(0.05)
                 botpad[C][E][i].SetBottomMargin(0.3)
                 botpad[C][E][i].SetBorderMode(0)
-                botpad[C][E][i].SetLogy()
+                
+                botpad[C][E][i].SetLogy(1)
+                #if linres: botpad[C][E][i].SetLogy(0)
+                
                 toppad[C][E][i].Draw()
                 botpad[C][E][i].Draw()
                 toppad[C][E][i].cd()
@@ -1309,10 +1348,12 @@ def _myself_(argv):
                 if toterr:
                     if dru:
                         for n in range(total[C][E][i].GetNbinsX()):
-                            total[C][E][i].SetBinError(n+1, total[C][E][i].GetBinError(n+1)*data[dkey]['druScale'])
+                            total[C][E][i].SetBinError(n+1,
+                                total[C][E][i].GetBinError(n+1)*data[dkey]['druScale'])
                     else:
                         for n in range(total[C][E][i].GetNbinsX()):
-                            total[C][E][i].SetBinError(n+1, total[C][E][i].GetBinError(n+1)/(float(plotRebin)/math.sqrt(2.)))
+                            total[C][E][i].SetBinError(n+1,
+                                total[C][E][i].GetBinError(n+1)/(float(plotRebin)/math.sqrt(2.)))
                 
                 
                 ### chi2 test
@@ -1343,7 +1384,8 @@ def _myself_(argv):
                         if ingroups:
                             legs[C][E][i].AddEntry(total[C][E][i], 'Total', lopt)
                         else:
-                            legs[C][E][i].AddEntry(total[C][E][i], 'Total MC (chi2/ndf = '+str(round(chi2/ndf,2))+')', lopt)
+                            legs[C][E][i].AddEntry(total[C][E][i],
+                                'Total MC (chi2/ndf = '+str(round(chi2/ndf,2))+')', lopt)
 
                 ### show the legends?
                 if showlegs and (dkey or bkey):
@@ -1360,9 +1402,7 @@ def _myself_(argv):
                 lopt = 'LPE'
 
                 if tcount and dkey:
-                    #resid[C][E][i].Divide(data['x'+str(i+1)+'-data'+'-e'+str(E)]['hist'], total[C][E][i])
                     resid[C][E][i].Divide(data[dkey]['hist'], total[C][E][i])
-                    #resid[C][E][i].Divide(total[C][E][i], data['x'+str(i+1)+'-data'+'-e'+str(E)]['hist'])
 
                 resid[C][E][i].SetTitle('')
                 resid[C][E][i].SetXTitle('Energy (keVee)')
@@ -1381,12 +1421,21 @@ def _myself_(argv):
                 resid[C][E][i].GetYaxis().SetLabelFont(font)
                 resid[C][E][i].GetYaxis().SetLabelSize(size)
                 resid[C][E][i].GetYaxis().SetLabelOffset(0.01)
-                resid[C][E][i].GetYaxis().SetNdivisions(505) # '5' secondary and '05' primary
+                # '5' secondary and '05' primary
+                resid[C][E][i].GetYaxis().SetNdivisions(505)
 
                 if E: resid[C][E][i].SetAxisRange(hier[0], hier[1], 'x')
                 else: resid[C][E][i].SetAxisRange(loer[0], loer[1], 'x')
 
                 resid[C][E][i].SetAxisRange(0.1,10,'y')
+                
+                ###---------------------------------------------
+                if linres:
+                    botpad[C][E][i].SetLogy(0)
+                    resid[C][E][i].SetAxisRange(0,2,'y')
+                ###---------------------------------------------
+
+                
                 resid[C][E][i].Draw()
 
                 # set my line to '1'
@@ -1420,7 +1469,7 @@ def _myself_(argv):
             save += '_loEplotRebin-'+str(loEplotRebin)
             save += '_hiEplotRebin-'+str(hiEplotRebin)
             save += '_reuse'+str(reuse)
-            save += '_chans'+chans
+            save += '_chans'+fitchans
             save += '_chan'+chan
             save += '_extend'+str(extend)
             if note: save += '_'+note
@@ -1436,15 +1485,21 @@ def _myself_(argv):
                 for i in range(8):
                     if i+1 in justthese:
                         tpad=toppad[C][E][i].Clone()
+
+                        #tpad.SetLogy(0)
+                        #tpad.SetAxisRange(0,10,'y')
+                        
                         bpad=botpad[C][E][i].Clone()
-                        sepPlots[C][E][i] = TCanvas('ican-'+str(chan)+str(E)+str(i), 'ican-'+str(chan)+str(E)+str(i), 0, 0, 1400, 900)
+                        sepPlots[C][E][i] = TCanvas('ican-'+str(chan)+str(E)+str(i),
+                                                    'ican-'+str(chan)+str(E)+str(i),
+                                                    0, 0, 1400, 900)
                         #sepPlots[C][E][i].cd()
                         tpad.Draw()
                         bpad.Draw()
                         sepPlots[C][E][i].Update()
                         isave  = ''
                         isave += 'x'+str(i+1)
-                        isave += '-cs'+str(chans)
+                        isave += '-cs'+str(fitchans)
                         isave += '-c'+str(chan)
                         isave += '-e'+str(E)
                         isave += '-ext'+str(extend)

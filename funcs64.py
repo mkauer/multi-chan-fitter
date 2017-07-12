@@ -6,10 +6,11 @@
 # 
 # Works with v64 and later versions
 # 
-# version: 2017-06-28
+# version: 2017-07-12
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# + add I126 and Te121 to cosmo group
 # + add cucase and teflon to surf group
 # ~ use 're' for the line splitting?
 # ~ mega revamp of the surface component syntax
@@ -181,7 +182,10 @@ def getInfo64(line, freuse=0, fchans=0):
 
 def setGroup(info):
     if info['loca'] == 'internal':
-        if info['isof'] in ['Na22','I125','Te121m','Te123m','Te125m','Te127']:
+        if info['isof'] in ['I125','I126',
+                            'Te121','Te121m',
+                            'Te123m','Te125m',
+                            'Te127m']:
             return 'cosmo'
         else: return 'internal'
     elif 'pmt' in info['loca']: return 'pmt'
