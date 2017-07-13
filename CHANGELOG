@@ -14,7 +14,7 @@
 
 # 2017-07-12
 # --------------------------------------------------------------------
-
+# + add warnings when fits are to the limit
 # ~ fixed BIG bug with fitting lower bound
 # ~ had to tweak the chans handling a bit
 # + add uniqString() to unique 'SM' and 'S' for example

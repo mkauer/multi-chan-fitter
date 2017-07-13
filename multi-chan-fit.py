@@ -758,17 +758,21 @@ def _myself_(argv):
                             if finit:
                                 E = str(E)
                                 ### print out activity and error and bounds
+                                fitacti = sigs[fskey+'-c'+C+'-e'+E]['info']['fitacti']
+                                fiterro = sigs[fskey+'-c'+C+'-e'+E]['info']['fiterro']
+                                lobnd = sigs[fskey+'-c'+C+'-e'+E]['info']['acti'] * \
+                                        sigs[fskey+'-c'+C+'-e'+E]['info']['fbnd'][0]
+                                hibnd = sigs[fskey+'-c'+C+'-e'+E]['info']['acti'] * \
+                                        sigs[fskey+'-c'+C+'-e'+E]['info']['fbnd'][1]
+                                limit = ''
+                                #if fitacti <= lobnd or fitacti >= hibnd:
+                                if float('%.2e'%(fitacti)) <= float('%.2e'%(lobnd)) \
+                                   or float('%.2e'%(fitacti)) >= float('%.2e'%(hibnd)):
+                                    limit = '[LIMIT]'
                                 fitresults[str(i)].append(
-                                    'fit '+fskey+' = %.2e +/- %.2e mBq  (%.2e, %.2e) '
-                                    %(sigs[fskey+'-c'+C+'-e'+E]['info']['fitacti'],
-                                      sigs[fskey+'-c'+C+'-e'+E]['info']['fiterro'],
-                                      sigs[fskey+'-c'+C+'-e'+E]['info']['acti'] * \
-                                      sigs[fskey+'-c'+C+'-e'+E]['info']['fbnd'][0],
-                                      sigs[fskey+'-c'+C+'-e'+E]['info']['acti'] * \
-                                      sigs[fskey+'-c'+C+'-e'+E]['info']['fbnd'][1]))
-                                
-                                finit=0
-            #print '\n'
+                                    'fit '+fskey+' = %.2e +/- %.2e mBq  (%.2e, %.2e)  %s '
+                                    %(fitacti, fiterro, lobnd, hibnd, limit))
+                                finit = 0
             fitresults[str(i)].append('\n')
 
             
