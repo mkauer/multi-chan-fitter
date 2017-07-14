@@ -6,10 +6,11 @@
 # 
 # Works with v70 and later versions
 # 
-# version: 2017-07-12
+# version: 2017-07-13
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# ~ tweaked updateBkgsFile70() to handle new fit results format
 # + add uniqString() to unique 'SM' and 'S' for example
 # ~ (evt_Type > 10) still works with new rootfiles
 # ~ primParticalName is 'triton' for H3
@@ -27,6 +28,7 @@
 ######################################################################
 
 import os,sys
+import re
 from copy import deepcopy
 import numpy as np
 
@@ -804,19 +806,29 @@ def updateBkgsFile70(bkgsfile, resultsfile, newbkgs, BF='B'):
     ffits.close()
 
     output = open(newbkgs, 'w')
+
+    print ''
+    print 'INFO: Updating bkgsfile -->',bkgsfile
+    print '      To a new bkgsfile -->',newbkgs
+    print ''
     
     for bline in bkgslines:
+
         #bline = bline.strip()
         if not bline:
             output.write('\n')
             continue
+
         if bline.startswith('#'):
             if 'version' in bline:
-                output.write('# GENERATED backgrounds file from fit!\n')
+                output.write('# NEW GENERATED backgrounds file from fit!\n\n')
+                output.write(bline+'\n')
             else:
                 output.write(bline+'\n')
             continue
-        bbits = bline.split()
+        
+        #bbits = bline.split()
+        bbits = filter(None, re.split("[ \s\t\n\r,:]+", bline.strip()))
         if 'F' not in bbits[0]:
             for bits in bbits:
                 output.write(bits+'\t')
@@ -826,10 +838,16 @@ def updateBkgsFile70(bkgsfile, resultsfile, newbkgs, BF='B'):
         replaced = 0
         for fline in fitlines:
             if not replaced:
-                fline = fline.strip()
-                if not fline: continue
-                fbits = fline.split()
-                if fbits[-1] == 'mBq' or fbits[-3] == 'mBq':
+                #fline = fline.strip()
+                if not fline:
+                    continue
+                #fbits = fline.split()
+                fbits = filter(None, re.split("[ \s\t\n\r,:]+", fline.strip()))
+
+                ### ------------------------------------------------------------
+                ### if output format changes, this is generally the part that fails...
+                #if fbits[-1] == 'mBq' or fbits[-3] == 'mBq':
+                if fbits[0] == 'fit':
                     xstal = fbits[1].split('-')[0].split('x')[1]
                     loca  = fbits[1].split('-')[1]
                     chst  = fbits[1].split('-')[2].split('_')[0]
@@ -850,10 +868,10 @@ def updateBkgsFile70(bkgsfile, resultsfile, newbkgs, BF='B'):
         
         if not replaced:
             output.write(bline+'\n')
-            print '!!!!!!! - could not match'
-            print fline
-            print 'to'
-            print bline
+            print 'WARNING: Could not match line -->',fline
+            #print fline
+            #print 'to'
+            print '         To line -->',bline
             print ''
 
     output.close()
@@ -862,9 +880,13 @@ def updateBkgsFile70(bkgsfile, resultsfile, newbkgs, BF='B'):
 
 def setBinError(histo):
     for n in range(histo.GetNbinsX()+1):
-        #histo.SetBinError(n, 0.0)
         histo.SetBinError(n, sqrt(histo.GetBinContent(n)))
-        
+    return histo
+
+
+def zeroBinError(histo):
+    for n in range(histo.GetNbinsX()+1):
+        histo.SetBinError(n, 0.0)
     return histo
 
 

@@ -12,6 +12,19 @@
 # ====================================================================
 
 
+# 2017-07-13
+# --------------------------------------------------------------------
+# ~ internal K40 too low - testing out fit with fixing K40 activity
+# ~ more fine tuning of C7 fit - no fit bounds hit limits this time
+# ~ tweaked updateBkgsFile70() to handle new fit results format
+# + new MC - split pmt U238 at the Ra226 level
+# ~ did a bit of code clean up
+# ~ scale errors correctly for the residual plots
+# ~ put H3 in cosmo group
+# + add errors just to data and set to 0 for the residual
+# ~ more fine tuning of the C7 fit
+
+
 # 2017-07-12
 # --------------------------------------------------------------------
 # + add warnings when fits are to the limit

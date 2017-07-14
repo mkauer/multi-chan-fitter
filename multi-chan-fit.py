@@ -10,12 +10,13 @@ V = 'v70'
 # Extend single/multi hit histos instead of stacking them
 # This should reduce biasing
 # 
-# version: 2017-07-12
+# version: 2017-07-14
 #
 # see CHANGELOG for changes
 ######################################################################
 
 import os,sys
+import shutil
 import socket
 import copy
 import math
@@ -31,9 +32,8 @@ sys.path.append("/home/mkauer/mc-fitting/")
 from funcs70 import *
 
 
-### user inputs
-#================================================================
-### extra notes to add to the saved plot file names? [0, 'something']
+### ========== GENERAL INPUTS ==============================
+### note to add to saved plot names?
 note = 0
 #note = 'sqrtN-error'
 
@@ -42,42 +42,43 @@ note = 0
 #mcfile = 'backgrounds700-C7.txt'
 #mcfile = 'backgrounds700-C7-update.txt'
 #mcfile = 'backgrounds700-C7-update-surf.txt'
-mcfile = 'backgrounds700-C7-update-surf-update.txt'
+#mcfile = 'backgrounds700-C7-update-surf-update.txt'
+#mcfile = 'backgrounds701-C7.txt'
+#mcfile = 'backgrounds702-C7-Ra226.txt'
+#mcfile = 'backgrounds703-C7-fix-K40.txt'
+#mcfile = 'backgrounds703-C7-fix-K40-update.txt'
+#mcfile = 'backgrounds703-C7-fix-Pb210.txt'
+mcfile = 'backgrounds704-C7-split-pmts.txt'
 
-### force reuse of all joined rootfiles in mcfile? [0,1,2]
-### nice for debugging
+### force the reuse of all joined rootfiles in mcfile? [0,1,2]
+### very nice for debugging
 ### [0] default - use whatever is specified in the backgrounds file
 ### [1] forces reusing of all data/bkgs/sigs
 ### [2] forces NOT reusing any data/bkgs/sigs
 reuse = 1
 
-### update backgrounds file with fit results
+### update and save new backgrounds file with fit results
 updateMCfile = 1
 
-### set all errors on signal and data-bkgs to something defined
-### in function setBinError() [0,1]
-seterror = 0
 
-### force a particular set of hit chan data? [0,1,2,3]
-### nice for debugging
-### [ 0 ] default - use whatever is specified in the backgrounds file
-### ['A'] force all-hit data selection channel
-### ['S'] force single-hit data selection channel
-### ['M'] force multi-hi data selection channel
-pltchans = 'SM'
+### ========== FITTING OPTIONS =============================
+### select channels to plot and fit
+### ['S'] single-hit data channel
+### ['M'] multi-hit data channel
+### ['SM'] both channels
 fitchans = 'SM'
 
-### decide to stack or extend the channels [0,1]
-### [0] for stacking
-### [1] for extending
-extend = 1
+### fitting ranges
+### lo and hi energy fit ranges
+fLoE = [6, 100]
+#fLoE = [2,5]
+fHiE = [200, 2900]
+#fHiE = [200, 2400]
+#fHiE = [0,0]
 
-### show the total? [0,1]
-showTotal = 1
-### show the legends? [0,1]
-showlegs = 1
-### plot components in groups? [0,1]
-ingroups = 1
+### rebin the histos for fitting [1,inf]
+loEfitRebin = 4
+hiEfitRebin = 10
 
 ### use fit bounds from backgrounds file? [0,1,2,3]
 ### [0] max bounds are 0-1
@@ -90,20 +91,19 @@ newBounds = [0.7, 1.3]
 ### else use these other bounds (as fractional scaling)
 otherBnds = [1e-6, 0.9]
 
-### fitting ranges
-### lo and hi energy fit ranges
-fLoE = [6, 100]
-#fLoE = [0,0]
-fHiE = [200, 2900]
-#fHiE = [0,0]
+### decide to stack or extend the channels [0,1]
+### [0] for stacking
+### [1] for extending
+extend = 1
 
-### rebin the histos for fitting [1,inf]
-loEfitRebin = 6
-hiEfitRebin = 10
+
+### ========== PLOTTING OPTIONS ============================
+### channels to plot
+pltchans = 'SM'
 
 ### plotting ranges
 ### lo and hi energy ranges
-loer = [0,  200]
+loer = [0,  100]
 #loer = [0,  20]
 hier = [0, 3000]
 eran = [loer, hier]
@@ -112,8 +112,20 @@ eran = [loer, hier]
 loEplotRebin = 6
 hiEplotRebin = 10
 
+### show the total? [0,1]
+showTotal = 1
+### show the legends? [0,1]
+showlegs = 1
+### plot components in groups? [0,1]
+ingroups = 1
+
 ### use linear residual scale? [0,1]
 linres = 1
+### set y scale on resid plot
+lrs = [0, 2]
+
+### main plots in linear scale [0,1]
+liny = 1
 
 ### individual plots for all crystals? [0,1]
 indi = 1
@@ -121,18 +133,16 @@ indi = 1
 #justthese = [1,2,3,4,5,6,7,8]
 justthese = [7]
 
+
+### ========== CAN EFFECT FIT RESULTS ======================
 ### scale to dru?
 dru = 1
-
-### This seems to be a must for TFF to weight all MC equally
-### pre scale the MC? [0,1]
-mcscale = 1
 
 ### This doesn't seem to effect the fit results at all
 ### set MC sumw2()? [0,1]
 mcsumw2  = 0
 ### set data sumw2()? [0,1]
-datsumw2 = 0
+datsumw2 = 1
 ### set error on the total? [0,1]
 toterr   = 0
 
@@ -144,19 +154,19 @@ hiEfitRebinScale = 0
 ### ["UU", "UW", "WW", "NORM"]
 chiopt = 'WU'
 
-#================================================================
 
 
-### automated selections...
-#==================================================
-batch = 0
-if onCup(): batch = 1
-gROOT.SetBatch(batch)
-#==================================================
+#batch = 0
+#if onCup(): batch = 1
+#gROOT.SetBatch(batch)
 
 
 def _myself_(argv):
 
+    batch = 0
+    if onCup(): batch = 1
+    gROOT.SetBatch(batch)
+    
     gStyle.SetPalette (1)
     gStyle.SetOptStat ('')
     gStyle.SetOptFit  (0)
@@ -164,7 +174,7 @@ def _myself_(argv):
     gStyle.SetPadBottomMargin (0.12)
     gStyle.SetPadLeftMargin   (0.12)
     gStyle.SetPadRightMargin  (0.05)
-
+    
     ### for saving the plots...
     if not os.path.exists('./plots'): 
         os.makedirs('./plots')
@@ -176,19 +186,15 @@ def _myself_(argv):
     
     ### where everything gets loaded into dictionary
     #-----------------------------------------------------------------
-    #-----------------------------------------------------------------
     allchans = uniqString(fitchans+pltchans)
-    #allchans = uniqString(pltchans+fitchans)
-    #print allchans
     data, bkgs, sigs, runtime = build70(mcfile, reuse, allchans)
     datkeys, bakkeys, sigkeys = sortKeys(data, bkgs, sigs)
-    #-----------------------------------------------------------------
+    if datsumw2:
+        for key in datkeys:
+            data[key]['hist'].Sumw2()
     #-----------------------------------------------------------------
     
-    #getPars(data[datkeys[0]]['hist'])
-    
-    # assume all data is using same run, channels, and hist params
-    #runNum = data[datkeys[0]]['info']['run']
+    # assume all data is using same runs and hist params
     try: runtag = data[datkeys[0]]['info']['tag']
     except: runtag = 'none'
     try:
@@ -198,18 +204,23 @@ def _myself_(argv):
         #allchans  = bkgs[bakkeys[0]]['info']['chans']
         params = globalParams(bkgs)
 
-    #print allchans
-    #sys.exit()
-    
     ### find unique names for color scheme?
     ### "internal-K40" for example
+    uniqBkgs = []
+    uniqSigs = []
     uniqAll = []
     for key in bakkeys:
+        uniqBkgs.append(key.split('-')[1]+'-'+key.split('-')[2])
         uniqAll.append(key.split('-')[1]+'-'+key.split('-')[2])
     for key in sigkeys:
+        uniqSigs.append(key.split('-')[1]+'-'+key.split('-')[2])
         uniqAll.append(key.split('-')[1]+'-'+key.split('-')[2])
-    
+
+    uniqBkgs = sorted(list(set(uniqBkgs)))
+    uniqSigs = sorted(list(set(uniqSigs)))
     uniqAll = sorted(list(set(uniqAll)))
+    #print 'INFO: Unique bkgs =',uniqBkgs
+    #print 'INFO: Unique sigs =',uniqSigs
     print 'INFO: Unique bkgs and sigs =',uniqAll
     
     # scale into dru units
@@ -540,11 +551,8 @@ def _myself_(argv):
 
             uniqSig = sorted(list(set(uniqSig)))
             
-            ### only fit a crystal that has 2 or more signals
-            ### TFF wants at least 2 MC to converge the fit
-            
+            ### TFractionFitter wants at least 2 MC to converge the fit
             if len(uniqSig) < 2:
-            #if len(uniqSig) < 1:
                 print "\nWARNING: TFractionFitter needs at least 2 MC to converge"
                 print   "         Skipping fit to crystal",str(i+1)
 
@@ -590,34 +598,27 @@ def _myself_(argv):
                     if mcsumw2:
                         fitsigs[fskey]['hist'].Sumw2() # set stat weights
 
-                    ### to scale or not to scale...
-                    if mcscale:
-                        try:
-                            fitsigs[fskey]['hist'].Scale(dat_int/mc_int) # scale to data integral
-                        except:
-                            print 'ERROR: No events for --> ',fskey
-                            print '       Remove it from the fit!'
-                            sys.exit()
+                    ### normalize MC to data
+                    ### needed for TFractionFitter to work right
+                    try:
+                        fitsigs[fskey]['hist'].Scale(dat_int/mc_int) # scale to data integral
+                    except:
+                        print 'ERROR: No events for --> ',fskey
+                        print '       Remove it from the fit!'
+                        sys.exit()
+
+                    for C in allchans:
+                        sigs[fskey+'-c'+C+'-e0']['hist'].Scale(dat_int/mc_int) # make sure MC is scaled too
+                        sigs[fskey+'-c'+C+'-e1']['hist'].Scale(dat_int/mc_int) # make sure MC is scaled too
+
+                        ### v31 - save the scaling factors so you can convert to mBq/kg later
+                        #sigs[fskey+'-e0']['fitscale'] = dat_int/mc_int
+                        #sigs[fskey+'-e1']['fitscale'] = dat_int/mc_int
+
+                        ### v42 version of fitscale
+                        sigs[fskey+'-c'+C+'-e0']['fitscale'] = sigs[fskey+'-c'+C+'-e0']['scale'] * dat_int/mc_int
+                        sigs[fskey+'-c'+C+'-e1']['fitscale'] = sigs[fskey+'-c'+C+'-e1']['scale'] * dat_int/mc_int
                             
-                        for C in allchans:
-                            sigs[fskey+'-c'+C+'-e0']['hist'].Scale(dat_int/mc_int) # make sure MC is scaled too
-                            sigs[fskey+'-c'+C+'-e1']['hist'].Scale(dat_int/mc_int) # make sure MC is scaled too
-
-                            ### v31 - save the scaling factors so you can convert to mBq/kg later
-                            #sigs[fskey+'-e0']['fitscale'] = dat_int/mc_int
-                            #sigs[fskey+'-e1']['fitscale'] = dat_int/mc_int
-
-                            ### v42 version of fitscale
-                            sigs[fskey+'-c'+C+'-e0']['fitscale'] = sigs[fskey+'-c'+C+'-e0']['scale'] * dat_int/mc_int
-                            sigs[fskey+'-c'+C+'-e1']['fitscale'] = sigs[fskey+'-c'+C+'-e1']['scale'] * dat_int/mc_int
-                            
-                    else:
-                        ### why doesn't this work??
-                        ### maybe it does now??
-                        for C in allchans:
-                            sigs[fskey+'-c'+C+'-e0']['fitscale'] = sigs[fskey+'-c'+C+'-e0']['scale']
-                            sigs[fskey+'-c'+C+'-e1']['fitscale'] = sigs[fskey+'-c'+C+'-e1']['scale']
-
                     
                     ### rescale the bounds to the normalized fraction
                     ### and save new values to the sigs info
@@ -653,14 +654,13 @@ def _myself_(argv):
                     
                     
                     ### set errors to zero
-                    if seterror:
-                        fitsigs[fskey]['hist'] = setBinError(fitsigs[fskey]['hist'])
+                    fitsigs[fskey]['hist'] = zeroBinError(fitsigs[fskey]['hist'])
                     
-                    #sigObj[i].Add(fitsigs[fskey]['hist']) # add to the TFractionFitter object
+                    ### add the signal object
                     sigObj[-1].Add(fitsigs[fskey]['hist']) # add to the TFractionFitter object
 
-            if seterror:
-                fitdata[i] = setBinError(fitdata[i])
+            ### set errors to zero
+            fitdata[i] = zeroBinError(fitdata[i])
                 
             #fit.append(TFractionFitter(fitdata[i], sigObj[i])) # create the TFF data and MC objects
             fit.append(TFractionFitter(fitdata[i], sigObj[-1])) # create the TFF data and MC objects
@@ -672,47 +672,29 @@ def _myself_(argv):
             fitresults[str(i)].append('channels fit = '+fitchans)
             fitresults[str(i)].append('hist extend = '+str(extend))
             fitresults[str(i)].append('norm to dru = '+str(dru))
-            fitresults[str(i)].append('scale mc = '+str(mcscale))
             fitresults[str(i)].append('lo-E fit range = '+str(fLoE[0])+' - '+str(fLoE[1])+' keV')
             fitresults[str(i)].append('hi-E fit range = '+str(fHiE[0])+' - '+str(fHiE[1])+' keV')
             
             ### set fit bounds!!!
-            #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            ### seems like Constrain starts with param=1
             ### l=0 sets all params to the same constrain
-            ### very confusing
             for l in range(len(bounds)):
                 fit[-1].Constrain(l+1, bounds[l][0], bounds[l][1])
-                """
-                if useBounds==0:
-                    fit[-1].Constrain(l+1, 0.00, 1.00)
-                if useBounds==1 or useBounds==2:
-                    if bounds[l][1] > 1.0: bounds[l][1] = 1.00
-                    fit[-1].Constrain(l+1, bounds[l][0], bounds[l][1])
-                if useBounds==3:
-                    fit[-1].Constrain(l+1, otherBnds[0], otherBnds[1])
-                """
-            #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            
-            #fit[i].SetRangeX(fmin, fmax) # set global range, should be the same as fmin and fmax?
-            fit[-1].SetRangeX(fmin, fmax) # set global range, should be the same as fmin and fmax?
 
-            ### try doing the fit
-            #------------------------------
+            ### set the fit range
+            fit[-1].SetRangeX(fmin, fmax)
+
+            ### do the fit
             status = fit[-1].Fit()
-            # do MINOS style error analysis?
-            # not sure what that means
-            # doesn't change fit results
+            ### do MINOS style error analysis?
             #fit[-1].ErrorAnalysis(1)
             wasFit.append(i)
-            #------------------------------
 
             chi2 = fit[-1].GetChisquare()
             chi2 = chi2 / druscale[i]
             ndf  = fit[-1].GetNDF()
             pval = fit[-1].GetProb()
             
-            fitresults[str(i)].append('fit status = '+str(status))
+            fitresults[str(i)].append('returned fit status = '+str(status))
             fitchi2ndf[-1] = (chi2/ndf)
             fitresults[str(i)].append('chi2/ndf = %.3g/%s = %.3g'%(chi2,ndf,chi2/ndf))
             
@@ -766,9 +748,10 @@ def _myself_(argv):
                                         sigs[fskey+'-c'+C+'-e'+E]['info']['fbnd'][1]
                                 limit = ''
                                 #if fitacti <= lobnd or fitacti >= hibnd:
-                                if float('%.2e'%(fitacti)) <= float('%.2e'%(lobnd)) \
-                                   or float('%.2e'%(fitacti)) >= float('%.2e'%(hibnd)):
-                                    limit = '[LIMIT]'
+                                if float('%.2e'%(fitacti)) <= float('%.2e'%(lobnd)):
+                                    limit = '[LOWER LIMIT]'
+                                if float('%.2e'%(fitacti)) >= float('%.2e'%(hibnd)):
+                                    limit = '[UPPER LIMIT]'
                                 fitresults[str(i)].append(
                                     'fit '+fskey+' = %.2e +/- %.2e mBq  (%.2e, %.2e)  %s '
                                     %(fitacti, fiterro, lobnd, hibnd, limit))
@@ -788,7 +771,6 @@ def _myself_(argv):
         save += '_loEfitRebinScale'+str(loEfitRebinScale)
         save += '_hiEfitRebinScale'+str(hiEfitRebinScale)
         save += '_useBounds'+str(useBounds)
-        save += '_mcscale'+str(mcscale)
         save += '_mcsumw2'+str(mcsumw2)
         save += '_datsumw2'+str(datsumw2)
         save += '_dru'+str(dru)
@@ -819,6 +801,7 @@ def _myself_(argv):
         
         ### create the updated backgrounds file
         if updateMCfile:
+            shutil.copyfile(mcfile, './plots/'+mcfile)
             newbkgs = './plots/'+mcfile[:-4]+'-update.txt'
             updateBkgsFile70(mcfile, resultsfile, newbkgs, BF='B')
         
@@ -928,20 +911,15 @@ def _myself_(argv):
             
             flegs[i].AddEntry(fitdata[i], 'data - bkgs', lopt)
             
-            # add legend entries in order
+            ### add legend entries in order
             for name in uniqAll:
-                #for fbkey in fbakkeys:
-                #    if name in fbkey and 'x'+str(i+1) in fbkey:
-                #        flegs[i].AddEntry(fitbkgs[fbkey]['hist'], fbkey, lopt)
                 for fskey in fsigkeys:
                     if name in fskey and 'x'+str(i+1) in fskey:
                         flegs[i].AddEntry(fitsigs[fskey]['hist'], fskey, lopt)
-                        #activ = ' ('+str(sigs[name]['fitacti'])+')  '
-                        #flegs[i].AddEntry(fitsigs[fskey]['hist'], activ+fskey, lopt)
-
+            
             
             ### get the chi2 of the total fit mc compared to data
-            #---------------------------------------------------------
+            #-------------------------------------------------------------------
             chi2  = ROOT.Double(0.0)
             ndf   = ROOT.Long(0)
             igood = ROOT.Long(0)
@@ -949,7 +927,7 @@ def _myself_(argv):
             if i in wasFit:
                 pval = fitdata[i].Chi2TestX(ftotal[i], chi2, ndf, igood, chiopt)
                 fitchi2ndfv2 = chi2/druscale[i]/ndf
-            #---------------------------------------------------------
+            #-------------------------------------------------------------------
             
             ftotal[i].Draw('same')
             
@@ -963,7 +941,7 @@ def _myself_(argv):
                 flegs[i].Draw('same')
             
             
-            ### fit residuals plots
+            ### plot the fit residuals
             #-------------------------------------------------------------
             fbotpad[i].cd()
             leg = TLegend(0.72, 0.78, 0.94, 0.94)
@@ -999,10 +977,10 @@ def _myself_(argv):
             fresid[i].SetAxisRange(0.1,10,'y')
             if linres:
                 fbotpad[i].SetLogy(0)
-                fresid[i].SetAxisRange(0,2,'y')
+                fresid[i].SetAxisRange(lrs[0], lrs[1], 'y')
             fresid[i].Draw()
             
-            ### set my line to '1'
+            ### set my reference line to '1'
             zero = TLine(fmin, 1, fmax, 1)
             fzeros.append(zero)
             fzeros[i].SetLineColor(kRed)
@@ -1028,9 +1006,8 @@ def _myself_(argv):
                 fisave += '_fit'
                 fisave += '_loEfRS'+str(loEfitRebinScale)
                 fisave += '_hiEfRS'+str(hiEfitRebinScale)
-                fisave += '_mcscale'+str(mcscale)
                 fisave += '_dru'+str(dru)
-                #fisave += '_cs'+str(fitchans)
+                fisave += '_cs'+str(fitchans)
                 fisave += '_ext'+str(extend)
                 if note: fisave += '_'+str(note)
                 fisave += '_'+str(V)
@@ -1159,7 +1136,7 @@ def _myself_(argv):
                     if 'x'+str(i+1) in key and '-c'+chan in key and '-e'+str(E) in key:
                         
                         dkey = key
-                                                
+                        
                         if dru:
                             data[dkey]['hist'].GetYaxis().SetTitle('counts / day / kg / keV  (dru)')
                         else:
@@ -1407,7 +1384,7 @@ def _myself_(argv):
 
                 if tcount and dkey:
                     resid[C][E][i].Divide(data[dkey]['hist'], total[C][E][i])
-
+                
                 resid[C][E][i].SetTitle('')
                 resid[C][E][i].SetXTitle('Energy (keVee)')
                 resid[C][E][i].GetXaxis().SetTitleFont(font)
@@ -1432,13 +1409,50 @@ def _myself_(argv):
                 else: resid[C][E][i].SetAxisRange(loer[0], loer[1], 'x')
 
                 resid[C][E][i].SetAxisRange(0.1,10,'y')
+
                 
                 ###---------------------------------------------
                 if linres:
                     botpad[C][E][i].SetLogy(0)
-                    resid[C][E][i].SetAxisRange(0,2,'y')
+                    resid[C][E][i].SetAxisRange(lrs[0], lrs[1], 'y')
                 ###---------------------------------------------
 
+                
+                ###==================================================================
+                ### set errors on resid R where R=Data/Total
+                ### sigR = R*sqrt((sigD/D**2) + (sigT/T)**2)
+                ### but sigT=0 (for now) so...
+                ### sigR = R*(sigD/D)
+                ###------------------------------------------------------------------
+                if dkey:
+                    for n in range(resid[C][E][i].GetNbinsX()+1):
+                        R  = resid[C][E][i].GetBinContent(n)
+                        D  = data[dkey]['hist'].GetBinContent(n)
+                        sD = data[dkey]['hist'].GetBinError(n)
+                        
+                        try:
+                            resid[C][E][i].SetBinError(n, R * (sD/D))
+                        except:
+                            resid[C][E][i].SetBinError(n,0)
+                        """
+                        # assume sqrt(N) error on the total
+                        T  = total[C][E][i].GetBinContent(n)
+                        sT = np.sqrt(total[C][E][i].GetBinContent(n))
+                        # assume a correlation of 1
+                        c  = 1.
+                        cDT = c*sD*sT
+                        # this over estimates the error a lot
+                        try:
+                            resid[C][E][i].SetBinError(n, R * \
+                                np.sqrt(((sD/D)**2) + ((sT/T)**2) - (2*(cDT/(D*T)))))
+                        except:
+                            resid[C][E][i].SetBinError(n, 0)
+                        """
+                else:
+                    resid[C][E][i] = zeroBinError(resid[C][E][i])
+                ###------------------------------------------------------------------
+                ###==================================================================
+                
                 
                 resid[C][E][i].Draw()
 
@@ -1466,7 +1480,6 @@ def _myself_(argv):
             save += '_loEfitRebinScale'+str(loEfitRebinScale)
             save += '_hiEfitRebinScale'+str(hiEfitRebinScale)
             save += '_useBounds'+str(useBounds)
-            save += '_mcscale'+str(mcscale)
             save += '_mcsumw2'+str(mcsumw2)
             save += '_datsumw2'+str(datsumw2)
             save += '_dru'+str(dru)

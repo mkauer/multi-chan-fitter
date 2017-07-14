@@ -1,8 +1,9 @@
 # -*- sh -*-
 
-# version 2017-07-11
+# version 2017-07-14
 
 
+# + add numbers for internal Pb210 (from Po210)
 # ~ fixed issue with Te names not showing the 'm'
 # + new bulk teflon and cu-case
 # + new internal, teflon, and copper surface Pb210
@@ -167,13 +168,13 @@ B       MS      7       internal    K40       K40       GRND      0.564     1e-4
 B       MS      8       internal    K40       K40       GRND      1.685     1e-4     0.69     1.31       ./root-join-read/build70/build70-internalK40_GRND.root
 
 B       MS      1       internal    Th232     Th232     GRND    5.37e-3   1e-4     0.69     1.31       ./root-join-read/build70/build70-internalTh232_GRND.root
-B       MS      2       internal    Th232     Th232     GRND    2.60e-3   1e-4     0.69     1.31       ./root-join-read/build70/build70-internalTh232_GRND.root
+B       MS      2       internal    Th232     Th232     GRND    2.58e-3   1e-4     0.69     1.31       ./root-join-read/build70/build70-internalTh232_GRND.root
 B       MS      3       internal    Th232     Th232     GRND    1.80e-3   1e-4     0.69     1.31       ./root-join-read/build70/build70-internalTh232_GRND.root
 B       MS      4       internal    Th232     Th232     GRND    1.23e-3   1e-4     0.69     1.31       ./root-join-read/build70/build70-internalTh232_GRND.root
-B       MS      5       internal    Th232     Th232     GRND    9.60e-3   1e-4     0.69     1.31       ./root-join-read/build70/build70-internalTh232_GRND.root
+B       MS      5       internal    Th232     Th232     GRND    9.63e-3   1e-4     0.69     1.31       ./root-join-read/build70/build70-internalTh232_GRND.root
 B       MS      6       internal    Th232     Th232     GRND    2.30e-3   1e-4     0.69     1.31       ./root-join-read/build70/build70-internalTh232_GRND.root
 B       MS      7       internal    Th232     Th232     GRND    2.50e-3   1e-4     0.69     1.31       ./root-join-read/build70/build70-internalTh232_GRND.root
-B       MS      8       internal    Th232     Th232     GRND    5.70e-3   1e-4     0.69     1.31       ./root-join-read/build70/build70-internalTh232_GRND.root
+B       MS      8       internal    Th232     Th232     GRND    5.74e-3   1e-4     0.69     1.31       ./root-join-read/build70/build70-internalTh232_GRND.root
 """
 B       MS      1       internal    U238      U238      GRND    2.48e-4   1e-4     0.69     1.31       ./root-join-read/build70/build70-internalU238_GRND.root
 B       MS      2       internal    U238      U238      GRND    1.48e-3   1e-4     0.69     1.31       ./root-join-read/build70/build70-internalU238_GRND.root
@@ -193,14 +194,14 @@ B       MS      6       internal    U238      U238      Pb210    2.23e-4   1e-4 
 B       MS      7       internal    U238      U238      Pb210    2.23e-4   1e-4     0.69     1.31       ./root-join-read/build70/build70-internalU238_Pb210.root
 B       MS      8       internal    U238      U238      Pb210    1.48e-3   1e-4     0.69     1.31       ./root-join-read/build70/build70-internalU238_Pb210.root
 
-B	MS	1     internal	Pb210	Pb210	GRND	0.1	1e-4	0.01	100.	./root-join-read/build70/build70-internalPb210_GRND.root	
-B	MS	2     internal	Pb210	Pb210	GRND	0.1	1e-4	0.01	100.	./root-join-read/build70/build70-internalPb210_GRND.root	
-B	MS	3     internal	Pb210	Pb210	GRND	0.1	1e-4	0.01	100.	./root-join-read/build70/build70-internalPb210_GRND.root	
-B	MS	4     internal	Pb210	Pb210	GRND	0.1	1e-4	0.01	100.	./root-join-read/build70/build70-internalPb210_GRND.root	
-B	MS	5     internal	Pb210	Pb210	GRND	0.1	1e-4	0.01	100.	./root-join-read/build70/build70-internalPb210_GRND.root	
-B	MS	6     internal	Pb210	Pb210	GRND	0.1	1e-4	0.01	100.	./root-join-read/build70/build70-internalPb210_GRND.root	
-B	MS	7     internal	Pb210	Pb210	GRND	0.1	1e-4	0.01	100.	./root-join-read/build70/build70-internalPb210_GRND.root	
-B	MS	8     internal	Pb210	Pb210	GRND	0.1	1e-4	0.01	100.	./root-join-read/build70/build70-internalPb210_GRND.root	
+B	MS	1     internal	Pb210	Pb210	GRND	3.20	1e-4	0.01	100.	./root-join-read/build70/build70-internalPb210_GRND.root	
+B	MS	2     internal	Pb210	Pb210	GRND	2.06	1e-4	0.01	100.	./root-join-read/build70/build70-internalPb210_GRND.root	
+B	MS	3     internal	Pb210	Pb210	GRND	0.76	1e-4	0.01	100.	./root-join-read/build70/build70-internalPb210_GRND.root	
+B	MS	4     internal	Pb210	Pb210	GRND	0.74	1e-4	0.01	100.	./root-join-read/build70/build70-internalPb210_GRND.root	
+B	MS	5     internal	Pb210	Pb210	GRND	2.06	1e-4	0.01	100.	./root-join-read/build70/build70-internalPb210_GRND.root	
+B	MS	6     internal	Pb210	Pb210	GRND	1.52	1e-4	0.01	100.	./root-join-read/build70/build70-internalPb210_GRND.root	
+B	MS	7     internal	Pb210	Pb210	GRND	1.54	1e-4	0.01	100.	./root-join-read/build70/build70-internalPb210_GRND.root	
+B	MS	8     internal	Pb210	Pb210	GRND	2.05	1e-4	0.01	100.	./root-join-read/build70/build70-internalPb210_GRND.root	
 
 B	MS	1	teflon	Pb210	Pb210	GRND	0.1	1e-4	0.01	100.	./root-join-read/build70/build70-teflonPb210_GRND.root	
 B	MS	2	teflon	Pb210	Pb210	GRND	0.1	1e-4	0.01	100.	./root-join-read/build70/build70-teflonPb210_GRND.root	

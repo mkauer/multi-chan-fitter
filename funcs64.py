@@ -6,10 +6,11 @@
 # 
 # Works with v64 and later versions
 # 
-# version: 2017-07-12
+# version: 2017-07-13
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# ~ put H3 in cosmo group
 # + add I126 and Te121 to cosmo group
 # + add cucase and teflon to surf group
 # ~ use 're' for the line splitting?
@@ -185,7 +186,7 @@ def setGroup(info):
         if info['isof'] in ['I125','I126',
                             'Te121','Te121m',
                             'Te123m','Te125m',
-                            'Te127m']:
+                            'Te127m', 'H3']:
             return 'cosmo'
         else: return 'internal'
     elif 'pmt' in info['loca']: return 'pmt'

@@ -45,7 +45,9 @@ joinscript=$base/$join
 #for mcfile in dataset1
 #for num in 1 2 3 4 5 6 7 8
 #for mcfile in `cat TeXXXm`
-for mcfile in internalCd109_GRND internalH3_GRND
+#for mcfile in internalCd109_GRND internalH3_GRND
+#for mcfile in pmtU238_Ra226 pmtRa226_Pb210 extpmtU238_Ra226 extpmtRa226_Pb210
+for mcfile in `cat LSVETO`
 do
     #mcfile="c$num-dataset1"
     file="$clustdir/$build-$mcfile.sh"
