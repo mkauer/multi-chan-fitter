@@ -6,10 +6,11 @@
 # 
 # Works with v70 and later versions
 # 
-# version: 2017-07-13
+# version: 2017-07-26
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# ~ modify updateBkgsFile70() to exclude lines between the """
 # ~ tweaked updateBkgsFile70() to handle new fit results format
 # + add uniqString() to unique 'SM' and 'S' for example
 # ~ (evt_Type > 10) still works with new rootfiles
@@ -133,15 +134,19 @@ def buildMC70(info, mc):
         
         if info['isof'] == 'Cd109' or info['isof'] == 'H3':
             path2 = '*'+info['isof']+'*.root'
+
         
-            
+        print 'INFO: looking for files with -->',path1+path2
+        
+        
         chain  = TChain("MC","")
         nfiles = 0
         nfiles = chain.Add(path1+path2)
         
         if nfiles > 0:
+            
             print 'INFO:',nfiles,'files found for', info['loca'], info['isof']
-
+            
             for c in info['chans']:
                 info['chan'] = c
                 
@@ -811,14 +816,24 @@ def updateBkgsFile70(bkgsfile, resultsfile, newbkgs, BF='B'):
     print 'INFO: Updating bkgsfile -->',bkgsfile
     print '      To a new bkgsfile -->',newbkgs
     print ''
-    
+
+    skip = 0
     for bline in bkgslines:
 
         #bline = bline.strip()
         if not bline:
             output.write('\n')
             continue
-
+        
+        if bline.startswith('\"\"\"'):
+            if skip == 0: skip = 1
+            else: skip = 0
+            output.write(bline+'\n')
+            continue
+        if skip:
+            output.write(bline+'\n')
+            continue
+        
         if bline.startswith('#'):
             if 'version' in bline:
                 output.write('# NEW GENERATED backgrounds file from fit!\n\n')

@@ -10,7 +10,7 @@ V = 'v70'
 # Extend single/multi hit histos instead of stacking them
 # This should reduce biasing
 # 
-# version: 2017-07-14
+# version: 2017-07-26
 #
 # see CHANGELOG for changes
 ######################################################################
@@ -48,7 +48,8 @@ note = 0
 #mcfile = 'backgrounds703-C7-fix-K40.txt'
 #mcfile = 'backgrounds703-C7-fix-K40-update.txt'
 #mcfile = 'backgrounds703-C7-fix-Pb210.txt'
-mcfile = 'backgrounds704-C7-split-pmts.txt'
+#mcfile = 'backgrounds704-C7-split-pmts.txt'
+mcfile = 'backgrounds705-C7-split-lsveto.txt'
 
 ### force the reuse of all joined rootfiles in mcfile? [0,1,2]
 ### very nice for debugging

@@ -12,6 +12,15 @@
 # ====================================================================
 
 
+# 2017-07-26
+# --------------------------------------------------------------------
+# + new backgrounds705 to test out broken chain lsveto
+# + generate broken chains for the lsveto MC
+# ~ regenerate the pmtPb210_GRND because it was using wrong files
+# ~ tweaked readFile() so the # search is after the """ search
+# ~ modify updateBkgsFile70() to exclude lines between the """
+
+
 # 2017-07-13
 # --------------------------------------------------------------------
 # ~ internal K40 too low - testing out fit with fixing K40 activity

@@ -6,10 +6,11 @@
 # 
 # Works with v60 and later versions
 # 
-# version: 2017-06-06
+# version: 2017-07-26
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# ~ tweaked readFile() so the # search is after the """ search
 # ~ tweaked histparam() to also return bins per keV
 # ~ fixed sim path+name so not to combine lsveto and lsvetoair
 # ~ tweaked longNames() in funcs60.py
@@ -1146,12 +1147,13 @@ def readFile(fileName="backgrounds60.txt"):
         for line in mcfile:
             line = line.strip()
             if not line: continue
-            if line.startswith('#'): continue
+            #if line.startswith('#'): continue
             if line.startswith('\"\"\"'):
                 if skip == 0: skip = 1
                 else: skip = 0
                 continue
             if skip: continue
+            if line.startswith('#'): continue
             lines.append(line)
     mcfile.close()
     return lines
