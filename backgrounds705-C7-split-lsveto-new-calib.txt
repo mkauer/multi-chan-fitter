@@ -9,9 +9,9 @@
 # 1 ppm K40   = 30.960 mBq
 
 
-# version 2017-07-26
+# version 2017-08-01
 
-
+# tweaked fit ranges for the new calib
 # split lsveto U238 and Th232 into groups
 # split pmt U238 and Th232 into groups
 # internal Pb210 measured 1.54 mBq
@@ -20,8 +20,8 @@
 # all major components finally added in!!!
 
 
-#D	MS	7	./set1_00-03-08.dat	set1	./root-join-read/build70/build70-c7-dataset1.root	
-D	MS	7	./set1_00-03-08.dat	set1	./root-join-read/build70/build70-c7-dataset1_old-calib.root	
+D	MS	7	./set1_00-03-08.dat	set1	./root-join-read/build70/build70-c7-dataset1.root	
+#D	MS	7	./set1_00-03-08.dat	set1	./root-join-read/build70/build70-c7-dataset1_old-calib.root	
 
 F	MS	7	internal	Cd109	Cd109	GRND	2.0e-02	1e-4	0.1	10	./root-join-read/build70/build70-internalCd109_GRND.root
 F	MS	7	internal	H3	H3	GRND	1.5e-01	1e-4	0.1	10	./root-join-read/build70/build70-internalH3_GRND.root
@@ -43,7 +43,7 @@ F	MS	7	internal	Th232	Th232	GRND	2.50e-3	1e-4	0.0000001	1.3	./root-join-read/bui
 F	MS	7	internal	Pb210	Pb210	GRND	1.54	1e-4	0.7	10.	./root-join-read/build70/build70-internalPb210_GRND.root	
 F	MS	7     teflon-surf-10um	Pb210	Pb210	GRND	6.27	1e-4	0.001	10.	./root-join-read/build70/build70-teflonsurf10umPb210_GRND.root	
 F	MS	7	teflon  	Pb210	Pb210	GRND    1.0	1e-4	0.000001	10.	./root-join-read/build70/build70-teflonPb210_GRND.root	
-F	MS	7	cu-case 	Pb210	Pb210	GRND    1.0	1e-4	0.000001	10.	./root-join-read/build70/build70-cucasePb210_GRND.root	
+F	MS	7	cu-case 	Pb210	Pb210	GRND    1.0	1e-4	0.000001	1000.	./root-join-read/build70/build70-cucasePb210_GRND.root	
 F	MS	7    internal-surf-10um	Pb210	Pb210	GRND    1.0	1e-4	0.000001	10.	./root-join-read/build70/build70-internalsurf10umPb210_GRND.root	
 F	MS	7	cu-surf-10um	Pb210	Pb210	GRND    1.0	1e-4	0.000001	10.	./root-join-read/build70/build70-cusurf10umPb210_GRND.root	
 
@@ -79,9 +79,9 @@ F	MS	7	lsveto	U238	Ra226	Rn222	8.6e-2	1e-4	0.000001	100.3	./root-join-read/build
 F	MS	7	lsveto	U238	Rn222	Pb210	8.6e-2	1e-4	0.1	100.3	./root-join-read/build70/build70-lsvetoRn222_Pb210.root	
 F	MS	7	lsveto	U238	Pb210	GRND	8.6e-2	1e-4	0.01	100.3	./root-join-read/build70/build70-lsvetoPb210_GRND.root	
 
-F	MS	7	lsveto	Th232	Th232	Ra228	1.6e-2	1e-4	0.01	100.3	./root-join-read/build70/build70-lsvetoTh232_Ra228.root	
+F	MS	7	lsveto	Th232	Th232	Ra228	1.6e-2	1e-4	0.01	1000.3	./root-join-read/build70/build70-lsvetoTh232_Ra228.root	
 F	MS	7	lsveto	Th232	Ra228	Th228	1.6e-2	1e-4	0.1	1000.3	./root-join-read/build70/build70-lsvetoRa228_Th228.root	
-F	MS	7	lsveto	Th232	Th228	GRND	1.6e-2	1e-4	0.1	100.3	./root-join-read/build70/build70-lsvetoTh228_GRND.root	
+F	MS	7	lsveto	Th232	Th228	GRND	1.6e-2	1e-4	0.01	100.3	./root-join-read/build70/build70-lsvetoTh228_GRND.root	
 
 """	
 B	MS	7	lsvetoair	U238	U238	GRND	1.0	1e-4	0.7	1.3	./root-join-read/build61/build61-lsvetoair-master.root	

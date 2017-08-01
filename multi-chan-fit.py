@@ -10,7 +10,7 @@ V = 'v70'
 # Extend single/multi hit histos instead of stacking them
 # This should reduce biasing
 # 
-# version: 2017-07-26
+# version: 2017-08-01
 #
 # see CHANGELOG for changes
 ######################################################################
@@ -35,7 +35,8 @@ from funcs70 import *
 ### ========== GENERAL INPUTS ==============================
 ### note to add to saved plot names?
 note = 0
-#note = 'sqrtN-error'
+#note = 'old-calib'
+#note = 'new-calib'
 
 ### backgrounds file
 #mcfile = 'backgrounds700.txt'
@@ -49,7 +50,8 @@ note = 0
 #mcfile = 'backgrounds703-C7-fix-K40-update.txt'
 #mcfile = 'backgrounds703-C7-fix-Pb210.txt'
 #mcfile = 'backgrounds704-C7-split-pmts.txt'
-mcfile = 'backgrounds705-C7-split-lsveto.txt'
+#mcfile = 'backgrounds705-C7-split-lsveto.txt'
+mcfile = 'backgrounds705-C7-split-lsveto-new-calib-update.txt'
 
 ### force the reuse of all joined rootfiles in mcfile? [0,1,2]
 ### very nice for debugging
@@ -59,7 +61,7 @@ mcfile = 'backgrounds705-C7-split-lsveto.txt'
 reuse = 1
 
 ### update and save new backgrounds file with fit results
-updateMCfile = 1
+updateMCfile = 0
 
 
 ### ========== FITTING OPTIONS =============================
@@ -72,9 +74,10 @@ fitchans = 'SM'
 ### fitting ranges
 ### lo and hi energy fit ranges
 fLoE = [6, 100]
+#fLoE = [2, 100]
 #fLoE = [2,5]
-fHiE = [200, 2900]
-#fHiE = [200, 2400]
+#fHiE = [200, 2900]
+fHiE = [100, 2900]
 #fHiE = [0,0]
 
 ### rebin the histos for fitting [1,inf]
@@ -126,7 +129,7 @@ linres = 1
 lrs = [0, 2]
 
 ### main plots in linear scale [0,1]
-liny = 1
+liny = 0
 
 ### individual plots for all crystals? [0,1]
 indi = 1
@@ -669,6 +672,7 @@ def _myself_(argv):
             
             ### Print out the fit infos
             fitresults[str(i)].append('Crystal-'+str(i+1)+' fit results')
+            if note: fitresults[str(i)].append('note = '+note)
             fitresults[str(i)].append('version = '+V)
             fitresults[str(i)].append('channels fit = '+fitchans)
             fitresults[str(i)].append('hist extend = '+str(extend))

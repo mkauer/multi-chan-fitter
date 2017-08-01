@@ -6,10 +6,11 @@
 # 
 # Works with v64 and later versions
 # 
-# version: 2017-07-13
+# version: 2017-07-31
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# ~ new low energy calib for c7
 # ~ put H3 in cosmo group
 # + add I126 and Te121 to cosmo group
 # + add cucase and teflon to surf group
@@ -1126,7 +1127,10 @@ def calib64(i, E=0):
  	0.000401190
     ]
 
-    c7 = [566.5, 9144.0]
+    ### old
+    #c7 = [566.5, 9144.0]
+    ### new
+    c7 = [566., 9255.]
 
     if E:
         edep = '(crystal'+str(i+1)+'.energyD)'
