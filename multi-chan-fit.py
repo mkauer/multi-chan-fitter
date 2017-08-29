@@ -10,7 +10,7 @@ V = 'v70'
 # Extend single/multi hit histos instead of stacking them
 # This should reduce biasing
 # 
-# version: 2017-08-01
+# version: 2017-08-29
 #
 # see CHANGELOG for changes
 ######################################################################
@@ -27,8 +27,8 @@ from ROOT import *
 ROOT.gROOT.Reset()
 ROOT.gErrorIgnoreLevel = kWarning
 
-sys.path.append("/home/mkauer/COSINE/CUP/mc-fitting/")
-sys.path.append("/home/mkauer/mc-fitting/")
+#sys.path.append("/home/mkauer/COSINE/CUP/mc-fitting/")
+#sys.path.append("/home/mkauer/mc-fitting/")
 from funcs70 import *
 
 
