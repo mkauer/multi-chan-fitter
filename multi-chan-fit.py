@@ -3,9 +3,9 @@
 ######################################################################
 # Matt Kauer - mkauer@physics.wisc.edu
 ######################################################################
-# 70-extend-histos.py
+# 71.py
 
-V = 'v70'
+V = 'v71'
 
 # Extend single/multi hit histos instead of stacking them
 # This should reduce biasing
