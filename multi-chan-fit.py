@@ -51,7 +51,8 @@ note = 0
 #mcfile = 'backgrounds703-C7-fix-Pb210.txt'
 #mcfile = 'backgrounds704-C7-split-pmts.txt'
 #mcfile = 'backgrounds705-C7-split-lsveto.txt'
-mcfile = 'backgrounds705-C7-split-lsveto-new-calib-update.txt'
+mcfile = 'backgrounds705-C7-split-lsveto-new-calib.txt'
+#mcfile = 'backgrounds705-C7-split-lsveto-new-calib-update.txt'
 
 ### force the reuse of all joined rootfiles in mcfile? [0,1,2]
 ### very nice for debugging
