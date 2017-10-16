@@ -3,14 +3,13 @@
 ######################################################################
 # Matt Kauer - mkauer@physics.wisc.edu
 ######################################################################
-# 71-add-steel.py
+# 80-global-fit.py
 
-V = 'v71'
+V = 'v80'
 
-# Extend single/multi hit histos instead of stacking them
-# This should reduce biasing
+# Try to get global fitting to work!
 # 
-# version: 2017-09-12
+# version: 2017-10-16
 #
 # see CHANGELOG for changes
 ######################################################################
