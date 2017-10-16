@@ -3,14 +3,14 @@
 ######################################################################
 # Matt Kauer - mkauer@physics.wisc.edu
 ######################################################################
-# 71.py
+# 71-add-steel.py
 
 V = 'v71'
 
 # Extend single/multi hit histos instead of stacking them
 # This should reduce biasing
 # 
-# version: 2017-08-29
+# version: 2017-09-12
 #
 # see CHANGELOG for changes
 ######################################################################
@@ -29,37 +29,26 @@ ROOT.gErrorIgnoreLevel = kWarning
 
 #sys.path.append("/home/mkauer/COSINE/CUP/mc-fitting/")
 #sys.path.append("/home/mkauer/mc-fitting/")
-from funcs70 import *
+from funcs71 import *
 
 
 ### ========== GENERAL INPUTS ==============================
 ### note to add to saved plot names?
 note = 0
-#note = 'old-calib'
-#note = 'new-calib'
+#note = 'steel'
 
 ### backgrounds file
-#mcfile = 'backgrounds700.txt'
-#mcfile = 'backgrounds700-C7.txt'
-#mcfile = 'backgrounds700-C7-update.txt'
-#mcfile = 'backgrounds700-C7-update-surf.txt'
-#mcfile = 'backgrounds700-C7-update-surf-update.txt'
-#mcfile = 'backgrounds701-C7.txt'
-#mcfile = 'backgrounds702-C7-Ra226.txt'
-#mcfile = 'backgrounds703-C7-fix-K40.txt'
-#mcfile = 'backgrounds703-C7-fix-K40-update.txt'
-#mcfile = 'backgrounds703-C7-fix-Pb210.txt'
-#mcfile = 'backgrounds704-C7-split-pmts.txt'
-#mcfile = 'backgrounds705-C7-split-lsveto.txt'
-mcfile = 'backgrounds705-C7-split-lsveto-new-calib.txt'
-#mcfile = 'backgrounds705-C7-split-lsveto-new-calib-update.txt'
+#mcfile = 'backgrounds705-C7-split-lsveto-new-calib.txt'
+#mcfile = 'backgrounds710-C7-add-steel-test.txt'
+mcfile = 'backgrounds710-C7-add-steel-test2.txt'
+
 
 ### force the reuse of all joined rootfiles in mcfile? [0,1,2]
 ### very nice for debugging
 ### [0] default - use whatever is specified in the backgrounds file
 ### [1] forces reusing of all data/bkgs/sigs
 ### [2] forces NOT reusing any data/bkgs/sigs
-reuse = 1
+reuse = 0
 
 ### update and save new backgrounds file with fit results
 updateMCfile = 0
@@ -192,7 +181,7 @@ def _myself_(argv):
     ### where everything gets loaded into dictionary
     #-----------------------------------------------------------------
     allchans = uniqString(fitchans+pltchans)
-    data, bkgs, sigs, runtime = build70(mcfile, reuse, allchans)
+    data, bkgs, sigs, runtime = build71(mcfile, reuse, allchans)
     datkeys, bakkeys, sigkeys = sortKeys(data, bkgs, sigs)
     if datsumw2:
         for key in datkeys:
@@ -231,12 +220,12 @@ def _myself_(argv):
     # scale into dru units
     if dru:
         data = scaleData70(data, 1)
-        bkgs = scaleBkgs70(bkgs)
-        sigs = scaleBkgs70(sigs)
+        bkgs = scaleBkgs71(bkgs)
+        sigs = scaleBkgs71(sigs)
     else:
         data = scaleData70(data, 0)
-        bkgs = scaleBkgs70(bkgs, runtime)
-        sigs = scaleBkgs70(sigs, runtime)
+        bkgs = scaleBkgs71(bkgs, runtime)
+        sigs = scaleBkgs71(sigs, runtime)
 
     ### Number of colors
     Nc = len(uniqAll)
@@ -731,8 +720,8 @@ def _myself_(argv):
                     count += 1
 
         ### scale the signals to mBq/kg
-        if dru: sigs = scaleSigs70(sigkeys, sigs)
-        else: sigs = scaleSigs70(sigkeys, sigs, runtime)
+        if dru: sigs = scaleSigs71(sigkeys, sigs)
+        else: sigs = scaleSigs71(sigkeys, sigs, runtime)
         
         ### print the fit activities
         for i in range(8):
