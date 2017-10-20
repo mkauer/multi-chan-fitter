@@ -9,7 +9,7 @@ V = 'v80'
 
 # Try to get global fitting to work!
 # 
-# version: 2017-10-16
+# version: 2017-10-18
 #
 # see CHANGELOG for changes
 ######################################################################
@@ -28,18 +28,20 @@ ROOT.gErrorIgnoreLevel = kWarning
 
 #sys.path.append("/home/mkauer/COSINE/CUP/mc-fitting/")
 #sys.path.append("/home/mkauer/mc-fitting/")
-from funcs71 import *
+from funcs80 import *
 
+
+#cry = 8
+#justthese = [cry]
 
 ### ========== GENERAL INPUTS ==============================
 ### note to add to saved plot names?
 note = 0
-#note = 'steel'
+#note = 'C'+str(cry)
 
 ### backgrounds file
-#mcfile = 'backgrounds705-C7-split-lsveto-new-calib.txt'
-#mcfile = 'backgrounds710-C7-add-steel-test.txt'
-mcfile = 'backgrounds710-C7-add-steel-test2.txt'
+#mcfile = 'backgrounds800-C'+str(cry)+'.txt'
+mcfile = 'backgrounds800.txt'
 
 
 ### force the reuse of all joined rootfiles in mcfile? [0,1,2]
@@ -62,7 +64,7 @@ fitchans = 'SM'
 
 ### fitting ranges
 ### lo and hi energy fit ranges
-fLoE = [6, 100]
+fLoE = [2, 100]
 #fLoE = [2, 100]
 #fLoE = [2,5]
 #fHiE = [200, 2900]
@@ -121,10 +123,10 @@ lrs = [0, 2]
 liny = 0
 
 ### individual plots for all crystals? [0,1]
-indi = 1
+indi = 0
 ### just plot individual for crystals? [1-8]
 #justthese = [1,2,3,4,5,6,7,8]
-justthese = [7]
+#justthese = [1]
 
 
 ### ========== CAN EFFECT FIT RESULTS ======================
@@ -758,7 +760,7 @@ def _myself_(argv):
         #else:     save += 'on-cup'
         save += str(runtag)
         save += '_Nchan-fit'
-        save += '_loEfit-'+str(int(fLo[0]))+'-'+str(int(fLo[1]))
+        save += '_loEfit-'+str(int(fLoE[0]))+'-'+str(int(fLoE[1]))
         save += '_hiEfit-'+str(int(fHiE[0]))+'-'+str(int(fHiE[1]))
         save += '_loEfitRebin-'+str(loEfitRebin)
         save += '_hiEfitRebin-'+str(hiEfitRebin)
@@ -1116,8 +1118,11 @@ def _myself_(argv):
                 #total[C][E][i].Scale(1./float(plotRebin))
                 #total[C][E][i].Sumw2()
                 if dru:
+                    #total[C][E][i].GetYaxis().SetTitle('counts / day / kg / keV  (dru)')
                     if E: total[C][E][i].SetAxisRange(2e-3, 2e1, 'y')
                     else: total[C][E][i].SetAxisRange(2e-3, 3e2, 'y')
+                #else: total[C][E][i].GetYaxis().SetTitle('arb. counts')
+
                 # just draw to show plots
                 if not showTotal: total[C][E][i].Draw()
                 
@@ -1467,7 +1472,7 @@ def _myself_(argv):
             #else: save += 'on-cup'
             save += str(runtag)
             save += '_E'+str(E)
-            save += '_loEfit-'+str(int(fLo[0]))+'-'+str(int(fLo[1]))
+            save += '_loEfit-'+str(int(fLoE[0]))+'-'+str(int(fLoE[1]))
             save += '_hiEfit-'+str(int(fHiE[0]))+'-'+str(int(fHiE[1]))
             save += '_loEfitRebin-'+str(loEfitRebin)
             save += '_hiEfitRebin-'+str(hiEfitRebin)
@@ -1519,9 +1524,37 @@ def _myself_(argv):
 
                         try: sepPlots[C][E][i].Print(str('./plots/'+isave+'.png'))
                         except: pass
-    try: del sepPlots
-    except: pass
+
     
+    ### Save 4 plots to one canvas
+    #-------------------------------------------------------------
+    if indi:
+        combPlots = [[] for x in range(8)]
+        for i in range(8):
+            if i+1 in justthese:
+                combPlots[i] = TCanvas('ccan-'+str(i),'ccan-'+str(i),0,0,1400,900)
+                combPlots[i].Divide(2,2)
+                tpad = [[] for x in range(4)]
+                bpad = [[] for x in range(4)]
+                p=0
+                for C, chan in enumerate(pltchans):
+                    for E in range(numE):
+                        tpad[p]=toppad[C][E][i].Clone()
+                        bpad[p]=botpad[C][E][i].Clone()
+                        combPlots[i].cd(p+1)
+                        tpad[p].Draw()
+                        bpad[p].Draw()
+                        combPlots[i].Update()
+                        p += 1
+                csave  = ''
+                csave += 'x'+str(i+1)
+                csave += '-combined'
+                if note: csave += '_'+str(note)
+                csave += '_'+str(V)
+
+                try: combPlots[i].Print(str('./plots/'+csave+'.png'))
+                except: pass
+
     #-----------------------------------------------------------------
     ### print out the fit results
     if fitting:
@@ -1531,9 +1564,17 @@ def _myself_(argv):
             for line in fitresults[key]:
                 print line
     #-----------------------------------------------------------------
+
+    # delete the extra crap
+    try: del combPlots
+    except: pass
+    try: del sepPlots
+    except: pass
+        
     
     if not batch:
         raw_input('[Enter] to quit \n')
+
 
 ######################################################################
 ######################################################################

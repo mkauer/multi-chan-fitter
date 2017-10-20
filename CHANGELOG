@@ -12,6 +12,28 @@
 # ====================================================================
 
 
+# 2017-10-19
+# --------------------------------------------------------------------
+# + new dataset to the backgrounds800.txt
+# + new dataset V00-04-03 as set1_00-04-03.dat
+# + new calib80(), resol80() cutsBDT80()
+
+
+# 2017-10-18
+# --------------------------------------------------------------------
+# + merged fits into backgrounds800.txt
+# ~ fit all crystals independantly
+# ~ update calibration funcitons with Pushpa's new version
+# + new funcs80.py
+
+
+# 2017-10-17
+# --------------------------------------------------------------------
+# + add new combined plots showing all chans and energies for a xstal
+# ~ new fit files are the 800 series
+# ~ refit all crystals individually
+
+
 # 2017-10-16
 # --------------------------------------------------------------------
 # V switch to branch 80
