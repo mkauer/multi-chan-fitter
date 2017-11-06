@@ -8,8 +8,12 @@
 # 1 ppb Th232 =  4.065 mBq
 # 1 ppm K40   = 30.960 mBq
 
-# version 2017-10-18
+# version 2017-11-06
 
+# ~ add fit results from crystals 5,7,8
+# ~ and tweaked MC resolution on crystal 8
+# ~ new data v00-04-03 including the data alpha cut
+# ~ new data v00-04-03 with tweaked data calibrations on 5 and 8
 # + try fitting each crystal separately
 # ~ tweaked fit ranges for the new calib
 # ~ split lsveto U238 and Th232 into groups
@@ -104,14 +108,14 @@
 #DR    chan   xstl     file                   tag          file
 #---   -----   ----    ----------------       ------     --------------------------
 
-DR       MS      1     ./set1_00-03-08.dat      set1      ./root-join-read/build70/build70-c1-dataset1.root
-DR       MS      2     ./set1_00-03-08.dat      set1      ./root-join-read/build70/build70-c2-dataset1.root
-DR       MS      3     ./set1_00-03-08.dat      set1      ./root-join-read/build70/build70-c3-dataset1.root
-DR       MS      4     ./set1_00-03-08.dat      set1      ./root-join-read/build70/build70-c4-dataset1.root
-DR       MS      5     ./set1_00-03-08.dat      set1      ./root-join-read/build70/build70-c5-dataset1.root
-DR       MS      6     ./set1_00-03-08.dat      set1      ./root-join-read/build70/build70-c6-dataset1.root
-DR       MS      7     ./set1_00-03-08.dat      set1      ./root-join-read/build70/build70-c7-dataset1.root
-DR       MS      8     ./set1_00-03-08.dat      set1      ./root-join-read/build70/build70-c8-dataset1.root
+DR       MS      1     ./set1_00-04-03.dat      set1      ./root-join-read/build80/build80-c1-dataset1.root
+DR       MS      2     ./set1_00-04-03.dat      set1      ./root-join-read/build80/build80-c2-dataset1.root
+DR       MS      3     ./set1_00-04-03.dat      set1      ./root-join-read/build80/build80-c3-dataset1.root
+DR       MS      4     ./set1_00-04-03.dat      set1      ./root-join-read/build80/build80-c4-dataset1.root
+DR       MS      5     ./set1_00-04-03.dat      set1      ./root-join-read/build80/build80-c5-dataset1.root
+DR       MS      6     ./set1_00-04-03.dat      set1      ./root-join-read/build80/build80-c6-dataset1.root
+DR       MS      7     ./set1_00-04-03.dat      set1      ./root-join-read/build80/build80-c7-dataset1.root
+DR       MS      8     ./set1_00-04-03.dat      set1      ./root-join-read/build80/build80-c8-dataset1.root
 
 
 #BFR   chan   xstl      loca           isof     chst    chsp    acti    erro    lbnd    hbnd       file
@@ -324,52 +328,52 @@ BR	MS	4	lsveto	Th232	Th228	GRND	1.71e-04	1e-4	0.01	100.3	./root-join-read/build7
 ########################
 ###   CRYSTAL 5
 ########################
-BR	MS	5	internal	Cd109	Cd109	GRND	2.00e-01	1e-4	0.1	10	./root-join-read/build70/build70-internalCd109_GRND.root	
-BR	MS	5	internal	H3	H3	GRND	1.50e+00	1e-4	0.1	10	./root-join-read/build70/build70-internalH3_GRND.root	
+BR	MS	5	internal	Cd109	Cd109	GRND	8.52e-02	1e-4	0.1	10	./root-join-read/build70/build70-internalCd109_GRND.root	
+BR	MS	5	internal	H3	H3	GRND	1.11e+00	1e-4	0.1	10	./root-join-read/build70/build70-internalH3_GRND.root	
 
-BR	MS	5	internal	Na22	Na22	GRND	1.12e+00	1e-4	0.7	10.3	./root-join-read/build70/build70-internalNa22_GRND.root	
-BR	MS	5	internal	I125	I125	GRND	2.86e-01	1e-4	0.7	10.3	./root-join-read/build70/build70-internalI125_GRND.root	
+BR	MS	5	internal	Na22	Na22	GRND	6.55e-01	1e-4	0.1	10	./root-join-read/build70/build70-internalNa22_GRND.root	
+BR	MS	5	internal	I125	I125	GRND	2.47e-01	1e-4	0.1	10	./root-join-read/build70/build70-internalI125_GRND.root	
 
-BR	MS	5	internal	Te121m	Te121m	GRND	7.70e-02	1e-4	0.7	1.3	./root-join-read/build70/build70-internalTe121m_GRND.root	
-BR	MS	5	internal	Te123m	Te123m	GRND	5.60e-03	1e-4	0.0001	100.	./root-join-read/build70/build70-internalTe123m_GRND.root	
-BR	MS	5	internal	Te125m	Te125m	GRND	2.62e-03	1e-4	0.0001	100.	./root-join-read/build70/build70-internalTe125m_GRND.root	
-BR	MS	5	internal	Te127m	Te127m	GRND	1.27e-01	1e-4	0.7	1.3	./root-join-read/build70/build70-internalTe127m_GRND.root	
+BR	MS	5	internal	Te121m	Te121m	GRND	7.99e-07	1e-4	1e-5	10	./root-join-read/build70/build70-internalTe121m_GRND.root	
+BR	MS	5	internal	Te123m	Te123m	GRND	6.12e-04	1e-4	0.1	100	./root-join-read/build70/build70-internalTe123m_GRND.root	
+BR	MS	5	internal	Te125m	Te125m	GRND	3.91e-04	1e-4	0.1	100	./root-join-read/build70/build70-internalTe125m_GRND.root	
+BR	MS	5	internal	Te127m	Te127m	GRND	1.87e-01	1e-4	0.01	10	./root-join-read/build70/build70-internalTe127m_GRND.root	
 
-BR	MS	5	internal	K40	K40	GRND	2.604	1e-4	0.5	1.0	./root-join-read/build70/build70-internalK40_GRND.root	
+BR	MS	5	internal	K40	K40	GRND	1.39e+00	1e-4	0.1	10	./root-join-read/build70/build70-internalK40_GRND.root	
 
-BR	MS	5	internal	U238	U238	Pb210	1.95e-08	1e-4	1.e-5	1000.3	./root-join-read/build70/build70-internalU238_Pb210.root	
-BR	MS	5	internal	Th232	Th232	GRND	6.50e-03	1e-4	1.e-7	1.3	./root-join-read/build70/build70-internalTh232_GRND.root	
+BR	MS	5	internal	U238	U238	Pb210	8.62e-09	1e-4	0.1	100	./root-join-read/build70/build70-internalU238_Pb210.root	
+BR	MS	5	internal	Th232	Th232	GRND	3.93e-01	1e-4	0.1	100	./root-join-read/build70/build70-internalTh232_GRND.root	
 
-BR	MS	5	internal	Pb210	Pb210	GRND	2.62e+00	1e-4	0.7	10.	./root-join-read/build70/build70-internalPb210_GRND.root	
-#F	MS	5     teflon-surf-10um	Pb210	Pb210	GRND	6.27	1e-4	0.001	    10.	 ./root-join-read/build70/build70-teflonsurf10umPb210_GRND.root
-#F	MS	5	teflon  	Pb210	Pb210	GRND    1.0	1e-4	0.000001    10.	 ./root-join-read/build70/build70-teflonPb210_GRND.root
-#F	MS	5	cu-case 	Pb210	Pb210	GRND    1.0	1e-4	0.000001  1000.	 ./root-join-read/build70/build70-cucasePb210_GRND.root
-#F	MS	5  internal-surf-10um	Pb210	Pb210	GRND    1.0	1e-4	0.000001    10.	 ./root-join-read/build70/build70-internalsurf10umPb210_GRND.root
-#F	MS	5	cu-surf-10um	Pb210	Pb210	GRND    1.0	1e-4	0.000001    10.	 ./root-join-read/build70/build70-cusurf10umPb210_GRND.root
+BR	MS	5	internal	Pb210	Pb210	GRND	2.63e+00	1e-4	0.1	10	./root-join-read/build70/build70-internalPb210_GRND.root	
+#FR	MS	5     teflon-surf-10um	Pb210	Pb210	GRND	6.27	1e-4	0.001	    10.	 ./root-join-read/build70/build70-teflonsurf10umPb210_GRND.root
+#FR	MS	5	teflon  	Pb210	Pb210	GRND    1.0	1e-4	0.000001    10.	 ./root-join-read/build70/build70-teflonPb210_GRND.root
+#FR	MS	5	cu-case 	Pb210	Pb210	GRND    1.0	1e-4	0.000001  1000.	 ./root-join-read/build70/build70-cucasePb210_GRND.root
+#FR	MS	5  internal-surf-10um	Pb210	Pb210	GRND    1.0	1e-4	0.000001    10.	 ./root-join-read/build70/build70-internalsurf10umPb210_GRND.root
+#FR	MS	5	cu-surf-10um	Pb210	Pb210	GRND    1.0	1e-4	0.000001    10.	 ./root-join-read/build70/build70-cusurf10umPb210_GRND.root
 
-BR	MS	5	pmt	K40	K40	GRND	8.82e-07	1e-4	1.e-8	1.3	./root-join-read/build70/build70-pmtK40_GRND.root	
+BR	MS	5	pmt	K40	K40	GRND	5.21e-06	1e-4	0.1	10	./root-join-read/build70/build70-pmtK40_GRND.root	
 
-BR	MS	5	pmt	U238	U238	Th230	2.14e+02	1e-4	0.001	100.3	./root-join-read/build70/build70-pmtU238_Th230.root	
-BR	MS	5	pmt	U238	Th230	Ra226	3.81e-01	1e-4	0.001	100.3	./root-join-read/build70/build70-pmtTh230_Ra226.root	
-BR	MS	5	pmt	U238	Ra226	Rn222	3.90e+03	1e-4	0.001	100.3	./root-join-read/build70/build70-pmtRa226_Rn222.root	
-BR	MS	5	pmt	U238	Rn222	Pb210	1.23e+02	1e-4	0.001	100.3	./root-join-read/build70/build70-pmtRn222_Pb210.root	
-BR	MS	5	pmt	U238	Pb210	GRND	7.65e-05	1e-4	0.001	100.3	./root-join-read/build70/build70-pmtPb210_GRND.root	
+BR	MS	5	pmt	U238	U238	Th230	2.74e+02	1e-4	0.1	10	./root-join-read/build70/build70-pmtU238_Th230.root	
+BR	MS	5	pmt	U238	Th230	Ra226	2.82e-01	1e-4	0.1	1e5	./root-join-read/build70/build70-pmtTh230_Ra226.root	
+BR	MS	5	pmt	U238	Ra226	Rn222	2.08e+03	1e-4	0.1	10	./root-join-read/build70/build70-pmtRa226_Rn222.root	
+BR	MS	5	pmt	U238	Rn222	Pb210	1.12e+02	1e-4	0.1	10	./root-join-read/build70/build70-pmtRn222_Pb210.root	
+BR	MS	5	pmt	U238	Pb210	GRND	2.09e+01	1e-4	0.1	1e7	./root-join-read/build70/build70-pmtPb210_GRND.root	
 
-BR	MS	5	pmt	Th232	Th232	Ra228	8.02e+03	1e-4	0.001	100.3	./root-join-read/build70/build70-pmtTh232_Ra228.root	
-BR	MS	5	pmt	Th232	Ra228	Th228	9.07e-02	1e-4	0.001	100.3	./root-join-read/build70/build70-pmtRa228_Th228.root	
-BR	MS	5	pmt	Th232	Th228	GRND	3.73e+01	1e-4	0.001	100.3	./root-join-read/build70/build70-pmtTh228_GRND.root	
+BR	MS	5	pmt	Th232	Th232	Ra228	1.01e+02	1e-4	0.01	10	./root-join-read/build70/build70-pmtTh232_Ra228.root	
+BR	MS	5	pmt	Th232	Ra228	Th228	9.16e-03	1e-4	0.1	1e4	./root-join-read/build70/build70-pmtRa228_Th228.root	
+BR	MS	5	pmt	Th232	Th228	GRND	6.80e+01	1e-4	0.1	10	./root-join-read/build70/build70-pmtTh228_GRND.root	
 
-BR	MS	5	lsveto	K40	K40	GRND	1.48e+00	1e-4	0.01	100.3	./root-join-read/build70/build70-lsvetoK40_GRND.root	
+BR	MS	5	lsveto	K40	K40	GRND	8.84e-01	1e-4	0.1	10	./root-join-read/build70/build70-lsvetoK40_GRND.root	
 
-BR	MS	5	lsveto	U238	U238	Th230	6.49e-02	1e-4	0.1	100.3	./root-join-read/build70/build70-lsvetoU238_Th230.root	
-#F	MS	5	lsveto	U238	Th230	Ra226	8.6e-2	1e-4	0.0001	1000.3	./root-join-read/build70/build70-lsvetoTh230_Ra226.root	
-BR	MS	5	lsveto	U238	Ra226	Rn222	3.90e-01	1e-4	1.e-6	100.3	./root-join-read/build70/build70-lsvetoRa226_Rn222.root	
-BR	MS	5	lsveto	U238	Rn222	Pb210	2.74e+00	1e-4	0.1	100.3	./root-join-read/build70/build70-lsvetoRn222_Pb210.root	
-BR	MS	5	lsveto	U238	Pb210	GRND	8.60e+00	1e-4	0.01	100.3	./root-join-read/build70/build70-lsvetoPb210_GRND.root	
+BR	MS	5	lsveto	U238	U238	Th230	9.01e-04	1e-4	0.01	100	./root-join-read/build70/build70-lsvetoU238_Th230.root	
+#FR	MS	5	lsveto	U238	Th230	Ra226	8.6e-2	1e-4	0.0001	1000.3	./root-join-read/build70/build70-lsvetoTh230_Ra226.root	
+BR	MS	5	lsveto	U238	Ra226	Rn222	6.16e+00	1e-4	0.1	100	./root-join-read/build70/build70-lsvetoRa226_Rn222.root	
+BR	MS	5	lsveto	U238	Rn222	Pb210	2.64e+00	1e-4	0.1	10	./root-join-read/build70/build70-lsvetoRn222_Pb210.root	
+BR	MS	5	lsveto	U238	Pb210	GRND	8.66e-03	1e-4	0.001	10	./root-join-read/build70/build70-lsvetoPb210_GRND.root	
 
-BR	MS	5	lsveto	Th232	Th232	Ra228	1.30e-02	1e-4	0.01	1000.3	./root-join-read/build70/build70-lsvetoTh232_Ra228.root	
-BR	MS	5	lsveto	Th232	Ra228	Th228	9.56e-01	1e-4	0.1	1000.3	./root-join-read/build70/build70-lsvetoRa228_Th228.root	
-BR	MS	5	lsveto	Th232	Th228	GRND	1.60e+00	1e-4	0.01	100.3	./root-join-read/build70/build70-lsvetoTh228_GRND.root	
+BR	MS	5	lsveto	Th232	Th232	Ra228	1.36e-06	1e-4	0.0001	10	./root-join-read/build70/build70-lsvetoTh232_Ra228.root	
+BR	MS	5	lsveto	Th232	Ra228	Th228	3.35e-02	1e-4	0.001	10	./root-join-read/build70/build70-lsvetoRa228_Th228.root	
+BR	MS	5	lsveto	Th232	Th228	GRND	6.87e-01	1e-4	0.01	10	./root-join-read/build70/build70-lsvetoTh228_GRND.root	
 
 
 ########################
@@ -426,101 +430,101 @@ BR	MS	6	lsveto	Th232	Th228	GRND	2.42e-04	1e-4	0.01	100.3	./root-join-read/build7
 ########################
 ###   CRYSTAL 7
 ########################
-BR	MS	7	internal	Cd109	Cd109	GRND	3.66e-02	1e-4	0.1	10	./root-join-read/build70/build70-internalCd109_GRND.root	
-BR	MS	7	internal	H3	H3	GRND	3.06e-01	1e-4	0.1	10	./root-join-read/build70/build70-internalH3_GRND.root	
+BR	MS	7	internal	Cd109	Cd109	GRND	2.79e-02	1e-4	0.1	10	./root-join-read/build70/build70-internalCd109_GRND.root	
+BR	MS	7	internal	H3	H3	GRND	2.62e-01	1e-4	0.1	10	./root-join-read/build70/build70-internalH3_GRND.root	
 
-BR	MS	7	internal	Na22	Na22	GRND	7.16e-01	1e-4	0.7	10.3	./root-join-read/build70/build70-internalNa22_GRND.root	
-BR	MS	7	internal	I125	I125	GRND	4.12e-01	1e-4	0.7	10.3	./root-join-read/build70/build70-internalI125_GRND.root	
+BR	MS	7	internal	Na22	Na22	GRND	6.77e-01	1e-4	0.1	10	./root-join-read/build70/build70-internalNa22_GRND.root	
+BR	MS	7	internal	I125	I125	GRND	4.17e-01	1e-4	0.1	10	./root-join-read/build70/build70-internalI125_GRND.root	
 
-BR	MS	7	internal	Te121m	Te121m	GRND	1.06e-01	1e-4	0.7	1.3	./root-join-read/build70/build70-internalTe121m_GRND.root	
-BR	MS	7	internal	Te123m	Te123m	GRND	2.04e-05	1e-4	0.0001	100.	./root-join-read/build70/build70-internalTe123m_GRND.root	
-BR	MS	7	internal	Te125m	Te125m	GRND	2.37e-04	1e-4	0.0001	100.	./root-join-read/build70/build70-internalTe125m_GRND.root	
-BR	MS	7	internal	Te127m	Te127m	GRND	1.28e-01	1e-4	0.7	1.3	./root-join-read/build70/build70-internalTe127m_GRND.root	
+BR	MS	7	internal	Te121m	Te121m	GRND	1.21e-01	1e-4	0.1	10	./root-join-read/build70/build70-internalTe121m_GRND.root	
+BR	MS	7	internal	Te123m	Te123m	GRND	2.37e-04	1e-4	0.1	100	./root-join-read/build70/build70-internalTe123m_GRND.root	
+BR	MS	7	internal	Te125m	Te125m	GRND	7.40e-05	1e-4	0.1	10	./root-join-read/build70/build70-internalTe125m_GRND.root	
+BR	MS	7	internal	Te127m	Te127m	GRND	1.32e-01	1e-4	0.1	10	./root-join-read/build70/build70-internalTe127m_GRND.root	
 
-BR	MS	7	internal	K40	K40	GRND	0.564	1e-4	0.5	1.0	./root-join-read/build70/build70-internalK40_GRND.root	
+BR	MS	7	internal	K40	K40	GRND	2.85e-01	1e-4	0.1	10	./root-join-read/build70/build70-internalK40_GRND.root	
 
-BR	MS	7	internal	U238	U238	Pb210	1.38e-01	1e-4	1.e-5	1000.3	./root-join-read/build70/build70-internalU238_Pb210.root	
-BR	MS	7	internal	Th232	Th232	GRND	6.50e-03	1e-4	1.e-7	1.3	./root-join-read/build70/build70-internalTh232_GRND.root	
+BR	MS	7	internal	U238	U238	Pb210	1.78e-01	1e-4	0.1	10	./root-join-read/build70/build70-internalU238_Pb210.root	
+BR	MS	7	internal	Th232	Th232	GRND	3.86e-02	1e-4	0.1	10	./root-join-read/build70/build70-internalTh232_GRND.root	
 
-BR	MS	7	internal	Pb210	Pb210	GRND	2.12e+00	1e-4	0.7	10.	./root-join-read/build70/build70-internalPb210_GRND.root	
-#F	MS	7     teflon-surf-10um	Pb210	Pb210	GRND	6.27	1e-4	0.001	    10.	 ./root-join-read/build70/build70-teflonsurf10umPb210_GRND.root
-#F	MS	7	teflon  	Pb210	Pb210	GRND    1.0	1e-4	0.000001    10.	 ./root-join-read/build70/build70-teflonPb210_GRND.root
-#F	MS	7	cu-case 	Pb210	Pb210	GRND    1.0	1e-4	0.000001  1000.	 ./root-join-read/build70/build70-cucasePb210_GRND.root
-#F	MS	7  internal-surf-10um	Pb210	Pb210	GRND    1.0	1e-4	0.000001    10.	 ./root-join-read/build70/build70-internalsurf10umPb210_GRND.root
-#F	MS	7	cu-surf-10um	Pb210	Pb210	GRND    1.0	1e-4	0.000001    10.	 ./root-join-read/build70/build70-cusurf10umPb210_GRND.root
+BR	MS	7	internal	Pb210	Pb210	GRND	2.12e+00	1e-4	0.1	10	./root-join-read/build70/build70-internalPb210_GRND.root	
+#FR	MS	7     teflon-surf-10um	Pb210	Pb210	GRND	6.27	1e-4	0.001	    10.	 ./root-join-read/build70/build70-teflonsurf10umPb210_GRND.root
+#FR	MS	7	teflon  	Pb210	Pb210	GRND    1.0	1e-4	0.000001    10.	 ./root-join-read/build70/build70-teflonPb210_GRND.root
+#FR	MS	7	cu-case 	Pb210	Pb210	GRND    1.0	1e-4	0.000001  1000.	 ./root-join-read/build70/build70-cucasePb210_GRND.root
+#FR	MS	7  internal-surf-10um	Pb210	Pb210	GRND    1.0	1e-4	0.000001    10.	 ./root-join-read/build70/build70-internalsurf10umPb210_GRND.root
+#FR	MS	7	cu-surf-10um	Pb210	Pb210	GRND    1.0	1e-4	0.000001    10.	 ./root-join-read/build70/build70-cusurf10umPb210_GRND.root
 
-BR	MS	7	pmt	K40	K40	GRND	8.85e-03	1e-4	1.e-8	1.3	./root-join-read/build70/build70-pmtK40_GRND.root	
+BR	MS	7	pmt	K40	K40	GRND	1.69e-02	1e-4	0.1	10	./root-join-read/build70/build70-pmtK40_GRND.root	
 
-BR	MS	7	pmt	U238	U238	Th230	4.40e+01	1e-4	0.001	100.3	./root-join-read/build70/build70-pmtU238_Th230.root	
-BR	MS	7	pmt	U238	Th230	Ra226	2.98e+03	1e-4	0.001	100.3	./root-join-read/build70/build70-pmtTh230_Ra226.root	
-BR	MS	7	pmt	U238	Ra226	Rn222	9.50e+02	1e-4	0.001	100.3	./root-join-read/build70/build70-pmtRa226_Rn222.root	
-BR	MS	7	pmt	U238	Rn222	Pb210	1.40e+02	1e-4	0.001	100.3	./root-join-read/build70/build70-pmtRn222_Pb210.root	
-BR	MS	7	pmt	U238	Pb210	GRND	1.00e-04	1e-4	0.001	100.3	./root-join-read/build70/build70-pmtPb210_GRND.root	
+BR	MS	7	pmt	U238	U238	Th230	4.28e+01	1e-4	0.1	10	./root-join-read/build70/build70-pmtU238_Th230.root	
+BR	MS	7	pmt	U238	Th230	Ra226	2.71e+03	1e-4	0.1	10	./root-join-read/build70/build70-pmtTh230_Ra226.root	
+BR	MS	7	pmt	U238	Ra226	Rn222	1.41e+03	1e-4	0.1	10	./root-join-read/build70/build70-pmtRa226_Rn222.root	
+BR	MS	7	pmt	U238	Rn222	Pb210	1.40e+02	1e-4	0.1	10	./root-join-read/build70/build70-pmtRn222_Pb210.root	
+BR	MS	7	pmt	U238	Pb210	GRND	2.91e-07	1e-4	1e-4	10	./root-join-read/build70/build70-pmtPb210_GRND.root	
 
-BR	MS	7	pmt	Th232	Th232	Ra228	3.16e+03	1e-4	0.001	100.3	./root-join-read/build70/build70-pmtTh232_Ra228.root	
-BR	MS	7	pmt	Th232	Ra228	Th228	2.99e+01	1e-4	0.001	100.3	./root-join-read/build70/build70-pmtRa228_Th228.root	
-BR	MS	7	pmt	Th232	Th228	GRND	1.01e+02	1e-4	0.001	100.3	./root-join-read/build70/build70-pmtTh228_GRND.root	
+BR	MS	7	pmt	Th232	Th232	Ra228	3.21e+03	1e-4	0.1	10	./root-join-read/build70/build70-pmtTh232_Ra228.root	
+BR	MS	7	pmt	Th232	Ra228	Th228	4.52e+01	1e-4	0.1	10	./root-join-read/build70/build70-pmtRa228_Th228.root	
+BR	MS	7	pmt	Th232	Th228	GRND	1.01e+02	1e-4	0.1	10	./root-join-read/build70/build70-pmtTh228_GRND.root	
 
-BR	MS	7	lsveto	K40	K40	GRND	1.22e+01	1e-4	0.01	100.3	./root-join-read/build70/build70-lsvetoK40_GRND.root	
+BR	MS	7	lsveto	K40	K40	GRND	1.25e+01	1e-4	0.1	10	./root-join-read/build70/build70-lsvetoK40_GRND.root	
 
-BR	MS	7	lsveto	U238	U238	Th230	1.05e-02	1e-4	0.1	100.3	./root-join-read/build70/build70-lsvetoU238_Th230.root	
-#F	MS	7	lsveto	U238	Th230	Ra226	8.6e-2	1e-4	0.0001	1000.3	./root-join-read/build70/build70-lsvetoTh230_Ra226.root	
-BR	MS	7	lsveto	U238	Ra226	Rn222	3.18e-06	1e-4	1.e-6	100.3	./root-join-read/build70/build70-lsvetoRa226_Rn222.root	
-BR	MS	7	lsveto	U238	Rn222	Pb210	1.67e+00	1e-4	0.1	100.3	./root-join-read/build70/build70-lsvetoRn222_Pb210.root	
-BR	MS	7	lsveto	U238	Pb210	GRND	1.51e-03	1e-4	0.01	100.3	./root-join-read/build70/build70-lsvetoPb210_GRND.root	
+BR	MS	7	lsveto	U238	U238	Th230	3.60e-04	1e-4	0.01	100	./root-join-read/build70/build70-lsvetoU238_Th230.root	
+#FR	MS	7	lsveto	U238	Th230	Ra226	8.6e-2	1e-4	0.0001	1000.3	./root-join-read/build70/build70-lsvetoTh230_Ra226.root	
+BR	MS	7	lsveto	U238	Ra226	Rn222	2.30e-06	1e-4	0.01	10	./root-join-read/build70/build70-lsvetoRa226_Rn222.root	
+BR	MS	7	lsveto	U238	Rn222	Pb210	1.46e+00	1e-4	0.1	10	./root-join-read/build70/build70-lsvetoRn222_Pb210.root	
+BR	MS	7	lsveto	U238	Pb210	GRND	7.45e-04	1e-4	0.1	10	./root-join-read/build70/build70-lsvetoPb210_GRND.root	
 
-BR	MS	7	lsveto	Th232	Th232	Ra228	1.05e+01	1e-4	0.01	1000.3	./root-join-read/build70/build70-lsvetoTh232_Ra228.root	
-BR	MS	7	lsveto	Th232	Ra228	Th228	2.44e+00	1e-4	0.1	1000.3	./root-join-read/build70/build70-lsvetoRa228_Th228.root	
-BR	MS	7	lsveto	Th232	Th228	GRND	7.77e-03	1e-4	0.01	100.3	./root-join-read/build70/build70-lsvetoTh228_GRND.root	
+BR	MS	7	lsveto	Th232	Th232	Ra228	6.68e+00	1e-4	0.1	10	./root-join-read/build70/build70-lsvetoTh232_Ra228.root	
+BR	MS	7	lsveto	Th232	Ra228	Th228	2.10e+00	1e-4	0.1	10	./root-join-read/build70/build70-lsvetoRa228_Th228.root	
+BR	MS	7	lsveto	Th232	Th228	GRND	8.04e-04	1e-4	0.1	100	./root-join-read/build70/build70-lsvetoTh228_GRND.root	
 
 
 ########################
 ###   CRYSTAL 8
 ########################
-BR	MS	8	internal	Cd109	Cd109	GRND	2.00e-01	1e-4	0.1	10	./root-join-read/build70/build70-internalCd109_GRND.root	
-BR	MS	8	internal	H3	H3	GRND	1.50e+00	1e-4	0.1	10	./root-join-read/build70/build70-internalH3_GRND.root	
+BR	MS	8	internal	Cd109	Cd109	GRND	2.07e-04	1e-4	0.1	10	./root-join-read/build80/c8/build80-internalCd109_GRND.root
+BR	MS	8	internal	H3	H3	GRND	1.19e+00	1e-4	0.1	10	./root-join-read/build80/c8/build80-internalH3_GRND.root
 
-BR	MS	8	internal	Na22	Na22	GRND	2.23e+00	1e-4	0.7	10.3	./root-join-read/build70/build70-internalNa22_GRND.root	
-BR	MS	8	internal	I125	I125	GRND	2.45e-01	1e-4	0.7	10.3	./root-join-read/build70/build70-internalI125_GRND.root	
+BR	MS	8	internal	Na22	Na22	GRND	3.24e-03	1e-4	0.1	10	./root-join-read/build80/c8/build80-internalNa22_GRND.root
+BR	MS	8	internal	I125	I125	GRND	4.43e-01	1e-4	0.1	10	./root-join-read/build80/c8/build80-internalI125_GRND.root
 
-BR	MS	8	internal	Te121m	Te121m	GRND	1.40e-01	1e-4	0.7	1.3	./root-join-read/build70/build70-internalTe121m_GRND.root	
-BR	MS	8	internal	Te123m	Te123m	GRND	1.21e-04	1e-4	0.0001	100.	./root-join-read/build70/build70-internalTe123m_GRND.root	
-BR	MS	8	internal	Te125m	Te125m	GRND	2.80e-01	1e-4	0.0001	100.	./root-join-read/build70/build70-internalTe125m_GRND.root	
-BR	MS	8	internal	Te127m	Te127m	GRND	9.60e-02	1e-4	0.7	1.3	./root-join-read/build70/build70-internalTe127m_GRND.root	
+BR	MS	8	internal	Te121m	Te121m	GRND	8.11e-02	1e-4	0.1	10	./root-join-read/build80/c8/build80-internalTe121m_GRND.root
+BR	MS	8	internal	Te123m	Te123m	GRND	1.35e-05	1e-4	0.1	10	./root-join-read/build80/c8/build80-internalTe123m_GRND.root
+BR	MS	8	internal	Te125m	Te125m	GRND	5.08e-04	1e-4	0.1	10	./root-join-read/build80/c8/build80-internalTe125m_GRND.root
+BR	MS	8	internal	Te127m	Te127m	GRND	2.69e-01	1e-4	0.1	10	./root-join-read/build80/c8/build80-internalTe127m_GRND.root
 
-BR	MS	8	internal	K40	K40	GRND	1.685	1e-4	0.5	1.0	./root-join-read/build70/build70-internalK40_GRND.root	
+BR	MS	8	internal	K40	K40	GRND	5.77e-01	1e-4	0.1	10	./root-join-read/build80/c8/build80-internalK40_GRND.root
 
-BR	MS	8	internal	U238	U238	Pb210	5.00e-01	1e-4	1.e-5	1000.3	./root-join-read/build70/build70-internalU238_Pb210.root	
-BR	MS	8	internal	Th232	Th232	GRND	6.50e-03	1e-4	1.e-7	1.3	./root-join-read/build70/build70-internalTh232_GRND.root	
+BR	MS	8	internal	U238	U238	Pb210	4.76e-01	1e-4	0.1	10	./root-join-read/build80/c8/build80-internalU238_Pb210.root
+BR	MS	8	internal	Th232	Th232	GRND	9.10e-01	1e-4	0.1	10	./root-join-read/build80/c8/build80-internalTh232_GRND.root
 
-BR	MS	8	internal	Pb210	Pb210	GRND	3.07e+00	1e-4	0.7	10.	./root-join-read/build70/build70-internalPb210_GRND.root	
-#F	MS	8     teflon-surf-10um	Pb210	Pb210	GRND	6.27	1e-4	0.001	    10.	 ./root-join-read/build70/build70-teflonsurf10umPb210_GRND.root
-#F	MS	8	teflon  	Pb210	Pb210	GRND    1.0	1e-4	0.000001    10.	 ./root-join-read/build70/build70-teflonPb210_GRND.root
-#F	MS	8	cu-case 	Pb210	Pb210	GRND    1.0	1e-4	0.000001  1000.	 ./root-join-read/build70/build70-cucasePb210_GRND.root
-#F	MS	8  internal-surf-10um	Pb210	Pb210	GRND    1.0	1e-4	0.000001    10.	 ./root-join-read/build70/build70-internalsurf10umPb210_GRND.root
-#F	MS	8	cu-surf-10um	Pb210	Pb210	GRND    1.0	1e-4	0.000001    10.	 ./root-join-read/build70/build70-cusurf10umPb210_GRND.root
+BR	MS	8	internal	Pb210	Pb210	GRND	2.46e+00	1e-4	0.1	10	./root-join-read/build80/c8/build80-internalPb210_GRND.root
+#FR	MS	8     teflon-surf-10um	Pb210	Pb210	GRND	6.27	1e-4	0.001	    10.	 ./root-join-read/build80/c8/build80-teflonsurf10umPb210_GRND.root
+#FR	MS	8	teflon  	Pb210	Pb210	GRND    1.0	1e-4	0.000001    10.	 ./root-join-read/build80/c8/build80-teflonPb210_GRND.root
+#FR	MS	8	cu-case 	Pb210	Pb210	GRND    1.0	1e-4	0.000001  1000.	 ./root-join-read/build80/c8/build80-cucasePb210_GRND.root
+#FR	MS	8  internal-surf-10um	Pb210	Pb210	GRND    1.0	1e-4	0.000001    10.	 ./root-join-read/build80/c8/build80-internalsurf10umPb210_GRND.root
+#FR	MS	8	cu-surf-10um	Pb210	Pb210	GRND    1.0	1e-4	0.000001    10.	 ./root-join-read/build80/c8/build80-cusurf10umPb210_GRND.root
 
-BR	MS	8	pmt	K40	K40	GRND	5.87e-02	1e-4	1.e-8	1.3	./root-join-read/build70/build70-pmtK40_GRND.root	
+BR	MS	8	pmt	K40	K40	GRND	8.55e-05	1e-4	0.1	10	./root-join-read/build80/c8/build80-pmtK40_GRND.root
 
-BR	MS	8	pmt	U238	U238	Th230	8.55e+00	1e-4	0.001	100.3	./root-join-read/build70/build70-pmtU238_Th230.root	
-BR	MS	8	pmt	U238	Th230	Ra226	1.00e-01	1e-4	0.001	100.3	./root-join-read/build70/build70-pmtTh230_Ra226.root	
-BR	MS	8	pmt	U238	Ra226	Rn222	1.02e-01	1e-4	0.001	100.3	./root-join-read/build70/build70-pmtRa226_Rn222.root	
-BR	MS	8	pmt	U238	Rn222	Pb210	5.75e+01	1e-4	0.001	100.3	./root-join-read/build70/build70-pmtRn222_Pb210.root	
-BR	MS	8	pmt	U238	Pb210	GRND	2.39e-07	1e-4	0.001	100.3	./root-join-read/build70/build70-pmtPb210_GRND.root	
+BR	MS	8	pmt	U238	U238	Th230	2.83e+01	1e-4	0.1	10	./root-join-read/build80/c8/build80-pmtU238_Th230.root
+BR	MS	8	pmt	U238	Th230	Ra226	2.45e+03	1e-4	0.1	10	./root-join-read/build80/c8/build80-pmtTh230_Ra226.root
+BR	MS	8	pmt	U238	Ra226	Rn222	2.99e+02	1e-4	0.1	10	./root-join-read/build80/c8/build80-pmtRa226_Rn222.root
+BR	MS	8	pmt	U238	Rn222	Pb210	7.58e+01	1e-4	0.1	10	./root-join-read/build80/c8/build80-pmtRn222_Pb210.root
+BR	MS	8	pmt	U238	Pb210	GRND	2.11e-06	1e-4	0.1	10	./root-join-read/build80/c8/build80-pmtPb210_GRND.root
 
-BR	MS	8	pmt	Th232	Th232	Ra228	8.91e-02	1e-4	0.001	100.3	./root-join-read/build70/build70-pmtTh232_Ra228.root	
-BR	MS	8	pmt	Th232	Ra228	Th228	1.59e+02	1e-4	0.001	100.3	./root-join-read/build70/build70-pmtRa228_Th228.root	
-BR	MS	8	pmt	Th232	Th228	GRND	4.00e+01	1e-4	0.001	100.3	./root-join-read/build70/build70-pmtTh228_GRND.root	
+BR	MS	8	pmt	Th232	Th232	Ra228	1.48e+03	1e-4	0.1	10	./root-join-read/build80/c8/build80-pmtTh232_Ra228.root
+BR	MS	8	pmt	Th232	Ra228	Th228	1.07e+02	1e-4	0.1	10	./root-join-read/build80/c8/build80-pmtRa228_Th228.root
+BR	MS	8	pmt	Th232	Th228	GRND	5.33e+01	1e-4	0.1	10	./root-join-read/build80/c8/build80-pmtTh228_GRND.root
 
-BR	MS	8	lsveto	K40	K40	GRND	9.19e+00	1e-4	0.01	100.3	./root-join-read/build70/build70-lsvetoK40_GRND.root	
+BR	MS	8	lsveto	K40	K40	GRND	4.94e-02	1e-4	0.1	10	./root-join-read/build80/c8/build80-lsvetoK40_GRND.root
 
-BR	MS	8	lsveto	U238	U238	Th230	2.36e-01	1e-4	0.1	100.3	./root-join-read/build70/build70-lsvetoU238_Th230.root	
-#F	MS	8	lsveto	U238	Th230	Ra226	8.6e-2	1e-4	0.0001	1000.3	./root-join-read/build70/build70-lsvetoTh230_Ra226.root	
-BR	MS	8	lsveto	U238	Ra226	Rn222	6.47e-07	1e-4	1.e-6	100.3	./root-join-read/build70/build70-lsvetoRa226_Rn222.root	
-BR	MS	8	lsveto	U238	Rn222	Pb210	1.06e+00	1e-4	0.1	100.3	./root-join-read/build70/build70-lsvetoRn222_Pb210.root	
-BR	MS	8	lsveto	U238	Pb210	GRND	8.60e+00	1e-4	0.01	100.3	./root-join-read/build70/build70-lsvetoPb210_GRND.root	
+BR	MS	8	lsveto	U238	U238	Th230	2.94e-05	1e-4	0.1	10	./root-join-read/build80/c8/build80-lsvetoU238_Th230.root
+#FR	MS	8	lsveto	U238	Th230	Ra226	8.6e-2	1e-4	0.0001	1000.3	./root-join-read/build80/c8/build80-lsvetoTh230_Ra226.root	
+BR	MS	8	lsveto	U238	Ra226	Rn222	1.24e-07	1e-4	0.1	10	./root-join-read/build80/c8/build80-lsvetoRa226_Rn222.root
+BR	MS	8	lsveto	U238	Rn222	Pb210	2.49e+00	1e-4	0.1	10	./root-join-read/build80/c8/build80-lsvetoRn222_Pb210.root
+BR	MS	8	lsveto	U238	Pb210	GRND	4.68e-03	1e-4	0.1	10	./root-join-read/build80/c8/build80-lsvetoPb210_GRND.root
 
-BR	MS	8	lsveto	Th232	Th232	Ra228	2.43e-02	1e-4	0.01	1000.3	./root-join-read/build70/build70-lsvetoTh232_Ra228.root	
-BR	MS	8	lsveto	Th232	Ra228	Th228	2.03e+00	1e-4	0.1	1000.3	./root-join-read/build70/build70-lsvetoRa228_Th228.root	
-BR	MS	8	lsveto	Th232	Th228	GRND	1.40e+00	1e-4	0.01	100.3	./root-join-read/build70/build70-lsvetoTh228_GRND.root	
+BR	MS	8	lsveto	Th232	Th232	Ra228	1.84e+01	1e-4	0.1	10	./root-join-read/build80/c8/build80-lsvetoTh232_Ra228.root
+BR	MS	8	lsveto	Th232	Ra228	Th228	2.51e+00	1e-4	0.1	10	./root-join-read/build80/c8/build80-lsvetoRa228_Th228.root
+BR	MS	8	lsveto	Th232	Th228	GRND	1.43e-01	1e-4	0.1	10	./root-join-read/build80/c8/build80-lsvetoTh228_GRND.root
 

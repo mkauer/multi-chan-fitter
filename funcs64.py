@@ -6,10 +6,11 @@
 # 
 # Works with v64 and later versions
 # 
-# version: 2017-07-31
+# version: 2017-10-24
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# ~ fixed a bug with run duration
 # ~ new low energy calib for c7
 # ~ put H3 in cosmo group
 # + add I126 and Te121 to cosmo group
@@ -1064,27 +1065,26 @@ def globalParams(data):
 
 
 def getDuration(rootfile):
-
-    chain = TChain('ntp','')
-    chain.Add(rootfile)
-    entries = chain.GetEntries()
-
-    ### only second precission
-    #var = "eventsec"
-    #norm = 1.
-
-    ### has nano-sec precission
-    var = "trgtime"
-    norm = 1.e9
-    
-    chain.GetEntry(0)
-    start = float(chain.GetLeaf(var).GetValue())
-    chain.GetEntry(entries-1)
-    stop = float(chain.GetLeaf(var).GetValue())
-    duration = (stop-start)/norm
-    #print var, start, stop, duration
-    
-    return duration
+    duration = -1
+    try:
+        chain = TChain('ntp','')
+        chain.Add(rootfile)
+        entries = chain.GetEntries()
+        ### only second precission
+        #var = "eventsec"
+        #norm = 1.
+        ### has nano-sec precission
+        var = "trgtime"
+        norm = 1.e9
+        chain.GetEntry(0)
+        start = float(chain.GetLeaf(var).GetValue())
+        chain.GetEntry(entries-1)
+        stop = float(chain.GetLeaf(var).GetValue())
+        duration = (stop-start)/norm
+        #print var, start, stop, duration
+        return duration
+    except:
+        return -1
 
 
 def baseDir():

@@ -12,6 +12,48 @@
 # ====================================================================
 
 
+# 2017-10-31
+# --------------------------------------------------------------------
+# ~ changed to file handling structure of join80.py
+# ~ updateBkgsFile70() now sets lower/upper bounds to 0.1 and 10
+# + added getInfo80() so I can select which xstals to build
+# ~ smearing C8 hi energy resolution more
+# + added resol80() and buildMC80()
+
+
+# 2017-10-30
+# --------------------------------------------------------------------
+# ~ i screwed up the high energy alpha cuts, i need to reprocess data
+# ~ fix cutsBDT80() to include the alpha cut
+# ~ ignore signals with 0 entries
+# ~ fixed some initializations that used a list of lists
+
+
+# 2017-10-25
+# --------------------------------------------------------------------
+# + now have data build v00-04-03 with new calibs
+
+
+# 2017-10-24
+# --------------------------------------------------------------------
+# ~ fixed a bug when getting run duration from a rootfile
+
+
+# 2017-10-23
+# --------------------------------------------------------------------
+# + had to upload my own root package to cup
+#   it's here: /home/mkauer/soft/root/v5.34.36/
+# + building new data histos for v00-04-03 with new calibs and
+#   and new/updated BDT cuts for all 8 crystals
+#   ~ crystal 5 and 8 have my tweaked calibrations
+# ~ tweaking hi energy calibration for crystal 5 and 8
+
+
+# 2017-10-20
+# --------------------------------------------------------------------
+# ~ changed cut names for BLSVeto.something format
+
+
 # 2017-10-19
 # --------------------------------------------------------------------
 # + new dataset to the backgrounds800.txt

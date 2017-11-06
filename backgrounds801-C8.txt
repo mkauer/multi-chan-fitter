@@ -1,0 +1,62 @@
+# -*- sh -*-
+
+# 1 Bq U238  =  81.0 ppb
+# 1 Bq Th232 = 246.0 ppb
+# 1 Bq K40   =  32.3 ppm
+
+# 1 ppb U238  = 12.346 mBq
+# 1 ppb Th232 =  4.065 mBq
+# 1 ppm K40   = 30.960 mBq
+
+# version 2017-11-01
+
+
+DR	MS	8	./set1_00-04-03.dat	set1	./root-join-read/build80/build80-c8-dataset1.root	
+
+FR	MS	8	internal	Cd109	Cd109	GRND	2.00e-01	1e-4	0.001	10	./root-join-read/build80/c8/build80-internalCd109_GRND.root	
+FR	MS	8	internal	H3	H3	GRND	1.50e+00	1e-4	0.1	10	./root-join-read/build80/c8/build80-internalH3_GRND.root	
+
+FR	MS	8	internal	Na22	Na22	GRND	2.23e+00	1e-4	1e-4	10	./root-join-read/build80/c8/build80-internalNa22_GRND.root	
+FR	MS	8	internal	I125	I125	GRND	2.45e-01	1e-4	0.1	10	./root-join-read/build80/c8/build80-internalI125_GRND.root	
+
+FR	MS	8	internal	Te121m	Te121m	GRND	1.40e-01	1e-4	0.1	10	./root-join-read/build80/c8/build80-internalTe121m_GRND.root	
+FR	MS	8	internal	Te123m	Te123m	GRND	1.21e-04	1e-4	0.1	10	./root-join-read/build80/c8/build80-internalTe123m_GRND.root	
+FR	MS	8	internal	Te125m	Te125m	GRND	2.80e-01	1e-4	1e-4	10	./root-join-read/build80/c8/build80-internalTe125m_GRND.root	
+FR	MS	8	internal	Te127m	Te127m	GRND	9.60e-02	1e-4	0.01	10	./root-join-read/build80/c8/build80-internalTe127m_GRND.root	
+
+FR	MS	8	internal	K40	K40	GRND	1.685	1e-4	0.1	10	./root-join-read/build80/c8/build80-internalK40_GRND.root	
+
+FR	MS	8	internal	U238	U238	Pb210	5.00e-01	1e-4	0.1	10	./root-join-read/build80/c8/build80-internalU238_Pb210.root	
+FR	MS	8	internal	Th232	Th232	GRND	6.50e-03	1e-4	0.1	1e3	./root-join-read/build80/c8/build80-internalTh232_GRND.root	
+
+FR	MS	8	internal	Pb210	Pb210	GRND	3.07e+00	1e-4	0.1	10	./root-join-read/build80/c8/build80-internalPb210_GRND.root	
+#FR	MS	8     teflon-surf-10um	Pb210	Pb210	GRND	6.27	1e-4	0.001	    10.	 ./root-join-read/build80/c8/build80-teflonsurf10umPb210_GRND.root
+#FR	MS	8	teflon  	Pb210	Pb210	GRND    1.0	1e-4	0.000001    10.	 ./root-join-read/build80/c8/build80-teflonPb210_GRND.root
+#FR	MS	8	cu-case 	Pb210	Pb210	GRND    1.0	1e-4	0.000001  1000.	 ./root-join-read/build80/c8/build80-cucasePb210_GRND.root
+#FR	MS	8  internal-surf-10um	Pb210	Pb210	GRND    1.0	1e-4	0.000001    10.	 ./root-join-read/build80/c8/build80-internalsurf10umPb210_GRND.root
+#FR	MS	8	cu-surf-10um	Pb210	Pb210	GRND    1.0	1e-4	0.000001    10.	 ./root-join-read/build80/c8/build80-cusurf10umPb210_GRND.root
+
+FR	MS	8	pmt	K40	K40	GRND	5.87e-02	1e-4	0.001	10	./root-join-read/build80/c8/build80-pmtK40_GRND.root	
+
+FR	MS	8	pmt	U238	U238	Th230	8.55e+00	1e-4	0.001	10	./root-join-read/build80/c8/build80-pmtU238_Th230.root	
+FR	MS	8	pmt	U238	Th230	Ra226	1.00e-01	1e-4	0.1	1e5	./root-join-read/build80/c8/build80-pmtTh230_Ra226.root	
+FR	MS	8	pmt	U238	Ra226	Rn222	1.02e-01	1e-4	0.1	1e5	./root-join-read/build80/c8/build80-pmtRa226_Rn222.root	
+FR	MS	8	pmt	U238	Rn222	Pb210	5.75e+01	1e-4	0.1	10	./root-join-read/build80/c8/build80-pmtRn222_Pb210.root	
+FR	MS	8	pmt	U238	Pb210	GRND	2.39e-07	1e-4	0.1	10	./root-join-read/build80/c8/build80-pmtPb210_GRND.root	
+
+FR	MS	8	pmt	Th232	Th232	Ra228	8.91e-02	1e-4	0.1	1e5	./root-join-read/build80/c8/build80-pmtTh232_Ra228.root	
+FR	MS	8	pmt	Th232	Ra228	Th228	1.59e+02	1e-4	0.1	10	./root-join-read/build80/c8/build80-pmtRa228_Th228.root	
+FR	MS	8	pmt	Th232	Th228	GRND	4.00e+01	1e-4	0.01	10	./root-join-read/build80/c8/build80-pmtTh228_GRND.root	
+
+FR	MS	8	lsveto	K40	K40	GRND	9.19e+00	1e-4	0.001	10	./root-join-read/build80/c8/build80-lsvetoK40_GRND.root	
+
+FR	MS	8	lsveto	U238	U238	Th230	2.36e-01	1e-4	1e-4	10	./root-join-read/build80/c8/build80-lsvetoU238_Th230.root	
+#FR	MS	8	lsveto	U238	Th230	Ra226	8.6e-2	1e-4	0.0001	1000.3	./root-join-read/build80/c8/build80-lsvetoTh230_Ra226.root	
+FR	MS	8	lsveto	U238	Ra226	Rn222	6.47e-07	1e-4	0.01	10	./root-join-read/build80/c8/build80-lsvetoRa226_Rn222.root	
+FR	MS	8	lsveto	U238	Rn222	Pb210	1.06e+00	1e-4	0.1	10	./root-join-read/build80/c8/build80-lsvetoRn222_Pb210.root	
+FR	MS	8	lsveto	U238	Pb210	GRND	8.60e+00	1e-4	1e-4	10	./root-join-read/build80/c8/build80-lsvetoPb210_GRND.root	
+
+FR	MS	8	lsveto	Th232	Th232	Ra228	2.43e-02	1e-4	0.1	1e3	./root-join-read/build80/c8/build80-lsvetoTh232_Ra228.root	
+FR	MS	8	lsveto	Th232	Ra228	Th228	2.03e+00	1e-4	0.1	10	./root-join-read/build80/c8/build80-lsvetoRa228_Th228.root	
+FR	MS	8	lsveto	Th232	Th228	GRND	1.40e+00	1e-4	0.1	10	./root-join-read/build80/c8/build80-lsvetoTh228_GRND.root	
+

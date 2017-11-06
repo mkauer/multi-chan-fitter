@@ -795,7 +795,7 @@ def buildData70(info, data):
     return data, runtime
 
 
-def updateBkgsFile70(bkgsfile, resultsfile, newbkgs, BF='B'):
+def updateBkgsFile70(bkgsfile, resultsfile, newbkgs, BF='BR'):
 
     for thisfile in [bkgsfile, resultsfile]:
         if not os.path.exists(thisfile):
@@ -868,14 +868,21 @@ def updateBkgsFile70(bkgsfile, resultsfile, newbkgs, BF='B'):
                     chst  = fbits[1].split('-')[2].split('_')[0]
                     chsp  = fbits[1].split('-')[2].split('_')[1]
                     acti  = str(fbits[3])
-                    
+
+                    lenbbits = len(bbits)
                     if bbits[2] == xstal and bbits[3].replace('-','') == loca and bbits[5] == chst and bbits[6] == chsp:
-                        for i in range(len(bbits)):
+                        for i in range(lenbbits):
                             if i == 0:
                                 output.write(BF+'\t')
                             elif i == 7:
                                 if acti != '0.0': output.write(acti+'\t')
                                 else: output.write(bbits[i]+'\t')
+                            elif i==9:
+                                output.write('0.1\t')
+                            elif i==10:
+                                output.write('10\t')
+                            elif i==(lenbbits-1):
+                                output.write(bbits[i])
                             else:
                                 output.write(bbits[i]+'\t')
                         output.write('\n')
@@ -883,12 +890,9 @@ def updateBkgsFile70(bkgsfile, resultsfile, newbkgs, BF='B'):
         
         if not replaced:
             output.write(bline+'\n')
-            print 'WARNING: Could not match line -->',fline
-            #print fline
-            #print 'to'
-            print '         To line -->',bline
-            print ''
-
+            print '\nWARNING: Could not match line -->',fline.split('\n')[0]
+            print   '         To line -->',bline.split('\n')[0]
+    
     output.close()
     return
 

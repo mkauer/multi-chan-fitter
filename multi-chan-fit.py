@@ -9,7 +9,7 @@ V = 'v80'
 
 # Try to get global fitting to work!
 # 
-# version: 2017-10-18
+# version: 2017-11-06
 #
 # see CHANGELOG for changes
 ######################################################################
@@ -31,17 +31,19 @@ ROOT.gErrorIgnoreLevel = kWarning
 from funcs80 import *
 
 
-#cry = 8
-#justthese = [cry]
+#xstal = 8
+#justthese = [xstal]
 
 ### ========== GENERAL INPUTS ==============================
 ### note to add to saved plot names?
 note = 0
-#note = 'C'+str(cry)
+#note = 'C'+str(xstal)
 
 ### backgrounds file
-#mcfile = 'backgrounds800-C'+str(cry)+'.txt'
-mcfile = 'backgrounds800.txt'
+#mcfile = 'backgrounds800-C'+str(xstal)+'-update.txt'
+#mcfile = 'backgrounds800.txt'
+mcfile = 'backgrounds801.txt'
+#mcfile = 'backgrounds801-C'+str(xstal)+'.txt'
 
 
 ### force the reuse of all joined rootfiles in mcfile? [0,1,2]
@@ -63,12 +65,11 @@ updateMCfile = 0
 fitchans = 'SM'
 
 ### fitting ranges
-### lo and hi energy fit ranges
+### lo and hi energy fit ranges or set [0,0]
 fLoE = [2, 100]
-#fLoE = [2, 100]
-#fLoE = [2,5]
-#fHiE = [200, 2900]
-fHiE = [100, 2900]
+#fLoE = [0,0]
+#fHiE = [60, 2800]
+fHiE = [50, 3100]
 #fHiE = [0,0]
 
 ### rebin the histos for fitting [1,inf]
@@ -100,7 +101,7 @@ pltchans = 'SM'
 ### lo and hi energy ranges
 loer = [0,  100]
 #loer = [0,  20]
-hier = [0, 3000]
+hier = [0, 3500]
 eran = [loer, hier]
 
 ### rebin the final plots [1,inf]
@@ -123,9 +124,9 @@ lrs = [0, 2]
 liny = 0
 
 ### individual plots for all crystals? [0,1]
-indi = 0
+indi = 1
 ### just plot individual for crystals? [1-8]
-#justthese = [1,2,3,4,5,6,7,8]
+justthese = [1,2,3,4,5,6,7,8]
 #justthese = [1]
 
 
@@ -156,7 +157,7 @@ chiopt = 'WU'
 #gROOT.SetBatch(batch)
 
 
-def _myself_(argv):
+def myself(argv):
 
     batch = 0
     if onCup(): batch = 1
@@ -175,14 +176,15 @@ def _myself_(argv):
         os.makedirs('./plots')
     
     if not os.path.exists(mcfile):
-        print 'ERROR: could not find backgrounds file -->', mcfile
+        print '\nERROR: could not find backgrounds file -->', mcfile
         sys.exit()
     
     
     ### where everything gets loaded into dictionary
     #-----------------------------------------------------------------
     allchans = uniqString(fitchans+pltchans)
-    data, bkgs, sigs, runtime = build71(mcfile, reuse, allchans)
+    data, bkgs, sigs, runtime = build80(mcfile, reuse, allchans)
+    #data, bkgs, sigs, runtime = build80(mcfile, reuse, allchans, [5,8])
     datkeys, bakkeys, sigkeys = sortKeys(data, bkgs, sigs)
     if datsumw2:
         for key in datkeys:
@@ -540,11 +542,40 @@ def _myself_(argv):
             ### Do a per crystal unique of the signals to see how many
             ### signal channels each crystal fit will have
             uniqSig = []
+            noEvents = []
             for fskey in fsigkeys:
                 if 'x'+str(i+1) in fskey:
-                    uniqSig.append(fskey.split('-')[1]+'-'+fskey.split('-')[2])
-
+                    mc_int = fitsigs[fskey]['hist'].Integral(fmin,fmax)
+                    if mc_int > 0.0:
+                        #print 'Integral of', fskey, '=', mc_int
+                        uniqSig.append(fskey.split('-')[1]+'-'+fskey.split('-')[2])
+                    else:
+                        print '\nWARNING: No events for --> ',fskey
+                        print   '         Maybe set it as a background...\n'
+                        noEvents.append(fskey)
+            
             uniqSig = sorted(list(set(uniqSig)))
+            
+            ### delete out keys that have noEntries
+            if len(noEvents) > 0:
+                ### delete the key out of fsigkeys so it does
+                ### not get plotted in the fit histos!
+                ### go in reverse to preserve index
+                L = len(fsigkeys)-1
+                for k,fskey in enumerate(reversed(fsigkeys)):
+                    if 'x'+str(i+1) in fskey and fskey in noEvents:
+                        print 'INFO: deleting fit key',fsigkeys[L-k]
+                        del fsigkeys[L-k]
+
+                ### and delete it out of sigs so it does not
+                ### get plotted in the lo-E and hi-E histos
+                ### go in reverse to preserve index
+                L = len(sigkeys)-1
+                for k,skey in enumerate(reversed(sigkeys)):
+                    for noEvt in noEvents:
+                        if 'x'+str(i+1) in skey and noEvt in skey:
+                            print 'INFO: deleting signal key',sigkeys[L-k]
+                            del sigkeys[L-k]
             
             ### TFractionFitter wants at least 2 MC to converge the fit
             if len(uniqSig) < 2:
@@ -598,10 +629,10 @@ def _myself_(argv):
                     try:
                         fitsigs[fskey]['hist'].Scale(dat_int/mc_int) # scale to data integral
                     except:
-                        print 'ERROR: No events for --> ',fskey
-                        print '       Remove it from the fit!'
+                        print '\nWARNING: No events for --> ',fskey
+                        print   '         Remove it from the fit!\n'
                         sys.exit()
-
+                        
                     for C in allchans:
                         sigs[fskey+'-c'+C+'-e0']['hist'].Scale(dat_int/mc_int) # make sure MC is scaled too
                         sigs[fskey+'-c'+C+'-e1']['hist'].Scale(dat_int/mc_int) # make sure MC is scaled too
@@ -742,15 +773,20 @@ def _myself_(argv):
                                         sigs[fskey+'-c'+C+'-e'+E]['info']['fbnd'][0]
                                 hibnd = sigs[fskey+'-c'+C+'-e'+E]['info']['acti'] * \
                                         sigs[fskey+'-c'+C+'-e'+E]['info']['fbnd'][1]
-                                limit = ''
-                                #if fitacti <= lobnd or fitacti >= hibnd:
+                                ### check if at limit
+                                limit = 0
                                 if float('%.2e'%(fitacti)) <= float('%.2e'%(lobnd)):
                                     limit = '[LOWER LIMIT]'
                                 if float('%.2e'%(fitacti)) >= float('%.2e'%(hibnd)):
                                     limit = '[UPPER LIMIT]'
-                                fitresults[str(i)].append(
-                                    'fit '+fskey+' = %.2e +/- %.2e mBq  (%.2e, %.2e)  %s '
-                                    %(fitacti, fiterro, lobnd, hibnd, limit))
+                                if limit:
+                                    fitresults[str(i)].append(
+                                        'fit '+fskey+' = %.2e +/- %.2e mBq  (%.2e, %.2e)  %s'
+                                        %(fitacti, fiterro, lobnd, hibnd, limit))
+                                else:
+                                    fitresults[str(i)].append(
+                                        'fit '+fskey+' = %.2e +/- %.2e mBq  (%.2e, %.2e)'
+                                        %(fitacti, fiterro, lobnd, hibnd))
                                 finit = 0
             fitresults[str(i)].append('\n')
 
@@ -799,7 +835,7 @@ def _myself_(argv):
         if updateMCfile:
             shutil.copyfile(mcfile, './plots/'+mcfile)
             newbkgs = './plots/'+mcfile[:-4]+'-update.txt'
-            updateBkgsFile70(mcfile, resultsfile, newbkgs, BF='B')
+            updateBkgsFile70(mcfile, resultsfile, newbkgs, BF='BR')
         
         ### create the background model table
         #outtable = newbkgs[:-4]+'-table.txt'
@@ -1028,27 +1064,34 @@ def _myself_(argv):
     # number of channels (all, single, multi, combos)
     numC = len(pltchans)
     
-    canvs  = [[[] for x in range(numE)] for x in range(numC)]
-
+    #canvs  = [[[] for x in range(numE)] for x in range(numC)]
+    canvs  = [[0 for x in range(numE)] for x in range(numC)]
+    
     ### for separate plots
-    #sepPlots = [[] for x in range(numE)]
-    #sepPlots = [[[] for x in range(8)] for x in range(numE)]
-    sepPlots = [[[[] for x in range(8)] for x in range(numE)] for x in range(numC)]
+    #sepPlots = [[[[] for x in range(8)] for x in range(numE)] for x in range(numC)]
+    sepPlots = [[[0 for x in range(8)] for x in range(numE)] for x in range(numC)]
         
     ### seperate memory space for the pads is key!!!!
-    toppad = [[[] for x in range(numE)] for x in range(numC)]
-    botpad = [[[] for x in range(numE)] for x in range(numC)]
-
-    legs   = [[[] for x in range(numE)] for x in range(numC)]
-    legs2  = [[[] for x in range(numE)] for x in range(numC)]
-    zeros  = [[[] for x in range(numE)] for x in range(numC)]
-
-    total  = [[[] for x in range(numE)] for x in range(numC)]
-    resid  = [[[] for x in range(numE)] for x in range(numC)]
-
+    #toppad = [[[] for x in range(numE)] for x in range(numC)]
+    #botpad = [[[] for x in range(numE)] for x in range(numC)]
+    toppad = [[0 for x in range(numE)] for x in range(numC)]
+    botpad = [[0 for x in range(numE)] for x in range(numC)]
+    
+    #legs   = [[[] for x in range(numE)] for x in range(numC)]
+    #legs2  = [[[] for x in range(numE)] for x in range(numC)]
+    #zeros  = [[[] for x in range(numE)] for x in range(numC)]
+    legs   = [[0 for x in range(numE)] for x in range(numC)]
+    legs2  = [[0 for x in range(numE)] for x in range(numC)]
+    zeros  = [[0 for x in range(numE)] for x in range(numC)]
+    
+    #total  = [[[] for x in range(numE)] for x in range(numC)]
+    #resid  = [[[] for x in range(numE)] for x in range(numC)]
+    total  = [[0 for x in range(numE)] for x in range(numC)]
+    resid  = [[0 for x in range(numE)] for x in range(numC)]
+    
     gbkgs  = [[[{} for x in range(8)] for x in range(numE)] for x in range(numC)]
     gsigs  = [[[{} for x in range(8)] for x in range(numE)] for x in range(numC)]
-    
+        
     plotRebin = 1
     for C, chan in enumerate(pltchans): 
     
@@ -1506,8 +1549,8 @@ def _myself_(argv):
                         #tpad.SetAxisRange(0,10,'y')
                         
                         bpad=botpad[C][E][i].Clone()
-                        sepPlots[C][E][i] = TCanvas('ican-'+str(chan)+str(E)+str(i),
-                                                    'ican-'+str(chan)+str(E)+str(i),
+                        sepPlots[C][E][i] = TCanvas('ican-'+str(chan)+str(E)+str(i+1),
+                                                    'ican-'+str(chan)+str(E)+str(i+1),
                                                     0, 0, 1400, 900)
                         #sepPlots[C][E][i].cd()
                         tpad.Draw()
@@ -1529,13 +1572,13 @@ def _myself_(argv):
     ### Save 4 plots to one canvas
     #-------------------------------------------------------------
     if indi:
-        combPlots = [[] for x in range(8)]
+        combPlots = [0 for x in range(8)]
         for i in range(8):
             if i+1 in justthese:
-                combPlots[i] = TCanvas('ccan-'+str(i),'ccan-'+str(i),0,0,1400,900)
+                combPlots[i] = TCanvas('ccan-'+str(i+1),'ccan-'+str(i+1),0,0,1400,900)
                 combPlots[i].Divide(2,2)
-                tpad = [[] for x in range(4)]
-                bpad = [[] for x in range(4)]
+                tpad = [0 for x in range(4)]
+                bpad = [0 for x in range(4)]
                 p=0
                 for C, chan in enumerate(pltchans):
                     for E in range(numE):
@@ -1566,9 +1609,14 @@ def _myself_(argv):
     #-----------------------------------------------------------------
 
     # delete the extra crap
-    try: del combPlots
-    except: pass
+    #-------------------------------
+    #try: del combPlots
+    #except: pass
+
     try: del sepPlots
+    except: pass
+
+    try: del canvs
     except: pass
         
     
@@ -1580,5 +1628,5 @@ def _myself_(argv):
 ######################################################################
 
 if __name__ == "__main__":
-    _myself_(sys.argv[1:])
+    myself(sys.argv[1:])
 
