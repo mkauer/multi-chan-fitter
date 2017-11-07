@@ -3,7 +3,7 @@
 ######################################################################
 # Matt Kauer - mkauer@physics.wisc.edu
 ######################################################################
-# 80-global-fit.py
+# 80-global-fit-prep.py
 
 V = 'v80'
 
@@ -31,20 +31,27 @@ ROOT.gErrorIgnoreLevel = kWarning
 from funcs80 import *
 
 
-#xstal = 8
-#justthese = [xstal]
+xstal = 7
+
+### individual plots for all crystals? [0,1]
+indi = 1
+
+### just plot individual for crystals? [1-8]
+justthese = [1,2,3,4,5,6,7,8]
+#justthese = [7]
+justthese = [xstal]
+
 
 ### ========== GENERAL INPUTS ==============================
 ### note to add to saved plot names?
 note = 0
-#note = 'C'+str(xstal)
+note = 'C'+str(xstal)
 
 ### backgrounds file
 #mcfile = 'backgrounds800-C'+str(xstal)+'-update.txt'
 #mcfile = 'backgrounds800.txt'
-mcfile = 'backgrounds801.txt'
-#mcfile = 'backgrounds801-C'+str(xstal)+'.txt'
-
+#mcfile = 'backgrounds801.txt'
+mcfile = 'backgrounds801-C'+str(xstal)+'.txt'
 
 ### force the reuse of all joined rootfiles in mcfile? [0,1,2]
 ### very nice for debugging
@@ -101,7 +108,7 @@ pltchans = 'SM'
 ### lo and hi energy ranges
 loer = [0,  100]
 #loer = [0,  20]
-hier = [0, 3500]
+hier = [0, 3000]
 eran = [loer, hier]
 
 ### rebin the final plots [1,inf]
@@ -122,12 +129,6 @@ lrs = [0, 2]
 
 ### main plots in linear scale [0,1]
 liny = 0
-
-### individual plots for all crystals? [0,1]
-indi = 1
-### just plot individual for crystals? [1-8]
-justthese = [1,2,3,4,5,6,7,8]
-#justthese = [1]
 
 
 ### ========== CAN EFFECT FIT RESULTS ======================
@@ -150,13 +151,13 @@ hiEfitRebinScale = 0
 ### ["UU", "UW", "WW", "NORM"]
 chiopt = 'WU'
 
+### set the background subtracted data errors to zero?
+### also, errors are super large when scaling to DRU
+### should look into this deeper at some point...
+zeroFitDataError = 1
 
 
-#batch = 0
-#if onCup(): batch = 1
-#gROOT.SetBatch(batch)
-
-
+### ========== MAIN FUNCTION ===============================
 def myself(argv):
 
     batch = 0
@@ -685,9 +686,12 @@ def myself(argv):
                     ### add the signal object
                     sigObj[-1].Add(fitsigs[fskey]['hist']) # add to the TFractionFitter object
 
-            ### set errors to zero
-            fitdata[i] = zeroBinError(fitdata[i])
-                
+
+            ### set errors to zero?
+            if zeroFitDataError:
+                fitdata[i] = zeroBinError(fitdata[i])
+
+            
             #fit.append(TFractionFitter(fitdata[i], sigObj[i])) # create the TFF data and MC objects
             fit.append(TFractionFitter(fitdata[i], sigObj[-1])) # create the TFF data and MC objects
             #fit.append(TFractionFitter(fitdata[i], sigObj[-1], "Q")) # create the TFF data and MC objects
