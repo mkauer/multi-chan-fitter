@@ -12,6 +12,23 @@
 # ====================================================================
 
 
+# 2017-11-15
+# --------------------------------------------------------------------
+# ~ trimmed out extra debug code that's not needed anymore
+# + fixed the scaling bug
+
+
+# 2017-11-07
+# --------------------------------------------------------------------
+# ~ changes to extracting the fit results
+# ~ changes to setting the fit bounds
+# ~ changes to building the fitting signal object
+# ~ changes to plotting layout
+# ~ many changes to accomodate the global fitting structure
+# + new 900 series backgrounds files
+# V switch to branch 90
+
+
 # 2017-10-31
 # --------------------------------------------------------------------
 # ~ changed to file handling structure of join80.py

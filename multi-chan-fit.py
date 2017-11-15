@@ -9,7 +9,7 @@ V = 'v80'
 
 # Try to get global fitting to work!
 # 
-# version: 2017-11-06
+# version: 2017-11-07
 #
 # see CHANGELOG for changes
 ######################################################################
@@ -37,7 +37,7 @@ xstal = 7
 indi = 1
 
 ### just plot individual for crystals? [1-8]
-justthese = [1,2,3,4,5,6,7,8]
+#justthese = [1,2,3,4,5,6,7,8]
 #justthese = [7]
 justthese = [xstal]
 
@@ -51,7 +51,9 @@ note = 'C'+str(xstal)
 #mcfile = 'backgrounds800-C'+str(xstal)+'-update.txt'
 #mcfile = 'backgrounds800.txt'
 #mcfile = 'backgrounds801.txt'
-mcfile = 'backgrounds801-C'+str(xstal)+'.txt'
+#mcfile = 'backgrounds801-C'+str(xstal)+'.txt'
+#mcfile = 'backgrounds900-C'+str(xstal)+'.txt'
+mcfile = 'backgrounds900.txt'
 
 ### force the reuse of all joined rootfiles in mcfile? [0,1,2]
 ### very nice for debugging
@@ -73,10 +75,10 @@ fitchans = 'SM'
 
 ### fitting ranges
 ### lo and hi energy fit ranges or set [0,0]
-fLoE = [2, 100]
+fLoE = [5, 100]
 #fLoE = [0,0]
 #fHiE = [60, 2800]
-fHiE = [50, 3100]
+fHiE = [100, 2500]
 #fHiE = [0,0]
 
 ### rebin the histos for fitting [1,inf]
