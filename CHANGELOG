@@ -14,6 +14,10 @@
 
 # 2017-11-15
 # --------------------------------------------------------------------
+
+# ~ set same activity and bounds for C6 and C7 testing
+# ~ tweaked a bunch of fit scalings, bounds, results
+# + adding in lsveto as a global fit component
 # ~ trimmed out extra debug code that's not needed anymore
 # + fixed the scaling bug
 

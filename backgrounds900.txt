@@ -318,7 +318,7 @@ FR	MS	4	lsveto	Th232	Th232	Ra228	7.25e-04	1e-4	0.01	1000.3	./root-join-read/buil
 FR	MS	4	lsveto	Th232	Ra228	Th228	1.02e+00	1e-4	0.1	1000.3	./root-join-read/build70/build70-lsvetoRa228_Th228.root	
 FR	MS	4	lsveto	Th232	Th228	GRND	1.71e-04	1e-4	0.01	100.3	./root-join-read/build70/build70-lsvetoTh228_GRND.root	
 
-"""
+
 ########################
 ###   CRYSTAL 5
 ########################
@@ -371,7 +371,7 @@ FR	MS	5	lsveto	Th232	Th232	Ra228	1.36e-06	1e-4	0.0001	10	./root-join-read/build7
 FR	MS	5	lsveto	Th232	Ra228	Th228	3.35e-02	1e-4	0.001	10	./root-join-read/build70/build70-lsvetoRa228_Th228.root	
 FR	MS	5	lsveto	Th232	Th228	GRND	6.87e-01	1e-4	0.01	10	./root-join-read/build70/build70-lsvetoTh228_GRND.root	
 
-
+"""
 ########################
 ###   CRYSTAL 6
 ########################
@@ -477,7 +477,7 @@ FR	MS	7	lsveto	Th232	Th232	Ra228	6.68e+00	1e-4	0.1	10	./root-join-read/build70/b
 FR	MS	7	lsveto	Th232	Ra228	Th228	2.10e+00	1e-4	0.1	10	./root-join-read/build70/build70-lsvetoRa228_Th228.root	
 FR	MS	7	lsveto	Th232	Th228	GRND	8.04e-04	1e-4	0.1	100	./root-join-read/build70/build70-lsvetoTh228_GRND.root	
 
-
+"""
 ########################
 ###   CRYSTAL 8
 ########################
