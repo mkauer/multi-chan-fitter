@@ -6,10 +6,11 @@
 # 
 # Works with v70 and later versions
 # 
-# version: 2017-07-26
+# version: 2017-11-16
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# ~ tweak updateBkgsFile70() to be compatible with no activity error
 # ~ modify updateBkgsFile70() to exclude lines between the """
 # ~ tweaked updateBkgsFile70() to handle new fit results format
 # + add uniqString() to unique 'SM' and 'S' for example
@@ -877,9 +878,11 @@ def updateBkgsFile70(bkgsfile, resultsfile, newbkgs, BF='BR'):
                             elif i == 7:
                                 if acti != '0.0': output.write(acti+'\t')
                                 else: output.write(bbits[i]+'\t')
-                            elif i==9:
+                            #elif i==9:
+                            elif i==(lenbbits-3):
                                 output.write('0.1\t')
-                            elif i==10:
+                            #elif i==10:
+                            elif i==(lenbbits-2):
                                 output.write('10\t')
                             elif i==(lenbbits-1):
                                 output.write(bbits[i])

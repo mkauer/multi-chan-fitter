@@ -6,7 +6,7 @@
 # 
 # Works with v64 and later versions
 # 
-# version: 2017-10-24
+# version: 2017-11-16
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
@@ -167,7 +167,8 @@ def getInfo64(line, freuse=0, fchans=0):
 
         ### fit bounds
         info['fbnd'] = [float(bits[9]), float(bits[10])]
-
+        #info['fbnd'] = [float(bits[-3]), float(bits[-2])]
+        
         ### build the histo key
         key  = 'x'+str(info['xstl'])
         key += '-'+info['loca']

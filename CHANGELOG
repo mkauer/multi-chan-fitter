@@ -12,9 +12,20 @@
 # ====================================================================
 
 
+# 2017-11-16
+# --------------------------------------------------------------------
+# ~ tweak getInfo80() to be compatible with no activity error
+# ~ tweak updateBkgsFile70() to be compatible with no activity error
+# ~ tweak fit results print out so updateBkgsFile() still works
+# ~ another fix to the boundskeys for global MC
+# ~ fixed the fit results plotting bug
+# ~ fixed 2x scaling bug
+# ~ fixed bugs with fit results print out
+# ~ fixed bugs with bounds setting
+
+
 # 2017-11-15
 # --------------------------------------------------------------------
-
 # ~ set same activity and bounds for C6 and C7 testing
 # ~ tweaked a bunch of fit scalings, bounds, results
 # + adding in lsveto as a global fit component
