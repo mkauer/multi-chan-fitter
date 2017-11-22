@@ -10,6 +10,7 @@
 
 # version 2017-11-22
 
+
 ########################
 ###   CRYSTAL 3
 ########################
@@ -43,12 +44,13 @@ FR	MS	3	lsveto	Th232	Th232	Ra228	2.44e-01	0.01	10	./root-join-read/build70/build
 FR	MS	3	lsveto	Th232	Ra228	Th228	9.08e-04	0.1	10000	./root-join-read/build70/build70-lsvetoRa228_Th228.root
 FR	MS	3	lsveto	Th232	Th228	GRND	9.70e-06	0.1	1000000	./root-join-read/build70/build70-lsvetoTh228_GRND.root
 
-FR	MS	3	pmt	K40	K40	GRND	1.48e-01	0.0001	10000	./root-join-read/build91/c3/build91-pmtK40_GRND.root
-FR	MS	3	pmt	U238	U238	Th230	2.27e+02	0.01	10	./root-join-read/build91/c3/build91-pmtU238_Th230.root
-FR	MS	3	pmt	U238	Th230	Ra226	4.20e+01	0.1	1000	./root-join-read/build91/c3/build91-pmtTh230_Ra226.root
-FR	MS	3	pmt	U238	Ra226	Rn222	1.17e+03	0.01	10	./root-join-read/build91/c3/build91-pmtRa226_Rn222.root
-FR	MS	3	pmt	U238	Rn222	Pb210	2.08e-03	0.1	100000	./root-join-read/build91/c3/build91-pmtRn222_Pb210.root
-FR	MS	3	pmt	U238	Pb210	GRND	8.50e-01	0.1	10	./root-join-read/build91/c3/build91-pmtPb210_GRND.root
-FR	MS	3	pmt	Th232	Th232	Ra228	3.03e+03	0.1	10	./root-join-read/build91/c3/build91-pmtTh232_Ra228.root
-FR	MS	3	pmt	Th232	Ra228	Th228	8.07e+00	0.1	100	./root-join-read/build91/c3/build91-pmtRa228_Th228.root
-FR	MS	3	pmt	Th232	Th228	GRND	2.23e-03	0.1	100000	./root-join-read/build91/c3/build91-pmtTh228_GRND.root
+# lower pmt bounds by 1/10
+FR	MS	3	pmt	K40	K40	GRND	1.48e-01	0.00001	10000	./root-join-read/build91/c3/build91-pmtK40_GRND.root
+FR	MS	3	pmt	U238	U238	Th230	2.27e+02	0.001	10	./root-join-read/build91/c3/build91-pmtU238_Th230.root
+FR	MS	3	pmt	U238	Th230	Ra226	4.20e+01	0.01	1000	./root-join-read/build91/c3/build91-pmtTh230_Ra226.root
+FR	MS	3	pmt	U238	Ra226	Rn222	1.17e+03	0.001	10	./root-join-read/build91/c3/build91-pmtRa226_Rn222.root
+FR	MS	3	pmt	U238	Rn222	Pb210	2.08e-03	0.01	100000	./root-join-read/build91/c3/build91-pmtRn222_Pb210.root
+FR	MS	3	pmt	U238	Pb210	GRND	8.50e-01	0.01	10	./root-join-read/build91/c3/build91-pmtPb210_GRND.root
+FR	MS	3	pmt	Th232	Th232	Ra228	3.03e+03	0.01	10	./root-join-read/build91/c3/build91-pmtTh232_Ra228.root
+FR	MS	3	pmt	Th232	Ra228	Th228	8.07e+00	0.01	100	./root-join-read/build91/c3/build91-pmtRa228_Th228.root
+FR	MS	3	pmt	Th232	Th228	GRND	2.23e-03	0.01	100000	./root-join-read/build91/c3/build91-pmtTh228_GRND.root

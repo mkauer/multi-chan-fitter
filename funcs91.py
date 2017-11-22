@@ -32,7 +32,7 @@ sys.path.append("/home/mkauer/mc-fitting/")
 from funcs80 import *
 
 
-def build91(infile='backgrounds900.txt', freuse=0, fchans=0, fxstals=[]):
+def build91(infile='backgrounds900.txt', others=1, freuse=0, fchans=0, fxstals=[]):
 
     data = {}
     bkgs = {}
@@ -44,8 +44,11 @@ def build91(infile='backgrounds900.txt', freuse=0, fchans=0, fxstals=[]):
         if len(info) == 0:
             continue
         
+        #+++++++++++++++++++++++++++++++++++++++++++++++++++
+        #+++++++++++++++++++++++++++++++++++++++++++++++++++
+        #others = 0
         infos=[]
-        if 'pmt' in info['key']:
+        if others and 'pmt' in info['key']:
             key = info['key']
             for i in range(8):
                 #info['key'] = key+'-f'+str(i+1)
@@ -53,8 +56,16 @@ def build91(infile='backgrounds900.txt', freuse=0, fchans=0, fxstals=[]):
                 newinfo['key'] = key+'-f'+str(i+1)
                 newinfo['from'] = str(i+1)
                 infos.append(newinfo)
+        elif not others and 'pmt' in info['key']:
+            key = info['key']
+            newinfo = deepcopy(info)
+            newinfo['key'] = key+'-f'+str(info['xstl'])
+            newinfo['from'] = info['xstl']
+            infos.append(newinfo)
         else:
             infos.append(info)
+        #+++++++++++++++++++++++++++++++++++++++++++++++++++
+        #+++++++++++++++++++++++++++++++++++++++++++++++++++
         
         for info in infos:
             #print info['key']

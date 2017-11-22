@@ -12,15 +12,28 @@
 # ====================================================================
 
 
+# 2017-11-22
+# --------------------------------------------------------------------
+# ~ use non-zero bins from fitdata as the ndf for chi2/ndf
+# + add memory mapping for the combined plots
+# ~ have C3+C6 fitting working with other pmts
+# + adding master plot showing global fit histograms
+# ~ tweaked v91 to handle multiple pmt sims
+# ~ rebuilding C6 and C7 simulations with other pmts
+# + add option to build91() to use old/new pmt handling
+# V switch to branch 91
+# ~ verified that v80 and v90 give same fit results
+
+
 # 2017-11-21
 # --------------------------------------------------------------------
 # ~ rebuild C3 PMT sim with other pmts added in
-# + new join90.py for build90
-# - do not need info['error'] anymore in getInfo90()
-# + add pmt key loop to build90()
-# + add key info['from'] to getInfo90()
-# + build90(), getInfo90(), buildMC90()
-# + new funcs90.py
+# + new join91.py for build91
+# - do not need info['error'] anymore in getInfo91()
+# + add pmt key loop to build91()
+# + add key info['from'] to getInfo91()
+# + build91(), getInfo91(), buildMC91()
+# + new funcs91.py
 
 
 # 2017-11-16

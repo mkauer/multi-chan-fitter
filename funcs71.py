@@ -448,6 +448,9 @@ def buildMC71(info, mc):
 def scaleBkgs71(bkgs,runtime=0):
     
     for key in bkgs:
+        
+        #print 'scaling -->',key
+        
         x = key.split('-')[0]
         loca = key.split('-')[1]
         e = key.split('-')[-1]

@@ -36,7 +36,7 @@ indi = 1
 
 ### just plot individual for crystals? [1-8]
 #justthese = [1,2,3,4,5,6,7,8]
-justthese = [3]
+justthese = [3,6,7]
 
 
 ### ========== GENERAL INPUTS ==============================
@@ -45,8 +45,10 @@ note = 0
 #note = 'C3'
 
 ### backgrounds file
-mcfile = 'backgrounds910-C3.txt'
+mcfile = 'backgrounds910-C367.txt'
 
+### include bkgs from other pmts?
+others = 1
 
 ### force the reuse of all joined rootfiles in mcfile? [0,1,2]
 ### very nice for debugging
@@ -56,7 +58,7 @@ mcfile = 'backgrounds910-C3.txt'
 reuse = 0
 
 ### update and save new backgrounds file with fit results
-updateMCfile = 0
+updateMCfile = 1
 
 
 ### ========== FITTING OPTIONS =============================
@@ -68,7 +70,7 @@ fitchans = 'SM'
 
 ### fitting ranges
 ### lo and hi energy fit ranges or set [0,0]
-fLoE = [5, 100]
+fLoE = [4, 100]
 #fLoE = [0,0]
 #fHiE = [60, 2800]
 fHiE = [100, 2500]
@@ -163,9 +165,9 @@ def myself(argv):
     gStyle.SetOptStat ('')
     gStyle.SetOptFit  (0)
     
-    gStyle.SetPadBottomMargin (0.12)
-    gStyle.SetPadLeftMargin   (0.12)
-    gStyle.SetPadRightMargin  (0.05)
+    #gStyle.SetPadBottomMargin (0.12)
+    #gStyle.SetPadLeftMargin   (0.12)
+    #gStyle.SetPadRightMargin  (0.05)
     
     ### for saving the plots...
     if not os.path.exists('./plots'): 
@@ -179,7 +181,7 @@ def myself(argv):
     ### where everything gets loaded into dictionary
     #-----------------------------------------------------------------
     allchans = uniqString(fitchans+pltchans)
-    data, bkgs, sigs, runtime = build91(mcfile, reuse, allchans)
+    data, bkgs, sigs, runtime = build91(mcfile, others, reuse, allchans)
     datkeys, bakkeys, sigkeys = sortKeys(data, bkgs, sigs)
     if datsumw2:
         for key in datkeys:
@@ -244,11 +246,13 @@ def myself(argv):
     ### legend length = MC + data + total
     Nlg = Nc+2
     lnc = 1
-    if Nlg > 6: lnc = 2
+    if Nlg >  6: lnc = 2
     if Nlg > 12: lnc = 3
+    #if Nlg > 18: lnc = 4
     xlegstop  = 0.94
     xlegstart = xlegstop-(0.2*lnc)
-    ylegstop  = 0.89
+    #ylegstop  = 0.89
+    ylegstop  = 0.91
     ylegstart = ylegstop-(0.04*6)
     
 
@@ -312,15 +316,15 @@ def myself(argv):
     if len(sigs) > 0:
         fitting=1
         
-        fitdata = []
+        #fitdata = []
         fitsigs = {}
         fitbkgs = {}
         
         fitglob = {}
         fglobkeys = []
 
-        ftotal = []
-        fresid = []
+        #ftotal = []
+        #fresid = []
         #druscale = [1 for x in range(8)]
 
         fitdata = TH1F('globData', 'globData', fmax*8, 0, fmax*8)
@@ -661,35 +665,48 @@ def myself(argv):
                     for C in allchans:
                         for E in range(2):
                             E=str(E)
-                            newkey = fskey+'-c'+C+'-e'+E
-                            sigs[newkey]['hist'].Scale(dat_int/mc_int)
-                            sigs[newkey]['fitscale'] = sigs[newkey]['scale'] * dat_int/mc_int
-                                                        
-                            ### rescale the bounds to the normalized fraction
-                            ### and save new values to the sigs info
-                            #---------------------------------------------------------------------
-                            sigs[newkey]['info']['newfbnd'] = [0,0]
-                            for k in range(2):
-                                renorm = sigs[newkey]['scale'] / float(sigs[newkey]['fitscale'])
-                                                                
-                                if useBounds == 0:
-                                    these = [0.00, 1.00]
-                                    sigs[newkey]['info']['fbnd'][k] = 1./renorm * these[k]
-                                    sigs[newkey]['info']['newfbnd'] = these
-                                elif useBounds == 1:
-                                    sigs[newkey]['info']['newfbnd'][k] = \
-                                        sigs[newkey]['info']['fbnd'][k] * renorm
-                                elif useBounds == 2:
-                                    sigs[newkey]['info']['fbnd'] = newBounds
-                                    sigs[newkey]['info']['newfbnd'][k] = \
-                                        newBounds[k] * renorm
-                                elif useBounds == 3:
-                                    sigs[newkey]['info']['fbnd'][k] = 1./renorm * otherBnds[k]
-                                    sigs[newkey]['info']['newfbnd'] = otherBnds
-                                else:
-                                    print 'ERROR: do not know what to do with useBounds =',useBounds
-                                    sys.exit()
-                    
+                            
+                            #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                            #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                            newkeys=[]
+                            if 'pmt' not in fskey:
+                                newkeys.append(fskey+'-c'+C+'-e'+E)
+                            else:
+                                for F in range(8):
+                                    F=str(F+1)
+                                    newkeys.append(fskey+'-f'+F+'-c'+C+'-e'+E)
+                            #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                            #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                            
+                            for newkey in newkeys:
+                                sigs[newkey]['hist'].Scale(dat_int/mc_int)
+                                sigs[newkey]['fitscale'] = sigs[newkey]['scale'] * dat_int/mc_int
+                            
+                                ### rescale the bounds to the normalized fraction
+                                ### and save new values to the sigs info
+                                #---------------------------------------------------------------------
+                                sigs[newkey]['info']['newfbnd'] = [0,0]
+                                for k in range(2):
+                                    renorm = sigs[newkey]['scale'] / float(sigs[newkey]['fitscale'])
+
+                                    if useBounds == 0:
+                                        these = [0.00, 1.00]
+                                        sigs[newkey]['info']['fbnd'][k] = 1./renorm * these[k]
+                                        sigs[newkey]['info']['newfbnd'] = these
+                                    elif useBounds == 1:
+                                        sigs[newkey]['info']['newfbnd'][k] = \
+                                            sigs[newkey]['info']['fbnd'][k] * renorm
+                                    elif useBounds == 2:
+                                        sigs[newkey]['info']['fbnd'] = newBounds
+                                        sigs[newkey]['info']['newfbnd'][k] = \
+                                            newBounds[k] * renorm
+                                    elif useBounds == 3:
+                                        sigs[newkey]['info']['fbnd'][k] = 1./renorm * otherBnds[k]
+                                        sigs[newkey]['info']['newfbnd'] = otherBnds
+                                    else:
+                                        print 'ERROR: do not know what to do with useBounds =',useBounds
+                                        sys.exit()
+
                     bounds.append(sigs[newkey]['info']['newfbnd'])
                     #---------------------------------------------------------------------
                     
@@ -701,6 +718,7 @@ def myself(argv):
             if note: fitresults[str(i)].append('note = '+note)
             fitresults[str(i)].append('version = '+V)
             fitresults[str(i)].append('channels fit = '+fitchans)
+            fitresults[str(i)].append('other pmts = '+str(others))
             fitresults[str(i)].append('hist extend = '+str(extend))
             fitresults[str(i)].append('norm to dru = '+str(dru))
             fitresults[str(i)].append('lo-E fit range = '+str(fLoE[0])+' - '+str(fLoE[1])+' keV')
@@ -726,8 +744,8 @@ def myself(argv):
                 print '\nWARNING: No events for --> ',fgkey
                 print   '         Remove it from the fit!\n'
                 sys.exit()
-
-            newkey=0
+            
+            #newkey=0
             #boundskeys=[]
             for i in range(8):
                 X = str(i+1)
@@ -735,54 +753,66 @@ def myself(argv):
                     for E in range(2):
                         E = str(E)
                         
+                        newkeys=[]
                         try:
                             newkey = 'x'+X+'-'+fgkey+'-c'+C+'-e'+E
                             test = sigs[newkey]
+                            newkeys.append(newkey)
                         except:
-                            newkey=0
-                            continue
+                            for F in range(8):
+                                F=str(F+1)
+                                try:
+                                    newkey = 'x'+X+'-'+fgkey+'-f'+F+'-c'+C+'-e'+E
+                                    test = sigs[newkey]
+                                    newkeys.append(newkey)
+                                except:
+                                    #newkey=0
+                                    continue
                         
-                        sigs[newkey]['hist'].Scale(dat_int/mc_int)
-                        sigs[newkey]['fitscale'] = sigs[newkey]['scale'] * dat_int/mc_int
-                
-                        ### rescale the bounds to the normalized fraction
-                        ### and save new values to the sigs info
-                        #---------------------------------------------------------------------
-                        sigs[newkey]['info']['newfbnd'] = [0,0]
-                        for k in range(2):
-                            renorm = sigs[newkey]['scale'] / float(sigs[newkey]['fitscale'])
+                        if len(newkeys) > 0:
+                            for newkey in newkeys:
+                                
+                                sigs[newkey]['hist'].Scale(dat_int/mc_int)
+                                sigs[newkey]['fitscale'] = sigs[newkey]['scale'] * dat_int/mc_int
 
-                            if useBounds == 0:
-                                these = [0.00, 1.00]
-                                sigs[newkey]['info']['fbnd'][k] = 1./renorm * these[k]
-                                sigs[newkey]['info']['newfbnd'] = these
-                            elif useBounds == 1:
-                                sigs[newkey]['info']['newfbnd'][k] = \
-                                    sigs[newkey]['info']['fbnd'][k] * renorm
-                            elif useBounds == 2:
-                                sigs[newkey]['info']['fbnd'] = newBounds
-                                sigs[newkey]['info']['newfbnd'][k] = \
-                                    newBounds[k] * renorm
-                            elif useBounds == 3:
-                                sigs[newkey]['info']['fbnd'][k] = 1./renorm * otherBnds[k]
-                                sigs[newkey]['info']['newfbnd'] = otherBnds
-                            else:
-                                print 'ERROR: do not know what to do with useBounds =',useBounds
-                                sys.exit()
+                                ### rescale the bounds to the normalized fraction
+                                ### and save new values to the sigs info
+                                #---------------------------------------------------------------------
+                                sigs[newkey]['info']['newfbnd'] = [0,0]
+                                for k in range(2):
+                                    renorm = sigs[newkey]['scale'] / float(sigs[newkey]['fitscale'])
 
-                ### this is the correct way
-                if newkey and fgkey not in boundskeys:
-                ### this is the wrong way
-                #if newkey:
-                    print 'bounds for', fgkey, sigs[newkey]['info']['newfbnd']
-                    boundskeys.append(fgkey)
-                    bounds.append(sigs[newkey]['info']['newfbnd'])
-            #---------------------------------------------------------------------
+                                    if useBounds == 0:
+                                        these = [0.00, 1.00]
+                                        sigs[newkey]['info']['fbnd'][k] = 1./renorm * these[k]
+                                        sigs[newkey]['info']['newfbnd'] = these
+                                    elif useBounds == 1:
+                                        sigs[newkey]['info']['newfbnd'][k] = \
+                                            sigs[newkey]['info']['fbnd'][k] * renorm
+                                    elif useBounds == 2:
+                                        sigs[newkey]['info']['fbnd'] = newBounds
+                                        sigs[newkey]['info']['newfbnd'][k] = \
+                                            newBounds[k] * renorm
+                                    elif useBounds == 3:
+                                        sigs[newkey]['info']['fbnd'][k] = 1./renorm * otherBnds[k]
+                                        sigs[newkey]['info']['newfbnd'] = otherBnds
+                                    else:
+                                        print 'ERROR: do not know what to do with useBounds =',useBounds
+                                        sys.exit()
+                                #---------------------------------------------------------------------
+
+                            
+                            ### add bounds to unique bouds list
+                            if newkeys[0] and fgkey not in boundskeys:
+                                print 'bounds for', fgkey, sigs[newkey]['info']['newfbnd']
+                                boundskeys.append(fgkey)
+                                bounds.append(sigs[newkey]['info']['newfbnd'])
+            
             
             ### set errors to zero?
             fitglob[fgkey]['hist'] = zeroBinError(fitglob[fgkey]['hist'])
-
-
+        
+        
         ### global fit debug infos
         #=============================================================
         """
@@ -857,8 +887,14 @@ def myself(argv):
         chi2 = fit.GetChisquare()
         ndf  = fit.GetNDF()
         pval = fit.GetProb()
-        
 
+        ### get non-zero ndf
+        NDF=0
+        for n in range(fmax*8):
+            if fitdata.GetBinContent(n) > 0:
+                NDF+=1
+        ndf=NDF
+        
         count = 0
         for i in range(8):
             
@@ -868,7 +904,7 @@ def myself(argv):
             
             for fskey in fsigkeys:
                 if 'x'+str(i+1) in fskey:
-
+                    
                     fscale = ROOT.Double(0.0)
                     ferror = ROOT.Double(0.0)
                     print 'count',count
@@ -906,32 +942,44 @@ def myself(argv):
             
             fitglob[fgkey]['hist'].Scale(fscale)
             
-            newkey=0
+            #newkey=0
             for i in range(8):
                 X = str(i+1)
                 for C in allchans:
                     for E in range(2):
                         E = str(E)
+                        
+                        newkeys=[]
                         try:
                             newkey = 'x'+X+'-'+fgkey+'-c'+C+'-e'+E
                             test = sigs[newkey]
+                            newkeys.append(newkey)
                         except:
-                            newkey=0
-                            continue
+                            for F in range(8):
+                                F=str(F+1)
+                                try:
+                                    newkey = 'x'+X+'-'+fgkey+'-f'+F+'-c'+C+'-e'+E
+                                    test = sigs[newkey]
+                                    newkeys.append(newkey)
+                                except:
+                                    #newkey=0
+                                    continue
                         
-                        ### save the raw scaling factor from the fit
-                        sigs[newkey]['hist'].Scale(fscale)
-                        
-                        ### save converted scaling factor
-                        sigs[newkey]['fitscale'] = sigs[newkey]['fitscale'] * fscale
-                        
-                        ### set error as a percent of the scaling factor
-                        try:
-                            sigs[newkey]['fiterror'] = ferror/fscale
-                        except:
-                            sigs[newkey]['fiterror'] = 1.
-                            
-                    
+                        if len(newkeys) > 0:
+                            for newkey in newkeys:
+                                ### save the raw scaling factor from the fit
+                                sigs[newkey]['hist'].Scale(fscale)
+
+                                ### save converted scaling factor
+                                sigs[newkey]['fitscale'] = sigs[newkey]['fitscale'] * fscale
+
+                                ### set error as a percent of the scaling factor
+                                try:
+                                    sigs[newkey]['fiterror'] = ferror/fscale
+                                except:
+                                    sigs[newkey]['fiterror'] = 1.
+
+        
         ### scale the signals to mBq/kg
         if dru: sigs = scaleSigs71(sigkeys, sigs)
         else: sigs = scaleSigs71(sigkeys, sigs, runtime)
@@ -981,37 +1029,50 @@ def myself(argv):
                     for E in range(2):
                         E=str(E)
                         if finit:
+
+                            newkeys=[]
                             try:
                                 newkey = 'x'+X+'-'+fgkey+'-c'+C+'-e'+E
                                 test = sigs[newkey]
+                                newkeys.append(newkey)
                             except:
-                                newkey=0
-                                continue
-                            
-                            ### print out activity and error and bounds
-                            fitacti = sigs[newkey]['info']['fitacti']
-                            fiterro = sigs[newkey]['info']['fiterro']
-                            lobnd = sigs[newkey]['info']['acti'] * \
-                                    sigs[newkey]['info']['fbnd'][0]
-                            hibnd = sigs[newkey]['info']['acti'] * \
-                                    sigs[newkey]['info']['fbnd'][1]
+                                for F in range(8):
+                                    F=str(F+1)
+                                    try:
+                                        newkey = 'x'+X+'-'+fgkey+'-f'+F+'-c'+C+'-e'+E
+                                        test = sigs[newkey]
+                                        newkeys.append(newkey)
+                                    except:
+                                        #newkey=0
+                                        continue
 
-                            ### check if at limit
-                            limit = 0
-                            if float('%.2e'%(fitacti)) <= float('%.2e'%(lobnd)):
-                                limit = '[LOWER LIMIT]'
-                            if float('%.2e'%(fitacti)) >= float('%.2e'%(hibnd)):
-                                limit = '[UPPER LIMIT]'
-                            if limit:
-                                fitresults[str(i)].append(
-                                    'fit '+'x'+X+'-'+fgkey+' = %.2e +/- %.2e mBq  (%.2e, %.2e)  %s'
-                                    %(fitacti, fiterro, lobnd, hibnd, limit))
-                            else:
-                                fitresults[str(i)].append(
-                                    'fit '+'x'+X+'-'+fgkey+' = %.2e +/- %.2e mBq  (%.2e, %.2e)'
-                                    %(fitacti, fiterro, lobnd, hibnd))
-                            finit = 0
-                            
+                            if len(newkeys) > 0:
+                                newkey = newkeys[0]
+                                ### print out activity and error and bounds
+                                fitacti = sigs[newkey]['info']['fitacti']
+                                fiterro = sigs[newkey]['info']['fiterro']
+                                lobnd = sigs[newkey]['info']['acti'] * \
+                                        sigs[newkey]['info']['fbnd'][0]
+                                hibnd = sigs[newkey]['info']['acti'] * \
+                                        sigs[newkey]['info']['fbnd'][1]
+
+                                ### check if at limit
+                                limit = 0
+                                if float('%.2e'%(fitacti)) <= float('%.2e'%(lobnd)):
+                                    limit = '[LOWER LIMIT]'
+                                if float('%.2e'%(fitacti)) >= float('%.2e'%(hibnd)):
+                                    limit = '[UPPER LIMIT]'
+                                if limit:
+                                    fitresults[str(i)].append(
+                                        'fit '+'x'+X+'-'+fgkey+' = %.2e +/- %.2e mBq  (%.2e, %.2e)  %s'
+                                        %(fitacti, fiterro, lobnd, hibnd, limit))
+                                else:
+                                    fitresults[str(i)].append(
+                                        'fit '+'x'+X+'-'+fgkey+' = %.2e +/- %.2e mBq  (%.2e, %.2e)'
+                                        %(fitacti, fiterro, lobnd, hibnd))
+                                ### turn off
+                                finit = 0
+            
             fitresults[str(i)].append('\n')
 
             
@@ -1035,6 +1096,7 @@ def myself(argv):
         save += '_reuse'+str(reuse)
         save += '_chans'+str(fitchans)
         save += '_extend'+str(extend)
+        save += '_others'+str(others)
         if note: save += '_'+note
         save += '_'+V
         
@@ -1073,7 +1135,13 @@ def myself(argv):
 
         fcanv = TCanvas('fcanv', 'fcanv', 0, 0, 1400, 900)
         fcanv.Divide(4,2)
-
+        """
+        gStyle.SetPadTopMargin    (0.06)
+        gStyle.SetPadBottomMargin (0.12)
+        gStyle.SetPadLeftMargin   (0.12)
+        #gStyle.SetPadRightMargin  (0.05)
+        gStyle.SetPadRightMargin  (0.02)
+        """
         ftoppad=[]
         fbotpad=[]
 
@@ -1088,13 +1156,25 @@ def myself(argv):
 
         fzeros=[]
         
-
+        """
         font=63
         size=13
         yoff=4.2
-        
+        xoff=8
+        """
         for i in range(8):
             fcanv.cd(i+1)
+            
+            gStyle.SetPadTopMargin    (0.07)
+            gStyle.SetPadBottomMargin (0.11)
+            gStyle.SetPadLeftMargin   (0.12)
+            gStyle.SetPadRightMargin  (0.02)
+            
+            font = 63
+            size = 13
+            yoff = 4.2
+            xoff = 8
+            
             
             fraction = 0.3
             pad1 = TPad('pad1','pad1',0,fraction,1,1)
@@ -1179,11 +1259,13 @@ def myself(argv):
             ### build legend after getting the numbers of signals
             Nfs = Nfsigs+2
             flnc = 1
-            if Nfs > 6: flnc = 2
+            if Nfs >  6: flnc = 2
             if Nfs > 12: flnc = 3
+            #if Nfs > 18: flnc = 4
             fxlegstop  = 0.94
             fxlegstart = fxlegstop-(0.2*flnc)
-            fylegstop  = 0.89
+            #fylegstop  = 0.89
+            fylegstop  = 0.91
             fylegstart = fylegstop-(0.04*6)
             
             fleg = TLegend(fxlegstart, fylegstart, fxlegstop, fylegstop)
@@ -1246,7 +1328,7 @@ def myself(argv):
             fresid.SetXTitle('fit bins')
             fresid.GetXaxis().SetTitleFont(font)
             fresid.GetXaxis().SetTitleSize(size)
-            fresid.GetXaxis().SetTitleOffset(8)
+            fresid.GetXaxis().SetTitleOffset(xoff)
             fresid.GetXaxis().SetLabelFont(font)
             fresid.GetXaxis().SetLabelSize(size)
             fresid.GetXaxis().SetLabelOffset(0.03)
@@ -1297,17 +1379,19 @@ def myself(argv):
                     sepFitPlot = TCanvas('ican-fit-'+str(fitchans)+str(i),
                                          'ican-fit-'+str(fitchans)+str(i),
                                          0, 0, 1400, 900)
+                    
                     ftpad.Draw()
                     fbpad.Draw()
                     sepFitPlot.Update()
                     fisave  = ''
                     fisave += 'x'+str(i+1)
-                    fisave += '_fit'
-                    fisave += '_loEfRS'+str(loEfitRebinScale)
-                    fisave += '_hiEfRS'+str(hiEfitRebinScale)
-                    fisave += '_dru'+str(dru)
-                    fisave += '_cs'+str(fitchans)
-                    fisave += '_ext'+str(extend)
+                    fisave += '-_fit'
+                    fisave += '-loEfRS'+str(loEfitRebinScale)
+                    fisave += '-hiEfRS'+str(hiEfitRebinScale)
+                    fisave += '-dru'+str(dru)
+                    fisave += '-cs'+str(fitchans)
+                    fisave += '-ext'+str(extend)
+                    fisave += '-oth'+str(others)
                     if note: fisave += '_'+str(note)
                     fisave += '_'+str(V)
                 
@@ -1315,21 +1399,245 @@ def myself(argv):
                 except:
                     print 'WARNING: could not make plot for xstal-'+str(i+1)
                     continue
-
-            ### maybe not delete these plots...
-            #try: del sepFitPlot
-            #except: pass
             
         fcanv.Update()
         fcanv.Print('./plots/'+save+'.png')
-    
+
+        
+        ### plot the MEGA combined histograms for fun!
+        #=============================================================
+        #=============================================================
+        
+        mcanv = TCanvas('mcanv', 'mcanv', 0, 0, 1400, 900)
+        #mcanv.Divide(4,2)
+
+        gStyle.SetPadTopMargin    (0.07)
+        gStyle.SetPadBottomMargin (0.10)
+        gStyle.SetPadLeftMargin   (0.08)
+        gStyle.SetPadRightMargin  (0.03)
+
+        font = 63
+        size = 20
+        yoff = 1.5
+        xoff = 6
+
+        fraction = 0.3
+        mtoppad = TPad('pad1','pad1',0,fraction,1,1)
+        mbotpad = TPad('pad2','pad2',0,0,1,fraction)
+        mtoppad.SetBottomMargin(0.01)
+        mtoppad.SetBorderMode(0)
+        mtoppad.SetLogy()
+        
+        mbotpad.SetTopMargin(0.05)
+        mbotpad.SetBottomMargin(0.3)
+        mbotpad.SetBorderMode(0)
+        mbotpad.SetLogy(1)
+
+        mtoppad.Draw()
+        mbotpad.Draw()
+        mtoppad.cd()
+        
+        newFitTitle = str('Global Fit Histograms')
+        fitdata.SetTitle(newFitTitle)
+        
+        fitdata.SetLineColor(kBlack)
+        fitdata.SetMarkerColor(kBlack)
+        fitdata.SetLineWidth(1)
+
+        if dru: fitdata.GetYaxis().SetTitle('counts / day / kg / keV  (dru)')
+        else: fitdata.GetYaxis().SetTitle('arb. counts')
+        fitdata.GetYaxis().SetTitleFont(font)
+        fitdata.GetYaxis().SetTitleSize(size)
+        fitdata.GetYaxis().SetTitleOffset(yoff)
+        fitdata.GetYaxis().SetLabelFont(font)
+        fitdata.GetYaxis().SetLabelSize(size)
+        fitdata.GetYaxis().SetLabelOffset(0.01)
+        
+        fitdata.Draw()
+        #flegs[i].AddEntry(fitdata, 'data - bkgs', lopt)
+        if dru: fitdata.SetAxisRange(2e-3, 2e3, 'y')
+        fitdata.SetAxisRange(0, fmax*8, 'x')
+
+            
+        Nfsigs=0
+        #for i in range(8):
+        for fskey in fsigkeys:
+            #if 'x'+str(i+1) in fskey:
+
+            Nfsigs+=1
+
+            # find the unique name for color and set color
+            cname = fskey.split('-')[1]+'-'+fskey.split('-')[2]
+            fitsigs[fskey]['hist'].SetMarkerColor(uniqColor[cname])
+            fitsigs[fskey]['hist'].SetLineColor(uniqColor[cname])
+
+            ### draw the sigs
+            fitsigs[fskey]['hist'].Draw('same')
+
+            ### add MC to total MC hist
+            #ftotal.Add(fitsigs[fskey]['hist'])
+
+        for fgkey in fglobkeys:
+            #if i==0:
+            Nfsigs+=1
+
+            # find the unique name for color and set color
+            #cname = fskey.split('-')[1]+'-'+fskey.split('-')[2]
+            cname = fgkey
+            fitglob[fgkey]['hist'].SetMarkerColor(uniqColor[cname])
+            fitglob[fgkey]['hist'].SetLineColor(uniqColor[cname])
+
+            ### draw the sigs
+            fitglob[fgkey]['hist'].Draw('same')
+
+            #if i==0:
+                ### add MC to total MC hist
+                #ftotal.Add(fitglob[fgkey]['hist'])
+
+                
+        ### select the right range
+        ftotal.SetAxisRange(0, fmax*8, 'x')
+        ftotal.Draw('same')
+        
+        ### build legend after getting the numbers of signals
+        Nfs = Nfsigs+2
+        flnc = 1
+        if Nfs >  6: flnc = 2
+        if Nfs > 12: flnc = 3
+        #if Nfs > 18: flnc = 4
+        #fxlegstop  = 0.94
+        fxlegstop  = 0.96
+        fxlegstart = fxlegstop-(0.2*flnc)
+        #fylegstop  = 0.89
+        fylegstop  = 0.91
+        fylegstart = fylegstop-(0.04*6)
+
+        mleg = TLegend(fxlegstart, fylegstart, fxlegstop, fylegstop)
+        #flegs.append(fleg)
+        mleg.SetNColumns(flnc)
+        mleg.SetFillColor(0)
+        mleg.SetBorderSize(0)
+        lopt = 'LPE'
+
+        mleg.AddEntry(fitdata, 'data - bkgs', lopt)
+
+        ### add legend entries in order
+        for name in uniqAll:
+            for fskey in fsigkeys:
+                if name in fskey:
+                    mleg.AddEntry(fitsigs[fskey]['hist'], fskey, lopt)
+            # and for globals
+            for fgkey in fglobkeys:
+                if name in fgkey:
+                    mleg.AddEntry(fitglob[fgkey]['hist'], fgkey, lopt)
+
+        #ftotal.Draw('same')
+
+        #if i in wasFit:
+        # returned from fit
+        mleg.AddEntry(ftotal, 'Fit Total (chi2/ndf = '+str(round(fitchi2ndf,2))+')', lopt)
+        # calc by Chi2TestX()
+        #flegs[i].AddEntry(ftotal, 'Fit Total (chi2/ndf = '+str(round(fitchi2ndfv2,2))+')', lopt)
+        #print 'INFO: Fit total MC from Chi2TestX chi2/ndf = '+str(round(fitchi2ndfv2,2))
+
+        mleg.Draw('same')
+
+
+        ### plot the fit residuals
+        #-------------------------------------------------------------
+        mbotpad.cd()
+        mleg2 = TLegend(0.72, 0.78, 0.94, 0.94)
+        #flegs2.append(leg)
+        mleg2.SetFillColor(0)
+        mleg2.SetBorderSize(0)
+        lopt = 'LPE'
+        
+        #fresid.Divide(fitdata, ftotal)
+                
+        fresid.SetTitle('')
+        #fresid.SetXTitle('Energy (keVee)')
+        fresid.SetXTitle('fit bins')
+        fresid.GetXaxis().SetTitleFont(font)
+        fresid.GetXaxis().SetTitleSize(size)
+        fresid.GetXaxis().SetTitleOffset(xoff)
+        fresid.GetXaxis().SetLabelFont(font)
+        fresid.GetXaxis().SetLabelSize(size)
+        fresid.GetXaxis().SetLabelOffset(0.03)
+        
+        #fresid.SetYTitle('counts / keV')
+        fresid.SetYTitle('data / MC')
+        #fresid.SetYTitle('MC / data')
+        fresid.GetYaxis().SetTitleFont(font)
+        fresid.GetYaxis().SetTitleSize(size)
+        fresid.GetYaxis().SetTitleOffset(yoff)
+        fresid.GetYaxis().SetLabelFont(font)
+        fresid.GetYaxis().SetLabelSize(size)
+        fresid.GetYaxis().SetLabelOffset(0.01)
+        # '5' secondary and '05' primary
+        fresid.GetYaxis().SetNdivisions(505)
+        
+        fresid.SetAxisRange(0.1,10,'y')
+        
+        fresid.SetAxisRange(0, fmax*8, 'x')
+        
+        if linres:
+            mbotpad.SetLogy(0)
+            fresid.SetAxisRange(lrs[0], lrs[1], 'y')
+        fresid.Draw()
+
+        ### set my reference line to '1'
+        #zero = TLine(fmin, 1, fmax, 1)
+        #fzeros.append(zero)
+        #fzeros[i].SetLineColor(kRed)
+        #fzeros[i].SetLineWidth(1)
+
+        mzero = TLine(0, 1, fmax*8, 1)
+        #fzeros.SetAxisRange(i*fmax, (i+1)*fmax, 'x')
+        #fzeros.append(zero)
+        mzero.SetLineColor(kRed)
+        mzero.SetLineWidth(1)
+        mzero.Draw()
+        
+        mleg2.AddEntry(fresid,'data / MC',lopt)
+        #flegs2[i].Draw()
+        #-------------------------------------------------------------
+        
+        mcanv.Update()
+        msave  = ''
+        msave += str(runtag)
+        msave += '_Global-fit'
+        msave += '_loEfit-'+str(int(fLoE[0]))+'-'+str(int(fLoE[1]))
+        msave += '_hiEfit-'+str(int(fHiE[0]))+'-'+str(int(fHiE[1]))
+        msave += '_loEfitRebin-'+str(loEfitRebin)
+        msave += '_hiEfitRebin-'+str(hiEfitRebin)
+        msave += '_loEfitRebinScale'+str(loEfitRebinScale)
+        msave += '_hiEfitRebinScale'+str(hiEfitRebinScale)
+        msave += '_useBounds'+str(useBounds)
+        msave += '_mcsumw2'+str(mcsumw2)
+        msave += '_datsumw2'+str(datsumw2)
+        msave += '_dru'+str(dru)
+        msave += '_loEplotRebin-'+str(loEplotRebin)
+        msave += '_hiEplotRebin-'+str(hiEplotRebin)
+        msave += '_reuse'+str(reuse)
+        msave += '_chans'+str(fitchans)
+        msave += '_extend'+str(extend)
+        msave += '_others'+str(others)
+        if note: msave += '_'+note
+        msave += '_'+V
+        
+        mcanv.Print('./plots/'+msave+'.png')
+        #=============================================================
+        #=============================================================
+
+        #raw_input('[Enter] to quit \n')
+        
     ### end of fitting bit if you have signals
     
     
     
     # plot the lo and hi energy histograms for all channels
     #=================================================================
-    
+        
     # number of energy ranges (lo, hi)
     numE = 2
     # number of channels (all, single, multi, combos)
@@ -1376,7 +1684,17 @@ def myself(argv):
                                   'canv'+chan+str(E),
                                   0, 0, 1400, 900)
             canvs[C][E].Divide(4,2)
-
+            
+            gStyle.SetPadTopMargin    (0.07)
+            gStyle.SetPadBottomMargin (0.11)
+            gStyle.SetPadLeftMargin   (0.12)
+            gStyle.SetPadRightMargin  (0.02)
+            
+            font = 63
+            size = 13
+            yoff = 4.2
+            xoff = 8
+            
             toppad[C][E] = []
             botpad[C][E] = []
 
@@ -1387,10 +1705,6 @@ def myself(argv):
             total[C][E]  = makeTotal64(chan, E, params[E])
             resid[C][E]  = makeResid64(chan, E, params[E])
             
-            font=63
-            size=13
-            yoff=4.2
-
             for i in range(8):
                 
                 canvs[C][E].cd(i+1)
@@ -1706,7 +2020,7 @@ def myself(argv):
                 resid[C][E][i].GetXaxis().SetLabelFont(font)
                 resid[C][E][i].GetXaxis().SetLabelSize(size)
                 resid[C][E][i].GetXaxis().SetLabelOffset(0.03)
-                resid[C][E][i].GetXaxis().SetTitleOffset(8)
+                resid[C][E][i].GetXaxis().SetTitleOffset(xoff)
                 #resid[C][E][i].SetYTitle('counts / keV')
                 resid[C][E][i].SetYTitle('data / MC')
                 #resid[C][E][i].SetYTitle('MC / data')
@@ -1803,6 +2117,7 @@ def myself(argv):
             save += '_chans'+fitchans
             save += '_chan'+chan
             save += '_extend'+str(extend)
+            save += '_others'+str(others)
             if note: save += '_'+note
             save += '_'+V
             
@@ -1836,6 +2151,7 @@ def myself(argv):
                             isave += '-c'+str(chan)
                             isave += '-e'+str(E)
                             isave += '-ext'+str(extend)
+                            isave += '-oth'+str(others)
                             if note: isave += '_'+str(note)
                             isave += '_'+str(V)
                             
@@ -1849,27 +2165,36 @@ def myself(argv):
     #-------------------------------------------------------------
     if indi:
         combPlots = [0 for x in range(8)]
+        tpad = [[0 for x in range(8)] for x in range(4)]
+        bpad = [[0 for x in range(8)] for x in range(4)]
+        
         for i in range(8):
             if i+1 in justthese:
                 #csave = 'xstal-'+str(i+1)
                 try:
                     combPlots[i] = TCanvas('ccan-'+str(i+1),'ccan-'+str(i+1),0,0,1400,900)
                     combPlots[i].Divide(2,2)
-                    tpad = [0 for x in range(4)]
-                    bpad = [0 for x in range(4)]
+                    #tpad = [0 for x in range(4)]
+                    #bpad = [0 for x in range(4)]
                     p=0
                     for C, chan in enumerate(pltchans):
                         for E in range(numE):
-                            tpad[p]=toppad[C][E][i].Clone()
-                            bpad[p]=botpad[C][E][i].Clone()
+                            #tpad[p]=toppad[C][E][i].Clone()
+                            #bpad[p]=botpad[C][E][i].Clone()
+                            tpad[p][i] = toppad[C][E][i].Clone()
+                            bpad[p][i] = botpad[C][E][i].Clone()
                             combPlots[i].cd(p+1)
-                            tpad[p].Draw()
-                            bpad[p].Draw()
+                            #tpad[p].Draw()
+                            #bpad[p].Draw()
+                            tpad[p][i].Draw()
+                            bpad[p][i].Draw()
                             combPlots[i].Update()
                             p += 1
                     csave  = ''
                     csave += 'x'+str(i+1)
                     csave += '-combined'
+                    csave += '-ext'+str(extend)
+                    csave += '-oth'+str(others)
                     if note: csave += '_'+str(note)
                     csave += '_'+str(V)
                     
@@ -1890,6 +2215,9 @@ def myself(argv):
 
     # delete the extra crap
     #-------------------------------
+    try: del fcanv
+    except: pass
+    
     try: del sepFitPlot
     except: pass
 

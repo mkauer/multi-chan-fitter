@@ -40,7 +40,7 @@ def _myself_(argv):
 
     # select a specific crystal
     # or comment out
-    xstal = 3
+    xstal = 7
     
     build = 'build91'
     
@@ -62,11 +62,11 @@ def _myself_(argv):
     
     rootfile = build+'-'+fname+'.root'
     rfile = TFile(outpath+rootfile, 'RECREATE')
-
+    
     if xstal:
-        data, bkgs, sigs, runtime = build91(mcfile, 2, 'MS', [xstal])
+        data, bkgs, sigs, runtime = build91(mcfile, 1, 2, 'MS', [xstal])
     else:
-        data, bkgs, sigs, runtime = build91(mcfile, 2, 'MS')
+        data, bkgs, sigs, runtime = build91(mcfile, 1, 2, 'MS')
     
     rfile.Write()
     rfile.Close()
