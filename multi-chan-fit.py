@@ -31,7 +31,7 @@ ROOT.gErrorIgnoreLevel = kWarning
 from funcs80 import *
 
 
-xstal = 7
+xstal = 3
 
 ### individual plots for all crystals? [0,1]
 indi = 1
@@ -52,8 +52,8 @@ note = 'C'+str(xstal)
 #mcfile = 'backgrounds800.txt'
 #mcfile = 'backgrounds801.txt'
 #mcfile = 'backgrounds801-C'+str(xstal)+'.txt'
-#mcfile = 'backgrounds900-C'+str(xstal)+'.txt'
-mcfile = 'backgrounds900.txt'
+mcfile = 'backgrounds900-C'+str(xstal)+'.txt'
+#mcfile = 'backgrounds900.txt'
 
 ### force the reuse of all joined rootfiles in mcfile? [0,1,2]
 ### very nice for debugging

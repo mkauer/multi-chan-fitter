@@ -12,6 +12,17 @@
 # ====================================================================
 
 
+# 2017-11-21
+# --------------------------------------------------------------------
+# ~ rebuild C3 PMT sim with other pmts added in
+# + new join90.py for build90
+# - do not need info['error'] anymore in getInfo90()
+# + add pmt key loop to build90()
+# + add key info['from'] to getInfo90()
+# + build90(), getInfo90(), buildMC90()
+# + new funcs90.py
+
+
 # 2017-11-16
 # --------------------------------------------------------------------
 # ~ tweak getInfo80() to be compatible with no activity error
