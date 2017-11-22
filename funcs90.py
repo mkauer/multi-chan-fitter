@@ -57,7 +57,7 @@ def build90(infile='backgrounds900.txt', freuse=0, fchans=0, fxstals=[]):
             infos.append(info)
         
         for info in infos:
-            print info['key']
+            #print info['key']
             if 'D' in info['type']:
                 data, runtime = buildData80(info, data)
             
@@ -113,13 +113,9 @@ def getInfo90(line, freuse=0, fchans=0, fxstals=[]):
     # force only a particular crystal(s) and skip the others
     if len(fxstals) > 0 and info['xstl'] not in fxstals:
         return []
-    #-----------------------------------------------------------------
-    
-    #-----------------------------------------------------------------
-    # what crystal is background from?
-    # set to 0 by default
-    # it will get changed for PMTs later
-    info['from'] = 0
+    # what crystal is the background from?
+    # set to xstl by default - can be updated later
+    info['from'] = int(bits[2])
     #-----------------------------------------------------------------
     
     #-----------------------------------------------------------------

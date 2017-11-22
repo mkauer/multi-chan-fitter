@@ -7,9 +7,9 @@
 
 V = 'v80'
 
-# Try to get global fitting to work!
+# The latest default fitter before the big change to global fitting
 # 
-# version: 2017-11-07
+# version: 2017-11-22
 #
 # see CHANGELOG for changes
 ######################################################################
@@ -45,7 +45,7 @@ justthese = [xstal]
 ### ========== GENERAL INPUTS ==============================
 ### note to add to saved plot names?
 note = 0
-note = 'C'+str(xstal)
+#note = 'C'+str(xstal)
 
 ### backgrounds file
 #mcfile = 'backgrounds800-C'+str(xstal)+'-update.txt'
