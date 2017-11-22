@@ -3,11 +3,11 @@
 ######################################################################
 # Matt Kauer - mkauer@physics.wisc.edu
 ######################################################################
-# 90-global-fit.py
+# 91-other-pmts.py
 
-V = 'v90'
+V = 'v91'
 
-# Trying harder on the global fitting!
+# Add in other PMTs to fits and plots
 # 
 # version: 2017-11-22
 #
@@ -28,8 +28,7 @@ ROOT.gErrorIgnoreLevel = kWarning
 
 #sys.path.append("/home/mkauer/COSINE/CUP/mc-fitting/")
 #sys.path.append("/home/mkauer/mc-fitting/")
-from funcs80 import *
-#from funcs90 import *
+from funcs91 import *
 
 
 ### individual plots for all crystals? [0,1]
@@ -43,20 +42,10 @@ justthese = [3]
 ### ========== GENERAL INPUTS ==============================
 ### note to add to saved plot names?
 note = 0
-#note = 'C7'
+#note = 'C3'
 
 ### backgrounds file
-#mcfile = 'backgrounds801-C7.txt'
-#mcfile = 'backgrounds900.txt'
-#mcfile = 'backgrounds900-C7.txt'
-#mcfile = 'backgrounds900-C67.txt'
-#mcfile = 'backgrounds900-C67-update.txt'
-#mcfile = 'backgrounds900-C56.txt'
-#mcfile = 'backgrounds900-C57.txt'
-#mcfile = 'backgrounds900-C37.txt'
-#mcfile = 'backgrounds900-C367.txt'
-#mcfile = 'backgrounds900-C367-update.txt'
-mcfile = 'backgrounds900-C3.txt'
+mcfile = 'backgrounds910-C3.txt'
 
 
 ### force the reuse of all joined rootfiles in mcfile? [0,1,2]
@@ -190,9 +179,7 @@ def myself(argv):
     ### where everything gets loaded into dictionary
     #-----------------------------------------------------------------
     allchans = uniqString(fitchans+pltchans)
-    data, bkgs, sigs, runtime = build80(mcfile, reuse, allchans)
-    #data, bkgs, sigs, runtime = build80(mcfile, reuse, allchans, [5,8])
-    #data, bkgs, sigs, runtime = build90(mcfile, reuse, allchans)
+    data, bkgs, sigs, runtime = build91(mcfile, reuse, allchans)
     datkeys, bakkeys, sigkeys = sortKeys(data, bkgs, sigs)
     if datsumw2:
         for key in datkeys:

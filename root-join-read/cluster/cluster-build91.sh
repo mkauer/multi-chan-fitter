@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# 2017-11-21
+# 2017-11-22
 
 # ~ rebuild C3 PMT sim with other pmts added in
 # ~ modified for just reprocessing of C8 with new resolution
@@ -32,7 +32,7 @@
 
 #=================================================
 
-V=90
+V=91
 
 build="build$V"
 join="join$V.py"

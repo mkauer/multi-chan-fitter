@@ -1,19 +1,19 @@
 #!/usr/bin/env python
 ######################################################################
-# funcs90.py
+# funcs91.py
 # 
 # Try adding in external PMTs - this time the right way
 # 
-# Works with v90 and later versions
+# Works with v91 and later versions
 # 
-# version: 2017-11-21
+# version: 2017-11-22
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
-# - do not need info['error'] anymore in getInfo90()
-# + add pmt key loop to build90()
-# + add key info['from'] to getInfo90()
-# + build90(), getInfo90(), buildMC90()
+# - do not need info['error'] anymore in getInfo91()
+# + add pmt key loop to build91()
+# + add key info['from'] to getInfo91()
+# + build91(), getInfo91(), buildMC91()
 # ~ import funcs80
 # 
 # email me: mkauer@physics.wisc.edu
@@ -32,7 +32,7 @@ sys.path.append("/home/mkauer/mc-fitting/")
 from funcs80 import *
 
 
-def build90(infile='backgrounds900.txt', freuse=0, fchans=0, fxstals=[]):
+def build91(infile='backgrounds900.txt', freuse=0, fchans=0, fxstals=[]):
 
     data = {}
     bkgs = {}
@@ -40,7 +40,7 @@ def build90(infile='backgrounds900.txt', freuse=0, fchans=0, fxstals=[]):
     runtime = 0
     
     for line in readFile(infile):
-        info = getInfo90(line, freuse, fchans, fxstals)
+        info = getInfo91(line, freuse, fchans, fxstals)
         if len(info) == 0:
             continue
         
@@ -62,10 +62,10 @@ def build90(infile='backgrounds900.txt', freuse=0, fchans=0, fxstals=[]):
                 data, runtime = buildData80(info, data)
             
             elif 'B' in info['type']:
-                bkgs = buildMC90(info, bkgs)
+                bkgs = buildMC91(info, bkgs)
             
             elif 'F' in info['type']:
-                sigs = buildMC90(info, sigs)
+                sigs = buildMC91(info, sigs)
             
             else:
                 print 'WARNING: I do not know what to do with type',info['type'], 'in line:'
@@ -75,7 +75,7 @@ def build90(infile='backgrounds900.txt', freuse=0, fchans=0, fxstals=[]):
     return data, bkgs, sigs, runtime
 
 
-def getInfo90(line, freuse=0, fchans=0, fxstals=[]):
+def getInfo91(line, freuse=0, fchans=0, fxstals=[]):
     
     info={}
     
@@ -197,7 +197,7 @@ def getInfo90(line, freuse=0, fchans=0, fxstals=[]):
     return info
 
 
-def buildMC90(info, mc):
+def buildMC91(info, mc):
 
     base = baseDir()
 

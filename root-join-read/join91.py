@@ -3,9 +3,9 @@
 ######################################################################
 # Pack all needed histos into one root file
 #
-# Works with v90 and later versions
+# Works with v91 and later versions
 # 
-# version: 2017-11-21
+# version: 2017-11-22
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
@@ -24,7 +24,7 @@ ROOT.gErrorIgnoreLevel = kWarning
 
 sys.path.append("/home/mkauer/COSINE/CUP/mc-fitting/")
 sys.path.append("/home/mkauer/mc-fitting/")
-from funcs90 import *
+from funcs91 import *
 
 local = amLocal()
 gROOT.SetBatch(1)
@@ -42,7 +42,7 @@ def _myself_(argv):
     # or comment out
     xstal = 3
     
-    build = 'build90'
+    build = 'build91'
     
     if local:
         outpath="/home/mkauer/COSINE/CUP/mc-fitting/root-join-read/"+build+'/'
@@ -64,9 +64,9 @@ def _myself_(argv):
     rfile = TFile(outpath+rootfile, 'RECREATE')
 
     if xstal:
-        data, bkgs, sigs, runtime = build90(mcfile, 2, 'MS', [xstal])
+        data, bkgs, sigs, runtime = build91(mcfile, 2, 'MS', [xstal])
     else:
-        data, bkgs, sigs, runtime = build90(mcfile, 2, 'MS')
+        data, bkgs, sigs, runtime = build91(mcfile, 2, 'MS')
     
     rfile.Write()
     rfile.Close()
