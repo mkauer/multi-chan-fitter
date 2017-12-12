@@ -12,6 +12,43 @@
 # ====================================================================
 
 
+# 2017-12-11
+# --------------------------------------------------------------------
+# cut a v91 release
+
+
+# 2017-12-05
+# --------------------------------------------------------------------
+# ~ switched the group colors around
+# ~ make the total MC red like Pushpas plots
+# + generating build91 internal U238 and Th232 into subgroups
+
+
+# 2017-12-04
+# --------------------------------------------------------------------
+# ~ make fits for 2keV, 4keV, and 6keV - no change to code
+#   just some book-keeping...
+# + add save text about which mc is being fit globally
+
+
+# 2017-11-28
+# --------------------------------------------------------------------
+# + fit everything in C6 and C7 globally!
+# + add a globalmc list so you can select which things to fit globally
+
+
+# 2017-11-27
+# --------------------------------------------------------------------
+# + create joined rootfiles for innersteel U238 and Th232 - v91
+# ~ generate comparison plots to make sure things are still the same
+# ~ make v80 plots same format as v91 plots
+# ~ make v90 plots same format as v91 plots
+# + add innersteel mass of 4000kg to scaleBkgs71() and scaleSigs71()
+# + add innersteel to buildMC80()
+# + add steel to the groups
+# ~ move Cd109 to cosmogenics group
+
+
 # 2017-11-22
 # --------------------------------------------------------------------
 # ~ use non-zero bins from fitdata as the ndf for chi2/ndf

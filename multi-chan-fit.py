@@ -9,7 +9,7 @@ V = 'v91'
 
 # Add in other PMTs to fits and plots
 # 
-# version: 2017-11-22
+# version: 2017-12-05
 #
 # see CHANGELOG for changes
 ######################################################################
@@ -36,7 +36,7 @@ indi = 1
 
 ### just plot individual for crystals? [1-8]
 #justthese = [1,2,3,4,5,6,7,8]
-justthese = [3,6,7]
+justthese = [6,7]
 
 
 ### ========== GENERAL INPUTS ==============================
@@ -45,7 +45,26 @@ note = 0
 #note = 'C3'
 
 ### backgrounds file
-mcfile = 'backgrounds910-C367.txt'
+#mcfile = 'backgrounds910-C367v2.txt'
+#mcfile = 'backgrounds910-C1367.txt'
+#mcfile = 'backgrounds910-C13467.txt'
+#mcfile = 'backgrounds910-C4.txt'
+#mcfile = 'backgrounds910-C14.txt'
+#mcfile = 'backgrounds910-C2.txt'
+#mcfile = 'backgrounds910-C1.txt'
+#mcfile = 'backgrounds910-C7-steel.txt'
+#mcfile = 'backgrounds910-C67.txt'
+#mcfile = 'backgrounds910-C67-update.txt'
+#mcfile = 'backgrounds910-C67-steel.txt'
+#mcfile = 'backgrounds920-C67.txt'
+mcfile = 'backgrounds920-C67v2.txt'
+#mcfile = 'backgrounds920-C67v2-update.txt'
+
+### which MC to fit globally?
+globalmc = []
+#globalmc = ['lsveto', 'pmt']
+globalmc = ['internal', 'lsveto', 'pmt']
+#globalmc = ['internal', 'innersteel', 'lsveto', 'pmt']
 
 ### include bkgs from other pmts?
 others = 1
@@ -70,11 +89,13 @@ fitchans = 'SM'
 
 ### fitting ranges
 ### lo and hi energy fit ranges or set [0,0]
-fLoE = [4, 100]
-#fLoE = [0,0]
-#fHiE = [60, 2800]
-fHiE = [100, 2500]
-#fHiE = [0,0]
+#fLoE = [0, 0]
+#fLoE = [2, 100]
+#fLoE = [4, 100]
+fLoE = [6, 100]
+#fHiE = [0, 0]
+#fHiE = [100, 2800]
+fHiE = [100, 2900]
 
 ### rebin the histos for fitting [1,inf]
 loEfitRebin = 4
@@ -103,9 +124,10 @@ pltchans = 'SM'
 
 ### plotting ranges
 ### lo and hi energy ranges
-loer = [0,  100]
-#loer = [0,  20]
+loer = [0, 100]
+#loer = [0, 70]
 hier = [0, 3000]
+#hier = [100, 2000]
 eran = [loer, hier]
 
 ### rebin the final plots [1,inf]
@@ -118,6 +140,8 @@ showTotal = 1
 showlegs = 1
 ### plot components in groups? [0,1]
 ingroups = 1
+### plot the total in red? [0,1]
+redtotal = 1
 
 ### use linear residual scale? [0,1]
 linres = 1
@@ -242,6 +266,10 @@ def myself(argv):
     #gcs, gis = rainbow(5)
     gis = [kRed, kOrange, kGreen+1, kBlue, kViolet,
            kRed, kOrange, kGreen+1, kBlue, kViolet]
+    if redtotal:
+        #gis = [kOrange, kGreen+1, kBlue, kMagenta+1, kCyan+1]
+        #      steel,   cosmo,      pmt,      inter, lsveto?
+        gis = [kCyan+1, kMagenta+1, kGreen+1, kBlue, kOrange]
     
     ### legend length = MC + data + total
     Nlg = Nc+2
@@ -311,6 +339,7 @@ def myself(argv):
     ### This part puts the histos together to get ready for the fitting
     ##################################################################
     ### only do the fit if you have signals and data!
+    globstr = ''
     resultsfile = ''
     fitting=0
     if len(sigs) > 0:
@@ -389,16 +418,18 @@ def myself(argv):
                 for skey in sigkeys:
 
                     ### init lsveto histo to globals
-                    if 'lsveto' in skey or 'pmt' in skey:
-                        #print skey.split('-')
-                        bits = skey.split('-')
-                        fgkey = bits[1]+'-'+bits[2]
-                        if fgkey not in fglobkeys:
-                            fglobkeys.append(fgkey)
-                            fitglob[fgkey] = {}
-                            fglob = TH1F(fgkey, fgkey, fmax*8, 0, fmax*8)
-                            fitglob[fgkey]['hist'] = fglob
-                        #continue
+                    for gmckey in globalmc:
+                        #if 'lsveto' in skey or 'pmt' in skey:
+                        if gmckey in skey:
+                            #print skey.split('-')
+                            bits = skey.split('-')
+                            fgkey = bits[1]+'-'+bits[2]
+                            if fgkey not in fglobkeys:
+                                fglobkeys.append(fgkey)
+                                fitglob[fgkey] = {}
+                                fglob = TH1F(fgkey, fgkey, fmax*8, 0, fmax*8)
+                                fitglob[fgkey]['hist'] = fglob
+                            #continue
                     
                     # lo E
                     if 'x'+str(i+1) in skey and '-c'+C in skey and '-e0' in skey:
@@ -511,9 +542,11 @@ def myself(argv):
         ### remove global sigs from fit sigs
         L = len(fsigkeys)-1
         for k,fskey in enumerate(reversed(fsigkeys)):
-            if 'lsveto' in fskey or 'pmt' in fskey:
-                print 'INFO: deleting fit key',fsigkeys[L-k]
-                del fsigkeys[L-k]
+            for gmckey in globalmc:
+                #if 'lsveto' in fskey or 'pmt' in fskey:
+                if gmckey in fskey:
+                    print 'INFO: deleting fit key',fsigkeys[L-k]
+                    del fsigkeys[L-k]
         
 
         ### global fit debug infos
@@ -714,10 +747,20 @@ def myself(argv):
                     fitsigs[fskey]['hist'] = zeroBinError(fitsigs[fskey]['hist'])
 
             ### Print out the fit infos
+            ### First make a string list of the globals
+            globstr = ''
+            if len(globalmc) == 0:
+                globstr = 'none'
+            else:
+                for txt in globalmc:
+                    globstr += txt+'-'
+                globstr = globstr[:-1]
+            
             fitresults[str(i)].append('Crystal-'+str(i+1)+' fit results')
             if note: fitresults[str(i)].append('note = '+note)
             fitresults[str(i)].append('version = '+V)
             fitresults[str(i)].append('channels fit = '+fitchans)
+            fitresults[str(i)].append('global fits = '+globstr)
             fitresults[str(i)].append('other pmts = '+str(others))
             fitresults[str(i)].append('hist extend = '+str(extend))
             fitresults[str(i)].append('norm to dru = '+str(dru))
@@ -907,7 +950,7 @@ def myself(argv):
                     
                     fscale = ROOT.Double(0.0)
                     ferror = ROOT.Double(0.0)
-                    print 'count',count
+                    #print 'count',count
                     fit.GetResult(count, fscale, ferror)
                     count += 1
                     
@@ -936,7 +979,7 @@ def myself(argv):
 
             fscale = ROOT.Double(0.0)
             ferror = ROOT.Double(0.0)
-            print 'count',count
+            #print 'count',count
             fit.GetResult(count, fscale, ferror)
             count += 1
             
@@ -1081,6 +1124,7 @@ def myself(argv):
         #else:     save += 'on-cup'
         save += str(runtag)
         save += '_Nchan-fit'
+        save += '_globals-'+globstr
         save += '_loEfit-'+str(int(fLoE[0]))+'-'+str(int(fLoE[1]))
         save += '_hiEfit-'+str(int(fHiE[0]))+'-'+str(int(fHiE[1]))
         save += '_loEfitRebin-'+str(loEfitRebin)
@@ -1289,6 +1333,7 @@ def myself(argv):
             
             ### get the chi2 of the total fit mc compared to data
             #-------------------------------------------------------------------
+            """
             chi2  = ROOT.Double(0.0)
             ndf   = ROOT.Long(0)
             igood = ROOT.Long(0)
@@ -1297,6 +1342,7 @@ def myself(argv):
             pval = fitdata.Chi2TestX(ftotal, chi2, ndf, igood, chiopt)
             #fitchi2ndfv2 = chi2/druscale[i]/ndf
             fitchi2ndfv2 = chi2/ndf
+            """
             #-------------------------------------------------------------------
             
             ftotal.Draw('same')
@@ -1306,7 +1352,7 @@ def myself(argv):
             flegs[i].AddEntry(ftotal, 'Fit Total (chi2/ndf = '+str(round(fitchi2ndf,2))+')', lopt)
             # calc by Chi2TestX()
             #flegs[i].AddEntry(ftotal, 'Fit Total (chi2/ndf = '+str(round(fitchi2ndfv2,2))+')', lopt)
-            print 'INFO: Fit total MC from Chi2TestX chi2/ndf = '+str(round(fitchi2ndfv2,2))
+            #print 'INFO: Fit total MC from Chi2TestX chi2/ndf = '+str(round(fitchi2ndfv2,2))
             
             flegs[i].Draw('same')
             
@@ -1385,13 +1431,14 @@ def myself(argv):
                     sepFitPlot.Update()
                     fisave  = ''
                     fisave += 'x'+str(i+1)
-                    fisave += '-_fit'
-                    fisave += '-loEfRS'+str(loEfitRebinScale)
-                    fisave += '-hiEfRS'+str(hiEfitRebinScale)
-                    fisave += '-dru'+str(dru)
-                    fisave += '-cs'+str(fitchans)
-                    fisave += '-ext'+str(extend)
-                    fisave += '-oth'+str(others)
+                    fisave += '_fit'
+                    fisave += '_globals-'+globstr
+                    fisave += '_loEfRS'+str(loEfitRebinScale)
+                    fisave += '_hiEfRS'+str(hiEfitRebinScale)
+                    fisave += '_dru'+str(dru)
+                    fisave += '_cs'+str(fitchans)
+                    fisave += '_ext'+str(extend)
+                    fisave += '_oth'+str(others)
                     if note: fisave += '_'+str(note)
                     fisave += '_'+str(V)
                 
@@ -1502,12 +1549,14 @@ def myself(argv):
         ### build legend after getting the numbers of signals
         Nfs = Nfsigs+2
         flnc = 1
-        if Nfs >  6: flnc = 2
-        if Nfs > 12: flnc = 3
-        #if Nfs > 18: flnc = 4
+        if Nfs > 10: flnc = 2
+        if Nfs > 20: flnc = 3
+        if Nfs > 30: flnc = 4
+        if Nfs > 40: flnc = 5
         #fxlegstop  = 0.94
         fxlegstop  = 0.96
-        fxlegstart = fxlegstop-(0.2*flnc)
+        #fxlegstart = fxlegstop-(0.2*flnc)
+        fxlegstart = fxlegstop-(0.14*flnc)
         #fylegstop  = 0.89
         fylegstop  = 0.91
         fylegstart = fylegstop-(0.04*6)
@@ -1605,7 +1654,7 @@ def myself(argv):
         mcanv.Update()
         msave  = ''
         msave += str(runtag)
-        msave += '_Global-fit'
+        msave += '_globals-'+globstr
         msave += '_loEfit-'+str(int(fLoE[0]))+'-'+str(int(fLoE[1]))
         msave += '_hiEfit-'+str(int(fHiE[0]))+'-'+str(int(fHiE[1]))
         msave += '_loEfitRebin-'+str(loEfitRebin)
@@ -1732,7 +1781,8 @@ def myself(argv):
                 toppad[C][E][i].cd()
 
                 if ingroups:
-                    leg = TLegend(0.35, 0.75, 0.94, 0.89)
+                    #leg = TLegend(0.35, 0.75, 0.94, 0.89)
+                    leg = TLegend(0.56, 0.76, 0.98, 0.92)
                     lnc = 3
                 else:
                     leg = TLegend(xlegstart, ylegstart, xlegstop, ylegstop)
@@ -1741,7 +1791,13 @@ def myself(argv):
                 legs[C][E][i].SetBorderSize(0)
                 legs[C][E][i].SetNColumns(lnc)
                 lopt = 'LPE'
-                
+
+                if redtotal:
+                    total[C][E][i].SetMarkerColor(kRed)
+                    total[C][E][i].SetLineColor(kRed)
+                    #total[C][E][i].SetLineWidth(4)
+                    #total[C][E][i].SetMarkerSize(4)
+                    
                 total[C][E][i].Rebin(plotRebin)
                 #total[C][E][i].Scale(1./float(plotRebin))
                 #total[C][E][i].Sumw2()
@@ -1797,7 +1853,10 @@ def myself(argv):
                         data[dkey]['hist'].SetMarkerColor(kBlack)
                         data[dkey]['hist'].SetLineColor(kBlack)
                         data[dkey]['hist'].SetLineWidth(1)
-
+                        #if redtotal:
+                            #data[dkey]['hist'].SetMarkerStyle(7)
+                            #data[dkey]['hist'].SetMarkerSize(1)
+                            
                         data[dkey]['hist'].GetYaxis().SetTitleFont(font)
                         data[dkey]['hist'].GetYaxis().SetTitleSize(size)
                         data[dkey]['hist'].GetYaxis().SetTitleOffset(yoff)
@@ -2100,6 +2159,7 @@ def myself(argv):
             #if local: save += 'local'
             #else: save += 'on-cup'
             save += str(runtag)
+            save += '_globals-'+globstr
             save += '_E'+str(E)
             save += '_loEfit-'+str(int(fLoE[0]))+'-'+str(int(fLoE[1]))
             save += '_hiEfit-'+str(int(fHiE[0]))+'-'+str(int(fHiE[1]))
@@ -2192,9 +2252,10 @@ def myself(argv):
                             p += 1
                     csave  = ''
                     csave += 'x'+str(i+1)
-                    csave += '-combined'
-                    csave += '-ext'+str(extend)
-                    csave += '-oth'+str(others)
+                    csave += '_combined'
+                    csave += '_globals-'+globstr
+                    csave += '_ext'+str(extend)
+                    csave += '_oth'+str(others)
                     if note: csave += '_'+str(note)
                     csave += '_'+str(V)
                     

@@ -6,10 +6,13 @@
 # 
 # Works with v64 and later versions
 # 
-# version: 2017-11-16
+# version: 2017-12-05
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# + add Na22 to cosmogenics
+# + add steel to the groups
+# ~ moved Cd109 to the cosmo group
 # ~ fixed a bug with run duration
 # ~ new low energy calib for c7
 # ~ put H3 in cosmo group
@@ -186,15 +189,17 @@ def getInfo64(line, freuse=0, fchans=0):
 
 def setGroup(info):
     if info['loca'] == 'internal':
-        if info['isof'] in ['I125','I126',
+        if info['isof'] in ['Cd109','H3','Na22',
+                            'I125','I126',
                             'Te121','Te121m',
                             'Te123m','Te125m',
-                            'Te127m', 'H3']:
+                            'Te127m']:
             return 'cosmo'
         else: return 'internal'
     elif 'pmt' in info['loca']: return 'pmt'
     elif 'surf' in info['loca']: return 'surf'
     elif 'cucase' in info['loca']: return 'surf'
+    elif 'steel' in info['loca']: return 'steel'
     elif 'teflon' in info['loca']: return 'surf'
     elif info['loca'] == 'lsveto': return 'lsveto'
     else: return 'none'

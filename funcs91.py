@@ -6,10 +6,11 @@
 # 
 # Works with v91 and later versions
 # 
-# version: 2017-11-22
+# version: 2017-11-27
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# + add innersteel to buildMC91()
 # - do not need info['error'] anymore in getInfo91()
 # + add pmt key loop to build91()
 # + add key info['from'] to getInfo91()
@@ -427,7 +428,10 @@ def buildMC91(info, mc):
                         #volumeCut = TCut('((primVolumeName == "SteelSupportTop"))')
                         #volumeCut = TCut('((primVolumeName == "Welding"))')
                         #volumeCut = TCut('((primVolumeName != ""))')
-                        
+
+                    elif info['loca'] == 'innersteel':
+                        volumeCut = TCut('(primVolumeName == "InnerSteel")')
+                    
                     else:
                         print "WARNING: No selection criteria for  --> ", info['loca']
                         continue

@@ -9,7 +9,7 @@
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
-# ~ see the changelog for version v90
+# ~ see the changelog for version v91
 #
 # email: mkauer@physics.wisc.edu
 ######################################################################
@@ -40,7 +40,7 @@ def _myself_(argv):
 
     # select a specific crystal
     # or comment out
-    xstal = 7
+    #xstal = 2
     
     build = 'build91'
     

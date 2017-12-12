@@ -46,7 +46,9 @@ builddir=$base/$build
 configdir=$builddir/configs
 joinscript=$base/$join
 
-for mcfile in `ls $configdir | grep -v -E "root|dataset"`
+#for mcfile in `ls $configdir | grep -v -E "root|dataset" | grep internal`
+for mcfile in `ls $configdir | grep dataset1`
+#for mcfile in innersteelU238_GRND innersteelTh232_GRND
 do
     file="$clustdir/$build-$mcfile.sh"
     cat > $file <<EOF

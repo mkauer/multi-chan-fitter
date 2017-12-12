@@ -6,10 +6,11 @@
 # 
 # Works with v80 and later versions
 # 
-# version: 2017-11-16
+# version: 2017-11-27
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# + add innersteel to buildMC80()
 # ~ tweak getInfo80() to be compatible with no activity error
 # + added getInfo80() so I can select which xstals to build
 # ~ smearing C8 hi energy resolution more
@@ -657,6 +658,9 @@ def buildMC80(info, mc):
                         #volumeCut = TCut('((primVolumeName == "SteelSupportTop"))')
                         #volumeCut = TCut('((primVolumeName == "Welding"))')
                         #volumeCut = TCut('((primVolumeName != ""))')
+                        
+                    elif info['loca'] == 'innersteel':
+                        volumeCut = TCut('(primVolumeName == "InnerSteel")')
                         
                     else:
                         print "WARNING: No selection criteria for  --> ", info['loca']

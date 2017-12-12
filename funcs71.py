@@ -6,10 +6,11 @@
 # 
 # Works with v70 and later versions
 # 
-# version: 2017-09-12
+# version: 2017-11-27
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# + add innersteel mass of 4000kg
 # + add steel frame mass of 1600kg
 # + add build71(), buildMC71(), scaleBkgs71, scaleSigs71()
 # ~ include funcs70
@@ -464,11 +465,12 @@ def scaleBkgs71(bkgs,runtime=0):
         xkgs = cmass(int(x[-1])-1)
         keVperBin = 1./float(bkgs[key]['pars'][3])
 
-        nmass     = cmass(int(x[-1])-1)
-        pmts      = 2.
-        extpmts   = 14.
-        lskg      = 1800.
-        steel     = 1600.
+        nmass      = cmass(int(x[-1])-1)
+        pmts       = 2.
+        extpmts    = 14.
+        lskg       = 1800.
+        steel      = 1600.
+        innersteel = 4000.
         
         ### treat the NaI surface and the copper and teflon as 1 unit
         surf = 1.
@@ -527,6 +529,11 @@ def scaleBkgs71(bkgs,runtime=0):
             scale = bkgs[key]['info']['acti'] * (steel) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
             bkgs[key]['hist'].Scale(scale)
             bkgs[key]['scale'] = scale
+
+        elif loca == 'innersteel':
+            scale = bkgs[key]['info']['acti'] * (innersteel) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
+            bkgs[key]['hist'].Scale(scale)
+            bkgs[key]['scale'] = scale
             
         else:
             print "WARNING: No background scaling for  --> ", loca
@@ -551,11 +558,12 @@ def scaleSigs71(sigkeys, sigs, runtime=0):
         xkgs = cmass(int(x[-1])-1)
         keVperBin = 1./float(sigs[key]['pars'][3])
 
-        nmass     = cmass(int(x[-1])-1)
-        pmts      = 2.
-        extpmts   = 14.
-        lskg      = 1800.
-        steel     = 1600.
+        nmass      = cmass(int(x[-1])-1)
+        pmts       = 2.
+        extpmts    = 14.
+        lskg       = 1800.
+        steel      = 1600.
+        innersteel = 4000.
         
         ### treat the NaI surface and the copper and teflon as 1 unit
         surf = 1.
@@ -612,6 +620,11 @@ def scaleSigs71(sigkeys, sigs, runtime=0):
             
         elif loca == 'steel':
             fitActivity = sigs[key]['fitscale'] * (1./steel) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
+            sigs[key]['info']['fitacti'] = fitActivity
+            sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
+
+        elif loca == 'innersteel':
+            fitActivity = sigs[key]['fitscale'] * (1./innersteel) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
             sigs[key]['info']['fitacti'] = fitActivity
             sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
             
