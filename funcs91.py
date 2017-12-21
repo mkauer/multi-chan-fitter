@@ -546,37 +546,26 @@ def buildMC91(info, mc):
                     chain.SetAlias('sigma', resolFunc)
 
                     
-                    ### do i need to change this too the pmt id cut?
-                    ### ie add the volume cut back in? - maybe not...
                     #=====================================================================
                     #=====================================================================
-                    
-                    masterCut = TCut('('+
+                    # use the volume cut?
+                    # vcut=1 is the old way I was doing things
+                    vcut = 1
+                    if vcut:
+                        masterCut = TCut('('+
                                      energyCut.GetTitle()+' && '+
                                      eventTypeCut.GetTitle()+' && '+
                                      brokenChainCut.GetTitle()+' && '+
                                      chanCut.GetTitle()+' && '+
                                      volumeCut.GetTitle()
                                      +')')
-                    """
-                    ### keep old cuts for now
-                    masterCut = TCut('('+
+                    else:
+                        masterCut = TCut('('+
                                      energyCut.GetTitle()+' && '+
-                                     #volumeCut.GetTitle()+' && '+
                                      eventTypeCut.GetTitle()+' && '+
                                      brokenChainCut.GetTitle()+' && '+
                                      chanCut.GetTitle()
                                      +')')
-                    ### need the volumeCut for the pmt selection
-                    if 'pmt' in info['loca']:
-                        masterCut = TCut('('+
-                                         energyCut.GetTitle()+' && '+
-                                         eventTypeCut.GetTitle()+' && '+
-                                         brokenChainCut.GetTitle()+' && '+
-                                         chanCut.GetTitle()+' && '+
-                                         volumeCut.GetTitle()
-                                         +')')
-                    """
                     #=====================================================================
                     #=====================================================================
                     

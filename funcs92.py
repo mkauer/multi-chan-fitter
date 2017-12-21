@@ -1,27 +1,27 @@
 #!/usr/bin/env python
 ######################################################################
-# funcs80.py
+# funcs92.py
 # 
-# New calibrations for all crystals
+# New calibrations and bdt cuts for v00-04-04
 # 
-# Works with v80 and later versions
+# Works with v92 and later versions
 # 
-# version: 2017-12-19
+# version: 2017-12-20
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
-# ~ tweaked resol80() for Pushpa C7 surface modification
-# + add innersteel to buildMC80()
-# ~ tweak getInfo80() to be compatible with no activity error
-# + added getInfo80() so I can select which xstals to build
-# ~ smearing C8 hi energy resolution more
-# + added resol80() and buildMC80()
-# ~ fix cutsBDT80() to include the alpha cut
-# + add cutsBDT80()
-# ~ fixed a bug with run duration
-# + new calibrations in calib80()
-# + add build80(), buildData80(), calib80()
-# ~ import funcs71
+# ~ and try offset in c6,c7 = [-8, -8]
+# ~ try a slightly different offset in c6,c7 = [-4, -10]
+# ~ tweaked calib92() for an offset in c6,c7 = [-6, -12]
+# ~ heavily modified buildMC92() to accommodate Pushpa's C7 surface MC
+# + include 'other' internal components
+# + new buildMC92() to include internal 'others'
+# ~ combine the 'other' pmt contributions for makePlots92()
+# + makePlots92() so you can see every isotope separately
+# + new bdt and bdtA cuts
+# + new calibration numbers
+# + build92(), buildData92(), calib92(), cutsBDT92()
+# ~ import funcs91
 # 
 # email me: mkauer@physics.wisc.edu
 ######################################################################
@@ -36,10 +36,10 @@ import ROOT
 
 sys.path.append("/home/mkauer/COSINE/CUP/mc-fitting/")
 sys.path.append("/home/mkauer/mc-fitting/")
-from funcs71 import *
+from funcs91 import *
 
 
-def build80(infile='backgrounds800.txt', freuse=0, fchans=0, fxstals=[]):
+def build92(infile='backgrounds900.txt', others=1, vcut=1, freuse=0, fchans=0, fxstals=[]):
 
     data = {}
     bkgs = {}
@@ -47,142 +47,55 @@ def build80(infile='backgrounds800.txt', freuse=0, fchans=0, fxstals=[]):
     runtime = 0
     
     for line in readFile(infile):
-        info = getInfo80(line, freuse, fchans, fxstals)
+        info = getInfo91(line, freuse, fchans, fxstals)
         if len(info) == 0:
             continue
         
-        if 'D' in info['type']:
-            data, runtime = buildData80(info, data)
-            
-        elif 'B' in info['type']:
-            bkgs = buildMC80(info, bkgs)
-            
-        elif 'F' in info['type']:
-            sigs = buildMC80(info, sigs)
-            
+        #+++++++++++++++++++++++++++++++++++++++++++++++++++
+        #+++++++++++++++++++++++++++++++++++++++++++++++++++
+        #others = 0
+        infos=[]
+        if others and ('pmt' in info['key'] or 'internal' in info['key']):
+        #if others and ('pmt' in info['key']):
+            key = info['key']
+            for i in range(8):
+                #info['key'] = key+'-f'+str(i+1)
+                newinfo = deepcopy(info)
+                newinfo['key'] = key+'-f'+str(i+1)
+                newinfo['from'] = str(i+1)
+                infos.append(newinfo)
+        elif not others and ('pmt' in info['key'] or 'internal' in info['key']):
+        #elif not others and ('pmt' in info['key']):
+            key = info['key']
+            newinfo = deepcopy(info)
+            newinfo['key'] = key+'-f'+str(info['xstl'])
+            newinfo['from'] = info['xstl']
+            infos.append(newinfo)
         else:
-            print 'WARNING: I do not know what to do with type',info['type'], 'in line:'
-            print info['line']
-            continue
+            infos.append(info)
+        #+++++++++++++++++++++++++++++++++++++++++++++++++++
+        #+++++++++++++++++++++++++++++++++++++++++++++++++++
         
+        for info in infos:
+            #print info['key']
+            if 'D' in info['type']:
+                data, runtime = buildData92(info, data)
+            
+            elif 'B' in info['type']:
+                bkgs = buildMC92(info, bkgs, vcut)
+            
+            elif 'F' in info['type']:
+                sigs = buildMC92(info, sigs, vcut)
+            
+            else:
+                print 'WARNING: I do not know what to do with type',info['type'], 'in line:'
+                print info['line']
+                continue
+    
     return data, bkgs, sigs, runtime
 
 
-def getInfo80(line, freuse=0, fchans=0, fxstals=[]):
-    
-    info={}
-    
-    info['line'] = line
-    
-    bits = line.split()
-    ### probably don't need to use 're' since split() is working fine
-    #import re
-    #bits = filter(None, re.split("[ \s\t]+", line.strip()))
-    
-    # data type
-    info['type'] = str(bits[0])
-    
-    #-----------------------------------------------------------------
-    # reuse a joined rootfile
-    if 'R' in info['type']: info['reuse'] = 1
-    else: info['reuse'] = 0
-    # force reuse of everything - nice for debugging
-    if freuse == 1: info['reuse'] = 1
-    # force not reuse of everything - nice for debugging
-    if freuse == 2: info['reuse'] = 0
-    #-----------------------------------------------------------------
-    
-    #-----------------------------------------------------------------
-    # channel
-    info['chans'] = str(bits[1])
-    # force a channel(s) of data selection
-    if fchans:
-        info['chans'] = fchans
-    #-----------------------------------------------------------------
-    
-    #-----------------------------------------------------------------
-    # crystal
-    info['xstl'] = int(bits[2])
-    # force only a particular crystal(s) and skip the others
-    if len(fxstals) > 0 and info['xstl'] not in fxstals:
-        return []
-    #-----------------------------------------------------------------
-    
-    # reuse rootfile name
-    if 'root' in str(bits[-1]):
-        temp = str(bits[-1])
-        for i in range(2):
-            if '.' in temp[0] or '/' in temp[0]:
-                temp = temp[1:]
-        info['rootfile'] = temp
-    else:
-        info['rootfile'] = 0
-
-
-    if 'D' in info['type']:
-        
-        ### data file
-        temp = str(bits[3])
-        for i in range(2):
-            if '.' in temp[0] or '/' in temp[0]:
-                temp = temp[1:]
-        info['file'] = temp
-        
-        ### data tag
-        info['tag'] = str(bits[4])
-
-        ### processing version
-        #info['build'] = str(bits[5])
-
-        ### build the histo key
-        key  = 'x'+str(info['xstl'])
-        key += '-data'
-        key += '-'+str(info['tag'])
-        #key += '-c'+info['chan']
-        info['key'] = key
-        
-    else:
-        
-        ### background location help
-        info['floca'] = str(bits[3])
-        # without any '-' for hist key help
-        info['loca'] = str(bits[3]).replace('-','')
-        
-        ### top level isotope file name
-        info['isof'] = str(bits[4])
-
-        ### isotope chain break start
-        info['chst'] = str(bits[5])
-
-        ### isotope chain break stop
-        info['chsp'] = str(bits[6])
-
-        ### activity
-        info['acti'] = float(bits[7])
-
-        ### error on activity
-        info['erro'] = float(bits[8])
-
-        ### fit bounds
-        #info['fbnd'] = [float(bits[9]), float(bits[10])]
-        info['fbnd'] = [float(bits[-3]), float(bits[-2])]
-
-        ### build the histo key
-        key  = 'x'+str(info['xstl'])
-        key += '-'+info['loca']
-        #if info['chst'] == info['chsp']: key += '-'+info['chst']
-        #if info['chsp'] == 'GRND': key += '-'+info['chst']
-        #else: key += '-'+info['chst']+'_'+info['chsp']
-        key += '-'+info['chst']+'_'+info['chsp']
-        info['key'] = key
-
-        ### assign a plotting group to the isotope-location
-        info['group'] = setGroup(info)
-        
-    return info
-
-
-def buildData80(info, data):
+def buildData92(info, data):
     
     base = baseDir()
     runtime = 0.
@@ -260,22 +173,22 @@ def buildData80(info, data):
             
         if nfiles > 0:
             print 'INFO:',nfiles,'files found for data',info['tag']
-            for c in info['chans']:
-                info['chan'] = c
-                for e in range(2):
+            for C in info['chans']:
+                info['chan'] = C
+                for E in range(2):
 
                     # DEFINE HIST AND KEY
                     #-----------------------------------------------------------------------
                     i = info['xstl'] - 1
                     
                     key  = info['key']
-                    key += '-c'+str(c)
-                    key += '-e'+str(e)
+                    key += '-c'+str(C)
+                    key += '-e'+str(E)
                     
                     data[key] = {}
                     data[key]['info'] = info
                     
-                    pars = histparam64(e)
+                    pars = histparam64(E)
                     data[key]['pars'] = pars
                     histo = TH1F(key, longNames(i), pars[0], pars[1], pars[2])
                     #-----------------------------------------------------------------------
@@ -283,13 +196,13 @@ def buildData80(info, data):
                     
                     # CALIBRATION
                     #-----------------------------------------------------------------------
-                    edep, selection = calib80(i,e)
+                    edep, selection = calib92(i, E)
                     #-----------------------------------------------------------------------
                     
                     
                     # DEFINE CUTS
                     #-----------------------------------------------------------------------
-                    masterCut = cutsBDT80(i,c,e)
+                    masterCut = cutsBDT92(i, C, E, edep, selection)
                     #-----------------------------------------------------------------------
                     
                     
@@ -326,93 +239,120 @@ def buildData80(info, data):
     return data, runtime
 
 
-def calib80(i, E=0):
+def calib92(i,E):
 
-    # from Pushpa on 2017-10-17
+    # from Pushpa on 2017-12-12
     
     # adc = crystalX.qc5
-    # E = adc * cal
-    loE = [
-        1.049981e-04,
-        1.046627e-04,
-        1.127174e-04,
-        1.099834e-04,
-        2.844480e-04,
-        1.149712e-04,
-        1.0,
-        3.851424e-04        
-    ]
+    # E = (adc + offset) / slope
+    loE = [[1192.0, 9620.0],
+           [2259.0, 9675.0],
+           [2264.0, 9027.0],
+           [1525.0, 9100.0],
+           [   0.0, 3712.7],
+           [ 735.1, 8755.0],
+           [ 115.2, 9150.0],
+           [   0.0, 2805.9]]
 
-    ### c7 low E is special
-    c7 = [566., 9255.]
-
-    hiE = [
-        1.0,
-        1.0,
-        1.0,
-        1.0,
-        0.95,
-        1.0,
-        1.0,
-        0.73
-    ]
+    hiE = [[1.00, 0],
+           [1.00, 0],
+           [1.00, 0],
+           [1.00, 0],
+           [0.95, 0],
+           [1.00, -8], # I tweaked the C6 offset
+           [1.00, -8], # I tweaked the C7 offset
+           [0.73, 0]]
     
     if E:
         edep = '(crystal'+str(i+1)+'.energyD)'
-        selection = '('+edep+'*'+str(hiE[i])+')'
+        selection = '(('+edep+'*'+str(hiE[i][0])+')+'+str(hiE[i][1])+')'
     else:
         edep = '(crystal'+str(i+1)+'.qc5)'
-        selection = '('+edep+'*'+str(loE[i])+')'
-        if str(i) == str(6):
-            selection = '(('+edep+'-'+str(c7[0])+')/'+str(c7[1])+')'
+        #selection = '('+edep+'*'+str(loE[i])+')'
+        #if str(i) == str(6):
+        #    selection = '(('+edep+'-'+str(c7[0])+')/'+str(c7[1])+')'
+        selection = '(('+edep+'-'+str(loE[i][0])+')/'+str(loE[i][1])+')'
 
     return edep, selection
 
 
-def cutsBDT80(i,c,e):
+def cutsBDT92(i,C,E,edep,selection):
     """
     From: https://cupwiki.ibs.re.kr/Kims/SET1EventSelection
     """
 
     # values for the alpha cut
-    alpha = [
-        2.660,
-        2.640,
-        2.660,
-        2.680,
-        2.650,
-        2.655,
-        2.630,
-        2.660
-    ]
-    
+    alpha = [2.660,
+             2.640,
+             2.660,
+             2.680,
+             2.650,
+             2.655,
+             2.630,
+             2.660]
+
+    # same as Pushpa since 2017-12-19
     alphaCut = '( ! ((crystal'+str(i+1)+'.energyD > 1000.) && ((pmt'+str(i+1)+'1.rqtD1_5+pmt'+str(i+1)+'2.rqtD1_5)/2. < '+str(alpha[i])+')) )'
+    # try with no alpha cut
+    #alphaCut = '(1)'
     
     # BDT cut values
-    cut = [
-        -0.05,
-         0.02,
-         0.00,
-        -0.02,
-        -0.10,
-         0.03,
-         0.03,
-        -0.15,
-    ]
+    cutbdt = [-0.1,
+               0.0,
+               0.0,
+              -0.05,
+              -0.2,
+               0.0,
+               0.0,
+              -0.2]
+
+    bdtebit = ['('+selection+'+20*bdt['+str(i+1)+'])',
+               '1',
+               '1',
+               '('+selection+'+40*bdt['+str(i+1)+'])',
+               '1',
+               '('+selection+'+20*bdt['+str(i+1)+'])',
+               '('+selection+'+20*bdt['+str(i+1)+'])',
+               '1']
+    
+    cutbdte = [0,
+               0,
+               0,
+               0,
+               0,
+               2,
+               2,
+               0]
+    
+    cutbdta = [-0.02,
+               -0.02,
+               -0.02,
+               -0.05,
+               -0.05,
+               -0.02,
+               -0.02,
+               -0.05]
     
     ### global noise cuts
     coinc  = '(BLSVeto.isCoincident == 1)'
     muons  = '(BMuon.totalDeltaT0/1.e6 > 30)'
-    bdt    = '(bdt['+str(i+1)+'] > '+str(cut[i])+')'
     charge = '(crystal'+str(i+1)+'.rqcn > -1)'
     nc     = '(pmt'+str(i+1)+'1.nc > 1 && pmt'+str(i+1)+'2.nc > 1)'
     
-    noiseCut = coinc+' && '+muons+' && '+bdt+' && '+charge+' && '+nc
+    noiseCut = '('+coinc+' && '+muons+' && '+charge+' && '+nc+')'
     
-    if c == 'A':
+    bdt    = '(bdt['+str(i+1)+'] > '+str(cutbdt[i])+')'
+    bdte   = '('+str(bdtebit[i])+' > '+str(cutbdte[i])+')'
+    bdta   = '(bdtA['+str(i+1)+'] > '+str(cutbdta[i])+')'
+    
+    #bdtCuts  = '('+bdt+' && '+bdte+' && '+bdta+')'
+    # i kinda don't like that bdte energy dependent cut
+    bdtCuts  = '('+bdt+' && '+bdta+')'
+    
+    if C == 'A':
         return TCut(noiseCut+' && '+alphaCut)
         
-    elif c == 'S':
+    elif C == 'S':
         lsveto = '(BLSVeto.Charge/143.8 < 20)'
         hits   = '('
         for j in range(8):
@@ -420,11 +360,14 @@ def cutsBDT80(i,c,e):
                 hits += '(crystal'+str(j+1)+'.nc < 4) && '
         ### remove extra '&&' or '||'
         hits = hits[:-4]+')'
-        
-        masterCut = TCut(noiseCut+' && '+'('+lsveto+' && '+hits+')'+' && '+alphaCut)
+
+        # BDT cuts ONLY for low energy spectrum!!
+        masterCut = TCut(bdtCuts+' && '+noiseCut+' && '+'('+lsveto+' && '+hits+')'+' && '+alphaCut)
+        if E:
+            masterCut = TCut(noiseCut+' && '+'('+lsveto+' && '+hits+')'+' && '+alphaCut)
         return masterCut
     
-    elif c == 'M':
+    elif C == 'M':
         lsveto = '(BLSVeto.Charge/143.8 > 20)'
         hits   = '('
         for j in range(8):
@@ -432,8 +375,11 @@ def cutsBDT80(i,c,e):
                 hits += '(crystal'+str(j+1)+'.nc > 4) || '
         ### remove extra '&&' or '||'
         hits = hits[:-4]+')'
-        
-        masterCut = TCut(noiseCut+' && '+'('+lsveto+' || '+hits+')'+' && '+alphaCut)
+
+        # BDT cuts ONLY for low energy spectrum!!
+        masterCut = TCut(bdtCuts+' && '+noiseCut+' && '+'('+lsveto+' || '+hits+')'+' && '+alphaCut)
+        if E:
+            masterCut = TCut(noiseCut+' && '+'('+lsveto+' || '+hits+')'+' && '+alphaCut)
         return masterCut
     
     else:
@@ -442,7 +388,7 @@ def cutsBDT80(i,c,e):
         sys.exit()
 
 
-def buildMC80(info, mc):
+def buildMC92(info, mc, vcut):
 
     base = baseDir()
 
@@ -499,6 +445,7 @@ def buildMC80(info, mc):
         ### 2nd level path to the specific files
         path2 = info['isof']+'/set2/'+'*'+location+info['isof']+'*root'
         
+        ### Estella's Surface Pb210 MC
         if location == 'internal-surf-10um':
             path2 = info['isof']+'/set2/surf/10um/'+'*'+location+'-C'+str(info['xstl'])+'*root'
         if location == 'cu-surf-10um':
@@ -506,9 +453,21 @@ def buildMC80(info, mc):
         if location == 'teflon-surf-10um':
             path2 = info['isof']+'/set2/surf/teflon-10um/'+'*'+location+'-C'+str(info['xstl'])+'*root'
         
+        ### Pushpa's Surface Pb210 MC
+        pushpaC7Surf = ['nai-surf-10um', 'teflon-surf-2um', 'teflon-bulk']
+        if location in pushpaC7Surf:
+            if onCup(): path1 = '/data/COSINE/WORK/pushpa/sim/process/Crystal7/ResolA_ResolD/'
+            else: path1 = '/home/mkauer/COSINE/CUP/mc-fitting/data/COSINE/WORK/pushpa/sim/process/Crystal7/ResolA_ResolD/'
+            if location == 'nai-surf-10um':
+                path2 = 'anal_lsvetofull-NaI-surface_C7-10um-Pb210-*.root'
+            if location == 'teflon-surf-2um':
+                path2 = 'anal_lsvetofull-Teflon-surface_2um-Pb210-*.root'
+            if location == 'teflon-bulk':
+                path2 = 'anal_lsvetofull-Teflon-surface_all-Pb210-*.root'
+        
         if info['isof'] == 'Cd109' or info['isof'] == 'H3':
             path2 = '*'+info['isof']+'*.root'
-
+        
         
         print 'INFO: looking for files with -->',path1+path2
         
@@ -547,6 +506,8 @@ def buildMC80(info, mc):
                     #=====================================================================================
 
                     energyCut = TCut('(edep['+str(i)+']*1000. > 0.0)')
+                    if location in pushpaC7Surf:
+                        energyCut = TCut('(edep[6]*1000. > 0.0)')
                     ### do we need an energy cut?
                     ### yes needed to get the generated events normalization right!!!
                     ### will this circumvent the primVolumeName bug? - NOPE!
@@ -559,6 +520,8 @@ def buildMC80(info, mc):
                         ### main single/multi hit cut
                         #hitCut = '((singleHitTag['+str(i)+'] > 0.0) && (multipleHitTag['+str(i)+'] < 0.0))'
                         hitCut = '((singleHitTag['+str(i)+'] == 1.0))'
+                        if location in pushpaC7Surf:
+                            hitCut = '((singleHitTag[6] == 1.0))'
                         ### do i have the single multi hit cuts wrong??
                         #hitCut = '((singleHitTag['+str(i)+'] > 0.0))'
                         #hitCut = '((singleHitTag['+str(i)+'] < 0.0))'
@@ -577,6 +540,8 @@ def buildMC80(info, mc):
                         ### main single/multi hit cut
                         #hitCut = '((singleHitTag['+str(i)+'] < 0.0) && (multipleHitTag['+str(i)+'] > 0.0))'
                         hitCut = '((multipleHitTag['+str(i)+'] == 1.0))'
+                        if location in pushpaC7Surf:
+                            hitCut = '((multipleHitTag[6] == 1.0))'
                         ### do i have the single multi hit cuts wrong??
                         #hitCut = '((multipleHitTag['+str(i)+'] > 0.0))'
                         #hitCut = '((multipleHitTag['+str(i)+'] < 0.0))'
@@ -608,28 +573,42 @@ def buildMC80(info, mc):
                     #=====================================================================================
                     
                     
-                    pmt1 = str((int(info['xstl'])*2)-2)
-                    pmt2 = str((int(info['xstl'])*2)-1)
+                    #pmt1 = str((int(info['xstl'])*2)-2)
+                    #pmt2 = str((int(info['xstl'])*2)-1)
+                    pmt1 = str((int(info['from'])*2)-2)
+                    pmt2 = str((int(info['from'])*2)-1)
                     #print pmt1,pmt2
                     
                     volumeCut = TCut('(1)')
                     if info['loca'] == 'internal':
-                        volumeCut = TCut('(primVolumeName == "NaIDet0'+str(i+1)+'Crystal")')
-                    
+                        #volumeCut = TCut('(primVolumeName == "NaIDet0'+str(i+1)+'Crystal")')
+                        volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['from'])+'Crystal")')
+                        
                     elif 'internalsurf' in info['loca']:
                         volumeCut = TCut('(primVolumeName == "NaIDet0'+str(i+1)+'Crystal")')
+                    
+                    elif 'naisurf' in info['loca']:
+                        # Pushpas C7 Surface  MC
+                        volumeCut = TCut('(primVolumeName == "NaIDet07Crystal")')
                     
                     elif 'cusurf' in info['loca']:
                         volumeCut = TCut('(primVolumeName == "NaIDet0'+str(i+1)+'Case")')
                     
                     elif 'teflonsurf' in info['loca']:
-                        volumeCut = TCut('(primVolumeName == "NaIDet0'+str(i+1)+'Teflon")')
+                        # Estella MC
+                        #volumeCut = TCut('(primVolumeName == "NaIDet0'+str(i+1)+'Teflon")')
+                        # Pushpas C7 Surface MC
+                        volumeCut = TCut('(primVolumeName == "NaIDet07Teflon")')
                     
                     elif info['loca'] == 'cucase':
                         volumeCut = TCut('(primVolumeName == "NaIDet0'+str(i+1)+'Case")')
                     
                     elif info['loca'] == 'teflon':
                         volumeCut = TCut('(primVolumeName == "NaIDet0'+str(i+1)+'Teflon")')
+
+                    elif info['loca'] == 'teflonbulk':
+                        # Pushpas C7 Surface  MC
+                        volumeCut = TCut('(primVolumeName == "NaIDet07Teflon")')
                     
                     elif info['loca'] == 'pmt':
                         volumeCut = TCut('((primPMTid[0] == '+pmt1+') || (primPMTid[0] == '+pmt2+'))')
@@ -659,10 +638,10 @@ def buildMC80(info, mc):
                         #volumeCut = TCut('((primVolumeName == "SteelSupportTop"))')
                         #volumeCut = TCut('((primVolumeName == "Welding"))')
                         #volumeCut = TCut('((primVolumeName != ""))')
-                        
+
                     elif info['loca'] == 'innersteel':
                         volumeCut = TCut('(primVolumeName == "InnerSteel")')
-                        
+                    
                     else:
                         print "WARNING: No selection criteria for  --> ", info['loca']
                         continue
@@ -774,49 +753,41 @@ def buildMC80(info, mc):
                     #resolFunc = resol60(i,e)
                     #resolFunc = resol64(i,e)
                     resolFunc = resol80(i,e)
+                    if location in pushpaC7Surf:
+                        resolFunc = resol80(i,e,1)
                     chain.SetAlias('sigma', resolFunc)
 
                     
-                    ### do i need to change this too the pmt id cut?
-                    ### ie add the volume cut back in? - maybe not...
                     #=====================================================================
                     #=====================================================================
-                    
-                    masterCut = TCut('('+
+                    # use the volume cut?
+                    #vcut = 1
+                    if vcut:
+                        masterCut = TCut('('+
                                      energyCut.GetTitle()+' && '+
                                      eventTypeCut.GetTitle()+' && '+
                                      brokenChainCut.GetTitle()+' && '+
                                      chanCut.GetTitle()+' && '+
                                      volumeCut.GetTitle()
                                      +')')
-                    """
-                    ### keep old cuts for now
-                    masterCut = TCut('('+
+                    else:
+                        masterCut = TCut('('+
                                      energyCut.GetTitle()+' && '+
-                                     #volumeCut.GetTitle()+' && '+
                                      eventTypeCut.GetTitle()+' && '+
                                      brokenChainCut.GetTitle()+' && '+
                                      chanCut.GetTitle()
                                      +')')
-                    ### need the volumeCut for the pmt selection
-                    if 'pmt' in info['loca']:
-                        masterCut = TCut('('+
-                                         energyCut.GetTitle()+' && '+
-                                         eventTypeCut.GetTitle()+' && '+
-                                         brokenChainCut.GetTitle()+' && '+
-                                         chanCut.GetTitle()+' && '+
-                                         volumeCut.GetTitle()
-                                         +')')
-                    """
                     #=====================================================================
                     #=====================================================================
                     
                     
                     selection = '((edep['+str(i)+']*1000.) + (sigma*edep['+str(i)+']*1000.*rng))'
+                    if location in pushpaC7Surf:
+                        selection = '((edep[6]*1000.) + (sigma*edep[6]*1000.*rng))'
                     chain.Draw(selection+' >> '+key, masterCut)
-
+                    
                     detected = histo.GetEntries()
-
+                    
                     #histo.SetLineColor(kBlack)
                     #histo.SetMarkerColor(kBlack)
                     #histo.SetLineWidth(1)
@@ -834,36 +805,102 @@ def buildMC80(info, mc):
     return mc
 
 
-def resol80(i, E=0, pushpaC7Surf=0):
-    """
-    https://cupwiki.ibs.re.kr/Kims/NaICalibration
-    """
-    # res = p[0]/sqrt(x) + p[1]
-    # low energy
-    loEresol = [[0.2413,  0.01799],
-	        [0.2951,  0.01427],
-	        [0.3106,  0.007894],
-	        [0.3894, -0.001437],
-                [0.8, 0], # tweaking C5
-	        [0.3620,  0.0006355],
-	        [0.3042,  0.009784],
-                [1.3, 0]] # tweaking C8
-    # high energy
-    hiEresol = [[0.6729, 0.009374],
-	        [0.6531, 0.006627],
-	        [0.5926, 0.009506],
-	        [0.7227, 0.004790],
-                [1.7, 0], # tweaking C5
-	        [0.6498, 0.009670],
-	        [0.7034, 0.007812],
-                [4., 0]] # tweaking C8
-    if E:
-        p0, p1 = hiEresol[int(i)]
-    else:
-        p0, p1 = loEresol[int(i)]
+def makePlots92(bkgs, combine, others, vcut):
+    
+    gStyle.SetPadTopMargin    (0.07)
+    gStyle.SetPadBottomMargin (0.11)
+    gStyle.SetPadLeftMargin   (0.12)
+    gStyle.SetPadRightMargin  (0.02)
+    
+    combos=[]
+    for key in bkgs:
+        
+        crystal = key.split('-')[0]
+        location = key.split('-')[1]
+        isotope = key.split('-')[2]
+        
+        combo = crystal+location+isotope
+        if combo not in combos:
+            
+            combos.append(combo)
+            
+            #canvas = TCanvas('canvas','canvas',0,0,1400,900)
+            canvas = TCanvas('canvas','canvas',0,0,1200,900)
+            canvas.Divide(2,2)
 
-    selection = '(('+str(float(p0))+'/sqrt(edep['+str(i)+']*1000.)) + '+str(float(p1))+')'
-    if pushpaC7Surf:
-        selection = '(('+str(float(p0))+'/sqrt(edep[6]*1000.)) + '+str(float(p1))+')'
-    return selection
+            i=1
+            temp = [0 for k in range(4)]
+            for C in ['S','M']:
+                for E in [0, 1]:
+                    
+                    canvas.cd(i)
+                    
+                    #==========================================================
+                    #==========================================================
+                    # combine all normalized pmt and internal contributions
+                    #combine = 1
+                    newkey  = crystal
+                    newkey += '-'+location
+                    newkey += '-'+isotope
+                    if location == 'pmt' or location == 'internal':
+                    #if location == 'pmt':
+                        newkey += '-f'+crystal[-1]
+                    newkey += '-c'+C
+                    newkey += '-e'+str(E)
+                    temp[i-1] = deepcopy(bkgs[newkey]['hist'])
+                    
+                    if combine and (location == 'pmt' or location == 'internal'):
+                    #if combine and (location == 'pmt'):
+                        for k in range(1,9):
+                            if k != int(crystal[-1]):
+                                newkey  = crystal
+                                newkey += '-'+location
+                                newkey += '-'+isotope
+                                newkey += '-f'+str(k)
+                                newkey += '-c'+C
+                                newkey += '-e'+str(E)
+                                try:
+                                    temp[i-1].Add(deepcopy(bkgs[newkey]['hist']))
+                                except:
+                                    pass
+                    #==========================================================
+                    #==========================================================
+                    
+                    bins = temp[i-1].GetNbinsX()
+                    hmin = temp[i-1].GetBinLowEdge(1)
+                    hmax = temp[i-1].GetBinLowEdge(bins+1)
+                    kvpb = (hmax-hmin)/bins
+                    
+                    if E:
+                        temp[i-1].Rebin(int(10/kvpb))
+                        temp[i-1].SetAxisRange(100, 3000, 'x')
+                        temp[i-1].SetAxisRange(1e-3, 1, 'y')
+                    else:
+                        temp[i-1].Rebin(int(1/kvpb))
+                        temp[i-1].SetAxisRange(0, 100, 'x')
+                        temp[i-1].SetAxisRange(1e-2, 10, 'y')
+                        
+                    what=''
+                    if C == 'S': what += 'Single-hit'
+                    if C == 'M': what += 'Multi-hit'
+                    if E: what += ' Hi-energy'
+                    else: what += ' Lo-energy'
+                    
+                    temp[i-1].SetTitle(crystal+' '+location+' '+isotope+'   '+what)
+                    temp[i-1].GetXaxis().SetTitle('energy (keV)')
+                    temp[i-1].GetYaxis().SetTitle('arb. counts')
+                    temp[i-1].Draw()
+                    canvas.cd(i).SetLogy(1)
+                    i+=1
+                    
+                    canvas.Update()
+            
+            save  = crystal+'-'+location+'-'+isotope
+            save += '-othr'+str(others)
+            save += '-vnct'+str(vcut)
+            save += '-cmbd'+str(combine)
+            canvas.Print('./plots-isotopes/'+save+'.png')
+            #raw_input()
+            del canvas
+            del temp
 

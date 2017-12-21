@@ -6,10 +6,11 @@
 # 
 # Works with v70 and later versions
 # 
-# version: 2017-11-27
+# version: 2017-12-19
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# ~ tweaked scaleBkgs71() and scaleSigs71() for Pushpas C7 teflon-bulk
 # + add innersteel mass of 4000kg
 # + add steel frame mass of 1600kg
 # + add build71(), buildMC71(), scaleBkgs71, scaleSigs71()
@@ -490,16 +491,16 @@ def scaleBkgs71(bkgs,runtime=0):
             bkgs[key]['hist'].Scale(scale)
             bkgs[key]['scale'] = scale
             
+        elif 'teflon' in loca:
+            scale = bkgs[key]['info']['acti'] * (surf) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
+            bkgs[key]['hist'].Scale(scale)
+            bkgs[key]['scale'] = scale
+            
         elif loca == 'cucase':
             scale = bkgs[key]['info']['acti'] * (surf) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
             bkgs[key]['hist'].Scale(scale)
             bkgs[key]['scale'] = scale
-            
-        elif loca == 'teflon':
-            scale = bkgs[key]['info']['acti'] * (surf) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
-            bkgs[key]['hist'].Scale(scale)
-            bkgs[key]['scale'] = scale
-            
+
         elif loca == 'pmt':
             scale = bkgs[key]['info']['acti'] * (pmts) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
             bkgs[key]['hist'].Scale(scale)
@@ -583,12 +584,12 @@ def scaleSigs71(sigkeys, sigs, runtime=0):
             sigs[key]['info']['fitacti'] = fitActivity
             sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
             
-        elif loca == 'cucase':
+        elif 'teflon' in loca:
             fitActivity = sigs[key]['fitscale'] * (1./surf) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
             sigs[key]['info']['fitacti'] = fitActivity
             sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
             
-        elif loca == 'teflon':
+        elif loca == 'cucase':
             fitActivity = sigs[key]['fitscale'] * (1./surf) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
             sigs[key]['info']['fitacti'] = fitActivity
             sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']

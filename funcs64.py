@@ -196,11 +196,11 @@ def setGroup(info):
                             'Te127m']:
             return 'cosmo'
         else: return 'internal'
-    elif 'pmt' in info['loca']: return 'pmt'
-    elif 'surf' in info['loca']: return 'surf'
-    elif 'cucase' in info['loca']: return 'surf'
+    elif 'pmt' in info['loca']: return 'pmts'
+    elif 'surf' in info['loca']: return 'surface'
+    elif 'cucase' in info['loca']: return 'surface'
     elif 'steel' in info['loca']: return 'steel'
-    elif 'teflon' in info['loca']: return 'surf'
+    elif 'teflon' in info['loca']: return 'surface'
     elif info['loca'] == 'lsveto': return 'lsveto'
     else: return 'none'
 

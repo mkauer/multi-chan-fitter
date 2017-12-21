@@ -3,14 +3,14 @@
 ######################################################################
 # Matt Kauer - mkauer@physics.wisc.edu
 ######################################################################
-# 91-other-pmts.py
+# 92-new-data.py
 
-V = 'v91'
+V = 'v92'
 
-# Add in other PMTs to fits and plots
+# data set 00-04-04 with new calibration and new bdt cuts
 # 
-# version: 2017-12-05
-#
+# version: 2017-12-20
+# 
 # see CHANGELOG for changes
 ######################################################################
 
@@ -28,7 +28,7 @@ ROOT.gErrorIgnoreLevel = kWarning
 
 #sys.path.append("/home/mkauer/COSINE/CUP/mc-fitting/")
 #sys.path.append("/home/mkauer/mc-fitting/")
-from funcs91 import *
+from funcs92 import *
 
 
 ### individual plots for all crystals? [0,1]
@@ -38,36 +38,41 @@ indi = 1
 #justthese = [1,2,3,4,5,6,7,8]
 justthese = [6,7]
 
+### use pushpa's fitting ranges and binning?
+pushpa = 0
+
 
 ### ========== GENERAL INPUTS ==============================
 ### note to add to saved plot names?
 note = 0
-#note = 'C3'
+note = ''
 
 ### backgrounds file
-#mcfile = 'backgrounds910-C367v2.txt'
-#mcfile = 'backgrounds910-C1367.txt'
-#mcfile = 'backgrounds910-C13467.txt'
-#mcfile = 'backgrounds910-C4.txt'
-#mcfile = 'backgrounds910-C14.txt'
-#mcfile = 'backgrounds910-C2.txt'
-#mcfile = 'backgrounds910-C1.txt'
-#mcfile = 'backgrounds910-C7-steel.txt'
-#mcfile = 'backgrounds910-C67.txt'
-#mcfile = 'backgrounds910-C67-update.txt'
-#mcfile = 'backgrounds910-C67-steel.txt'
-#mcfile = 'backgrounds920-C67.txt'
-mcfile = 'backgrounds920-C67v2.txt'
-#mcfile = 'backgrounds920-C67v2-update.txt'
+#mcfile = 'backgrounds930-C67v2.txt'
+#mcfile = 'backgrounds930-C67v2-update.txt'
+#mcfile = 'backgrounds930-C67v2-test.txt'
+#mcfile = 'backgrounds930-C67v2-alphas.txt'
+#mcfile = 'backgrounds930-test-no-others.txt'
+#mcfile = 'backgrounds930-test-with-others.txt'
+#mcfile = 'backgrounds940-C67.txt'
+mcfile = 'backgrounds940-surf-test.txt'
 
 ### which MC to fit globally?
 globalmc = []
 #globalmc = ['lsveto', 'pmt']
-globalmc = ['internal', 'lsveto', 'pmt']
+#globalmc = ['internal', 'lsveto', 'pmt']
+globalmc = ['internal', 'lsveto', 'pmt', 'naisurf', 'teflonsurf', 'teflonbulk']
 #globalmc = ['internal', 'innersteel', 'lsveto', 'pmt']
 
-### include bkgs from other pmts?
-others = 1
+### some debug options
+#===========================================================
+### include bkgs from 'other' pmts and internals?
+others  = 1
+### use the primVolumeName cut?
+vcut    = 1
+### combine 'others' into the raw isotope plots?
+combine = 1
+#===========================================================
 
 ### force the reuse of all joined rootfiles in mcfile? [0,1,2]
 ### very nice for debugging
@@ -88,18 +93,24 @@ updateMCfile = 1
 fitchans = 'SM'
 
 ### fitting ranges
-### lo and hi energy fit ranges or set [0,0]
-#fLoE = [0, 0]
-#fLoE = [2, 100]
-#fLoE = [4, 100]
-fLoE = [6, 100]
-#fHiE = [0, 0]
-#fHiE = [100, 2800]
-fHiE = [100, 2900]
+### lo energy fit range in keV
+if pushpa: fLoE = [6, 70] # Pushpa style
+else:
+    fLoE = [6, 100]
+
+### hi energy fit range in keV
+if pushpa: fHiE = [70, 2000] # Pushpa style
+else:
+    fHiE = [60, 2800]
 
 ### rebin the histos for fitting [1,inf]
-loEfitRebin = 4
-hiEfitRebin = 10
+# Pushpa style 0.5 keV/bin low energy and 2 keV/bin high energy
+if pushpa:
+    loEfitRebin = 6 # Pushpa style
+    hiEfitRebin = 2 # Pushpa style
+else:
+    loEfitRebin = 6
+    hiEfitRebin = 2
 
 ### use fit bounds from backgrounds file? [0,1,2,3]
 ### [0] max bounds are 0-1
@@ -123,16 +134,22 @@ extend = 1
 pltchans = 'SM'
 
 ### plotting ranges
-### lo and hi energy ranges
+### lo and hi energy plot range
+loer = [0, 70] # pushpa style
+hier = [100, 2000] # pushpa style
+# mine
 loer = [0, 100]
-#loer = [0, 70]
 hier = [0, 3000]
-#hier = [100, 2000]
+
 eran = [loer, hier]
 
 ### rebin the final plots [1,inf]
-loEplotRebin = 6
-hiEplotRebin = 10
+if pushpa:
+    loEplotRebin = 6 # Pushpa style
+    hiEplotRebin = 2 # Pushpa style
+else:
+    loEplotRebin = 6
+    hiEplotRebin = 2
 
 ### show the total? [0,1]
 showTotal = 1
@@ -205,7 +222,7 @@ def myself(argv):
     ### where everything gets loaded into dictionary
     #-----------------------------------------------------------------
     allchans = uniqString(fitchans+pltchans)
-    data, bkgs, sigs, runtime = build91(mcfile, others, reuse, allchans)
+    data, bkgs, sigs, runtime = build92(mcfile, others, vcut, reuse, allchans)
     datkeys, bakkeys, sigkeys = sortKeys(data, bkgs, sigs)
     if datsumw2:
         for key in datkeys:
@@ -221,7 +238,10 @@ def myself(argv):
     except:
         #allchans  = bkgs[bakkeys[0]]['info']['chans']
         params = globalParams(bkgs)
-
+    
+    #print params
+    #sys.exit()
+    
     ### find unique names for color scheme?
     ### "internal-K40" for example
     uniqBkgs = []
@@ -240,6 +260,11 @@ def myself(argv):
     #print 'INFO: Unique bkgs =',uniqBkgs
     #print 'INFO: Unique sigs =',uniqSigs
     print 'INFO: Unique bkgs and sigs =',uniqAll
+
+    # plot all the bkgs and sigs before scaling them?
+    #makePlots92(bkgs)
+    #makePlots92(sigs)
+    #sys.exit()
     
     # scale into dru units
     if dru:
@@ -251,6 +276,23 @@ def myself(argv):
         bkgs = scaleBkgs71(bkgs, runtime)
         sigs = scaleBkgs71(sigs, runtime)
 
+    # plot all the bkgs and sigs after scaling them?
+    #=====================================================
+    #makePlots92(bkgs, combine, others, vcut)
+    #makePlots92(sigs, combine, others, vcut)
+    #sys.exit()
+    #=====================================================
+    
+    # make a string list of the globals
+    globstr = ''
+    if len(globalmc) == 0:
+        globstr = 'none'
+    else:
+        for txt in globalmc:
+            globstr += txt+'-'
+        globstr = globstr[:-1]
+    print 'INFO: global fits to -->',globstr
+    
     ### Number of colors
     Nc = len(uniqAll)
     print 'INFO: Total number of unique bkgs and sigs =',Nc
@@ -261,15 +303,21 @@ def myself(argv):
     for i, key in enumerate(uniqAll):
         #print key
         uniqColor[key] = cis[i]
-
+    
+    ### MAKE THIS BETTER!!!!!
     ### colors for groups
     #gcs, gis = rainbow(5)
     gis = [kRed, kOrange, kGreen+1, kBlue, kViolet,
            kRed, kOrange, kGreen+1, kBlue, kViolet]
     if redtotal:
         #gis = [kOrange, kGreen+1, kBlue, kMagenta+1, kCyan+1]
-        #      steel,   cosmo,      pmt,      inter, lsveto?
-        gis = [kCyan+1, kMagenta+1, kGreen+1, kBlue, kOrange]
+        ###    steel,     cosmo,      pmts,     inter, lsveto
+        gis = [kYellow, kMagenta+1, kGreen+1, kBlue, kOrange+1]
+        #------------
+        ### OR with surface
+        #------------
+        ###    steel,     cosmo,      lsveto,  surf,    inter, pmts
+        gis = [kYellow, kMagenta+1, kOrange+1, kCyan+1, kBlue, kGreen+1]
     
     ### legend length = MC + data + total
     Nlg = Nc+2
@@ -290,10 +338,12 @@ def myself(argv):
     bpkvLo = params[0][3]
     fLo = [int(fLoE[0]*bpkvLo/loEfitRebin), int(fLoE[1]*bpkvLo/loEfitRebin)]
     fLoBins = fLo[1]-fLo[0]
+    keVperBinLoE = (fLoE[1]-fLoE[0])/float(fLoBins)
     
     bpkvHi = params[1][3]
     fHi = [int(fHiE[0]*bpkvHi/hiEfitRebin), int(fHiE[1]*bpkvHi/hiEfitRebin)]
     fHiBins = fHi[1]-fHi[0]
+    keVperBinHiE = (fHiE[1]-fHiE[0])/float(fHiBins)
     
     fbins = int(fLoBins+fHiBins)
     
@@ -339,7 +389,7 @@ def myself(argv):
     ### This part puts the histos together to get ready for the fitting
     ##################################################################
     ### only do the fit if you have signals and data!
-    globstr = ''
+    #globstr = ''
     resultsfile = ''
     fitting=0
     if len(sigs) > 0:
@@ -747,6 +797,7 @@ def myself(argv):
                     fitsigs[fskey]['hist'] = zeroBinError(fitsigs[fskey]['hist'])
 
             ### Print out the fit infos
+            """
             ### First make a string list of the globals
             globstr = ''
             if len(globalmc) == 0:
@@ -755,6 +806,7 @@ def myself(argv):
                 for txt in globalmc:
                     globstr += txt+'-'
                 globstr = globstr[:-1]
+            """
             
             fitresults[str(i)].append('Crystal-'+str(i+1)+' fit results')
             if note: fitresults[str(i)].append('note = '+note)
@@ -765,7 +817,9 @@ def myself(argv):
             fitresults[str(i)].append('hist extend = '+str(extend))
             fitresults[str(i)].append('norm to dru = '+str(dru))
             fitresults[str(i)].append('lo-E fit range = '+str(fLoE[0])+' - '+str(fLoE[1])+' keV')
+            fitresults[str(i)].append('lo-E fit binbing = '+str(keVperBinLoE)+' keV/bin')
             fitresults[str(i)].append('hi-E fit range = '+str(fHiE[0])+' - '+str(fHiE[1])+' keV')
+            fitresults[str(i)].append('hi-E fit binning = '+str(keVperBinHiE)+' keV/bin')
 
         
         ### do the same to the global lsveto
@@ -1129,18 +1183,18 @@ def myself(argv):
         save += '_hiEfit-'+str(int(fHiE[0]))+'-'+str(int(fHiE[1]))
         save += '_loEfitRebin-'+str(loEfitRebin)
         save += '_hiEfitRebin-'+str(hiEfitRebin)
-        save += '_loEfitRebinScale'+str(loEfitRebinScale)
-        save += '_hiEfitRebinScale'+str(hiEfitRebinScale)
-        save += '_useBounds'+str(useBounds)
-        save += '_mcsumw2'+str(mcsumw2)
-        save += '_datsumw2'+str(datsumw2)
-        save += '_dru'+str(dru)
-        save += '_loEplotRebin-'+str(loEplotRebin)
-        save += '_hiEplotRebin-'+str(hiEplotRebin)
-        save += '_reuse'+str(reuse)
-        save += '_chans'+str(fitchans)
-        save += '_extend'+str(extend)
-        save += '_others'+str(others)
+        #save += '_loEfitRebinScale'+str(loEfitRebinScale)
+        #save += '_hiEfitRebinScale'+str(hiEfitRebinScale)
+        #save += '_useBounds'+str(useBounds)
+        #save += '_mcsumw2'+str(mcsumw2)
+        #save += '_datsumw2'+str(datsumw2)
+        #save += '_dru'+str(dru)
+        #save += '_loEplotRebin-'+str(loEplotRebin)
+        #save += '_hiEplotRebin-'+str(hiEplotRebin)
+        #save += '_reuse'+str(reuse)
+        #save += '_chans'+str(fitchans)
+        #save += '_extend'+str(extend)
+        #save += '_others'+str(others)
         if note: save += '_'+note
         save += '_'+V
         
@@ -1504,8 +1558,8 @@ def myself(argv):
         #flegs[i].AddEntry(fitdata, 'data - bkgs', lopt)
         if dru: fitdata.SetAxisRange(2e-3, 2e3, 'y')
         fitdata.SetAxisRange(0, fmax*8, 'x')
-
-            
+        
+        
         Nfsigs=0
         #for i in range(8):
         for fskey in fsigkeys:
@@ -1659,18 +1713,18 @@ def myself(argv):
         msave += '_hiEfit-'+str(int(fHiE[0]))+'-'+str(int(fHiE[1]))
         msave += '_loEfitRebin-'+str(loEfitRebin)
         msave += '_hiEfitRebin-'+str(hiEfitRebin)
-        msave += '_loEfitRebinScale'+str(loEfitRebinScale)
-        msave += '_hiEfitRebinScale'+str(hiEfitRebinScale)
-        msave += '_useBounds'+str(useBounds)
-        msave += '_mcsumw2'+str(mcsumw2)
-        msave += '_datsumw2'+str(datsumw2)
-        msave += '_dru'+str(dru)
-        msave += '_loEplotRebin-'+str(loEplotRebin)
-        msave += '_hiEplotRebin-'+str(hiEplotRebin)
-        msave += '_reuse'+str(reuse)
-        msave += '_chans'+str(fitchans)
-        msave += '_extend'+str(extend)
-        msave += '_others'+str(others)
+        #msave += '_loEfitRebinScale'+str(loEfitRebinScale)
+        #msave += '_hiEfitRebinScale'+str(hiEfitRebinScale)
+        #msave += '_useBounds'+str(useBounds)
+        #msave += '_mcsumw2'+str(mcsumw2)
+        #msave += '_datsumw2'+str(datsumw2)
+        #msave += '_dru'+str(dru)
+        #msave += '_loEplotRebin-'+str(loEplotRebin)
+        #msave += '_hiEplotRebin-'+str(hiEplotRebin)
+        #msave += '_reuse'+str(reuse)
+        #msave += '_chans'+str(fitchans)
+        #msave += '_extend'+str(extend)
+        #msave += '_others'+str(others)
         if note: msave += '_'+note
         msave += '_'+V
         
@@ -1698,7 +1752,9 @@ def myself(argv):
     ### for separate plots
     #sepPlots = [[[[] for x in range(8)] for x in range(numE)] for x in range(numC)]
     sepPlots = [[[0 for x in range(8)] for x in range(numE)] for x in range(numC)]
-        
+    sepTopPad = [[[0 for x in range(8)] for x in range(numE)] for x in range(numC)]
+    sepBotPad = [[[0 for x in range(8)] for x in range(numE)] for x in range(numC)]
+    
     ### seperate memory space for the pads is key!!!!
     #toppad = [[[] for x in range(numE)] for x in range(numC)]
     #botpad = [[[] for x in range(numE)] for x in range(numC)]
@@ -2165,19 +2221,19 @@ def myself(argv):
             save += '_hiEfit-'+str(int(fHiE[0]))+'-'+str(int(fHiE[1]))
             save += '_loEfitRebin-'+str(loEfitRebin)
             save += '_hiEfitRebin-'+str(hiEfitRebin)
-            save += '_loEfitRebinScale'+str(loEfitRebinScale)
-            save += '_hiEfitRebinScale'+str(hiEfitRebinScale)
-            save += '_useBounds'+str(useBounds)
-            save += '_mcsumw2'+str(mcsumw2)
-            save += '_datsumw2'+str(datsumw2)
-            save += '_dru'+str(dru)
-            save += '_loEplotRebin-'+str(loEplotRebin)
-            save += '_hiEplotRebin-'+str(hiEplotRebin)
-            save += '_reuse'+str(reuse)
-            save += '_chans'+fitchans
+            #save += '_loEfitRebinScale'+str(loEfitRebinScale)
+            #save += '_hiEfitRebinScale'+str(hiEfitRebinScale)
+            #save += '_useBounds'+str(useBounds)
+            #save += '_mcsumw2'+str(mcsumw2)
+            #save += '_datsumw2'+str(datsumw2)
+            #save += '_dru'+str(dru)
+            #save += '_loEplotRebin-'+str(loEplotRebin)
+            #save += '_hiEplotRebin-'+str(hiEplotRebin)
+            #save += '_reuse'+str(reuse)
+            #save += '_chans'+fitchans
             save += '_chan'+chan
-            save += '_extend'+str(extend)
-            save += '_others'+str(others)
+            #save += '_extend'+str(extend)
+            #save += '_others'+str(others)
             if note: save += '_'+note
             save += '_'+V
             
@@ -2192,18 +2248,13 @@ def myself(argv):
                     if i+1 in justthese:
                         #isave = 'xstal-'+str(i+1)
                         try:
-                            tpad=toppad[C][E][i].Clone()
-
-                            #tpad.SetLogy(0)
-                            #tpad.SetAxisRange(0,10,'y')
-                        
-                            bpad=botpad[C][E][i].Clone()
+                            sepTopPad[C][E][i] = toppad[C][E][i].Clone()
+                            sepBotPad[C][E][i] = botpad[C][E][i].Clone()
                             sepPlots[C][E][i] = TCanvas('ican-'+str(chan)+str(E)+str(i+1),
                                                         'ican-'+str(chan)+str(E)+str(i+1),
                                                         0, 0, 1400, 900)
-                            #sepPlots[C][E][i].cd()
-                            tpad.Draw()
-                            bpad.Draw()
+                            sepTopPad[C][E][i].Draw()
+                            sepBotPad[C][E][i].Draw()
                             sepPlots[C][E][i].Update()
                             isave  = ''
                             isave += 'x'+str(i+1)
@@ -2285,8 +2336,8 @@ def myself(argv):
     #try: del combPlots
     #except: pass
     
-    try: del sepPlots
-    except: pass
+    #try: del sepPlots
+    #except: pass
 
     try: del canvs
     except: pass

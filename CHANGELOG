@@ -12,9 +12,58 @@
 # ====================================================================
 
 
+# 2017-12-20
+# --------------------------------------------------------------------
+
+# ~ try a slightly different offset in c6,c7 = [-4, -10]
+
+
+# 2017-12-19
+# --------------------------------------------------------------------
+# ~ tweak plotting colors for grouped MC
+# + generating new Pushpa surface MC - just for C6 and C7 right now
+# + regenerating C6 and C7 data with new calib offsets -6 and -12
+# ~ tweaked calib92() for an offset in C6 and C7 hi energy
+# ~ heavily modified buildMC92() to accommodate Pushpa's C7 surface MC
+# ~ tweaked resol80() for Pushpa C7 surface modification
+# ~ tweaked scaleBkgs71() and scaleSigs71() for Pushpas C7 teflon-bulk
+
+
+# 2017-12-15
+# --------------------------------------------------------------------
+# ~ regenerate the internal components including 'others' v92
+# + include 'other' internal components
+# + new buildMC92() to include internal 'others'
+# ~ combine the 'other' pmt contributions for makePlots92()
+
+
+# 2017-12-14
+# --------------------------------------------------------------------
+# ~ regenerated with and without the alpha cuts
+# ~ regenerated v92 v00-04-04 data because it wasn't right before
+
+
+# 2017-12-13
+# --------------------------------------------------------------------
+# ~ move the global component string to the beginning of the program
+# ~ trimmed down some of the file/plot names being saved
+# + makePlots92() so you can see every isotope separately
+# + double check fit binning and print out as part of summary
+
+
+# 2017-12-12
+# --------------------------------------------------------------------
+# + new bdt and bdtA cuts
+# + new calibration numbers
+# + build92(), buildData92(), calib92(), cutsBDT92()
+# + funcs92.py
+# V switched to v92-new-data.py
+
+
 # 2017-12-11
 # --------------------------------------------------------------------
-# cut a v91 release
+# ~ change the fit settings to be same as Pushpas fit settings
+# + cut a v91 release
 
 
 # 2017-12-05
