@@ -961,10 +961,11 @@ def amLocal():
 
 
 def sortKeys(data, bkgs, sigs):
+    
     datkeys=[]
     bakkeys=[]
     sigkeys=[]
-
+    
     for key in data:
         datkeys.append(key)
     datkeys.sort()

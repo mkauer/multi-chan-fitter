@@ -3,13 +3,13 @@
 ######################################################################
 # Matt Kauer - mkauer@physics.wisc.edu
 ######################################################################
-# 92-new-data.py
+# 93-fix-other-crystals.py
 
-V = 'v92'
+V = 'v93'
 
-# data set 00-04-04 with new calibration and new bdt cuts
+# trying to get this working with crystals not C6 or C7...
 # 
-# version: 2017-12-20
+# version: 2018-03-08
 # 
 # see CHANGELOG for changes
 ######################################################################
@@ -35,19 +35,20 @@ from funcs92 import *
 indi = 1
 
 ### just plot individual for crystals? [1-8]
-#justthese = [1,2,3,4,5,6,7,8]
-justthese = [6,7]
+#justthese = [1,3,4,6,7]
+#justthese = [6,7]
+justthese = [1]
 
 ### use pushpa's fitting ranges and binning?
-pushpa = 0
+pushpa = 1
 
 
 ### ========== GENERAL INPUTS ==============================
 ### note to add to saved plot names?
 note = 0
-note = ''
+note = 'pushpa-range'
 
-### backgrounds file
+### old backgrounds file
 #mcfile = 'backgrounds930-C67v2.txt'
 #mcfile = 'backgrounds930-C67v2-update.txt'
 #mcfile = 'backgrounds930-C67v2-test.txt'
@@ -55,13 +56,40 @@ note = ''
 #mcfile = 'backgrounds930-test-no-others.txt'
 #mcfile = 'backgrounds930-test-with-others.txt'
 #mcfile = 'backgrounds940-C67.txt'
-mcfile = 'backgrounds940-surf-test.txt'
+#mcfile = 'backgrounds940-surf-test.txt'
 
-### which MC to fit globally?
+# 2018-03-06 - works in progress...
+#mcfile = 'backgrounds940-C1.txt' # working
+#mcfile = 'backgrounds940-C3.txt' # not working
+#mcfile = 'backgrounds940-C4.txt' # not working
+#mcfile = 'backgrounds940-C6.txt' # working
+#mcfile = 'backgrounds940-C7.txt' # working
+#mcfile = 'backgrounds940-C13467.txt' #not working
+#mcfile = 'backgrounds940-C13467_offset-C67.txt'
+
+# 2018-03-08 - try rebuilding configs again
+#mcfile = 'backgrounds950-C1.txt'  # working!
+#mcfile = 'backgrounds950-C2.txt'  # working!
+#mcfile = 'backgrounds950-C3.txt'  # working!
+#mcfile = 'backgrounds950-C4.txt'  # working!
+#mcfile = 'backgrounds950-C5.txt'  # missing PMT v91 MC?
+#mcfile = 'backgrounds950-C6.txt'  # working!
+#mcfile = 'backgrounds950-C7.txt'  # working!
+#mcfile = 'backgrounds950-C8.txt'  # missing PMT v91 MC?
+
+#mcfile = 'backgrounds950-C13467.txt'  # working!
+mcfile = 'backgrounds950-C123467.txt'
+
+justthese = [1,2,3,4,6,7]
+
+
+### which MC to fit globally (to all crystals simultaneously)?
 globalmc = []
-#globalmc = ['lsveto', 'pmt']
+#globalmc = ['lsveto']
+globalmc = ['lsveto', 'pmt']
+# these were for the C6+C7 combined fitting...
 #globalmc = ['internal', 'lsveto', 'pmt']
-globalmc = ['internal', 'lsveto', 'pmt', 'naisurf', 'teflonsurf', 'teflonbulk']
+#globalmc = ['internal', 'lsveto', 'pmt', 'naisurf', 'teflonsurf', 'teflonbulk']
 #globalmc = ['internal', 'innersteel', 'lsveto', 'pmt']
 
 ### some debug options
@@ -135,9 +163,9 @@ pltchans = 'SM'
 
 ### plotting ranges
 ### lo and hi energy plot range
-loer = [0, 70] # pushpa style
-hier = [100, 2000] # pushpa style
-# mine
+#loer = [0, 70] # pushpa style
+#hier = [100, 2000] # pushpa style
+# my plotting ranges
 loer = [0, 100]
 hier = [0, 3000]
 
@@ -221,12 +249,39 @@ def myself(argv):
     
     ### where everything gets loaded into dictionary
     #-----------------------------------------------------------------
+    #-----------------------------------------------------------------
     allchans = uniqString(fitchans+pltchans)
     data, bkgs, sigs, runtime = build92(mcfile, others, vcut, reuse, allchans)
-    datkeys, bakkeys, sigkeys = sortKeys(data, bkgs, sigs)
+    datkeys = sortDataKeys92(data)
     if datsumw2:
         for key in datkeys:
             data[key]['hist'].Sumw2()
+            
+    # scale into dru units
+    if dru:
+        data = scaleData70(data, 1)
+        bkgs = scaleBkgs71(bkgs)
+        sigs = scaleBkgs71(sigs)
+    else:
+        data = scaleData70(data, 0)
+        bkgs = scaleBkgs71(bkgs, runtime)
+        sigs = scaleBkgs71(sigs, runtime)
+    
+    # combine after scaling?
+    sigs = combineOthers92(sigs, globalmc)
+    bkgs = combineOthers92(bkgs, globalmc)
+    
+    # now sort and remove empty histos
+    bkgs, bakkeys = sortSimKeys92(bkgs)
+    sigs, sigkeys = sortSimKeys92(sigs)
+    
+    # plot all the bkgs and sigs for debug?
+    #makePlots92(bkgs)
+    #makePlots92(sigs)
+    #makePlots92(bkgs, combine, others, vcut)
+    #makePlots92(sigs, combine, others, vcut)
+    #sys.exit()
+    #-----------------------------------------------------------------
     #-----------------------------------------------------------------
     
     # assume all data is using same runs and hist params
@@ -260,28 +315,6 @@ def myself(argv):
     #print 'INFO: Unique bkgs =',uniqBkgs
     #print 'INFO: Unique sigs =',uniqSigs
     print 'INFO: Unique bkgs and sigs =',uniqAll
-
-    # plot all the bkgs and sigs before scaling them?
-    #makePlots92(bkgs)
-    #makePlots92(sigs)
-    #sys.exit()
-    
-    # scale into dru units
-    if dru:
-        data = scaleData70(data, 1)
-        bkgs = scaleBkgs71(bkgs)
-        sigs = scaleBkgs71(sigs)
-    else:
-        data = scaleData70(data, 0)
-        bkgs = scaleBkgs71(bkgs, runtime)
-        sigs = scaleBkgs71(sigs, runtime)
-
-    # plot all the bkgs and sigs after scaling them?
-    #=====================================================
-    #makePlots92(bkgs, combine, others, vcut)
-    #makePlots92(sigs, combine, others, vcut)
-    #sys.exit()
-    #=====================================================
     
     # make a string list of the globals
     globstr = ''
@@ -492,14 +525,16 @@ def myself(argv):
                         rlsigs[skey]['hist'].Rebin(loEfitRebin)
                         if loEfitRebinScale: rlsigs[skey]['hist'].Scale(1./loEfitRebin)
                         for n in range(fLoBins):
-                            if extend:
-                                fitsigs[fskey]['hist'].SetBinContent(n+1+(fbins*nc)+(i*fmax),
-                                                fitsigs[fskey]['hist'].GetBinContent(n+1+(fbins*nc)+(i*fmax))
-                                                + rlsigs[skey]['hist'].GetBinContent(fLo[0]+n))
-                            else:
-                                fitsigs[fskey]['hist'].SetBinContent(n+1+(i*fmax),
-                                                fitsigs[fskey]['hist'].GetBinContent(n+1+(i*fmax))
-                                                + rlsigs[skey]['hist'].GetBinContent(fLo[0]+n))
+                            try:
+                                if extend:
+                                    fitsigs[fskey]['hist'].SetBinContent(n+1+(fbins*nc)+(i*fmax),
+                                            fitsigs[fskey]['hist'].GetBinContent(n+1+(fbins*nc)+(i*fmax))
+                                            + rlsigs[skey]['hist'].GetBinContent(fLo[0]+n))
+                                else:
+                                    fitsigs[fskey]['hist'].SetBinContent(n+1+(i*fmax),
+                                            fitsigs[fskey]['hist'].GetBinContent(n+1+(i*fmax))
+                                            + rlsigs[skey]['hist'].GetBinContent(fLo[0]+n))
+                            except: pass
                     # hi E
                     if 'x'+str(i+1) in skey and '-c'+C in skey and '-e1' in skey:
                         rhsigs[skey]['hist'] = copy.deepcopy(sigs[skey]['hist'])
@@ -508,14 +543,16 @@ def myself(argv):
                         fskey = skey.split('-c'+C+'-e1')[0]
                         r = 0
                         for n in range(fLoBins,fbins):
-                            if extend:
-                                fitsigs[fskey]['hist'].SetBinContent(n+1+(fbins*nc)+(i*fmax),
-                                                fitsigs[fskey]['hist'].GetBinContent(n+1+(fbins*nc)+(i*fmax))
-                                                + rhsigs[skey]['hist'].GetBinContent(fHi[0]+r))
-                            else:
-                                fitsigs[fskey]['hist'].SetBinContent(n+1+(i*fmax),
-                                                fitsigs[fskey]['hist'].GetBinContent(n+1+(i*fmax))
-                                                + rhsigs[skey]['hist'].GetBinContent(fHi[0]+r))
+                            try:
+                                if extend:
+                                    fitsigs[fskey]['hist'].SetBinContent(n+1+(fbins*nc)+(i*fmax),
+                                            fitsigs[fskey]['hist'].GetBinContent(n+1+(fbins*nc)+(i*fmax))
+                                            + rhsigs[skey]['hist'].GetBinContent(fHi[0]+r))
+                                else:
+                                    fitsigs[fskey]['hist'].SetBinContent(n+1+(i*fmax),
+                                            fitsigs[fskey]['hist'].GetBinContent(n+1+(i*fmax))
+                                            + rhsigs[skey]['hist'].GetBinContent(fHi[0]+r))
+                            except: pass
                             r += 1
                 sinit=0
                 
@@ -531,14 +568,16 @@ def myself(argv):
                         rlbkgs[bkey]['hist'].Rebin(loEfitRebin)
                         if loEfitRebinScale: rlbkgs[bkey]['hist'].Scale(1./loEfitRebin)
                         for n in range(fLoBins):
-                            if extend:
-                                fitbkgs[fbkey]['hist'].SetBinContent(n+1+(fbins*nc)+(i*fmax),
-                                                fitbkgs[fbkey]['hist'].GetBinContent(n+1+(fbins*nc)+(i*fmax))
-                                                + rlbkgs[bkey]['hist'].GetBinContent(fLo[0]+n))
-                            else:
-                                fitbkgs[fbkey]['hist'].SetBinContent(n+1+(i*fmax),
-                                                fitbkgs[fbkey]['hist'].GetBinContent(n+1+(i*fmax))
-                                                + rlbkgs[bkey]['hist'].GetBinContent(fLo[0]+n))
+                            try:
+                                if extend:
+                                    fitbkgs[fbkey]['hist'].SetBinContent(n+1+(fbins*nc)+(i*fmax),
+                                            fitbkgs[fbkey]['hist'].GetBinContent(n+1+(fbins*nc)+(i*fmax))
+                                            + rlbkgs[bkey]['hist'].GetBinContent(fLo[0]+n))
+                                else:
+                                    fitbkgs[fbkey]['hist'].SetBinContent(n+1+(i*fmax),
+                                            fitbkgs[fbkey]['hist'].GetBinContent(n+1+(i*fmax))
+                                            + rlbkgs[bkey]['hist'].GetBinContent(fLo[0]+n))
+                            except: pass
                     # hi E
                     if 'x'+str(i+1) in bkey and '-c'+C in bkey and '-e1' in bkey:
                         rhbkgs[bkey]['hist'] = copy.deepcopy(bkgs[bkey]['hist'])
@@ -547,14 +586,16 @@ def myself(argv):
                         fbkey = bkey.split('-c'+C+'-e1')[0]
                         r = 0
                         for n in range(fLoBins,fbins):
-                            if extend:
-                                fitbkgs[fbkey]['hist'].SetBinContent(n+1+(fbins*nc)+(i*fmax),
-                                                fitbkgs[fbkey]['hist'].GetBinContent(n+1+(fbins*nc)+(i*fmax))
-                                                + rhbkgs[bkey]['hist'].GetBinContent(fHi[0]+r))
-                            else:
-                                fitbkgs[fbkey]['hist'].SetBinContent(n+1+(i*fmax),
-                                                fitbkgs[fbkey]['hist'].GetBinContent(n+1+(i*fmax))
-                                                + rhbkgs[bkey]['hist'].GetBinContent(fHi[0]+r))
+                            try:
+                                if extend:
+                                    fitbkgs[fbkey]['hist'].SetBinContent(n+1+(fbins*nc)+(i*fmax),
+                                            fitbkgs[fbkey]['hist'].GetBinContent(n+1+(fbins*nc)+(i*fmax))
+                                            + rhbkgs[bkey]['hist'].GetBinContent(fHi[0]+r))
+                                else:
+                                    fitbkgs[fbkey]['hist'].SetBinContent(n+1+(i*fmax),
+                                            fitbkgs[fbkey]['hist'].GetBinContent(n+1+(i*fmax))
+                                            + rhbkgs[bkey]['hist'].GetBinContent(fHi[0]+r))
+                            except: pass
                             r += 1
                 binit=0
                 
@@ -568,20 +609,44 @@ def myself(argv):
 
         
         ### sort all the fbakkeys
+        delete=[]
         fbakkeys=[]
         for fbkey in fitbkgs:
-            fbakkeys.append(fbkey)
+            if fitbkgs[fbkey]['hist'].Integral() > 0:
+                fbakkeys.append(fbkey)
+            else: delete.append(fbkey)
+        for key in delete:
+            print 'INFO: deleting fit bak key', key
+            del fitbkgs[key]
         fbakkeys.sort()
 
         ### sort all the fsigkeys
+        delete=[]
         fsigkeys=[]
         for fskey in fitsigs:
-            fsigkeys.append(fskey)
+            if fitsigs[fskey]['hist'].Integral() > 0:
+                fsigkeys.append(fskey)
+            else: delete.append(fskey)
+        for key in delete:
+            print 'INFO: deleting fit sig key', key
+            del fitsigs[key]
         fsigkeys.sort()
 
         ### sort all the fglobkeys
+        """
+        delete=[]
+        fglobkeys=[]
+        for fgkey in fitglob:
+            if fitglob[fgkey]['hist'].Integral() > 0:
+                fglobkeys.append(fgkey)
+            else: delete.append(fgkey)
+        for key in delete:
+            print 'INFO: deleting fit glob key', key
+            del fitglob[key]
+        """
         fglobkeys.sort()
-
+        
+        
         ### build global sigs
         for fskey in fsigkeys:
             for fgkey in fglobkeys:
@@ -597,7 +662,18 @@ def myself(argv):
                 if gmckey in fskey:
                     print 'INFO: deleting fit key',fsigkeys[L-k]
                     del fsigkeys[L-k]
-        
+
+        ### now delete the empty histos
+        delete=[]
+        fglobkeys=[]
+        for fgkey in fitglob:
+            if fitglob[fgkey]['hist'].Integral() > 0:
+                fglobkeys.append(fgkey)
+            else: delete.append(fgkey)
+        for key in delete:
+            print 'INFO: deleting fit glob key', key
+            del fitglob[key]
+        fglobkeys.sort()
 
         ### global fit debug infos
         #=============================================================
@@ -728,7 +804,21 @@ def myself(argv):
             
             for fskey in fsigkeys:
                 if 'x'+str(i+1) in fskey:
-                    
+
+                    ### 2018-03-05
+                    ### remove keys and hists with no events
+                    """
+                    if fitsigs[fskey]['hist'].Integral(i*fmax,(i+1)*fmax) <= 0:
+                        print '\nINFO: No events for --> ',fskey
+                        print   '      deleting fitsigs key', fskey
+                        del fitsigs[fskey]
+                        for k,key in enumerate(fsigkeys):
+                            if key == fskey:
+                                print   '      deleting fsigkeys',k,key,fskey
+                                del fsigkeys[k]
+                        continue
+                    """
+                        
                     mc_int = fitsigs[fskey]['hist'].Integral(i*fmax,(i+1)*fmax) # MC integral
 
                     ### to weight or not to weight...
@@ -742,8 +832,15 @@ def myself(argv):
                         fitsigs[fskey]['hist'].Scale(dat_int/mc_int) # scale to data integral
                     except:
                         print '\nWARNING: No events for --> ',fskey
-                        print   '         Remove it from the fit!\n'
+                        print   '         Remove it from the fit? \n'
                         sys.exit()
+
+                        ### some crystals don't have events from "other" crystals
+                        #print '\nINFO: No events for --> ',fskey
+                        #print   '      Deleting/ignoring this histogram...\n'
+                        #for key in fsigkeys:
+                        #del fsigkeys[fskey]
+                        #del fitsigs[fskey]
                         
                     for C in allchans:
                         for E in range(2):
@@ -751,20 +848,60 @@ def myself(argv):
                             
                             #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                             #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-                            newkeys=[]
+                            newkeys = []
+                            try:
+                                tmpkey=fskey+'-c'+C+'-e'+E
+                                test = sigs[tmpkey]['hist']
+                                newkeys.append(tmpkey)
+                            except:
+                                for F in range(8):
+                                    F=str(F+1)
+                                    try:
+                                        tmpkey=fskey+'-f'+F+'-c'+C+'-e'+E
+                                        test = sigs[tmpkey]['hist']
+                                        newkeys.append(tmpkey)
+                                    except:
+                                        continue
+                            """
                             if 'pmt' not in fskey:
-                                newkeys.append(fskey+'-c'+C+'-e'+E)
+                                tmpkey=fskey+'-c'+C+'-e'+E
+                                try:
+                                    test = sigs[tmpkey]['hist'].Integral()
+                                    #print test,tmpkey
+                                    #newkeys.append(tmpkey)
+                                except:
+                                    print 'INFO: skipping', tmpkey
+                                    continue
+                                newkeys.append(tmpkey)
                             else:
                                 for F in range(8):
                                     F=str(F+1)
-                                    newkeys.append(fskey+'-f'+F+'-c'+C+'-e'+E)
+                                    tmpkey=fskey+'-f'+F+'-c'+C+'-e'+E
+                                    try:
+                                        test = sigs[tmpkey]['hist'].Integral()
+                                        #print test,tmpkey
+                                        #newkeys.append(tmpkey)
+                                    except:
+                                        print 'INFO: skipping', tmpkey
+                                        continue
+                                    newkeys.append(tmpkey)
+                            """
                             #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                             #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                             
                             for newkey in newkeys:
+
+                                ### delete if there are no events in the hist
+                                #try:
+                                #    if sigs[newkey]['hist'].Integral() <= 0:
+                                        
+                                #try:
                                 sigs[newkey]['hist'].Scale(dat_int/mc_int)
                                 sigs[newkey]['fitscale'] = sigs[newkey]['scale'] * dat_int/mc_int
-                            
+                                #except:
+                                #    sigs[newkey]['fitscale'] = sigs[newkey]['scale']
+                                #    print '\nWARNING: No events for --> ',newkey
+                                
                                 ### rescale the bounds to the normalized fraction
                                 ### and save new values to the sigs info
                                 #---------------------------------------------------------------------
@@ -852,18 +989,17 @@ def myself(argv):
                         
                         newkeys=[]
                         try:
-                            newkey = 'x'+X+'-'+fgkey+'-c'+C+'-e'+E
-                            test = sigs[newkey]
-                            newkeys.append(newkey)
+                            tmpkey = 'x'+X+'-'+fgkey+'-c'+C+'-e'+E
+                            test = sigs[tmpkey]['hist']
+                            newkeys.append(tmpkey)
                         except:
                             for F in range(8):
                                 F=str(F+1)
                                 try:
-                                    newkey = 'x'+X+'-'+fgkey+'-f'+F+'-c'+C+'-e'+E
-                                    test = sigs[newkey]
-                                    newkeys.append(newkey)
+                                    tmpkey = 'x'+X+'-'+fgkey+'-f'+F+'-c'+C+'-e'+E
+                                    test = sigs[tmpkey]['hist']
+                                    newkeys.append(tmpkey)
                                 except:
-                                    #newkey=0
                                     continue
                         
                         if len(newkeys) > 0:
@@ -977,7 +1113,8 @@ def myself(argv):
         
         ### set the fit range
         fit.SetRangeX(0, fmax*8)
-        
+
+        #sys.exit()
         ### do the fit
         status = fit.Fit()
         
@@ -1015,19 +1152,22 @@ def myself(argv):
                             E = str(E)
                             
                             newkey = fskey+'-c'+C+'-e'+E
-                            
-                            ### save the raw scaling factor from the fit
-                            sigs[newkey]['hist'].Scale(fscale)
-                            
-                            ### save converted scaling factor
-                            sigs[newkey]['fitscale'] = sigs[newkey]['fitscale'] * fscale
-                            
-                            ### set error as a percent of the scaling factor
                             try:
+                                ### save the raw scaling factor from the fit
+                                sigs[newkey]['hist'].Scale(fscale)
+                                
+                                ### save converted scaling factor
+                                sigs[newkey]['fitscale'] = sigs[newkey]['fitscale'] * fscale
+                            except:
+                                continue
+
+                            try:
+                                ### set error as a percent of the scaling factor
                                 sigs[newkey]['fiterror'] = ferror/fscale
                             except:
                                 sigs[newkey]['fiterror'] = 1.
-
+                            
+                                
         ### do the same for the globals lsveto
         for fgkey in fglobkeys:
 
@@ -1048,18 +1188,18 @@ def myself(argv):
                         
                         newkeys=[]
                         try:
-                            newkey = 'x'+X+'-'+fgkey+'-c'+C+'-e'+E
-                            test = sigs[newkey]
-                            newkeys.append(newkey)
+                            tmpkey = 'x'+X+'-'+fgkey+'-c'+C+'-e'+E
+                            test = sigs[tmpkey]['hist']
+                            newkeys.append(tmpkey)
                         except:
                             for F in range(8):
                                 F=str(F+1)
                                 try:
-                                    newkey = 'x'+X+'-'+fgkey+'-f'+F+'-c'+C+'-e'+E
-                                    test = sigs[newkey]
-                                    newkeys.append(newkey)
+                                    tmpkey = 'x'+X+'-'+fgkey+'-f'+F+'-c'+C+'-e'+E
+                                    test = sigs[tmpkey]['hist']
+                                    newkeys.append(tmpkey)
                                 except:
-                                    #newkey=0
+                                    #tmpkey=0
                                     continue
                         
                         if len(newkeys) > 0:
@@ -1077,9 +1217,22 @@ def myself(argv):
                                     sigs[newkey]['fiterror'] = 1.
 
         
+        ### double check for broken keys
+        """
+        newkeys=[]
+        for skey in sigkeys:
+            try:
+                test = sigs[skey]
+                newkeys.append(skey)
+            except:
+                pass
+        sigkeys = newkeys
+        sigkeys.sort()
+        """
+        
         ### scale the signals to mBq/kg
-        if dru: sigs = scaleSigs71(sigkeys, sigs)
-        else: sigs = scaleSigs71(sigkeys, sigs, runtime)
+        if dru: sigs = scaleSigs92(sigkeys, sigs)
+        else: sigs = scaleSigs92(sigkeys, sigs, runtime)
 
         
         ### print the fit activities
@@ -1092,6 +1245,8 @@ def myself(argv):
                             if finit:
                                 E = str(E)
                                 newkey = fskey+'-c'+C+'-e'+E
+                                try: test = sigs[newkey]['hist']
+                                except: continue
                                 
                                 ### print out activity and error and bounds
                                 fitacti = sigs[newkey]['info']['fitacti']
@@ -1126,21 +1281,21 @@ def myself(argv):
                     for E in range(2):
                         E=str(E)
                         if finit:
-
+                            
                             newkeys=[]
                             try:
-                                newkey = 'x'+X+'-'+fgkey+'-c'+C+'-e'+E
-                                test = sigs[newkey]
-                                newkeys.append(newkey)
+                                tmpkey = 'x'+X+'-'+fgkey+'-c'+C+'-e'+E
+                                test = sigs[tmpkey]['hist']
+                                newkeys.append(tmpkey)
                             except:
                                 for F in range(8):
                                     F=str(F+1)
                                     try:
-                                        newkey = 'x'+X+'-'+fgkey+'-f'+F+'-c'+C+'-e'+E
-                                        test = sigs[newkey]
-                                        newkeys.append(newkey)
+                                        tmpkey = 'x'+X+'-'+fgkey+'-f'+F+'-c'+C+'-e'+E
+                                        test = sigs[tmpkey]['hist']
+                                        newkeys.append(tmpkey)
                                     except:
-                                        #newkey=0
+                                        #tmpkey=0
                                         continue
 
                             if len(newkeys) > 0:

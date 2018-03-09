@@ -6,10 +6,14 @@
 # 
 # Works with v92 and later versions
 # 
-# version: 2017-12-20
+# version: 2018-03-08
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# + new combineOthers92()
+# + new sortSimKeys92()
+# + new sortDataKeys92()
+# + new scaleSigs92()
 # ~ and try offset in c6,c7 = [-8, -8]
 # ~ try a slightly different offset in c6,c7 = [-4, -10]
 # ~ tweaked calib92() for an offset in c6,c7 = [-6, -12]
@@ -903,4 +907,164 @@ def makePlots92(bkgs, combine, others, vcut):
             #raw_input()
             del canvas
             del temp
+
+
+def scaleSigs92(sigkeys, sigs, runtime=0):
+
+    for key in sigkeys:
+
+        try:
+            test = sigs[key]['fitscale']
+        except:
+            print 'WARNING: no fitscale for', key
+            sigs[key]['info']['fitacti'] = 0
+            sigs[key]['info']['fiterro'] = 0
+            continue
+        
+        x = key.split('-')[0]
+        loca = key.split('-')[1]
+        e = key.split('-')[-1]
+
+        ### 1 day in seconds
+        day = 86400.
+        xkgs = 1.
+        keVperBin = 1.
+        if runtime:
+            day = runtime
+        xkgs = cmass(int(x[-1])-1)
+        keVperBin = 1./float(sigs[key]['pars'][3])
+
+        nmass      = cmass(int(x[-1])-1)
+        pmts       = 2.
+        extpmts    = 14.
+        lskg       = 1800.
+        steel      = 1600.
+        innersteel = 4000.
+        
+        ### treat the NaI surface and the copper and teflon as 1 unit
+        surf = 1.
+        
+        generated = float(sigs[key]['generated'])
+        if generated < 1:
+            print "WARNING: 0 events generated for -->", key
+            continue
+        
+        if loca == 'internal':
+            fitActivity = sigs[key]['fitscale'] * (1./nmass) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
+            sigs[key]['info']['fitacti'] = fitActivity
+            sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
+            
+        elif 'surf' in loca:
+            fitActivity = sigs[key]['fitscale'] * (1./surf) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
+            sigs[key]['info']['fitacti'] = fitActivity
+            sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
+            
+        elif 'teflon' in loca:
+            fitActivity = sigs[key]['fitscale'] * (1./surf) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
+            sigs[key]['info']['fitacti'] = fitActivity
+            sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
+            
+        elif loca == 'cucase':
+            fitActivity = sigs[key]['fitscale'] * (1./surf) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
+            sigs[key]['info']['fitacti'] = fitActivity
+            sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
+            
+        elif loca == 'pmt':
+            fitActivity = sigs[key]['fitscale'] * (1./pmts) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
+            sigs[key]['info']['fitacti'] = fitActivity
+            sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
+            
+        elif loca == 'extpmt':
+            fitActivity = sigs[key]['fitscale'] * (1./extpmts) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
+            sigs[key]['info']['fitacti'] = fitActivity
+            sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
+            
+        elif loca == 'lsveto':
+            fitActivity = sigs[key]['fitscale'] * (1./lskg) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
+            sigs[key]['info']['fitacti'] = fitActivity
+            sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
+            
+        elif loca == 'lsvetoair':
+            fitActivity = sigs[key]['fitscale'] * (1./nmass) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
+            sigs[key]['info']['fitacti'] = fitActivity
+            sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
+            
+        elif loca == 'airshield':
+            fitActivity = sigs[key]['fitscale'] * (1./nmass) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
+            sigs[key]['info']['fitacti'] = fitActivity
+            sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
+            
+        elif loca == 'steel':
+            fitActivity = sigs[key]['fitscale'] * (1./steel) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
+            sigs[key]['info']['fitacti'] = fitActivity
+            sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
+
+        elif loca == 'innersteel':
+            fitActivity = sigs[key]['fitscale'] * (1./innersteel) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
+            sigs[key]['info']['fitacti'] = fitActivity
+            sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
+            
+        else:
+            print "WARNING: No signal scaling for  --> ", loca
+            continue
+
+    return sigs
+
+
+def combineOthers92(sigs, globalMC):
+    donekeys=[]
+    delete=[]
+    #for key in sigkeys:
+    for key in sigs:
+        if key in donekeys: continue
+        bits = key.split('-')
+        if len(bits) != 6: continue
+        # don't combine if combining in global fit anyway?
+        if bits[1] in globalMC: continue
+        for F in range(1,9):
+            X = int(bits[0][1])
+            if F == X: continue
+            try:
+                default = 'x'+str(X)+'-'+bits[1]+'-'+bits[2]+'-f'+str(X)+'-'+bits[4]+'-'+bits[5]
+                newkey  = 'x'+str(X)+'-'+bits[1]+'-'+bits[2]+'-f'+str(F)+'-'+bits[4]+'-'+bits[5]
+                print '!!! adding ', newkey, ' to ', default
+                sigs[default]['hist'].Add(sigs[newkey]['hist'])
+                donekeys.append(default)
+                donekeys.append(newkey)
+                delete.append(newkey)
+            except:
+                pass
+    
+    # delete this histograms?
+    for key in delete:
+        print '!!! deleting -fx key ', key
+        del sigs[key]
+    
+    return sigs
+
+
+def sortDataKeys92(data):
+    datkeys=[]
+    for key in data:
+        datkeys.append(key)
+    datkeys.sort()
+    return datkeys
+
+
+def sortSimKeys92(sigs):
+    sigkeys=[]
+    """
+    delete=[]
+    for key in sigs:
+        if sigs[key]['hist'].Integral() > 0:
+            sigkeys.append(key)
+        else: delete.append(key)
+    for key in delete:
+        print 'INFO: deleting sigs key', key
+        del sigs[key]
+    """
+    for key in sigs:
+        sigkeys.append(key)
+    sigkeys.sort()
+    return sigs, sigkeys
 

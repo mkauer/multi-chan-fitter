@@ -12,9 +12,47 @@
 # ====================================================================
 
 
+# 2018-03-08
+# --------------------------------------------------------------------
+# ~ simultaneous fits to C123467 is NOT working!
+# ~ simultaneous fits to C13467 works! lsveto and pmt as globals
+# ~ all crystals fit well except 5 and 8 because I was missing MC
+# ~ generating some test plots
+# ~ fixed a couple bugs but now this looks to be working correctly
+# + new sortSimKeys92()
+# + new sortDataKeys92()
+# + new combineOthers92() to add -fx hists into mother hist
+
+
+# 2018-03-07
+# --------------------------------------------------------------------
+# ~ code is getting pretty messy - I need to clean this up eventually
+# + added a lot of tests to see if ['hist'] exists before doing anything
+# + new scaleSigs92() that now checks for ['fitscale']
+# + new sortKeys92() that deletes empty histograms
+# ~ almost there with the fix!
+
+
+# 2018-03-06
+# --------------------------------------------------------------------
+# ~ trying to reproduce the C13467 simultaneous fit...
+# ~ the issue is with including "other" internal backgrounds...
+#   I need to add all the "others" to the mother histo but I'm still
+#   working on that - making sure I don't mess something else up...
+# ~ still working on this issue of globals and others
+
+
+# 2018-03-05
+# --------------------------------------------------------------------
+# ~ trying to fix errors when or when-not selecting global MC
+#   shows up when not using globals or mc with the -fx- in name/key
+#   the issue seems to be due to how the global mc is being handled
+#   probably 2 related issues when handling MC with -fx- in name/key
+# V switched to v93-fix-other-crystals.py
+
+
 # 2017-12-20
 # --------------------------------------------------------------------
-
 # ~ try a slightly different offset in c6,c7 = [-4, -10]
 
 
