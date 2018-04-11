@@ -878,11 +878,11 @@ def makePlots92(bkgs, combine, others, vcut):
                     if E:
                         temp[i-1].Rebin(int(10/kvpb))
                         temp[i-1].SetAxisRange(100, 3000, 'x')
-                        temp[i-1].SetAxisRange(1e-3, 1, 'y')
+                        #temp[i-1].SetAxisRange(1e-3, 1, 'y')
                     else:
                         temp[i-1].Rebin(int(1/kvpb))
                         temp[i-1].SetAxisRange(0, 100, 'x')
-                        temp[i-1].SetAxisRange(1e-2, 10, 'y')
+                        #temp[i-1].SetAxisRange(1e-2, 10, 'y')
                         
                     what=''
                     if C == 'S': what += 'Single-hit'
@@ -1027,7 +1027,7 @@ def combineOthers92(sigs, globalMC):
             try:
                 default = 'x'+str(X)+'-'+bits[1]+'-'+bits[2]+'-f'+str(X)+'-'+bits[4]+'-'+bits[5]
                 newkey  = 'x'+str(X)+'-'+bits[1]+'-'+bits[2]+'-f'+str(F)+'-'+bits[4]+'-'+bits[5]
-                print '!!! adding ', newkey, ' to ', default
+                #print '!!! adding ', newkey, ' to ', default
                 sigs[default]['hist'].Add(sigs[newkey]['hist'])
                 donekeys.append(default)
                 donekeys.append(newkey)
@@ -1037,7 +1037,7 @@ def combineOthers92(sigs, globalMC):
     
     # delete this histograms?
     for key in delete:
-        print '!!! deleting -fx key ', key
+        #print '!!! deleting -fx key ', key
         del sigs[key]
     
     return sigs

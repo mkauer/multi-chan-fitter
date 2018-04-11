@@ -3,13 +3,13 @@
 ######################################################################
 # Pack all needed histos into one root file
 #
-# Works with v91 and later versions
+# Works with v93 and later versions
 # 
-# version: 2017-11-22
+# version: 2018-04-04
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
-# ~ see the changelog for version v91
+# ~ see the changelog for version v93
 #
 # email: mkauer@physics.wisc.edu
 ######################################################################
@@ -24,7 +24,7 @@ ROOT.gErrorIgnoreLevel = kWarning
 
 sys.path.append("/home/mkauer/COSINE/CUP/mc-fitting/")
 sys.path.append("/home/mkauer/mc-fitting/")
-from funcs91 import *
+from funcs93 import *
 
 local = amLocal()
 gROOT.SetBatch(1)
@@ -40,33 +40,29 @@ def _myself_(argv):
 
     # select a specific crystal
     # or comment out
-    xstal = 8
+    #xstal = 2
     
-    build = 'build91'
+    build = 'build93'
     
-    if local:
-        outpath="/home/mkauer/COSINE/CUP/mc-fitting/root-join-read/"+build+'/'
-    else:
-        outpath="/home/mkauer/mc-fitting/root-join-read/"+build+'/'
+    if local: outpath = "/home/mkauer/COSINE/CUP/mc-fitting/root-join-read/"+build+'/'
+    else:     outpath = "/home/mkauer/mc-fitting/root-join-read/"+build+'/'
 
-    if xstal:
-        outpath += 'c'+str(xstal)+'/'
+    #outpath += 'noAlphaCut/'
+    
+    if xstal: outpath += 'c'+str(xstal)+'/'
 
     if not os.path.exists(outpath):
-        try:
-            os.path.mkdir(outpath)
-        except:
-            os.mkdir(outpath)
+        try:    os.path.mkdir(outpath)
+        except: os.mkdir(outpath)
     
     fname = mcfile.split('/')[-1]
     
     rootfile = build+'-'+fname+'.root'
     rfile = TFile(outpath+rootfile, 'RECREATE')
-    
-    if xstal:
-        data, bkgs, sigs, runtime = build91(mcfile, 1, 2, 'MS', [xstal])
-    else:
-        data, bkgs, sigs, runtime = build91(mcfile, 1, 2, 'MS')
+
+    ### REMEMBER to change the build version here if it changed!!!
+    if xstal: data, bkgs, sigs, runtime = build93(mcfile, 1, 1, 2, 'MS', [xstal])
+    else:     data, bkgs, sigs, runtime = build93(mcfile, 1, 1, 2, 'MS')
     
     rfile.Write()
     rfile.Close()

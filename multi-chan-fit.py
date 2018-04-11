@@ -8,8 +8,9 @@
 V = 'v93'
 
 # trying to get this working with crystals not C6 or C7...
+# and adding new MC from Pushpa
 # 
-# version: 2018-03-08
+# version: 2018-04-04
 # 
 # see CHANGELOG for changes
 ######################################################################
@@ -28,25 +29,17 @@ ROOT.gErrorIgnoreLevel = kWarning
 
 #sys.path.append("/home/mkauer/COSINE/CUP/mc-fitting/")
 #sys.path.append("/home/mkauer/mc-fitting/")
-from funcs92 import *
+from funcs93 import *
 
-
-### individual plots for all crystals? [0,1]
-indi = 1
-
-### just plot individual for crystals? [1-8]
-#justthese = [1,3,4,6,7]
-#justthese = [6,7]
-justthese = [1]
 
 ### use pushpa's fitting ranges and binning?
-pushpa = 1
+pushpa = 0
 
 
 ### ========== GENERAL INPUTS ==============================
 ### note to add to saved plot names?
 note = 0
-note = 'pushpa-range'
+#note = 'pushpa-fit'
 
 ### old backgrounds file
 #mcfile = 'backgrounds930-C67v2.txt'
@@ -76,17 +69,51 @@ note = 'pushpa-range'
 #mcfile = 'backgrounds950-C6.txt'  # working!
 #mcfile = 'backgrounds950-C7.txt'  # working!
 #mcfile = 'backgrounds950-C8.txt'  # missing PMT v91 MC?
+#mcfile = 'backgrounds950-C67.txt' # working!
 
-#mcfile = 'backgrounds950-C13467.txt'  # working!
-mcfile = 'backgrounds950-C123467.txt'
+#mcfile = 'backgrounds950-C13467.txt'  # working! and Pushpa working!
+#mcfile = 'backgrounds950-C13467-update.txt'
+#mcfile = 'backgrounds950-C123467.txt' # not working? and not Pushpa working?
 
-justthese = [1,2,3,4,6,7]
+# set K40 lower bound to 0.5 for C1234
+#mcfile = 'backgrounds950-C13467_K40-05.txt' # working! and Pushpa not working
+#mcfile = 'backgrounds950-C23467_K40-05.txt' # not working and Pushpa not working!
+#mcfile = 'backgrounds950-C123467_K40-05.txt' # not working and Pushpa not working!
+
+# tweaked bounds
+#mcfile = 'backgrounds951-C123467.txt' # WORKING!!! with my fit range
+#mcfile = 'backgrounds951-C13467.txt'  # not working
+#mcfile = 'backgrounds951-C23467.txt'  # working
+#mcfile = 'backgrounds951-C3467.txt'   # not working
+#mcfile = 'backgrounds951-C1267.txt'   # working
+#mcfile = 'backgrounds951-C1234.txt'   # not working
+#mcfile = 'backgrounds951-C136.txt'    # not working
+#mcfile = 'backgrounds951-C1.txt'      # working
+#mcfile = 'backgrounds951-C2.txt'      # working
+#mcfile = 'backgrounds951-C3.txt'      # working
+#mcfile = 'backgrounds951-C4.txt'      # working
+#mcfile = 'backgrounds951-C6.txt'      # working
+#mcfile = 'backgrounds951-C7.txt'      # working
+
+#mcfile = 'backgrounds951-C123467.txt'
+#mcfile = 'backgrounds951-C123467-Tl208.txt'
+mcfile = 'backgrounds951-C123467-v2.txt'
+
+#mcfile = 'backgrounds952-C123467.txt'
+
+#mcfile = 'backgrounds952-C5.txt'
+#mcfile = 'backgrounds952-C5-v2.txt'
+#mcfile = 'backgrounds952-C8-v2.txt'
+
+#mcfile = 'backgrounds953-C12345678.txt'
+
+print '\nINFO: using backgrounds config file -->', mcfile
 
 
 ### which MC to fit globally (to all crystals simultaneously)?
 globalmc = []
 #globalmc = ['lsveto']
-globalmc = ['lsveto', 'pmt']
+globalmc = ['lsveto', 'pmt', 'innersteel']
 # these were for the C6+C7 combined fitting...
 #globalmc = ['internal', 'lsveto', 'pmt']
 #globalmc = ['internal', 'lsveto', 'pmt', 'naisurf', 'teflonsurf', 'teflonbulk']
@@ -98,7 +125,7 @@ globalmc = ['lsveto', 'pmt']
 others  = 1
 ### use the primVolumeName cut?
 vcut    = 1
-### combine 'others' into the raw isotope plots?
+### combine 'others' into the makePlots() plots?
 combine = 1
 #===========================================================
 
@@ -120,25 +147,21 @@ updateMCfile = 1
 ### ['SM'] both channels
 fitchans = 'SM'
 
-### fitting ranges
-### lo energy fit range in keV
-if pushpa: fLoE = [6, 70] # Pushpa style
+
+### fitting ranges and rebinnings
+if pushpa:
+    fLoE = [6, 70]    # Pushpa style
+    fHiE = [70, 2000] # Pushpa style
+    loEfitRebin = 6   # Pushpa style
+    hiEfitRebin = 2   # Pushpa style
 else:
     fLoE = [6, 100]
-
-### hi energy fit range in keV
-if pushpa: fHiE = [70, 2000] # Pushpa style
-else:
     fHiE = [60, 2800]
-
-### rebin the histos for fitting [1,inf]
-# Pushpa style 0.5 keV/bin low energy and 2 keV/bin high energy
-if pushpa:
-    loEfitRebin = 6 # Pushpa style
-    hiEfitRebin = 2 # Pushpa style
-else:
+    #fLoE = [0, 1]
+    #fHiE = [2400, 2800]
     loEfitRebin = 6
     hiEfitRebin = 2
+
 
 ### use fit bounds from backgrounds file? [0,1,2,3]
 ### [0] max bounds are 0-1
@@ -158,6 +181,9 @@ extend = 1
 
 
 ### ========== PLOTTING OPTIONS ============================
+### individual plots for all crystals? [0,1]
+indi = 1
+
 ### channels to plot
 pltchans = 'SM'
 
@@ -251,7 +277,9 @@ def myself(argv):
     #-----------------------------------------------------------------
     #-----------------------------------------------------------------
     allchans = uniqString(fitchans+pltchans)
-    data, bkgs, sigs, runtime = build92(mcfile, others, vcut, reuse, allchans)
+    data, bkgs, sigs, runtime = build93(mcfile, others, vcut, reuse, allchans)
+    print 'INFO: runtime =', runtime, '(seconds)'
+    
     datkeys = sortDataKeys92(data)
     if datsumw2:
         for key in datkeys:
@@ -260,29 +288,36 @@ def myself(argv):
     # scale into dru units
     if dru:
         data = scaleData70(data, 1)
-        bkgs = scaleBkgs71(bkgs)
-        sigs = scaleBkgs71(sigs)
+        bkgs = scaleBkgs93(bkgs)
+        sigs = scaleBkgs93(sigs)
     else:
         data = scaleData70(data, 0)
-        bkgs = scaleBkgs71(bkgs, runtime)
-        sigs = scaleBkgs71(sigs, runtime)
+        bkgs = scaleBkgs93(bkgs, runtime)
+        sigs = scaleBkgs93(sigs, runtime)
+
+    # make plots before combining!!!
+    #makePlots93(bkgs, combine, others, vcut)
+    #makePlots93(sigs, combine, others, vcut)
+    #sys.exit()
     
     # combine after scaling?
+    # FIX ME - combine but don't delete others?
     sigs = combineOthers92(sigs, globalmc)
     bkgs = combineOthers92(bkgs, globalmc)
     
     # now sort and remove empty histos
     bkgs, bakkeys = sortSimKeys92(bkgs)
     sigs, sigkeys = sortSimKeys92(sigs)
-    
-    # plot all the bkgs and sigs for debug?
-    #makePlots92(bkgs)
-    #makePlots92(sigs)
-    #makePlots92(bkgs, combine, others, vcut)
-    #makePlots92(sigs, combine, others, vcut)
-    #sys.exit()
     #-----------------------------------------------------------------
     #-----------------------------------------------------------------
+
+    # plot all crystals that have data
+    justthese=[]
+    for i in range(1,9):
+        for key in datkeys:
+            if 'x'+str(i) in key and i not in justthese:
+                justthese.append(i)
+    print 'INFO: plotting crystals -->', justthese
     
     # assume all data is using same runs and hist params
     try: runtag = data[datkeys[0]]['info']['tag']
@@ -314,7 +349,7 @@ def myself(argv):
     uniqAll = sorted(list(set(uniqAll)))
     #print 'INFO: Unique bkgs =',uniqBkgs
     #print 'INFO: Unique sigs =',uniqSigs
-    print 'INFO: Unique bkgs and sigs =',uniqAll
+    #print 'INFO: Unique bkgs and sigs =',uniqAll
     
     # make a string list of the globals
     globstr = ''
@@ -328,7 +363,7 @@ def myself(argv):
     
     ### Number of colors
     Nc = len(uniqAll)
-    print 'INFO: Total number of unique bkgs and sigs =',Nc
+    #print 'INFO: Total number of unique bkgs and sigs =',Nc
     colors, cis = rainbow(Nc)
 
     ### Create color dict for unique simulations
@@ -336,22 +371,17 @@ def myself(argv):
     for i, key in enumerate(uniqAll):
         #print key
         uniqColor[key] = cis[i]
-    
-    ### MAKE THIS BETTER!!!!!
-    ### colors for groups
-    #gcs, gis = rainbow(5)
-    gis = [kRed, kOrange, kGreen+1, kBlue, kViolet,
-           kRed, kOrange, kGreen+1, kBlue, kViolet]
-    if redtotal:
-        #gis = [kOrange, kGreen+1, kBlue, kMagenta+1, kCyan+1]
-        ###    steel,     cosmo,      pmts,     inter, lsveto
-        gis = [kYellow, kMagenta+1, kGreen+1, kBlue, kOrange+1]
-        #------------
-        ### OR with surface
-        #------------
-        ###    steel,     cosmo,      lsveto,  surf,    inter, pmts
-        gis = [kYellow, kMagenta+1, kOrange+1, kCyan+1, kBlue, kGreen+1]
-    
+
+    ### colors for the groups
+    gis = {'steel':    kYellow,
+           'cosmo':    kMagenta+1,
+           'lsveto':   kOrange+1,
+           'surface':  kCyan+1,
+           'internal': kBlue,
+           'pmts':     kGreen+1,
+           'copper':   kYellow+1,
+           'none':     kRed-1}
+
     ### legend length = MC + data + total
     Nlg = Nc+2
     lnc = 1
@@ -616,7 +646,7 @@ def myself(argv):
                 fbakkeys.append(fbkey)
             else: delete.append(fbkey)
         for key in delete:
-            print 'INFO: deleting fit bak key', key
+            #print 'INFO: deleting fit bak key', key
             del fitbkgs[key]
         fbakkeys.sort()
 
@@ -628,7 +658,7 @@ def myself(argv):
                 fsigkeys.append(fskey)
             else: delete.append(fskey)
         for key in delete:
-            print 'INFO: deleting fit sig key', key
+            #print 'INFO: deleting fit sig key', key
             del fitsigs[key]
         fsigkeys.sort()
 
@@ -651,7 +681,7 @@ def myself(argv):
         for fskey in fsigkeys:
             for fgkey in fglobkeys:
                 if fgkey in fskey:
-                    print 'INFO: adding',fskey,'to',fgkey
+                    #print 'INFO: adding',fskey,'to',fgkey
                     fitglob[fgkey]['hist'].Add(fitsigs[fskey]['hist'])
         
         ### remove global sigs from fit sigs
@@ -660,7 +690,7 @@ def myself(argv):
             for gmckey in globalmc:
                 #if 'lsveto' in fskey or 'pmt' in fskey:
                 if gmckey in fskey:
-                    print 'INFO: deleting fit key',fsigkeys[L-k]
+                    #print 'INFO: deleting fit key',fsigkeys[L-k]
                     del fsigkeys[L-k]
 
         ### now delete the empty histos
@@ -671,7 +701,7 @@ def myself(argv):
                 fglobkeys.append(fgkey)
             else: delete.append(fgkey)
         for key in delete:
-            print 'INFO: deleting fit glob key', key
+            #print 'INFO: deleting fit glob key', key
             del fitglob[key]
         fglobkeys.sort()
 
@@ -831,8 +861,8 @@ def myself(argv):
                     try:
                         fitsigs[fskey]['hist'].Scale(dat_int/mc_int) # scale to data integral
                     except:
-                        print '\nWARNING: No events for --> ',fskey
-                        print   '         Remove it from the fit? \n'
+                        print '\nERROR: No events for --> ',fskey
+                        print   '       Remove it from the fit? \n'
                         sys.exit()
 
                         ### some crystals don't have events from "other" crystals
@@ -946,6 +976,7 @@ def myself(argv):
             """
             
             fitresults[str(i)].append('Crystal-'+str(i+1)+' fit results')
+            fitresults[str(i)].append('runtime = '+str(round(runtime/60./60./24., 2))+' days')
             if note: fitresults[str(i)].append('note = '+note)
             fitresults[str(i)].append('version = '+V)
             fitresults[str(i)].append('channels fit = '+fitchans)
@@ -975,8 +1006,8 @@ def myself(argv):
             try:
                 fitglob[fgkey]['hist'].Scale(dat_int/mc_int) # scale to data integral
             except:
-                print '\nWARNING: No events for --> ',fgkey
-                print   '         Remove it from the fit!\n'
+                print '\nERROR: No events for --> ',fgkey
+                print   '       Remove it from the fit!\n'
                 sys.exit()
             
             #newkey=0
@@ -1037,7 +1068,7 @@ def myself(argv):
                             
                             ### add bounds to unique bouds list
                             if newkeys[0] and fgkey not in boundskeys:
-                                print 'bounds for', fgkey, sigs[newkey]['info']['newfbnd']
+                                #print 'bounds for', fgkey, sigs[newkey]['info']['newfbnd']
                                 boundskeys.append(fgkey)
                                 bounds.append(sigs[newkey]['info']['newfbnd'])
             
@@ -1094,7 +1125,9 @@ def myself(argv):
         #=========================================================
 
 
-        sigObj = TObjArray(len(fsigkeys)+len(fglobkeys))
+        totalNumFits = len(fsigkeys)+len(fglobkeys)
+        print 'INFO: total number of hists being fit =', totalNumFits,'\n\n'
+        sigObj = TObjArray(totalNumFits)
         
         for fskey in fsigkeys:
             sigObj.append(fitsigs[fskey]['hist'])
@@ -1117,6 +1150,8 @@ def myself(argv):
         #sys.exit()
         ### do the fit
         status = fit.Fit()
+
+        print '\n\n******************* FIT IS DONE *******************\n\n'
         
         chi2 = fit.GetChisquare()
         ndf  = fit.GetNDF()
@@ -1132,6 +1167,7 @@ def myself(argv):
         count = 0
         for i in range(8):
             
+            fitresults[str(i)].append('total number of hists being fit = '+str(totalNumFits))
             fitresults[str(i)].append('returned fit status = '+str(status))
             fitchi2ndf = (chi2/ndf)
             fitresults[str(i)].append('chi2/ndf = %.3g/%s = %.3g'%(chi2,ndf,chi2/ndf))
@@ -1231,8 +1267,8 @@ def myself(argv):
         """
         
         ### scale the signals to mBq/kg
-        if dru: sigs = scaleSigs92(sigkeys, sigs)
-        else: sigs = scaleSigs92(sigkeys, sigs, runtime)
+        if dru: sigs = scaleSigs93(sigkeys, sigs)
+        else: sigs = scaleSigs93(sigkeys, sigs, runtime)
 
         
         ### print the fit activities
@@ -1362,23 +1398,39 @@ def myself(argv):
             resultskeys.append(rskey)
         resultskeys.sort()
 
-        ### write results to file
-        resultsfile = './plots/'+save+'_fit-results.txt'
-        outfile = open(resultsfile, 'w')
-        for key in resultskeys:
-            for line in fitresults[key]:
-                outfile.write(line+'\n')
-        outfile.close()
         
-        ### create the updated backgrounds file
-        if updateMCfile:
-            shutil.copyfile(mcfile, './plots/'+mcfile)
-            newbkgs = './plots/'+mcfile[:-4]+'-update.txt'
-            updateBkgsFile70(mcfile, resultsfile, newbkgs, BF='FR')
-        
-        ### create the background model table
-        #outtable = newbkgs[:-4]+'-table.txt'
-        #outputModelTable61(newbkgs, outtable)
+        ### only write out files if fit is successful
+        #-------------------------------------------------------------
+        if status == 0:
+            ### write results to file
+            resultsfile = './plots/'+save+'_fit-results.txt'
+            outfile = open(resultsfile, 'w')
+            for key in resultskeys:
+                if int(key)+1 in justthese:
+                    for line in fitresults[key]:
+                        outfile.write(line+'\n')
+            outfile.close()
+            
+            ### create the updated backgrounds file
+            if updateMCfile:
+                shutil.copyfile(mcfile, './plots/'+mcfile)
+                newbkgs = './plots/'+mcfile[:-4]+'-update.txt'
+                updateBkgsFile70(mcfile, resultsfile, newbkgs, BF='BR')
+            
+            ### save histograms to a rootfile
+            rootoutfile = TFile("./plots/histograms.root", "RECREATE")
+            for key in sigkeys:
+                sigs[key]['hist'].Write(key)
+            for key in bakkeys:
+                bkgs[key]['hist'].Write(key)
+            for key in data:
+                data[key]['hist'].Write(key)
+            rootoutfile.Write()
+            rootoutfile.Close()
+            
+            ### create the background model table
+            #outtable = newbkgs[:-4]+'-table.txt'
+            #outputModelTable61(newbkgs, outtable)
         #-------------------------------------------------------------
         
         
@@ -2190,21 +2242,23 @@ def myself(argv):
                         #legs[C][E][i].AddEntry(sigs[key]['hist'], key, lopt)
 
                 if ingroups:
-                    c=0
+                    groupSort = []
                     for group in gbkgs[C][E][i]:
+                        if group not in groupSort:
+                            groupSort.append(group)
+                    groupSort.sort()
+                    for group in groupSort:
                         if group != 'none':
-                            gbkgs[C][E][i][group].SetMarkerColor(gis[c])
-                            gbkgs[C][E][i][group].SetLineColor(gis[c])
+                            gbkgs[C][E][i][group].SetMarkerColor(gis[group])
+                            gbkgs[C][E][i][group].SetLineColor(gis[group])
                             gbkgs[C][E][i][group].Draw('same')
                             legs[C][E][i].AddEntry(gbkgs[C][E][i][group], group, lopt)
-                            c+=1
-                    for group in gbkgs[C][E][i]:
-                        if group == 'none':
-                            for j, key in enumerate(gbkgs[C][E][i]['none']):
-                                gbkgs[C][E][i]['none'][key].SetMarkerColor(gis[c+j])
-                                gbkgs[C][E][i]['none'][key].SetLineColor(gis[c+j])
-                                gbkgs[C][E][i]['none'][key].Draw('same')
-                                legs[C][E][i].AddEntry(gbkgs[C][E][i]['none'][key], key, lopt)
+                    if 'none' in groupSort:
+                        for key in gbkgs[C][E][i]['none']:
+                            gbkgs[C][E][i]['none'][key].SetMarkerColor(gis['none'])
+                            gbkgs[C][E][i]['none'][key].SetLineColor(gis['none'])
+                            gbkgs[C][E][i]['none'][key].Draw('same')
+                            legs[C][E][i].AddEntry(gbkgs[C][E][i]['none'][key], key, lopt)
                 else:
                     # add legend entries in order
                     for name in uniqAll:
@@ -2476,10 +2530,12 @@ def myself(argv):
         print '\n\n'
         print '!!!!!  FIT RESULTS  !!!!!\n'
         for key in resultskeys:
-            for line in fitresults[key]:
-                print line
+            if int(key)+1 in justthese:
+                for line in fitresults[key]:
+                    print line
     #-----------------------------------------------------------------
 
+    
     # delete the extra crap
     #-------------------------------
     try: del fcanv
@@ -2491,8 +2547,8 @@ def myself(argv):
     #try: del combPlots
     #except: pass
     
-    #try: del sepPlots
-    #except: pass
+    try: del sepPlots
+    except: pass
 
     try: del canvs
     except: pass

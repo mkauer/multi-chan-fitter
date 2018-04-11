@@ -6,10 +6,11 @@
 # 
 # Works with v64 and later versions
 # 
-# version: 2017-12-05
+# version: 2018-04-04
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# + add copper as a separate group
 # + add Na22 to cosmogenics
 # + add steel to the groups
 # ~ moved Cd109 to the cosmo group
@@ -196,13 +197,14 @@ def setGroup(info):
                             'Te127m']:
             return 'cosmo'
         else: return 'internal'
-    elif 'pmt' in info['loca']: return 'pmts'
-    elif 'surf' in info['loca']: return 'surface'
-    elif 'cucase' in info['loca']: return 'surface'
-    elif 'steel' in info['loca']: return 'steel'
-    elif 'teflon' in info['loca']: return 'surface'
-    elif info['loca'] == 'lsveto': return 'lsveto'
-    else: return 'none'
+    if 'pmt'    in info['loca']: return 'pmts'
+    if 'surf'   in info['loca']: return 'surface'
+    if 'cucase' in info['loca']: return 'copper'
+    if 'copper' in info['loca']: return 'copper'
+    if 'steel'  in info['loca']: return 'steel'
+    if 'teflon' in info['loca']: return 'surface'
+    if 'veto'   in info['loca']: return 'lsveto'
+    return 'none'
 
 
 def build64(infile = 'backgrounds640.txt', freuse=0, fchans=0):

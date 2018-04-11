@@ -2,7 +2,9 @@
 
 # 2018-04-04
 
-# ~ rebuild C5 and C8 with other pmts added in
+# + add new Cd105 and Co60 backgrounds
+# ~ check different data offsets in c6,c7
+# ~ new v00-04-04 dataset
 # ~ rebuild C3 PMT sim with other pmts added in
 # ~ modified for just reprocessing of C8 with new resolution
 # + new data set V00-04-03
@@ -33,7 +35,7 @@
 
 #=================================================
 
-V=91
+V=93
 
 build="build$V"
 join="join$V.py"
@@ -49,8 +51,12 @@ joinscript=$base/$join
 
 #for mcfile in `ls $configdir | grep -v -E "root|dataset" | grep internal`
 #for mcfile in `ls $configdir | grep dataset1`
+#for mcfile in `ls $configdir | grep internal`
 #for mcfile in innersteelU238_GRND innersteelTh232_GRND
-for mcfile in `ls $configdir | grep pmt`
+#for mcfile in c6-dataset1 c7-dataset1
+#for mcfile in naisurf10umPb210_GRND teflonsurf2umPb210_GRND teflonbulkPb210_GRND
+#for mcfile in coppercaseCo60_GRND
+for mcfile in `ls $configdir`
 do
     file="$clustdir/$build-$mcfile.sh"
     cat > $file <<EOF
@@ -68,12 +74,13 @@ EOF
     
     #qsub -q "very_short" $file
     qsub -q "short" $file
+    #qsub -q "medium" $file
     
 done
 
 
 ### qsub -q
 # "very_short"
-# "short"
+# "short" - 12 hours
 # "medium"
 # "long"

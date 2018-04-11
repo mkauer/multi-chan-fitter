@@ -29,9 +29,9 @@ DR	SM	6	./set1_00-04-04.dat	set1	./root-join-read/build92/build92-c6-dataset1-4.
 #DR	SM	6	./set1_00-04-04.dat	set1	./root-join-read/build92/alphaCut/build92-c6-dataset1.root
 #DR	SM	6	./set1_00-04-04.dat	set1	./root-join-read/build92/noAlphaCut/build92-c6-dataset1.root
 
-#FR	SM	6     nai-surf-10um	Pb210	Pb210	GRND    0.1	0.0001    10.	 ./root-join-read/build92/build92-naisurf10umPb210_GRND.root
+FR	SM	6     nai-surf-10um	Pb210	Pb210	GRND    0.1	0.0001    10.	 ./root-join-read/build92/build92-naisurf10umPb210_GRND.root
 #FR	SM	6     teflon-surf-2um	Pb210	Pb210	GRND	0.1	0.01    10.	 ./root-join-read/build92/build92-teflonsurf2umPb210_GRND.root
-#FR	SM	6     teflon-bulk	Pb210	Pb210	GRND    0.1	0.01    100.	 ./root-join-read/build92/build92-teflonbulkPb210_GRND.root
+FR	SM	6     teflon-bulk	Pb210	Pb210	GRND    0.1	0.01    100.	 ./root-join-read/build92/build92-teflonbulkPb210_GRND.root
 
 FR	SM	6	internal	Cd109	Cd109	GRND	3.44e-02	0.1	10	./root-join-read/build92/build92-internalCd109_GRND.root
 FR	SM	6	internal	H3	H3	GRND	3.19e-01	0.1	10	./root-join-read/build92/build92-internalH3_GRND.root

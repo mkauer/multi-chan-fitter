@@ -8,7 +8,9 @@
 # 1 ppb Th232 =  4.065 mBq
 # 1 ppm K40   = 30.960 mBq
 
-# version 2018-01-02
+# version 2018-03-13
+
+# tweak bounds on C2 so pushpa range fit converges!
 
 # tweaked bounds so no limits would be hit
 # going with c6-4keV and c7-10keV
@@ -80,22 +82,22 @@ BR	SM	1	innersteel	Th232	Th232	GRND	4.00e-01	0.1	10	./root-join-read/build91/bui
 #DR      MS      2     ./set1_00-04-03.dat      set1      ./root-join-read/build92/alphaCut/build92-c2-dataset1.root
 DR      MS      2     ./set1_00-04-04.dat      set1      ./root-join-read/build92/alphaCut/build92-c2-dataset1.root
 
-FR	SM	2	internal	Cd109	Cd109	GRND	3.44e-02	0.1	10	./root-join-read/build92/build92-internalCd109_GRND.root
-FR	SM	2	internal	H3	H3	GRND	3.19e-01	0.1	10	./root-join-read/build92/build92-internalH3_GRND.root
-FR	SM	2	internal	Na22	Na22	GRND	5.60e-01	0.1	10	./root-join-read/build92/build92-internalNa22_GRND.root
-FR	SM	2	internal	I125	I125	GRND	4.68e-01	0.1	10	./root-join-read/build92/build92-internalI125_GRND.root
-FR	SM	2	internal	Te121m	Te121m	GRND	1.43e-01	0.1	10	./root-join-read/build92/build92-internalTe121m_GRND.root
-FR	SM	2	internal	Te123m	Te123m	GRND	3.20e-03	0.0001	100	./root-join-read/build92/build92-internalTe123m_GRND.root
-FR	SM	2	internal	Te125m	Te125m	GRND	1.28e-03	0.001	100	./root-join-read/build92/build92-internalTe125m_GRND.root
-FR	SM	2	internal	Te127m	Te127m	GRND	1.02e-01	0.1	10	./root-join-read/build92/build92-internalTe127m_GRND.root
+FR	SM	2	internal	Cd109	Cd109	GRND	3.44e-02	0.01	1	./root-join-read/build92/build92-internalCd109_GRND.root
+FR	SM	2	internal	H3	H3	GRND	3.19e-01	0.01	1	./root-join-read/build92/build92-internalH3_GRND.root
+FR	SM	2	internal	Na22	Na22	GRND	5.60e-01	0.01	2	./root-join-read/build92/build92-internalNa22_GRND.root
+FR	SM	2	internal	I125	I125	GRND	4.68e-01	0.01	1	./root-join-read/build92/build92-internalI125_GRND.root
+FR	SM	2	internal	Te121m	Te121m	GRND	1.43e-01	0.01	2	./root-join-read/build92/build92-internalTe121m_GRND.root
+FR	SM	2	internal	Te123m	Te123m	GRND	3.20e-03	0.0001	2	./root-join-read/build92/build92-internalTe123m_GRND.root
+FR	SM	2	internal	Te125m	Te125m	GRND	1.28e-03	0.001	2	./root-join-read/build92/build92-internalTe125m_GRND.root
+FR	SM	2	internal	Te127m	Te127m	GRND	1.02e-01	0.01	2	./root-join-read/build92/build92-internalTe127m_GRND.root
 
-FR	SM	2	internal	K40	K40	GRND	2.40e+00	0.9	10	./root-join-read/build92/build92-internalK40_GRND.root
+FR	SM	2	internal	K40	K40	GRND	2.40e+00	0.01	1	./root-join-read/build92/build92-internalK40_GRND.root
 
 FR	SM	2	internal	U238	U238	Th230	1.33e-01	0.001	10	./root-join-read/build92/build92-internalU238_Th230.root
 FR	SM	2	internal	U238	Th230	Ra226	1.33e+00	0.001	10	./root-join-read/build92/build92-internalTh230_Ra226.root
 FR	SM	2	internal	U238	Ra226	Rn222	1.33e+00	0.000001	10	./root-join-read/build92/build92-internalRa226_Rn222.root
 #FR	SM	2	internal	U238	Rn222	Pb210	1.33e-01	0.0000001	10	./root-join-read/build92/build92-internalRn222_Pb210.root
-FR	SM	2	internal	Pb210	Pb210	GRND	2.22e+00	0.01	10	./root-join-read/build92/build92-internalPb210_GRND.root
+FR	SM	2	internal	Pb210	Pb210	GRND	2.22e+00	0.001	10	./root-join-read/build92/build92-internalPb210_GRND.root
 
 FR	SM	2	internal	Th232	Th232	Ra228	8.31e-03	0.001	100	./root-join-read/build92/build92-internalTh232_Ra228.root
 FR	SM	2	internal	Th232	Ra228	Th228	8.31e-03	0.01	10	./root-join-read/build92/build92-internalRa228_Th228.root

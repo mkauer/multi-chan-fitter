@@ -12,6 +12,42 @@
 # ====================================================================
 
 
+# 2018-04-11
+# --------------------------------------------------------------------
+# ~ fit just PMT Tl208 in Multi-hit channel == 42.2 +/- 9 mBq/kg
+
+
+# 2018-04-10
+# --------------------------------------------------------------------
+# ~ only print out fit results info to crystals in justthese
+# + build justthese list based off which crystals have loaded data
+# ~ no I125 for C1 or C2
+
+
+# 2018-04-05
+# --------------------------------------------------------------------
+# + generate new plots now using surface Pb210, Co60 and G4.10 Cd109
+
+
+# 2018-04-04
+# --------------------------------------------------------------------
+# ~ no change that back to just PMT and INTERNAL use "others"
+# ~ everything has "others" generated except for lsveto and innersteel
+#   and data! - missed that one
+# ~ fixed order in which groups are plotted
+# ~ fixed group colors to group name
+# ~ updated setGroup() in funcs64.py
+# + write scaled histograms to rootfile
+# ~ rebuild pmt mc for C5 and C8 including 'others'
+# + copper-case Co60 and G4.10 Cd109
+# + new funcs93.py to handle new MC from Pushpa
+
+
+# 2018-03-13
+# --------------------------------------------------------------------
+# ~ managed to fit all C123467 !!!
+
+
 # 2018-03-08
 # --------------------------------------------------------------------
 # ~ simultaneous fits to C123467 is NOT working!
