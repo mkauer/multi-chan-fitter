@@ -792,6 +792,10 @@ def buildMC92(info, mc, vcut):
                     
                     detected = histo.GetEntries()
                     
+                    #print '!!!! ', key, 'generated events =', generated
+                    #print '!!!! ', key, 'detected events =', detected
+                    #print '!!!! ', key, 'efficiency =', int(100*detected/generated), '%'
+                    
                     #histo.SetLineColor(kBlack)
                     #histo.SetMarkerColor(kBlack)
                     #histo.SetLineWidth(1)

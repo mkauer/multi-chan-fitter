@@ -1,0 +1,14 @@
+# -*- sh -*-
+
+# version 2018-04-17
+
+# bsdr   chan   xstl  loca     isof     chst     chsp     acti    erro    lbnd   hbnd    file
+# ----   -----  ----  -----    ------   ------   ------   -----   -----   ----   -----   --------
+B        SM     1     copper   Co60     Co60     GRND     1.0     0.1     0.5    1.5     dummy.root
+B        SM     2     copper   Co60     Co60     GRND     1.0     0.1     0.5    1.5     dummy.root
+B        SM     3     copper   Co60     Co60     GRND     1.0     0.1     0.5    1.5     dummy.root
+B        SM     4     copper   Co60     Co60     GRND     1.0     0.1     0.5    1.5     dummy.root
+B        SM     5     copper   Co60     Co60     GRND     1.0     0.1     0.5    1.5     dummy.root
+B        SM     6     copper   Co60     Co60     GRND     1.0     0.1     0.5    1.5     dummy.root
+B        SM     7     copper   Co60     Co60     GRND     1.0     0.1     0.5    1.5     dummy.root
+B        SM     8     copper   Co60     Co60     GRND     1.0     0.1     0.5    1.5     dummy.root

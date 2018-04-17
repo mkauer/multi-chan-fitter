@@ -1,7 +1,8 @@
 #!/bin/bash
 
-# 2018-04-04
+# 2018-04-17
 
+# + add newer copper Co60
 # + add new Cd105 and Co60 backgrounds
 # ~ check different data offsets in c6,c7
 # ~ new v00-04-04 dataset
@@ -55,8 +56,8 @@ joinscript=$base/$join
 #for mcfile in innersteelU238_GRND innersteelTh232_GRND
 #for mcfile in c6-dataset1 c7-dataset1
 #for mcfile in naisurf10umPb210_GRND teflonsurf2umPb210_GRND teflonbulkPb210_GRND
-#for mcfile in coppercaseCo60_GRND
-for mcfile in `ls $configdir`
+for mcfile in copperCo60_GRND
+#for mcfile in `ls $configdir`
 do
     file="$clustdir/$build-$mcfile.sh"
     cat > $file <<EOF

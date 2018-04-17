@@ -6,10 +6,13 @@
 # 
 # Works with v93 and later versions
 # 
-# version: 2018-04-04
+# version: 2018-04-17
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# + tweaked functions for copper Co60 MC from Pushpa
+# ~ need to figure out difference between evt_type cut and primParticleName cut
+# ~ something is wonky with the primParticleName cut
 # ~ do to surface MC issues, switch back to just pmt and internal "others"
 # + makePlots93() - "others" for everything except lsveto, innersteel, data
 # ~ do "others" for everything except for lsveto, innersteel and data
@@ -54,7 +57,7 @@ def build93(infile='backgrounds900.txt', others=1, vcut=1, freuse=0, fchans=0, f
         ###    scale by mass or surface area etc. But this
         ###    is okay for now...
         infos=[]
-        if others and ('pmt' in info['key'] or 'internal' in info['key']):
+        if others and ('pmt' in info['key'] or 'internal' in info['key'] or 'copper' in info['key']):
         #if others and ('lsveto' not in info['key'] and 'innersteel' not in info['key'] and 'data' not in info['key']):
             key = info['key']
             for i in range(8):
@@ -63,7 +66,7 @@ def build93(infile='backgrounds900.txt', others=1, vcut=1, freuse=0, fchans=0, f
                 newinfo['key'] = key+'-f'+str(i+1)
                 newinfo['from'] = str(i+1)
                 infos.append(newinfo)
-        elif not others and ('pmt' in info['key'] or 'internal' in info['key']):
+        elif not others and ('pmt' in info['key'] or 'internal' in info['key'] or 'copper' in info['key']):
         #elif not others and ('lsveto' not in info['key'] and 'innersteel' not in info['key'] and 'data' not in info['key']):
             key = info['key']
             newinfo = deepcopy(info)
@@ -71,7 +74,8 @@ def build93(infile='backgrounds900.txt', others=1, vcut=1, freuse=0, fchans=0, f
             newinfo['from'] = info['xstl']
             infos.append(newinfo)
         # force these to not grab "others" until fixed
-        elif ('surf' in info['key'] or 'teflon' in info['key'] or 'copper' in info['key'] or 'case' in info['key']):
+        #elif ('surf' in info['key'] or 'teflon' in info['key'] or 'copper' in info['key'] or 'case' in info['key']):
+        elif ('surf' in info['key'] or 'teflon' in info['key'] or 'case' in info['key']):
             key = info['key']
             newinfo = deepcopy(info)
             newinfo['key'] = key+'-f'+str(info['xstl'])
@@ -183,6 +187,9 @@ def buildMC93(info, mc, vcut):
             path2 = '*'+info['isof']+'*.root'
         if info['isof'] == 'Co60' and location == 'copper-case':
             path2 = '*'+'CuCase-'+info['isof']+'*.root'
+        if info['isof'] == 'Co60' and location == 'copper':
+            path1 = '/data/MC/COSINE/V3.1.1/reprocessed/Co60'
+            path2 = '*'+'Copper-'+info['isof']+'*.root'
         
         if not onCup():
             path1 = '/home/mkauer/COSINE/CUP/mc-fitting'+path1
@@ -328,7 +335,15 @@ def buildMC93(info, mc, vcut):
 
                     elif info['loca'] == 'coppercase':
                         # Pushpas MC
-                        volumeCut = TCut('((primVolumeName == "NaIDet07Fringe0") || (primVolumeName == "NaIDet07Fringe1") || (primVolumeName == "NaIDet07CalibHole"))')
+                        volumeCut = TCut('((primVolumeName == "NaIDet07Fringe0")'
+                                     +' || (primVolumeName == "NaIDet07Fringe1")'
+                                     +' || (primVolumeName == "NaIDet07CalibHole"))')
+                    
+                    elif info['loca'] == 'copper':
+                        # Pushpas MC
+                        volumeCut = TCut('((primVolumeName == "NaIDet0'+str(info['from'])+'Fringe0")'
+                                     +' || (primVolumeName == "NaIDet0'+str(info['from'])+'Fringe1")'
+                                     +' || (primVolumeName == "NaIDet0'+str(info['from'])+'Case"))')
                     
                     elif info['loca'] == 'teflon':
                         volumeCut = TCut('(primVolumeName == "NaIDet0'+str(i+1)+'Teflon")')
@@ -373,16 +388,40 @@ def buildMC93(info, mc, vcut):
                         print "WARNING: No selection criteria for  --> ", info['loca']
                         continue
 
-
+                    
                     ### this is needed to get the generated event numbers right!
+                    #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                    ### FIX ME - there's still something wonky with Pushpa's MC
+                    #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                     pname = info['chst']
                     if info['chst'].startswith('Te') \
                        and info['chst'].endswith('m'):
                         pname = info['chst'][:-1]
-                    if info['chst'] == 'H3':
-                        pname = 'triton'
-                    #motherIsoCut = TCut('(primParticleName == "'+info['chst']+'")')
-                    motherIsoCut = TCut('(primParticleName == "'+pname+'")')
+                        motherIsoCut = TCut('(primParticleName == "'+pname+'")')
+                        
+                    elif info['chst'] == 'H3':
+                        #motherIsoCut = TCut('(primParticleName == "triton")')
+                        motherIsoCut = TCut('(primParticleName == "He3")')
+                        #motherIsoCut = TCut('((primParticleName == "triton") || (primParticleName == "He3"))')
+                        
+                    elif info['chst'] == 'Cd109':
+                        motherIsoCut = TCut('(primParticleName == "Cd109")')
+                        #motherIsoCut = TCut('(primParticleName == "Ag109")')
+                        #motherIsoCut = TCut('((primParticleName == "Cd109") || (primParticleName == "Ag109"))')
+                    
+                    #elif info['chst'] == 'K40':
+                    #    motherIsoCut = TCut('(primParticleName == "K40")')
+                    #    #motherIsoCut = TCut('(primParticleName == "Ca40")')
+                    #    #motherIsoCut = TCut('((primParticleName == "K40") || (primParticleName == "Ca40"))')
+                    
+                    else:
+                        motherIsoCut = TCut('(primParticleName == "'+pname+'")')
+                    
+                    ### is this really needed??
+                    #motherIsoCut = TCut('(1)')
+                    
+                    #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                    #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                     
                     
                     ### This is needed to cut out crap events
@@ -390,9 +429,8 @@ def buildMC93(info, mc, vcut):
                     ### (event_info.Type) is new
                     ### (evt_Type) still works with new files
                     #eventTypeCut = TCut('(event_info.Type > 10)')
-                    #if info['isof'] == 'Cd109' or info['isof'] == 'H3':
-                    #    eventTypeCut = TCut('(evt_Type > 10)')
                     eventTypeCut = TCut('(evt_Type > 10)')
+
                     
                     
                     #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -429,15 +467,16 @@ def buildMC93(info, mc, vcut):
                     #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
-                    
-                    
                     ### create a hist of the generated events
                     #---------------------------------------------------------------------
                     key2 = key+'_generated'
                     temp2 = TH1F(key2, 'generated', 1, 1, 2)
                     
                     #totalCuts = TCut(volumeCut.GetTitle()+' && '+motherIsoCut.GetTitle())
-                    totalCuts = TCut(motherIsoCut.GetTitle()+' && '+volumeCut.GetTitle())
+                    #totalCuts = TCut(motherIsoCut.GetTitle()+' && '+volumeCut.GetTitle())
+                    totalCuts = TCut(motherIsoCut.GetTitle()+' && '+'(evt_Type < 10)'+' && '+volumeCut.GetTitle())
+                    #totalCuts = TCut(volumeCut.GetTitle())
+                    #print 'generated events cut =', str(totalCuts)
                     
                     ### I think that has to change?
                     #=====================================================================
@@ -457,20 +496,12 @@ def buildMC93(info, mc, vcut):
                     #=====================================================================
                     #=====================================================================
                     
-                    #mc[key]['generated_hist'] = temp2
-                    #mc[key]['generated'] = generated
-
                     mc[key]['generated_hist'] = temp2
                     #mc[key]['generated_hist'] = deepcopy(TH1F(temp2))
-                    #mc[key]['generated'] = mc[key]['generated_hist'].GetBinContent(1)
-                    #mc[key]['generated'] = temp2.GetBinContent(1)
-                    mc[key]['generated'] = temp2.Integral()
-                    #mc[key]['generated'] = temp2.GetEntries()
-                    
-                    entries = temp2.GetEntries()
-                    generated = mc[key]['generated']
-                    #print '!!!! ',key2,'',generated,' generated events  (',entries,'entries )' 
-                    
+                    #generated = temp2.Integral()
+                    generated = temp2.GetEntries()
+                    mc[key]['generated'] = generated
+
                     #---------------------------------------------------------------------
                     
                     
@@ -512,13 +543,14 @@ def buildMC93(info, mc, vcut):
                     if pushpasMC:
                         selection = '((edep[6]*1000.) + (sigma*edep[6]*1000.*rng))'
                     chain.Draw(selection+' >> '+key, masterCut)
+                    #print 'detected hits cut = ',str(masterCut)
                     
                     detected = histo.GetEntries()
                     
-                    #histo.SetLineColor(kBlack)
-                    #histo.SetMarkerColor(kBlack)
-                    #histo.SetLineWidth(1)
-
+                    print '!!!! ', key, 'generated events =', generated
+                    print '!!!! ', key, 'detected events =', detected
+                    print '!!!! ', key, 'efficiency =', int(100*detected/generated), '%'
+                    
                     mc[key]['hist'] = histo
                     #mc[key]['hist'].Sumw2()
 
@@ -583,6 +615,11 @@ def scaleSigs93(sigkeys, sigs, runtime=0):
             sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
             
         elif 'teflon' in loca:
+            fitActivity = sigs[key]['fitscale'] * (1./surf) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
+            sigs[key]['info']['fitacti'] = fitActivity
+            sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
+            
+        elif loca == 'copper':
             fitActivity = sigs[key]['fitscale'] * (1./surf) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
             sigs[key]['info']['fitacti'] = fitActivity
             sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
@@ -683,6 +720,11 @@ def scaleBkgs93(bkgs,runtime=0):
             bkgs[key]['hist'].Scale(scale)
             bkgs[key]['scale'] = scale
             
+        elif loca == 'copper':
+            scale = bkgs[key]['info']['acti'] * (surf) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
+            bkgs[key]['hist'].Scale(scale)
+            bkgs[key]['scale'] = scale
+
         elif loca == 'cucase' or loca == 'coppercase':
             scale = bkgs[key]['info']['acti'] * (surf) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
             bkgs[key]['hist'].Scale(scale)

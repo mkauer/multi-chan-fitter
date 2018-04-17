@@ -10,7 +10,7 @@ V = 'v93'
 # trying to get this working with crystals not C6 or C7...
 # and adding new MC from Pushpa
 # 
-# version: 2018-04-04
+# version: 2018-04-17
 # 
 # see CHANGELOG for changes
 ######################################################################
@@ -41,90 +41,33 @@ pushpa = 0
 note = 0
 #note = 'pushpa-fit'
 
-### old backgrounds file
-#mcfile = 'backgrounds930-C67v2.txt'
-#mcfile = 'backgrounds930-C67v2-update.txt'
-#mcfile = 'backgrounds930-C67v2-test.txt'
-#mcfile = 'backgrounds930-C67v2-alphas.txt'
-#mcfile = 'backgrounds930-test-no-others.txt'
-#mcfile = 'backgrounds930-test-with-others.txt'
-#mcfile = 'backgrounds940-C67.txt'
-#mcfile = 'backgrounds940-surf-test.txt'
 
-# 2018-03-06 - works in progress...
-#mcfile = 'backgrounds940-C1.txt' # working
-#mcfile = 'backgrounds940-C3.txt' # not working
-#mcfile = 'backgrounds940-C4.txt' # not working
-#mcfile = 'backgrounds940-C6.txt' # working
-#mcfile = 'backgrounds940-C7.txt' # working
-#mcfile = 'backgrounds940-C13467.txt' #not working
-#mcfile = 'backgrounds940-C13467_offset-C67.txt'
+#mcfile = 'backgrounds951-C123467-v2.txt' # WORKING!!!
 
-# 2018-03-08 - try rebuilding configs again
-#mcfile = 'backgrounds950-C1.txt'  # working!
-#mcfile = 'backgrounds950-C2.txt'  # working!
-#mcfile = 'backgrounds950-C3.txt'  # working!
-#mcfile = 'backgrounds950-C4.txt'  # working!
-#mcfile = 'backgrounds950-C5.txt'  # missing PMT v91 MC?
-#mcfile = 'backgrounds950-C6.txt'  # working!
-#mcfile = 'backgrounds950-C7.txt'  # working!
-#mcfile = 'backgrounds950-C8.txt'  # missing PMT v91 MC?
-#mcfile = 'backgrounds950-C67.txt' # working!
+mcfile = 'backgrounds953-C12345678-v2.txt' # WORKING!!!
 
-#mcfile = 'backgrounds950-C13467.txt'  # working! and Pushpa working!
-#mcfile = 'backgrounds950-C13467-update.txt'
-#mcfile = 'backgrounds950-C123467.txt' # not working? and not Pushpa working?
-
-# set K40 lower bound to 0.5 for C1234
-#mcfile = 'backgrounds950-C13467_K40-05.txt' # working! and Pushpa not working
-#mcfile = 'backgrounds950-C23467_K40-05.txt' # not working and Pushpa not working!
-#mcfile = 'backgrounds950-C123467_K40-05.txt' # not working and Pushpa not working!
-
-# tweaked bounds
-#mcfile = 'backgrounds951-C123467.txt' # WORKING!!! with my fit range
-#mcfile = 'backgrounds951-C13467.txt'  # not working
-#mcfile = 'backgrounds951-C23467.txt'  # working
-#mcfile = 'backgrounds951-C3467.txt'   # not working
-#mcfile = 'backgrounds951-C1267.txt'   # working
-#mcfile = 'backgrounds951-C1234.txt'   # not working
-#mcfile = 'backgrounds951-C136.txt'    # not working
-#mcfile = 'backgrounds951-C1.txt'      # working
-#mcfile = 'backgrounds951-C2.txt'      # working
-#mcfile = 'backgrounds951-C3.txt'      # working
-#mcfile = 'backgrounds951-C4.txt'      # working
-#mcfile = 'backgrounds951-C6.txt'      # working
-#mcfile = 'backgrounds951-C7.txt'      # working
-
-#mcfile = 'backgrounds951-C123467.txt'
-#mcfile = 'backgrounds951-C123467-Tl208.txt'
-mcfile = 'backgrounds951-C123467-v2.txt'
-
-#mcfile = 'backgrounds952-C123467.txt'
-
-#mcfile = 'backgrounds952-C5.txt'
-#mcfile = 'backgrounds952-C5-v2.txt'
-#mcfile = 'backgrounds952-C8-v2.txt'
-
-#mcfile = 'backgrounds953-C12345678.txt'
+#mcfile = 'test-h3.txt'
 
 print '\nINFO: using backgrounds config file -->', mcfile
 
 
-### which MC to fit globally (to all crystals simultaneously)?
-globalmc = []
-#globalmc = ['lsveto']
-globalmc = ['lsveto', 'pmt', 'innersteel']
-# these were for the C6+C7 combined fitting...
-#globalmc = ['internal', 'lsveto', 'pmt']
-#globalmc = ['internal', 'lsveto', 'pmt', 'naisurf', 'teflonsurf', 'teflonbulk']
-#globalmc = ['internal', 'innersteel', 'lsveto', 'pmt']
-
-### some debug options
+### some extra MC and plotting options
 #===========================================================
+### which MC to fit globally (to all crystals simultaneously)?
+globalmc = ['lsveto', 'pmt', 'innersteel']
 ### include bkgs from 'other' pmts and internals?
 others  = 1
 ### use the primVolumeName cut?
 vcut    = 1
+
+### plot components in groups? [0,1]
+ingroups = 1
+### show the total? [0,1]
+showTotal = 1
+### show the legends? [0,1]
+showlegs = 1
+### plot the total in red? [0,1]
+redtotal = 1
 ### combine 'others' into the makePlots() plots?
 combine = 1
 #===========================================================
@@ -150,7 +93,7 @@ fitchans = 'SM'
 
 ### fitting ranges and rebinnings
 if pushpa:
-    fLoE = [6, 70]    # Pushpa style
+    fLoE = [6,  70]   # Pushpa style
     fHiE = [70, 2000] # Pushpa style
     loEfitRebin = 6   # Pushpa style
     hiEfitRebin = 2   # Pushpa style
@@ -188,12 +131,12 @@ indi = 1
 pltchans = 'SM'
 
 ### plotting ranges
-### lo and hi energy plot range
-#loer = [0, 70] # pushpa style
-#hier = [100, 2000] # pushpa style
-# my plotting ranges
-loer = [0, 100]
-hier = [0, 3000]
+if pushpa:
+    loer = [0,   70]   # pushpa style
+    hier = [100, 2000] # pushpa style
+else:
+    loer = [0, 100]
+    hier = [0, 3000]
 
 eran = [loer, hier]
 
@@ -204,15 +147,6 @@ if pushpa:
 else:
     loEplotRebin = 6
     hiEplotRebin = 2
-
-### show the total? [0,1]
-showTotal = 1
-### show the legends? [0,1]
-showlegs = 1
-### plot components in groups? [0,1]
-ingroups = 1
-### plot the total in red? [0,1]
-redtotal = 1
 
 ### use linear residual scale? [0,1]
 linres = 1
@@ -2261,13 +2195,17 @@ def myself(argv):
                             legs[C][E][i].AddEntry(gbkgs[C][E][i]['none'][key], key, lopt)
                 else:
                     # add legend entries in order
+                    #print uniqAll
                     for name in uniqAll:
                         for bkey in bakkeys:
-                            if bkey == 'x'+str(i+1)+'-'+name+'-c'+chan+'-e'+str(E):
+                            #print bkey
+                            if bkey == 'x'+str(i+1)+'-'+name+'-c'+chan+'-e'+str(E) \
+                               or bkey == 'x'+str(i+1)+'-'+name+'-f'+str(i+1)+'-c'+chan+'-e'+str(E):
                                 activ = '(%.2e) '%(bkgs[bkey]['info']['acti'])
                                 legs[C][E][i].AddEntry(bkgs[bkey]['hist'], activ+bkey, lopt)
                         for skey in sigkeys:
-                            if skey == 'x'+str(i+1)+'-'+name+'-c'+chan+'-e'+str(E):
+                            if skey == 'x'+str(i+1)+'-'+name+'-c'+chan+'-e'+str(E) \
+                               or skey == 'x'+str(i+1)+'-'+name+'-f'+str(i+1)+'-c'+chan+'-e'+str(E):
                                 activ = '(%.2e) '%(sigs[skey]['info']['fitacti'])
                                 legs[C][E][i].AddEntry(sigs[skey]['hist'], activ+skey, lopt)
                 
