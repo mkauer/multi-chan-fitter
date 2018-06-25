@@ -6,10 +6,15 @@
 # 
 # Works with v93 and later versions
 # 
-# version: 2018-04-17
+# version: 2018-05-29
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# ~ fixed the H3 normalization - it was still wrong!
+# + added calib93() and buildData93()
+# + add path to Sn113 MC and groupNo for Sn113
+# ~ now should have cuts for generated events correct!
+# + add new groupNum93() to test out efficiency cuts
 # + tweaked functions for copper Co60 MC from Pushpa
 # ~ need to figure out difference between evt_type cut and primParticleName cut
 # ~ something is wonky with the primParticleName cut
@@ -89,7 +94,7 @@ def build93(infile='backgrounds900.txt', others=1, vcut=1, freuse=0, fchans=0, f
         for info in infos:
             #print info['key']
             if 'D' in info['type']:
-                data, runtime = buildData92(info, data)
+                data, runtime = buildData93(info, data)
             
             elif 'B' in info['type']:
                 bkgs = buildMC93(info, bkgs, vcut)
@@ -182,7 +187,8 @@ def buildMC93(info, mc, vcut):
                 path2 = 'anal_lsvetofull-Teflon-surface_all-Pb210-*.root'
             if location == 'copper-case':
                 path1 = '/data/MC/COSINE/V3.1.1/reprocessed/'
-        
+
+        ### many special cases for Pushpa's MC locations
         if (info['isof'] == 'Cd109' or info['isof'] == 'H3') and location == 'internal':
             path2 = '*'+info['isof']+'*.root'
         if info['isof'] == 'Co60' and location == 'copper-case':
@@ -190,11 +196,15 @@ def buildMC93(info, mc, vcut):
         if info['isof'] == 'Co60' and location == 'copper':
             path1 = '/data/MC/COSINE/V3.1.1/reprocessed/Co60'
             path2 = '*'+'Copper-'+info['isof']+'*.root'
+        if info['isof'] == 'Sn113' and location == 'internal':
+            path1 = '/data/MC/COSINE/V3.1.1/reprocessed'
+            path2 = '*'+'internal-'+info['isof']+'*.root'
+        
         
         if not onCup():
             path1 = '/home/mkauer/COSINE/CUP/mc-fitting'+path1
         
-        print 'INFO: looking for files with -->', os.path.join(path1, path2)
+        #print 'INFO: looking for files with -->', os.path.join(path1, path2)
 
         pushpasMC = 0
         if location in pushpas: #or info['isof'] in ['Cd109', 'H3']:
@@ -206,7 +216,7 @@ def buildMC93(info, mc, vcut):
         
         if nfiles > 0:
             
-            print 'INFO:',nfiles,'files found for', info['loca'], info['isof']
+            #print 'INFO:',nfiles,'files found for', info['loca'], info['isof']
             
             for c in info['chans']:
                 info['chan'] = c
@@ -320,15 +330,23 @@ def buildMC93(info, mc, vcut):
                         # Pushpas C7 Surface MC
                         volumeCut = TCut('(primVolumeName == "NaIDet07Crystal")')
                     
-                    elif 'cusurf' in info['loca']:
-                        # Estellas MC
-                        volumeCut = TCut('(primVolumeName == "NaIDet0'+str(i+1)+'Case")')
+                    elif info['loca'] == 'teflon':
+                        volumeCut = TCut('(primVolumeName == "NaIDet0'+str(i+1)+'Teflon")')
+
+                    elif info['loca'] == 'teflonbulk':
+                        # Pushpas C7 Surface MC
+                        volumeCut = TCut('(primVolumeName == "NaIDet07Teflon")')
                     
                     elif 'teflonsurf' in info['loca']:
                         # Estellas MC
-                        #volumeCut = TCut('(primVolumeName == "NaIDet0'+str(i+1)+'Teflon")')
+                        volumeCut = TCut('(primVolumeName == "NaIDet0'+str(i+1)+'Teflon")')
                         # Pushpas C7 Surface MC
-                        volumeCut = TCut('(primVolumeName == "NaIDet07Teflon")')
+                        if pushpasMC:
+                            volumeCut = TCut('(primVolumeName == "NaIDet07Teflon")')
+                    
+                    elif 'cusurf' in info['loca']:
+                        # Estellas MC
+                        volumeCut = TCut('(primVolumeName == "NaIDet0'+str(i+1)+'Case")')
                     
                     elif info['loca'] == 'cucase':
                         volumeCut = TCut('(primVolumeName == "NaIDet0'+str(i+1)+'Case")')
@@ -345,25 +363,11 @@ def buildMC93(info, mc, vcut):
                                      +' || (primVolumeName == "NaIDet0'+str(info['from'])+'Fringe1")'
                                      +' || (primVolumeName == "NaIDet0'+str(info['from'])+'Case"))')
                     
-                    elif info['loca'] == 'teflon':
-                        volumeCut = TCut('(primVolumeName == "NaIDet0'+str(i+1)+'Teflon")')
-
-                    elif info['loca'] == 'teflonbulk':
-                        # Pushpas C7 Surface MC
-                        volumeCut = TCut('(primVolumeName == "NaIDet07Teflon")')
-                    
                     elif info['loca'] == 'pmt':
                         volumeCut = TCut('((primPMTid[0] == '+pmt1+') || (primPMTid[0] == '+pmt2+'))')
                     
                     elif info['loca'] == 'extpmt':
                         volumeCut = TCut('((primPMTid[0] != '+pmt1+') && (primPMTid[0] != '+pmt2+'))')
-                        """
-                        tcan = TCanvas('tcan','tcan',800,600)
-                        testing = TH2I('testing','primPMTid[1] : primPMTid[0]',17,0,17,17,0,17)
-                        chain.Draw('primPMTid[1] : primPMTid[0] >> testing')
-                        testing.Draw()
-                        raw_input('enter to continue')
-                        """
                     
                     elif info['loca'] == 'lsveto':
                         volumeCut = TCut('(primVolumeName == "lsveto")')
@@ -376,10 +380,6 @@ def buildMC93(info, mc, vcut):
 
                     elif info['loca'] == 'steel':
                         volumeCut = TCut('((primVolumeName == "SteelSupport") || (primVolumeName == "SteelSupportTop"))')
-                        #volumeCut = TCut('((primVolumeName == "SteelSupport"))')
-                        #volumeCut = TCut('((primVolumeName == "SteelSupportTop"))')
-                        #volumeCut = TCut('((primVolumeName == "Welding"))')
-                        #volumeCut = TCut('((primVolumeName != ""))')
 
                     elif info['loca'] == 'innersteel':
                         volumeCut = TCut('(primVolumeName == "InnerSteel")')
@@ -389,177 +389,66 @@ def buildMC93(info, mc, vcut):
                         continue
 
                     
-                    ### this is needed to get the generated event numbers right!
-                    #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-                    ### FIX ME - there's still something wonky with Pushpa's MC
-                    #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-                    pname = info['chst']
-                    if info['chst'].startswith('Te') \
-                       and info['chst'].endswith('m'):
-                        pname = info['chst'][:-1]
-                        motherIsoCut = TCut('(primParticleName == "'+pname+'")')
-                        
-                    elif info['chst'] == 'H3':
-                        #motherIsoCut = TCut('(primParticleName == "triton")')
-                        motherIsoCut = TCut('(primParticleName == "He3")')
-                        #motherIsoCut = TCut('((primParticleName == "triton") || (primParticleName == "He3"))')
-                        
-                    elif info['chst'] == 'Cd109':
-                        motherIsoCut = TCut('(primParticleName == "Cd109")')
-                        #motherIsoCut = TCut('(primParticleName == "Ag109")')
-                        #motherIsoCut = TCut('((primParticleName == "Cd109") || (primParticleName == "Ag109"))')
-                    
-                    #elif info['chst'] == 'K40':
-                    #    motherIsoCut = TCut('(primParticleName == "K40")')
-                    #    #motherIsoCut = TCut('(primParticleName == "Ca40")')
-                    #    #motherIsoCut = TCut('((primParticleName == "K40") || (primParticleName == "Ca40"))')
-                    
-                    else:
-                        motherIsoCut = TCut('(primParticleName == "'+pname+'")')
-                    
-                    ### is this really needed??
-                    #motherIsoCut = TCut('(1)')
-                    
-                    #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-                    #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-                    
-                    
-                    ### This is needed to cut out crap events
-                    ### (evt_Type) is old
-                    ### (event_info.Type) is new
-                    ### (evt_Type) still works with new files
-                    #eventTypeCut = TCut('(event_info.Type > 10)')
+                    brokenChainCut = groupNum93(info)
                     eventTypeCut = TCut('(evt_Type > 10)')
-
+                    generatedCuts = TCut('(evt_Type < 10)'+' && '+volumeCut.GetTitle())
                     
+                    if info['chst'] == 'H3':
+                        generatedCuts = TCut('(evt_Type > 10)'+' && '+volumeCut.GetTitle())
                     
-                    #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-                    #   CRITIAL POINT IN THE SIM !!!
-                    #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-                    brokenChainCut = TCut('(1)')
-                    groupCuts = groupNum62(info)
-                    
-                    if groupCuts:
-                        """
-                        print 'INFO:',info['isof'],\
-                            'chan start =',info['chst'],\
-                            'chan stop =',info['chsp'],\
-                            'groupNo start >=',groupCuts[0],\
-                            'groupNo stop <',groupCuts[1]
-                        """
                         
-                        ### this is what i used before but it might be wrong??
-                        ### it should probably be 'groupNo < number' instead of 'groupNo <= number' ???
-                        # include last group
-                        #brokenChainCut = TCut('((groupNo >= '+str(groupCuts[0])+') && (groupNo <= '+str(groupCuts[1])+'))')
-
-                        ### I think it actually needs to exclude the last decay product groupNo - not sure??
-                        ### minor change '<=' to '<' but I think it's a big difference... 
-                        # do not include last group
-                        brokenChainCut = TCut('((groupNo >= '+str(groupCuts[0])+') && (groupNo < '+str(groupCuts[1])+'))')
-
-                    ### not sure how this groupNo thing works - I need to ask Eunju for details!
-                    ### everything should have groupNo > 1 right?
-                    ### NO! Cosmogenics are groupNo == 1
-                    #else:
-                    #    brokenChainCut = TCut('(groupNo > 1)')
-                    #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-                    #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-
                     ### create a hist of the generated events
                     #---------------------------------------------------------------------
                     key2 = key+'_generated'
                     temp2 = TH1F(key2, 'generated', 1, 1, 2)
                     
-                    #totalCuts = TCut(volumeCut.GetTitle()+' && '+motherIsoCut.GetTitle())
-                    #totalCuts = TCut(motherIsoCut.GetTitle()+' && '+volumeCut.GetTitle())
-                    totalCuts = TCut(motherIsoCut.GetTitle()+' && '+'(evt_Type < 10)'+' && '+volumeCut.GetTitle())
-                    #totalCuts = TCut(volumeCut.GetTitle())
-                    #print 'generated events cut =', str(totalCuts)
-                    
-                    ### I think that has to change?
-                    #=====================================================================
-                    #=====================================================================
-                    #chain.Draw('primVolumeName >> '+key2, totalCuts)
-                    
-                    if info['loca'] == 'pmt':
-                        chain.Draw('1 >> '+key2, totalCuts)
-                        #chain.Draw('primPMTid >> '+key2, totalCuts)
-                        #chain.Draw('primPMTid[0] >> '+key2, totalCuts)
-                        #chain.Draw('primPMTid['+str(i)+'] >> '+key2, totalCuts)
-                        #chain.Draw('primVolumeName >> '+key2, totalCuts)
-                    else:
-                        #chain.Draw('primVolumeName >> '+key2, totalCuts)
-                        chain.Draw('1 >> '+key2, totalCuts)
-                        
-                    #=====================================================================
-                    #=====================================================================
-                    
+                    chain.Draw('1 >> '+key2, generatedCuts)
+                                        
                     mc[key]['generated_hist'] = temp2
-                    #mc[key]['generated_hist'] = deepcopy(TH1F(temp2))
-                    #generated = temp2.Integral()
                     generated = temp2.GetEntries()
                     mc[key]['generated'] = generated
-
                     #---------------------------------------------------------------------
                     
                     
                     ### using Box-Muller for resolution smearing method
                     ### setting "rng" as the smearing alias
                     chain.SetAlias('rng','sin(2.*pi*rndm)*sqrt(-2.*log(rndm))')
-                    #resolFunc = resol60(i,e)
-                    #resolFunc = resol64(i,e)
                     resolFunc = resol80(i,e)
                     if pushpasMC:
                         resolFunc = resol80(i,e,1)
                     chain.SetAlias('sigma', resolFunc)
 
                     
-                    #=====================================================================
-                    #=====================================================================
-                    # use the volume cut?
-                    #vcut = 1
-                    if vcut:
-                        masterCut = TCut('('+
-                                     energyCut.GetTitle()+' && '+
-                                     eventTypeCut.GetTitle()+' && '+
-                                     brokenChainCut.GetTitle()+' && '+
-                                     chanCut.GetTitle()+' && '+
-                                     volumeCut.GetTitle()
+                    masterCut = TCut('('+
+                                energyCut.GetTitle()+' && '+
+                                eventTypeCut.GetTitle()+' && '+
+                                brokenChainCut.GetTitle()+' && '+
+                                chanCut.GetTitle()+' && '+
+                                volumeCut.GetTitle()
                                      +')')
-                    else:
-                        masterCut = TCut('('+
-                                     energyCut.GetTitle()+' && '+
-                                     eventTypeCut.GetTitle()+' && '+
-                                     brokenChainCut.GetTitle()+' && '+
-                                     chanCut.GetTitle()
-                                     +')')
-                    #=====================================================================
-                    #=====================================================================
                     
                     
                     selection = '((edep['+str(i)+']*1000.) + (sigma*edep['+str(i)+']*1000.*rng))'
                     if pushpasMC:
                         selection = '((edep[6]*1000.) + (sigma*edep[6]*1000.*rng))'
                     chain.Draw(selection+' >> '+key, masterCut)
-                    #print 'detected hits cut = ',str(masterCut)
-                    
+                                        
                     detected = histo.GetEntries()
+
+                    if (c=='S' and e==0) or (c=='M' and e==1):
+                        print 'DEBUG:', key, 'generated events =', generated
+                        print 'DEBUG:', key, 'detected events =', detected
+                        print 'DEBUG:', key, 'efficiency =', round(100*detected/generated, 2), '%'
                     
-                    print '!!!! ', key, 'generated events =', generated
-                    print '!!!! ', key, 'detected events =', detected
-                    print '!!!! ', key, 'efficiency =', int(100*detected/generated), '%'
                     
                     mc[key]['hist'] = histo
                     #mc[key]['hist'].Sumw2()
-
+            print ''
                     
         else:
-            #print 'WARNING:', loca, isof, 'not found...'
-            print 'WARNING: No MC files found for --> ',\
+            print 'ERROR: no MC files found for -->', \
                 'x'+str(info['xstl']), info['floca'], info['isof']
-            #sys.exit()
+            sys.exit()
     
     return mc
 
@@ -665,8 +554,8 @@ def scaleSigs93(sigkeys, sigs, runtime=0):
             sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
             
         else:
-            print "WARNING: No signal scaling for  --> ", loca
-            continue
+            print "ERROR: no signal scaling for -->", loca
+            sys.exit()
 
     return sigs
 
@@ -766,8 +655,8 @@ def scaleBkgs93(bkgs,runtime=0):
             bkgs[key]['scale'] = scale
             
         else:
-            print "WARNING: No background scaling for  --> ", loca
-            continue
+            print "ERROR: no background scaling for -->", loca
+            sys.exit()
 
     return bkgs
 
@@ -840,7 +729,7 @@ def makePlots93(bkgs, combine, others, vcut):
                     
                     if E:
                         temp[i-1].Rebin(int(10/kvpb))
-                        temp[i-1].SetAxisRange(100, 3000, 'x')
+                        temp[i-1].SetAxisRange(0, 3000, 'x')
                         #temp[i-1].SetAxisRange(1e-3, 1, 'y')
                     else:
                         temp[i-1].Rebin(int(1/kvpb))
@@ -870,4 +759,219 @@ def makePlots93(bkgs, combine, others, vcut):
             #raw_input()
             del canvas
             del temp
+
+
+def groupNum93(info):
+    
+    # internal U238 "groupNo"
+    # -----------------------------
+    # 11: U238  -> Th230
+    # 12: Th230 -> Ra226
+    # 13: Ra226 -> Rn222
+    # 14: Rn222 -> Pb210
+    # 15: Pb210 -> ground
+    
+    # internal Th232 "groupNo"
+    # -----------------------------
+    # 21: Th232 -> Ra228
+    # 22: Ra228 -> Th228
+    # 23: Th228 -> ground
+
+    if info['chst'] in ['Te121m','Te123m','Te125m','Te127m','I125','Cd109','Na22','H3','Co60','Sn113']:
+        return TCut('((groupNo >= 0) && (groupNo < 1))')
+
+    if info['chst'] == 'K40':
+        return TCut('((groupNo >= 0) && (groupNo < 1))')
+    
+    if   info['chst'] == 'U238':  start = 11
+    elif info['chst'] == 'Th230': start = 12
+    elif info['chst'] == 'Ra226': start = 13
+    elif info['chst'] == 'Rn222': start = 14
+    elif info['chst'] == 'Pb210': start = 15
+    elif info['chst'] == 'Th232': start = 21
+    elif info['chst'] == 'Ra228': start = 22
+    elif info['chst'] == 'Th228': start = 23
+    else: start = -1
+    
+    if   info['chsp'] == 'U238':  stop = 11
+    elif info['chsp'] == 'Th230': stop = 12
+    elif info['chsp'] == 'Ra226': stop = 13
+    elif info['chsp'] == 'Rn222': stop = 14
+    elif info['chsp'] == 'Pb210': stop = 15
+    elif info['chsp'] == 'Th232': stop = 21
+    elif info['chsp'] == 'Ra228': stop = 22
+    elif info['chsp'] == 'Th228': stop = 23
+    elif info['chsp'] == 'GRND':  stop = 24
+    else: stop = -1
+
+    if start != -1 and stop != -1:
+        return TCut('((groupNo >= '+str(start)+') && (groupNo < '+str(stop)+'))')
+    else:
+        print 'ERROR: no groupNo found for -->', info['chst']
+        sys.exit()
+
+
+def buildData93(info, data):
+    
+    base = baseDir()
+    runtime = 0.
+    
+    if info['reuse']:
+        for c in info['chans']:
+            info['chan'] = c
+            
+            if not info['rootfile']:
+                print 'ERROR: no rootfile specified in backgrounds file'
+                sys.exit()
+
+            rootfile = base+info['rootfile']
+            if not os.path.exists(rootfile):
+                print 'ERROR: rootfile not found -->', rootfile
+                sys.exit()
+
+            rfile = TFile(rootfile, "READ")
+
+            for e in range(2):
+                key  = info['key']
+                key += '-c'+str(c)
+                key += '-e'+str(e)
+                #print key
+                try:
+                    data[key] = {}
+                    data[key]['info'] = info
+                    data[key]['hist'] = deepcopy(TH1F(rfile.Get(key)))
+                    data[key]['pars'] = getPars(data[key]['hist'])
+                    #data[key]['hist'].Sumw2()
+                except:
+                    print "ERROR: could not find hist -->",key
+                    sys.exit()
+                    
+                try:
+                    data[key]['subruns_hist'] = deepcopy(TH1F(rfile.Get(key+'_subruns')))
+                    data[key]['subruns'] = data[key]['subruns_hist'].GetBinContent(1)
+                except:
+                    print "ERROR: could not find subruns_hist -->",key+'_subruns'
+                    sys.exit()
+                    
+                try:
+                    data[key]['runtime_hist'] = deepcopy(TH1F(rfile.Get(key+'_runtime')))
+                    data[key]['runtime'] = data[key]['runtime_hist'].GetBinContent(1)
+                    runtime = data[key]['runtime']
+                except:
+                    print "ERROR: could not find runtime_hist -->",key+'_runtime'
+                    sys.exit()
+
+    else:
+        
+        runfile = base+info['file']
+        #print 'looking for -->',runfile
+        if not os.path.exists(runfile):
+            print 'ERROR: runfile not found -->', runfile
+            sys.exit()
+
+        runtime = 0.
+        nfiles = 0
+        chain = TChain("ntp","")
+        for line in readFile(runfile):
+            if not onCup(): fpath = '/home/mkauer/COSINE/CUP/mc-fitting'+line
+            else: fpath = line
+            #print 'looking for -->',fpath
+            if not os.path.exists(fpath):
+                continue
+            else:
+                #print 'adding -->',fpath
+                tmpruntime = getDuration(fpath)
+                if tmpruntime > 0:
+                    runtime += tmpruntime
+                    nfiles += chain.Add(fpath)
+                else:
+                    print 'WARNING: no run duration found for',fpath
+            
+        if nfiles > 0:
+            print 'INFO:',nfiles,'files found for data',info['tag']
+            for C in info['chans']:
+                info['chan'] = C
+                for E in range(2):
+
+                    # DEFINE HIST AND KEY
+                    #-----------------------------------------------------------------------
+                    i = info['xstl'] - 1
+                    
+                    key  = info['key']
+                    key += '-c'+str(C)
+                    key += '-e'+str(E)
+                    
+                    data[key] = {}
+                    data[key]['info'] = info
+                    
+                    pars = histparam64(E)
+                    data[key]['pars'] = pars
+                    histo = TH1F(key, longNames(i), pars[0], pars[1], pars[2])
+                    #-----------------------------------------------------------------------
+                    
+                    
+                    # CALIBRATION
+                    #-----------------------------------------------------------------------
+                    edep, selection = calib93(i, E)
+                    #-----------------------------------------------------------------------
+                    
+                    
+                    # DEFINE CUTS
+                    #-----------------------------------------------------------------------
+                    masterCut = cutsBDT92(i, C, E, edep, selection)
+                    #-----------------------------------------------------------------------
+                    
+                    
+                    # FILL HISTOS
+                    #-----------------------------------------------------------------------
+                    chain.Draw(selection+' >> '+key, masterCut)
+                    
+                    #histo.SetLineColor(kBlack)
+                    #histo.SetMarkerColor(kBlack)
+                    #histo.SetLineWidth(1)
+                    
+                    data[key]['hist'] = histo
+                    #data[key]['hist'].Sumw2()
+                    
+                    subruns = nfiles
+                    key2 = key+'_subruns'
+                    temp2 = TH1F(key2,'subruns',1,0,1)
+                    temp2.SetBinContent(1, subruns)
+                    data[key]['subruns_hist'] = temp2
+                    data[key]['subruns'] = subruns
+                    
+                    #runtime = subruns*subrunTime*60.*60.
+                    key3 = key+'_runtime'
+                    temp3 = TH1F(key3,'runtime',1,0,1)
+                    temp3.SetBinContent(1, runtime)
+                    data[key]['runtime_hist'] = temp3
+                    data[key]['runtime'] = runtime
+                    #-----------------------------------------------------------------------
+                    
+        else:
+            print 'ERROR: No data files found... quitting...'
+            sys.exit()
+
+    return data, runtime
+
+
+def calib93(i,E):
+    
+    hiE = [[1.0,  -6],
+           [1.0,  -6],
+           [1.0,  -8],
+           [1.0,  -8],
+           [1.0, -20],
+           [1.0,  -5],
+           [1.0,  -8],
+           [0.7,   0]]
+    
+    if E:
+        edep = '(crystal'+str(i+1)+'.energyD)'
+        selection = '(('+edep+'*'+str(hiE[i][0])+')+'+str(hiE[i][1])+')'
+    else:
+        edep = '(crystal'+str(i+1)+'.energy)'
+        selection = edep
+    
+    return edep, selection
 

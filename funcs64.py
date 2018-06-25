@@ -6,11 +6,12 @@
 # 
 # Works with v64 and later versions
 # 
-# version: 2018-04-04
+# version: 2018-05-17
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
-# + add copper as a separate group
+# + add Sn113 to the cosmo group in setGroup()
+# + add copper as a separate group in setGroup()
 # + add Na22 to cosmogenics
 # + add steel to the groups
 # ~ moved Cd109 to the cosmo group
@@ -57,6 +58,26 @@ import ROOT
 sys.path.append("/home/mkauer/COSINE/CUP/mc-fitting/")
 sys.path.append("/home/mkauer/mc-fitting/")
 from funcs63 import *
+
+
+def setGroup(info):
+    if info['loca'] == 'internal':
+        if info['isof'] in ['Cd109',  'Sn113',
+                            'H3',     'Na22',
+                            'I125',   'I126',
+                            'Te121',  'Te121m',
+                            'Te123m', 'Te125m',
+                            'Te127m']:
+            return 'cosmo'
+        else: return 'internal'
+    if 'pmt'    in info['loca']: return 'pmts'
+    if 'surf'   in info['loca']: return 'surface'
+    if 'cucase' in info['loca']: return 'copper'
+    if 'copper' in info['loca']: return 'copper'
+    if 'steel'  in info['loca']: return 'steel'
+    if 'teflon' in info['loca']: return 'surface'
+    if 'veto'   in info['loca']: return 'lsveto'
+    return 'none'
 
 
 def histparam64(E):
@@ -186,25 +207,6 @@ def getInfo64(line, freuse=0, fchans=0):
         info['group'] = setGroup(info)
         
     return info
-
-
-def setGroup(info):
-    if info['loca'] == 'internal':
-        if info['isof'] in ['Cd109','H3','Na22',
-                            'I125','I126',
-                            'Te121','Te121m',
-                            'Te123m','Te125m',
-                            'Te127m']:
-            return 'cosmo'
-        else: return 'internal'
-    if 'pmt'    in info['loca']: return 'pmts'
-    if 'surf'   in info['loca']: return 'surface'
-    if 'cucase' in info['loca']: return 'copper'
-    if 'copper' in info['loca']: return 'copper'
-    if 'steel'  in info['loca']: return 'steel'
-    if 'teflon' in info['loca']: return 'surface'
-    if 'veto'   in info['loca']: return 'lsveto'
-    return 'none'
 
 
 def build64(infile = 'backgrounds640.txt', freuse=0, fchans=0):

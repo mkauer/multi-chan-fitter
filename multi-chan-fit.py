@@ -10,7 +10,7 @@ V = 'v93'
 # trying to get this working with crystals not C6 or C7...
 # and adding new MC from Pushpa
 # 
-# version: 2018-04-17
+# version: 2018-05-29
 # 
 # see CHANGELOG for changes
 ######################################################################
@@ -39,20 +39,45 @@ pushpa = 0
 ### ========== GENERAL INPUTS ==============================
 ### note to add to saved plot names?
 note = 0
-#note = 'pushpa-fit'
+#note = 'default'
 
+#mcfile = 'test-efficiencies.txt'
 
 #mcfile = 'backgrounds951-C123467-v2.txt' # WORKING!!!
+#mcfile = 'backgrounds953-C12345678-v2.txt' # WORKING!!!
+#mcfile = 'backgrounds953-C12345678-v3.txt'
+#mcfile = 'backgrounds953-C12345678-v4.txt'
+#mcfile = 'backgrounds953-C12345678-v5.txt' # WORKING!!!
+#mcfile = 'backgrounds953-C12345678-v6.txt' # WORKING!!!
+#mcfile = 'backgrounds953-C12345678-v7.txt' # WORKING!!!
+#mcfile = 'backgrounds953-C12345678-v8.txt' # WORKING!!!
+mcfile = 'backgrounds953-C12345678-v9.txt'
 
-mcfile = 'backgrounds953-C12345678-v2.txt' # WORKING!!!
-
-#mcfile = 'test-h3.txt'
 
 print '\nINFO: using backgrounds config file -->', mcfile
 
 
-### some extra MC and plotting options
-#===========================================================
+### ==========  FITTING OPTIONS  ===========================
+### fitting ranges and rebinnings
+if pushpa:
+    fLoE = [6,  70]   # Pushpa style
+    fHiE = [70, 2000] # Pushpa style
+    loEfitRebin = 6   # Pushpa style
+    hiEfitRebin = 2   # Pushpa style
+else:
+    fLoE = [6, 76]
+    fHiE = [70, 2770]
+    loEfitRebin = 3
+    hiEfitRebin = 4
+    
+### select channels to plot and fit
+### ['S'] single-hit data channel
+### ['M'] multi-hit data channel
+### ['SM'] both channels
+fitchans = 'SM'
+
+
+### ==========  EXTRA MC OPTIONS  ==========================
 ### which MC to fit globally (to all crystals simultaneously)?
 globalmc = ['lsveto', 'pmt', 'innersteel']
 ### include bkgs from 'other' pmts and internals?
@@ -70,7 +95,6 @@ showlegs = 1
 redtotal = 1
 ### combine 'others' into the makePlots() plots?
 combine = 1
-#===========================================================
 
 ### force the reuse of all joined rootfiles in mcfile? [0,1,2]
 ### very nice for debugging
@@ -83,29 +107,7 @@ reuse = 0
 updateMCfile = 1
 
 
-### ========== FITTING OPTIONS =============================
-### select channels to plot and fit
-### ['S'] single-hit data channel
-### ['M'] multi-hit data channel
-### ['SM'] both channels
-fitchans = 'SM'
-
-
-### fitting ranges and rebinnings
-if pushpa:
-    fLoE = [6,  70]   # Pushpa style
-    fHiE = [70, 2000] # Pushpa style
-    loEfitRebin = 6   # Pushpa style
-    hiEfitRebin = 2   # Pushpa style
-else:
-    fLoE = [6, 100]
-    fHiE = [60, 2800]
-    #fLoE = [0, 1]
-    #fHiE = [2400, 2800]
-    loEfitRebin = 6
-    hiEfitRebin = 2
-
-
+### ==========  OTHER FITTING OPTIONS  =====================
 ### use fit bounds from backgrounds file? [0,1,2,3]
 ### [0] max bounds are 0-1
 ### [1] use bounds specified in backgrounds file (as percent of activity)
@@ -123,7 +125,7 @@ otherBnds = [1e-6, 0.9]
 extend = 1
 
 
-### ========== PLOTTING OPTIONS ============================
+### ==========  PLOTTING OPTIONS  ==========================
 ### individual plots for all crystals? [0,1]
 indi = 1
 
@@ -131,22 +133,22 @@ indi = 1
 pltchans = 'SM'
 
 ### plotting ranges
-if pushpa:
-    loer = [0,   70]   # pushpa style
-    hier = [100, 2000] # pushpa style
-else:
-    loer = [0, 100]
-    hier = [0, 3000]
+#loer = [0,   70]   # pushpa style
+#hier = [100, 2000] # pushpa style
+loer = [0, 100]
+hier = [0, 3000]
 
 eran = [loer, hier]
 
 ### rebin the final plots [1,inf]
 if pushpa:
-    loEplotRebin = 6 # Pushpa style
-    hiEplotRebin = 2 # Pushpa style
+    loEplotRebin = 6  # Pushpa style
+    hiEplotRebin = 2  # Pushpa style
 else:
-    loEplotRebin = 6
-    hiEplotRebin = 2
+    #loEplotRebin = 6
+    #hiEplotRebin = 2
+    loEplotRebin = loEfitRebin
+    hiEplotRebin = hiEfitRebin
 
 ### use linear residual scale? [0,1]
 linres = 1
@@ -157,7 +159,7 @@ lrs = [0, 2]
 liny = 0
 
 
-### ========== CAN EFFECT FIT RESULTS ======================
+### ==========  CAN EFFECT FIT RESULTS  ====================
 ### scale to dru?
 dru = 1
 
@@ -183,13 +185,26 @@ chiopt = 'WU'
 zeroFitDataError = 1
 
 
-### ========== MAIN FUNCTION ===============================
+### ==========  MAIN FUNCTION  =============================
 def myself(argv):
-
+    
     batch = 0
     if onCup(): batch = 1
-    gROOT.SetBatch(batch)
     
+    #-----------------------------------------
+    # set as an empty list for default action
+    #-----------------------------------------
+    xstals = []
+    
+    if len(argv) > 0:
+        batch = 1
+        xstals = []
+        for c in argv:
+            xstals.append(int(c))
+    #-----------------------------------------
+    #-----------------------------------------
+    
+    gROOT.SetBatch(batch)
     gStyle.SetPalette (1)
     gStyle.SetOptStat ('')
     gStyle.SetOptFit  (0)
@@ -211,8 +226,10 @@ def myself(argv):
     #-----------------------------------------------------------------
     #-----------------------------------------------------------------
     allchans = uniqString(fitchans+pltchans)
-    data, bkgs, sigs, runtime = build93(mcfile, others, vcut, reuse, allchans)
+    data, bkgs, sigs, runtime = build93(mcfile, others, vcut, reuse, allchans, xstals)
     print 'INFO: runtime =', runtime, '(seconds)'
+
+    #sys.exit()
     
     datkeys = sortDataKeys92(data)
     if datsumw2:
@@ -2478,6 +2495,9 @@ def myself(argv):
     #-------------------------------
     try: del fcanv
     except: pass
+
+    try: del mcanv
+    except: pass
     
     try: del sepFitPlot
     except: pass
@@ -2495,6 +2515,7 @@ def myself(argv):
     if not batch:
         raw_input('[Enter] to quit \n')
 
+    return
 
 ######################################################################
 ######################################################################

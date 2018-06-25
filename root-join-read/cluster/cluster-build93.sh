@@ -1,7 +1,12 @@
 #!/bin/bash
 
-# 2018-04-17
+# 2018-05-29
 
+# ~ regenerate internal H3 with the new efficiency cut
+#   (evt_type > 10) - this finally works!
+#   fix this issue with the x2 higher activity...
+# ~ revert energy calibs to what Pushpa is using
+# + add Sn113
 # + add newer copper Co60
 # + add new Cd105 and Co60 backgrounds
 # ~ check different data offsets in c6,c7
@@ -56,8 +61,10 @@ joinscript=$base/$join
 #for mcfile in innersteelU238_GRND innersteelTh232_GRND
 #for mcfile in c6-dataset1 c7-dataset1
 #for mcfile in naisurf10umPb210_GRND teflonsurf2umPb210_GRND teflonbulkPb210_GRND
-for mcfile in copperCo60_GRND
+#for mcfile in copperCo60_GRND
+#for mcfile in internalSn113_GRND
 #for mcfile in `ls $configdir`
+for mcfile in internalH3_GRND
 do
     file="$clustdir/$build-$mcfile.sh"
     cat > $file <<EOF

@@ -38,6 +38,9 @@ def _myself_(argv):
         print "ERROR: specify a backgrounds or data file"
         return
 
+    #if len(sys.argv)>2:
+    #    xstal = int(sys.argv[2])
+    
     # select a specific crystal
     # or comment out
     #xstal = 2

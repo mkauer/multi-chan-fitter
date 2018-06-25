@@ -856,7 +856,7 @@ def resol80(i, E=0, pushpaC7Surf=0):
                 [1.7, 0], # tweaking C5
 	        [0.6498, 0.009670],
 	        [0.7034, 0.007812],
-                [4., 0]] # tweaking C8
+                [4.0, 0]] # tweaking C8
     if E:
         p0, p1 = hiEresol[int(i)]
     else:

@@ -12,6 +12,59 @@
 # ====================================================================
 
 
+# 2018-05-29
+# --------------------------------------------------------------------
+# ~ regenerate the H3 - the normalization was still wrong
+# ~ fixed H3 normalization in funcs93.py --> buildMC93()
+
+
+# 2018-05-28
+# --------------------------------------------------------------------
+# ~ regenerate internals with new efficiency cut (mainly H3 and Na22)
+
+
+# 2018-05-21
+# --------------------------------------------------------------------
+# + argv parsing for the xstals
+# + added calib93() and buildData93() to funcs93.py
+
+
+# 2018-05-17
+# --------------------------------------------------------------------
+# + add path to Sn113 MC and groupNo for Sn113
+# + add Sn113 to the cosmo group in setGroup()
+
+
+# 2018-05-16
+# --------------------------------------------------------------------
+# + added option to just fit/plot crystals in a specified list
+# ~ massive revamp of the backgrounds file, new initial values and bounds
+
+
+# 2018-05-15
+# --------------------------------------------------------------------
+# ~ tweaked fit energy windows 6-70, 100-2500, and fit rebinning 6, 4
+
+
+# 2018-05-03
+# --------------------------------------------------------------------
+# ~ using more accurate list of pmt isotope fit parameters from Pushpa
+# ~ using more accurate list of internal isotope fit parameters from Pushpa
+
+
+# 2018-04-25
+# --------------------------------------------------------------------
+# ~ updated the cuts on generated events!
+
+
+# 2018-04-24
+# --------------------------------------------------------------------
+# ~ trying backgrounds953-C12345678-v3 with new Co60 and also
+#   no teflon bulk Pb210 in crystals 1 or 2
+# ~ played around with cut efficiencies and I think using the
+#   groupNo cut and no evt_type cut looks most accurate...
+
+
 # 2018-04-17
 # --------------------------------------------------------------------
 # + tweaked functions for new copper Co60 from pushpa
