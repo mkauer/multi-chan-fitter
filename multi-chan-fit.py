@@ -3,19 +3,22 @@
 ######################################################################
 # Matt Kauer - mkauer@physics.wisc.edu
 ######################################################################
-# 93-fix-other-crystals.py
+# 100-add-lsveto.py
 
-V = 'v93'
+V = 'v100'
 
-# trying to get this working with crystals not C6 or C7...
-# and adding new MC from Pushpa
+# Include the LS veto as a 9th crystal!
+#   This will take some major refactoring. I should try to include
+#   separate S and M fit ranges here too since it's going to effect
+#   a lot of the same infrastructure. And might as well revamp into
+#   python class structure. 
 # 
-# version: 2018-05-29
+# version: 2018-06-26
 # 
 # see CHANGELOG for changes
 ######################################################################
 
-import os,sys
+import os,sys,re
 import shutil
 import socket
 import copy
@@ -27,9 +30,9 @@ from ROOT import *
 ROOT.gROOT.Reset()
 ROOT.gErrorIgnoreLevel = kWarning
 
-#sys.path.append("/home/mkauer/COSINE/CUP/mc-fitting/")
-#sys.path.append("/home/mkauer/mc-fitting/")
-from funcs93 import *
+sys.path.append("/home/mkauer/COSINE/CUP/mc-fitting/")
+sys.path.append("/home/mkauer/mc-fitting/")
+from funcs100 import *
 
 
 ### use pushpa's fitting ranges and binning?
@@ -41,17 +44,7 @@ pushpa = 0
 note = 0
 #note = 'default'
 
-#mcfile = 'test-efficiencies.txt'
-
-#mcfile = 'backgrounds951-C123467-v2.txt' # WORKING!!!
-#mcfile = 'backgrounds953-C12345678-v2.txt' # WORKING!!!
-#mcfile = 'backgrounds953-C12345678-v3.txt'
-#mcfile = 'backgrounds953-C12345678-v4.txt'
-#mcfile = 'backgrounds953-C12345678-v5.txt' # WORKING!!!
-#mcfile = 'backgrounds953-C12345678-v6.txt' # WORKING!!!
-#mcfile = 'backgrounds953-C12345678-v7.txt' # WORKING!!!
-#mcfile = 'backgrounds953-C12345678-v8.txt' # WORKING!!!
-mcfile = 'backgrounds953-C12345678-v9.txt'
+mcfile = 'backgrounds1000.txt'
 
 
 print '\nINFO: using backgrounds config file -->', mcfile
