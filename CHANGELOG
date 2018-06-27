@@ -7,14 +7,23 @@
 # Key is:
 # [+] added
 # [-] removed
-# [~] changed/fixed
+# [~] changed/updated
 # [V] version change
 # ====================================================================
 
 
 # 2018-06-26
 # --------------------------------------------------------------------
-
+# + many tweaks to get plotting working for x9/lsveto
+# + added lsveto (x9) info to a bunch of old "standard" functions
+#   in funcs60.py
+# + many new/updated functions in funcs100.py for x9/lsveto
+#    + buildMC100() and scaleBkgs100()
+#    + numX()
+#    + calib100()
+#    + makeTotal100 and makeResid100
+#    + buildData100 and cutsBDT100
+#    + getInfo100 and build100
 # V switch to funcs100.py
 # V switch to 100-add-lsveto.py
 

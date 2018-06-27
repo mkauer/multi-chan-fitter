@@ -465,8 +465,7 @@ def scaleData70(data, dru=0):
         days = 1.
         xkgs = 1.
         keVperBin = 1.
-        if dru:
-            days = float((data[key]['runtime'])/86400.)
+        if dru: days = float((data[key]['runtime'])/86400.)
         xkgs = float(cmass(i))
         keVperBin = 1./float(data[key]['pars'][3])
         scale = float(1./(days*xkgs*keVperBin))

@@ -6,10 +6,11 @@
 # 
 # Works with v60 and later versions
 # 
-# version: 2017-07-26
+# version: 2018-06-26
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# ~ updated the naming of stuff for the lsveto (crystal 9)
 # ~ tweaked readFile() so the # search is after the """ search
 # ~ tweaked histparam() to also return bins per keV
 # ~ fixed sim path+name so not to combine lsveto and lsvetoair
@@ -23,16 +24,6 @@
 # + building off funcs52.py
 # 
 # email me: mkauer@physics.wisc.edu
-######################################################################
-# 
-# Where is MC?
-# /data/MC/KIMS-NaI/user-scratch/sim/processed/newGeometry/
-# 
-# Where is the processed data?
-# Right now I'm using:
-# /data/COSINE/NTP/phys/V00-02-03_MERGED
-# and run ntp_I001546*
-# 
 ######################################################################
 
 import os,sys
@@ -993,7 +984,8 @@ def names(i):
         'NaI-05',
         'NaI-06',
         'NaI-07',
-        'NaI-08'
+        'NaI-08',
+        'LSveto'
     ]
     return crystals[int(i)]
 
@@ -1010,7 +1002,8 @@ def cnames(i):
         'C5',
         'C6',
         'C7',
-        'C8'
+        'C8',
+        'LS'
     ]
     return crystals[int(i)]
 
@@ -1027,7 +1020,9 @@ def cmass(i):
         18.28,
         12.50,
         12.50,
-        18.28
+        18.28,
+        1800.0   # XXX : ls veto mass in kg
+        #106.14  # sum of 8 crystal masses
         ]
     return mass[int(i)]
 
@@ -1041,7 +1036,6 @@ def energyNames(E=0):
     
 def chanNames(chan='S'):
     name = ''
-    if chan == 'A': name = 'all-hit'
     if chan == 'S': name = 'single-hit'
     if chan == 'M': name = 'multi-hit'
     return name
@@ -1056,7 +1050,8 @@ def detailNames(i):
         'AS-1  Sample-C',
         'NaI-011  WimpScint-3',
         'NaI-012  WimpScint-3',
-        'AS-2  Sample-C'
+        'AS-2  Sample-C',
+        'LS Veto'
     ]
     return crystals[int(i)]
 
@@ -1065,17 +1060,6 @@ def longNames(i):
     """
     Full name and specs for the crystal
     """
-    crystals = [
-        cnames(i)+'  NaI-001  Sample-B  '+str(cmass(i))+'kg',
-        cnames(i)+'  NaI-002  Sample-C  '+str(cmass(i))+'kg',
-        cnames(i)+'  NaI-007  WimpScint-2  '+str(cmass(i))+'kg',
-        cnames(i)+'  AS-3  WimpScint-2  '+str(cmass(i))+'kg',
-        cnames(i)+'  AS-1  Sample-C  '+str(cmass(i))+'kg',
-        cnames(i)+'  NaI-011  WimpScint-3  '+str(cmass(i))+'kg',
-        cnames(i)+'  NaI-012  WimpScint-3  '+str(cmass(i))+'kg',
-        cnames(i)+'  AS-2  Sample-C  '+str(cmass(i))+'kg'
-    ]
-    #return crystals[int(i)]
     return str(cnames(i)+'  '+detailNames(i)+'  '+str(cmass(i))+'kg')
 
 
@@ -1091,7 +1075,8 @@ def volumeNames(i):
         'NaIDet05Crystal',
         'NaIDet06Crystal',
         'NaIDet07Crystal',
-        'NaIDet08Crystal'
+        'NaIDet08Crystal',
+        'lsveto'
     ]
     return volumeNames[int(i)]
 

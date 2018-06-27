@@ -72,14 +72,15 @@ fitchans = 'SM'
 
 ### ==========  EXTRA MC OPTIONS  ==========================
 ### which MC to fit globally (to all crystals simultaneously)?
-globalmc = ['lsveto', 'pmt', 'innersteel']
+globalmc = []
+#globalmc = ['lsveto', 'pmt', 'innersteel']
 ### include bkgs from 'other' pmts and internals?
-others  = 1
+others  = 0
 ### use the primVolumeName cut?
 vcut    = 1
 
 ### plot components in groups? [0,1]
-ingroups = 1
+ingroups = 0
 ### show the total? [0,1]
 showTotal = 1
 ### show the legends? [0,1]
@@ -129,7 +130,7 @@ pltchans = 'SM'
 #loer = [0,   70]   # pushpa style
 #hier = [100, 2000] # pushpa style
 loer = [0, 100]
-hier = [0, 3000]
+hier = [0, 3500]
 
 eran = [loer, hier]
 
@@ -219,7 +220,7 @@ def myself(argv):
     #-----------------------------------------------------------------
     #-----------------------------------------------------------------
     allchans = uniqString(fitchans+pltchans)
-    data, bkgs, sigs, runtime = build93(mcfile, others, vcut, reuse, allchans, xstals)
+    data, bkgs, sigs, runtime = build100(mcfile, others, vcut, reuse, allchans, xstals)
     print 'INFO: runtime =', runtime, '(seconds)'
 
     #sys.exit()
@@ -232,11 +233,11 @@ def myself(argv):
     # scale into dru units
     if dru:
         data = scaleData70(data, 1)
-        bkgs = scaleBkgs93(bkgs)
+        bkgs = scaleBkgs100(bkgs)
         sigs = scaleBkgs93(sigs)
     else:
         data = scaleData70(data, 0)
-        bkgs = scaleBkgs93(bkgs, runtime)
+        bkgs = scaleBkgs100(bkgs, runtime)
         sigs = scaleBkgs93(sigs, runtime)
 
     # make plots before combining!!!
@@ -257,7 +258,7 @@ def myself(argv):
 
     # plot all crystals that have data
     justthese=[]
-    for i in range(1,9):
+    for i in range(1, numX()+1):
         for key in datkeys:
             if 'x'+str(i) in key and i not in justthese:
                 justthese.append(i)
@@ -1891,20 +1892,20 @@ def myself(argv):
     
     # plot the lo and hi energy histograms for all channels
     #=================================================================
-        
+    
     # number of energy ranges (lo, hi)
     numE = 2
-    # number of channels (all, single, multi, combos)
+    # number of channels (single, multi, lsveto, alpha)
     numC = len(pltchans)
     
     #canvs  = [[[] for x in range(numE)] for x in range(numC)]
     canvs  = [[0 for x in range(numE)] for x in range(numC)]
     
     ### for separate plots
-    #sepPlots = [[[[] for x in range(8)] for x in range(numE)] for x in range(numC)]
-    sepPlots = [[[0 for x in range(8)] for x in range(numE)] for x in range(numC)]
-    sepTopPad = [[[0 for x in range(8)] for x in range(numE)] for x in range(numC)]
-    sepBotPad = [[[0 for x in range(8)] for x in range(numE)] for x in range(numC)]
+    #sepPlots = [[[[] for x in range(numX())] for x in range(numE)] for x in range(numC)]
+    sepPlots = [[[0 for x in range(numX())] for x in range(numE)] for x in range(numC)]
+    sepTopPad = [[[0 for x in range(numX())] for x in range(numE)] for x in range(numC)]
+    sepBotPad = [[[0 for x in range(numX())] for x in range(numE)] for x in range(numC)]
     
     ### seperate memory space for the pads is key!!!!
     #toppad = [[[] for x in range(numE)] for x in range(numC)]
@@ -1924,8 +1925,8 @@ def myself(argv):
     total  = [[0 for x in range(numE)] for x in range(numC)]
     resid  = [[0 for x in range(numE)] for x in range(numC)]
     
-    gbkgs  = [[[{} for x in range(8)] for x in range(numE)] for x in range(numC)]
-    gsigs  = [[[{} for x in range(8)] for x in range(numE)] for x in range(numC)]
+    gbkgs  = [[[{} for x in range(numX())] for x in range(numE)] for x in range(numC)]
+    gsigs  = [[[{} for x in range(numX())] for x in range(numE)] for x in range(numC)]
         
     plotRebin = 1
     for C, chan in enumerate(pltchans): 
@@ -1939,7 +1940,9 @@ def myself(argv):
             canvs[C][E] = TCanvas('canv'+chan+str(E),
                                   'canv'+chan+str(E),
                                   0, 0, 1400, 900)
-            canvs[C][E].Divide(4,2)
+
+            #canvs[C][E].Divide(4,2)
+            canvs[C][E].Divide(5,2)
             
             gStyle.SetPadTopMargin    (0.07)
             gStyle.SetPadBottomMargin (0.11)
@@ -1958,10 +1961,10 @@ def myself(argv):
             legs2[C][E]  = []
             zeros[C][E]  = []
 
-            total[C][E]  = makeTotal64(chan, E, params[E])
-            resid[C][E]  = makeResid64(chan, E, params[E])
+            total[C][E]  = makeTotal100(chan, E, params[E])
+            resid[C][E]  = makeResid100(chan, E, params[E])
             
-            for i in range(8):
+            for i in range(numX()):
                 
                 canvs[C][E].cd(i+1)
                 
@@ -2081,7 +2084,12 @@ def myself(argv):
                             #data[dkey]['hist'].SetAxisRange(2e-3, 2e1, 'y')
                             if E: data[dkey]['hist'].SetAxisRange(2e-3, 2e1, 'y')
                             else: data[dkey]['hist'].SetAxisRange(2e-3, 3e2, 'y')
-                        
+
+                            ### for lsveto spectra
+                            if E and i==8:
+                                data[dkey]['hist'].SetAxisRange(0, 3500, 'x')
+                                data[dkey]['hist'].SetAxisRange(2e-5, 30, 'y')
+                                
                         #popt = 'P E1'
                         #popt = 'HIST'
                         popt = ''
@@ -2401,7 +2409,7 @@ def myself(argv):
             ### Save separate crystal histos?
             #-------------------------------------------------------------
             if indi:
-                for i in range(8):
+                for i in range(numX()):
                     if i+1 in justthese:
                         #isave = 'xstal-'+str(i+1)
                         try:
@@ -2432,28 +2440,21 @@ def myself(argv):
     ### Save 4 plots to one canvas
     #-------------------------------------------------------------
     if indi:
-        combPlots = [0 for x in range(8)]
-        tpad = [[0 for x in range(8)] for x in range(4)]
-        bpad = [[0 for x in range(8)] for x in range(4)]
+        combPlots = [0 for x in range(numX())]
+        tpad = [[0 for x in range(numX())] for x in range(4)]
+        bpad = [[0 for x in range(numX())] for x in range(4)]
         
-        for i in range(8):
+        for i in range(numX()):
             if i+1 in justthese:
-                #csave = 'xstal-'+str(i+1)
                 try:
                     combPlots[i] = TCanvas('ccan-'+str(i+1),'ccan-'+str(i+1),0,0,1400,900)
                     combPlots[i].Divide(2,2)
-                    #tpad = [0 for x in range(4)]
-                    #bpad = [0 for x in range(4)]
                     p=0
                     for C, chan in enumerate(pltchans):
                         for E in range(numE):
-                            #tpad[p]=toppad[C][E][i].Clone()
-                            #bpad[p]=botpad[C][E][i].Clone()
                             tpad[p][i] = toppad[C][E][i].Clone()
                             bpad[p][i] = botpad[C][E][i].Clone()
                             combPlots[i].cd(p+1)
-                            #tpad[p].Draw()
-                            #bpad[p].Draw()
                             tpad[p][i].Draw()
                             bpad[p][i].Draw()
                             combPlots[i].Update()
@@ -2486,24 +2487,25 @@ def myself(argv):
     
     # delete the extra crap
     #-------------------------------
+    
     try: del fcanv
     except: pass
-
+    
     try: del mcanv
     except: pass
     
     try: del sepFitPlot
     except: pass
-
+    
     #try: del combPlots
     #except: pass
     
     try: del sepPlots
     except: pass
-
+    
     try: del canvs
     except: pass
-     
+    
     
     if not batch:
         raw_input('[Enter] to quit \n')
