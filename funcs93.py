@@ -6,10 +6,11 @@
 # 
 # Works with v93 and later versions
 # 
-# version: 2018-05-29
+# version: 2018-06-27
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# ~ was using groupNo 1 for K40! changed to 31 in groupNum93()
 # ~ fixed the H3 normalization - it was still wrong!
 # + added calib93() and buildData93()
 # + add path to Sn113 MC and groupNo for Sn113
@@ -762,26 +763,31 @@ def makePlots93(bkgs, combine, others, vcut):
 
 
 def groupNum93(info):
-    
-    # internal U238 "groupNo"
-    # -----------------------------
+
+    # U238 group numbers
+    # ------------------------
     # 11: U238  -> Th230
     # 12: Th230 -> Ra226
     # 13: Ra226 -> Rn222
     # 14: Rn222 -> Pb210
     # 15: Pb210 -> ground
     
-    # internal Th232 "groupNo"
-    # -----------------------------
+    # Th232 group numbers
+    # ------------------------
     # 21: Th232 -> Ra228
     # 22: Ra228 -> Th228
     # 23: Th228 -> ground
 
-    if info['chst'] in ['Te121m','Te123m','Te125m','Te127m','I125','Cd109','Na22','H3','Co60','Sn113']:
-        return TCut('((groupNo >= 0) && (groupNo < 1))')
+    # others
+    # ------------------------
+    # 31: K40
 
+    
+    if info['chst'] in ['Te121m','Te123m','Te125m','Te127m','I125','Cd109','Na22','H3','Co60','Sn113']:
+        return TCut('(groupNo == 0)')
+    
     if info['chst'] == 'K40':
-        return TCut('((groupNo >= 0) && (groupNo < 1))')
+        return TCut('(groupNo == 31)')
     
     if   info['chst'] == 'U238':  start = 11
     elif info['chst'] == 'Th230': start = 12

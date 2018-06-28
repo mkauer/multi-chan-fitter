@@ -10,6 +10,9 @@
 #-----------------------------------------------------------
 
 
+# 2018-06-27
+# changed bounds for pmt, lsveto, and innersteel
+
 # 2018-06-26
 # add lsveto as xstal-9
 
@@ -457,25 +460,25 @@ FR	M	9	internal	U238	U238	Th230	3.28e-04	0.8	1.2	./root-join-read/build92/build9
 FR	M	9	internal	Pb210	Pb210	GRND	1.52e+00	0.9	10	./root-join-read/build92/build92-internalPb210_GRND.root
 FR	M	9	internal	Th232	Ra228	Th228	2.30e-03	0.8	1.2	./root-join-read/build92/build92-internalRa228_Th228.root
 FR	M	9	internal	Th232	Th228	GRND	2.30e-03	0.8	1.2	./root-join-read/build92/build92-internalTh228_GRND.root
+"""
 
-FR	M	9	pmt		K40	K40	GRND	5.80e+01	0.5	2	./root-join-read/build91/c6/build91-pmtK40_GRND.root
-FR	M	9	pmt		U238	U238	Th230	2.50e+01	0.5	5	./root-join-read/build91/c6/build91-pmtU238_Th230.root
-#FR	M	9	pmt		U238	Th230	Ra226	2.50e+01	0.5	5	./root-join-read/build91/c6/build91-pmtTh230_Ra226.root
-FR	M	9	pmt		U238	Ra226	Rn222	6.00e+01	0.5	5	./root-join-read/build91/c6/build91-pmtRa226_Rn222.root
-FR	M	9	pmt		U238	Rn222	Pb210	2.50e+01	0.5	5	./root-join-read/build91/c6/build91-pmtRn222_Pb210.root
-FR	M	9	pmt		Th232	Ra228	Th228	1.20e+01	0.5	5	./root-join-read/build91/c6/build91-pmtRa228_Th228.root
-FR	M	9	pmt		Th232	Th228	GRND	3.80e+00	0.5	5	./root-join-read/build91/c6/build91-pmtTh228_GRND.root
-"""
-B	M	9	lsveto	K40	K40	GRND	6.00e+00	0.1	10	./root-join-read/build70/build70-lsvetoK40_GRND.root
-B	M	9	lsveto	U238	U238	Th230	1.06e-02	0.1	10	./root-join-read/build70/build70-lsvetoU238_Th230.root
-B	M	9	lsveto	U238	Th230	Ra226	2.05e+00	0.1	10	./root-join-read/build70/build70-lsvetoTh230_Ra226.root
-B	M	9	lsveto	U238	Ra226	Rn222	9.00e-03	0.1	10	./root-join-read/build70/build70-lsvetoRa226_Rn222.root
-B	M	9	lsveto	U238	Rn222	Pb210	3.67e-01	0.1	10	./root-join-read/build70/build70-lsvetoRn222_Pb210.root
-B	M	9	lsveto	U238	Pb210	GRND	1.23e+00	0.1	10	./root-join-read/build70/build70-lsvetoPb210_GRND.root
-B	M	9	lsveto	Th232	Th232	Ra228	2.00e-03	0.1	10	./root-join-read/build70/build70-lsvetoTh232_Ra228.root
-B	M	9	lsveto	Th232	Ra228	Th228	2.04e-03	0.1	10	./root-join-read/build70/build70-lsvetoRa228_Th228.root
-B	M	9	lsveto	Th232	Th228	GRND	7.94e-01	0.1	10	./root-join-read/build70/build70-lsvetoTh228_GRND.root
-"""
-#B	M	9	innersteel	U238	U238	GRND	1.50e-01	1	10	./root-join-read/build91/build91-innersteelU238_GRND.root
-#B	M	9	innersteel	Th232	Th232	GRND	4.00e-01	1	10	./root-join-read/build91/build91-innersteelTh232_GRND.root
+F	M	9	pmt	K40	K40	GRND	1.15e+02	0.001	10	./root-join-read/build91/c6/build91-pmtK40_GRND.root
+F	M	9	pmt	U238	U238	Th230	1.25e+01	0.001	10	./root-join-read/build91/c6/build91-pmtU238_Th230.root
+F	M	9	pmt	U238	Ra226	Rn222	3.00e+02	0.001	10	./root-join-read/build91/c6/build91-pmtRa226_Rn222.root
+F	M	9	pmt	U238	Rn222	Pb210	1.25e+02	0.001	10	./root-join-read/build91/c6/build91-pmtRn222_Pb210.root
+F	M	9	pmt	Th232	Ra228	Th228	6.00e+01	0.001	10	./root-join-read/build91/c6/build91-pmtRa228_Th228.root
+F	M	9	pmt	Th232	Th228	GRND	1.90e+01	0.001	10	./root-join-read/build91/c6/build91-pmtTh228_GRND.root
+
+F	M	9	lsveto	K40	K40	GRND	6.00e+00	0.001	10	./root-join-read/build70/build70-lsvetoK40_GRND.root
+F	M	9	lsveto	U238	U238	Th230	1.06e-02	0.001	10	./root-join-read/build70/build70-lsvetoU238_Th230.root
+F	M	9	lsveto	U238	Th230	Ra226	2.05e+00	0.00001	10	./root-join-read/build70/build70-lsvetoTh230_Ra226.root
+F	M	9	lsveto	U238	Ra226	Rn222	9.00e-03	0.001	10	./root-join-read/build70/build70-lsvetoRa226_Rn222.root
+F	M	9	lsveto	U238	Rn222	Pb210	3.67e-01	0.001	10	./root-join-read/build70/build70-lsvetoRn222_Pb210.root
+F	M	9	lsveto	U238	Pb210	GRND	1.23e+00	0.001	10	./root-join-read/build70/build70-lsvetoPb210_GRND.root
+F	M	9	lsveto	Th232	Th232	Ra228	2.00e-03	0.001	10	./root-join-read/build70/build70-lsvetoTh232_Ra228.root
+F	M	9	lsveto	Th232	Ra228	Th228	2.04e-03	0.001	100	./root-join-read/build70/build70-lsvetoRa228_Th228.root
+F	M	9	lsveto	Th232	Th228	GRND	7.94e-01	0.001	10	./root-join-read/build70/build70-lsvetoTh228_GRND.root
+
+F	M	9	innersteel	U238	U238	GRND	1.50e-01	0.001	10	./root-join-read/build91/build91-innersteelU238_GRND.root
+F	M	9	innersteel	Th232	Th232	GRND	4.00e-01	0.001	10	./root-join-read/build91/build91-innersteelTh232_GRND.root
 

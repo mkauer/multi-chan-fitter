@@ -12,6 +12,18 @@
 # ====================================================================
 
 
+# 2018-06-27
+# --------------------------------------------------------------------
+# ~ fitting is now working but activity scaling I think is still wrong
+# ~ tweaked main script 100-add-lsveto.py for fitting and plotting
+#   of a 9th sudo-crystal
+# + more new/updated functions in funcs100.py for x9/lsveto
+#    + scaleSigs100() and tweaked the lsveto
+#    + combineOthers100() and tweaked for the lsveto pmt sigs
+# ~ working on getting the correct normalization for the MC
+# ~ was using groupNo 1 for K40! changed to 31 in groupNum93()
+
+
 # 2018-06-26
 # --------------------------------------------------------------------
 # + many tweaks to get plotting working for x9/lsveto

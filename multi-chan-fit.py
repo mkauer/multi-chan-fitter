@@ -13,7 +13,7 @@ V = 'v100'
 #   a lot of the same infrastructure. And might as well revamp into
 #   python class structure. 
 # 
-# version: 2018-06-26
+# version: 2018-06-27
 # 
 # see CHANGELOG for changes
 ######################################################################
@@ -34,6 +34,8 @@ sys.path.append("/home/mkauer/COSINE/CUP/mc-fitting/")
 sys.path.append("/home/mkauer/mc-fitting/")
 from funcs100 import *
 
+### number of crystals
+numx = numX()
 
 ### use pushpa's fitting ranges and binning?
 pushpa = 0
@@ -60,14 +62,14 @@ if pushpa:
 else:
     fLoE = [6, 76]
     fHiE = [70, 2770]
+    # lsveto testing
+    fLoE = [30, 180]
+    fHiE = [200, 4000]
     loEfitRebin = 3
     hiEfitRebin = 4
     
-### select channels to plot and fit
-### ['S'] single-hit data channel
-### ['M'] multi-hit data channel
-### ['SM'] both channels
-fitchans = 'SM'
+### select channels to fit
+fitchans = 'M'
 
 
 ### ==========  EXTRA MC OPTIONS  ==========================
@@ -76,11 +78,9 @@ globalmc = []
 #globalmc = ['lsveto', 'pmt', 'innersteel']
 ### include bkgs from 'other' pmts and internals?
 others  = 0
-### use the primVolumeName cut?
-vcut    = 1
 
 ### plot components in groups? [0,1]
-ingroups = 0
+ingroups = 1
 ### show the total? [0,1]
 showTotal = 1
 ### show the legends? [0,1]
@@ -98,7 +98,7 @@ combine = 1
 reuse = 0
 
 ### update and save new backgrounds file with fit results
-updateMCfile = 1
+updateMCfile = 0
 
 
 ### ==========  OTHER FITTING OPTIONS  =====================
@@ -123,14 +123,14 @@ extend = 1
 ### individual plots for all crystals? [0,1]
 indi = 1
 
-### channels to plot
+### select channels to plot
 pltchans = 'SM'
 
 ### plotting ranges
 #loer = [0,   70]   # pushpa style
 #hier = [100, 2000] # pushpa style
-loer = [0, 100]
-hier = [0, 3500]
+loer = [0, 200]
+hier = [0, 4000]
 
 eran = [loer, hier]
 
@@ -220,7 +220,7 @@ def myself(argv):
     #-----------------------------------------------------------------
     #-----------------------------------------------------------------
     allchans = uniqString(fitchans+pltchans)
-    data, bkgs, sigs, runtime = build100(mcfile, others, vcut, reuse, allchans, xstals)
+    data, bkgs, sigs, runtime = build100(mcfile, others, reuse, allchans, xstals)
     print 'INFO: runtime =', runtime, '(seconds)'
 
     #sys.exit()
@@ -234,21 +234,21 @@ def myself(argv):
     if dru:
         data = scaleData70(data, 1)
         bkgs = scaleBkgs100(bkgs)
-        sigs = scaleBkgs93(sigs)
+        sigs = scaleBkgs100(sigs)
     else:
         data = scaleData70(data, 0)
         bkgs = scaleBkgs100(bkgs, runtime)
-        sigs = scaleBkgs93(sigs, runtime)
+        sigs = scaleBkgs100(sigs, runtime)
 
     # make plots before combining!!!
-    #makePlots93(bkgs, combine, others, vcut)
-    #makePlots93(sigs, combine, others, vcut)
+    #makePlots93(bkgs, combine, others)
+    #makePlots93(sigs, combine, others)
     #sys.exit()
     
     # combine after scaling?
     # FIX ME - combine but don't delete others?
-    sigs = combineOthers92(sigs, globalmc)
-    bkgs = combineOthers92(bkgs, globalmc)
+    sigs = combineOthers100(sigs, globalmc)
+    bkgs = combineOthers100(bkgs, globalmc)
     
     # now sort and remove empty histos
     bkgs, bakkeys = sortSimKeys92(bkgs)
@@ -258,7 +258,7 @@ def myself(argv):
 
     # plot all crystals that have data
     justthese=[]
-    for i in range(1, numX()+1):
+    for i in range(1, numx+1):
         for key in datkeys:
             if 'x'+str(i) in key and i not in justthese:
                 justthese.append(i)
@@ -412,22 +412,22 @@ def myself(argv):
 
         #ftotal = []
         #fresid = []
-        #druscale = [1 for x in range(8)]
+        #druscale = [1 for x in range(numx)]
 
-        fitdata = TH1F('globData', 'globData', fmax*8, 0, fmax*8)
+        fitdata = TH1F('globData', 'globData', fmax*numx, 0, fmax*numx)
 
-        ftotal = TH1F('globTotal', 'globTotal', fmax*8, 0, fmax*8)
+        ftotal = TH1F('globTotal', 'globTotal', fmax*numx, 0, fmax*numx)
         ftotal.SetLineColor(kGray+1)
         ftotal.SetMarkerColor(kGray+1)
         ftotal.SetLineWidth(1)
 
-        fresid = TH1F('globRsid', 'globResid', fmax*8, 0, fmax*8)
+        fresid = TH1F('globRsid', 'globResid', fmax*numx, 0, fmax*numx)
         fresid.SetLineColor(kBlack)
         fresid.SetMarkerColor(kBlack)
         fresid.SetLineWidth(1)
 
         ### fill fitdata and fitsigs
-        for i in range(8):
+        for i in range(numx):
             
             # cycle through the channels
             sinit = 1
@@ -485,7 +485,7 @@ def myself(argv):
                             if fgkey not in fglobkeys:
                                 fglobkeys.append(fgkey)
                                 fitglob[fgkey] = {}
-                                fglob = TH1F(fgkey, fgkey, fmax*8, 0, fmax*8)
+                                fglob = TH1F(fgkey, fgkey, fmax*numx, 0, fmax*numx)
                                 fitglob[fgkey]['hist'] = fglob
                             #continue
                     
@@ -493,7 +493,7 @@ def myself(argv):
                     if 'x'+str(i+1) in skey and '-c'+C in skey and '-e0' in skey:
                         fskey = skey.split('-c'+C+'-e0')[0]
                         if sinit:
-                            fsig = TH1F(fskey, fskey, fmax*8, 0, fmax*8)
+                            fsig = TH1F(fskey, fskey, fmax*numx, 0, fmax*numx)
                             fitsigs[fskey] = {}
                             fitsigs[fskey]['hist'] = fsig
                         rlsigs[skey]['hist'] = copy.deepcopy(sigs[skey]['hist'])
@@ -536,7 +536,7 @@ def myself(argv):
                     if 'x'+str(i+1) in bkey and '-c'+C in bkey and '-e0' in bkey:
                         fbkey = bkey.split('-c'+C+'-e0')[0]
                         if binit:
-                            fbak = TH1F(fbkey, fbkey, fmax*8, 0, fmax*8)
+                            fbak = TH1F(fbkey, fbkey, fmax*numx, 0, fmax*numx)
                             fitbkgs[fbkey] = {}
                             fitbkgs[fbkey]['hist'] = fbak
                         rlbkgs[bkey]['hist'] = copy.deepcopy(bkgs[bkey]['hist'])
@@ -695,10 +695,10 @@ def myself(argv):
         bounds = []
         
         ### data integral to normalize signal to
-        dat_int = fitdata.Integral(0, fmax*8)
+        dat_int = fitdata.Integral(0, fmax*numx)
 
         ### set up the fitting object for TFractionFitter
-        for i in range(8):
+        for i in range(numx):
             
             fitresults[str(i)] = []
             
@@ -829,7 +829,7 @@ def myself(argv):
                                 test = sigs[tmpkey]['hist']
                                 newkeys.append(tmpkey)
                             except:
-                                for F in range(8):
+                                for F in range(numx):
                                     F=str(F+1)
                                     try:
                                         tmpkey=fskey+'-f'+F+'-c'+C+'-e'+E
@@ -849,7 +849,7 @@ def myself(argv):
                                     continue
                                 newkeys.append(tmpkey)
                             else:
-                                for F in range(8):
+                                for F in range(numx):
                                     F=str(F+1)
                                     tmpkey=fskey+'-f'+F+'-c'+C+'-e'+E
                                     try:
@@ -939,7 +939,7 @@ def myself(argv):
         boundskeys=[]
         for fgkey in fglobkeys:
                 
-            mc_int = fitglob[fgkey]['hist'].Integral(0, fmax*8) # total MC integral
+            mc_int = fitglob[fgkey]['hist'].Integral(0, fmax*numx) # total MC integral
             
             ### to weight or not to weight...
             if mcsumw2:
@@ -957,7 +957,7 @@ def myself(argv):
             
             #newkey=0
             #boundskeys=[]
-            for i in range(8):
+            for i in range(numx):
                 X = str(i+1)
                 for C in allchans:
                     for E in range(2):
@@ -969,7 +969,7 @@ def myself(argv):
                             test = sigs[tmpkey]['hist']
                             newkeys.append(tmpkey)
                         except:
-                            for F in range(8):
+                            for F in range(numx):
                                 F=str(F+1)
                                 try:
                                     tmpkey = 'x'+X+'-'+fgkey+'-f'+F+'-c'+C+'-e'+E
@@ -1090,7 +1090,7 @@ def myself(argv):
             fit.Constrain(l+1, bounds[l][0], bounds[l][1])
         
         ### set the fit range
-        fit.SetRangeX(0, fmax*8)
+        fit.SetRangeX(0, fmax*numx)
 
         #sys.exit()
         ### do the fit
@@ -1104,13 +1104,13 @@ def myself(argv):
 
         ### get non-zero ndf
         NDF=0
-        for n in range(fmax*8):
+        for n in range(fmax*numx):
             if fitdata.GetBinContent(n) > 0:
                 NDF+=1
         ndf=NDF
         
         count = 0
-        for i in range(8):
+        for i in range(numx):
             
             fitresults[str(i)].append('total number of hists being fit = '+str(totalNumFits))
             fitresults[str(i)].append('returned fit status = '+str(status))
@@ -1161,7 +1161,7 @@ def myself(argv):
             fitglob[fgkey]['hist'].Scale(fscale)
             
             #newkey=0
-            for i in range(8):
+            for i in range(numx):
                 X = str(i+1)
                 for C in allchans:
                     for E in range(2):
@@ -1173,7 +1173,7 @@ def myself(argv):
                             test = sigs[tmpkey]['hist']
                             newkeys.append(tmpkey)
                         except:
-                            for F in range(8):
+                            for F in range(numx):
                                 F=str(F+1)
                                 try:
                                     tmpkey = 'x'+X+'-'+fgkey+'-f'+F+'-c'+C+'-e'+E
@@ -1212,12 +1212,12 @@ def myself(argv):
         """
         
         ### scale the signals to mBq/kg
-        if dru: sigs = scaleSigs93(sigkeys, sigs)
-        else: sigs = scaleSigs93(sigkeys, sigs, runtime)
+        if dru: sigs = scaleSigs100(sigkeys, sigs)
+        else: sigs = scaleSigs100(sigkeys, sigs, runtime)
 
         
         ### print the fit activities
-        for i in range(8):
+        for i in range(numx):
             for fskey in fsigkeys:
                 if 'x'+str(i+1) in fskey:
                     finit=1
@@ -1254,7 +1254,7 @@ def myself(argv):
                                 finit = 0
 
         ### do the same for the globals
-        for i in range(8):
+        for i in range(numx):
             for fgkey in fglobkeys:
                 X=str(i+1)
                 finit=1
@@ -1269,7 +1269,7 @@ def myself(argv):
                                 test = sigs[tmpkey]['hist']
                                 newkeys.append(tmpkey)
                             except:
-                                for F in range(8):
+                                for F in range(numx):
                                     F=str(F+1)
                                     try:
                                         tmpkey = 'x'+X+'-'+fgkey+'-f'+F+'-c'+C+'-e'+E
@@ -1395,9 +1395,9 @@ def myself(argv):
         ftoppad=[]
         fbotpad=[]
 
-        sepfitdata = [0 for x in range(8)]
-        sepfitsigs = [0 for x in range(8)]
-        sepfitglob = [0 for x in range(8)]
+        sepfitdata = [0 for x in range(numx)]
+        sepfitsigs = [0 for x in range(numx)]
+        sepfitglob = [0 for x in range(numx)]
         
         #sepFitPlots=[]
         
@@ -1412,7 +1412,7 @@ def myself(argv):
         yoff=4.2
         xoff=8
         """
-        for i in range(8):
+        for i in range(numx):
             fcanv.cd(i+1)
             
             gStyle.SetPadTopMargin    (0.07)
@@ -1709,11 +1709,11 @@ def myself(argv):
         fitdata.Draw()
         #flegs[i].AddEntry(fitdata, 'data - bkgs', lopt)
         if dru: fitdata.SetAxisRange(2e-3, 2e3, 'y')
-        fitdata.SetAxisRange(0, fmax*8, 'x')
+        fitdata.SetAxisRange(0, fmax*numx, 'x')
         
         
         Nfsigs=0
-        #for i in range(8):
+        #for i in range(numx):
         for fskey in fsigkeys:
             #if 'x'+str(i+1) in fskey:
 
@@ -1749,7 +1749,7 @@ def myself(argv):
 
                 
         ### select the right range
-        ftotal.SetAxisRange(0, fmax*8, 'x')
+        ftotal.SetAxisRange(0, fmax*numx, 'x')
         ftotal.Draw('same')
         
         ### build legend after getting the numbers of signals
@@ -1833,7 +1833,7 @@ def myself(argv):
         
         fresid.SetAxisRange(0.1,10,'y')
         
-        fresid.SetAxisRange(0, fmax*8, 'x')
+        fresid.SetAxisRange(0, fmax*numx, 'x')
         
         if linres:
             mbotpad.SetLogy(0)
@@ -1846,7 +1846,7 @@ def myself(argv):
         #fzeros[i].SetLineColor(kRed)
         #fzeros[i].SetLineWidth(1)
 
-        mzero = TLine(0, 1, fmax*8, 1)
+        mzero = TLine(0, 1, fmax*numx, 1)
         #fzeros.SetAxisRange(i*fmax, (i+1)*fmax, 'x')
         #fzeros.append(zero)
         mzero.SetLineColor(kRed)
@@ -1902,10 +1902,10 @@ def myself(argv):
     canvs  = [[0 for x in range(numE)] for x in range(numC)]
     
     ### for separate plots
-    #sepPlots = [[[[] for x in range(numX())] for x in range(numE)] for x in range(numC)]
-    sepPlots = [[[0 for x in range(numX())] for x in range(numE)] for x in range(numC)]
-    sepTopPad = [[[0 for x in range(numX())] for x in range(numE)] for x in range(numC)]
-    sepBotPad = [[[0 for x in range(numX())] for x in range(numE)] for x in range(numC)]
+    #sepPlots = [[[[] for x in range(numx)] for x in range(numE)] for x in range(numC)]
+    sepPlots = [[[0 for x in range(numx)] for x in range(numE)] for x in range(numC)]
+    sepTopPad = [[[0 for x in range(numx)] for x in range(numE)] for x in range(numC)]
+    sepBotPad = [[[0 for x in range(numx)] for x in range(numE)] for x in range(numC)]
     
     ### seperate memory space for the pads is key!!!!
     #toppad = [[[] for x in range(numE)] for x in range(numC)]
@@ -1925,8 +1925,8 @@ def myself(argv):
     total  = [[0 for x in range(numE)] for x in range(numC)]
     resid  = [[0 for x in range(numE)] for x in range(numC)]
     
-    gbkgs  = [[[{} for x in range(numX())] for x in range(numE)] for x in range(numC)]
-    gsigs  = [[[{} for x in range(numX())] for x in range(numE)] for x in range(numC)]
+    gbkgs  = [[[{} for x in range(numx)] for x in range(numE)] for x in range(numC)]
+    gsigs  = [[[{} for x in range(numx)] for x in range(numE)] for x in range(numC)]
         
     plotRebin = 1
     for C, chan in enumerate(pltchans): 
@@ -1964,7 +1964,7 @@ def myself(argv):
             total[C][E]  = makeTotal100(chan, E, params[E])
             resid[C][E]  = makeResid100(chan, E, params[E])
             
-            for i in range(numX()):
+            for i in range(numx):
                 
                 canvs[C][E].cd(i+1)
                 
@@ -2409,7 +2409,7 @@ def myself(argv):
             ### Save separate crystal histos?
             #-------------------------------------------------------------
             if indi:
-                for i in range(numX()):
+                for i in range(numx):
                     if i+1 in justthese:
                         #isave = 'xstal-'+str(i+1)
                         try:
@@ -2440,11 +2440,11 @@ def myself(argv):
     ### Save 4 plots to one canvas
     #-------------------------------------------------------------
     if indi:
-        combPlots = [0 for x in range(numX())]
-        tpad = [[0 for x in range(numX())] for x in range(4)]
-        bpad = [[0 for x in range(numX())] for x in range(4)]
+        combPlots = [0 for x in range(numx)]
+        tpad = [[0 for x in range(numx)] for x in range(4)]
+        bpad = [[0 for x in range(numx)] for x in range(4)]
         
-        for i in range(numX()):
+        for i in range(numx):
             if i+1 in justthese:
                 try:
                     combPlots[i] = TCanvas('ccan-'+str(i+1),'ccan-'+str(i+1),0,0,1400,900)

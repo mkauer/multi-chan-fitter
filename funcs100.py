@@ -4,10 +4,12 @@
 # 
 # Adding LS-veto functionality!
 # 
-# version: 2018-06-26
+# version: 2018-06-27
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# + scaleSigs100() and tweaked the lsveto
+# + combineOthers100() and tweaked for the lsveto pmt sigs
 # + buildMC100() and scaleBkgs100()
 # + numX()
 # + calib100()
@@ -33,7 +35,7 @@ from funcs93 import *
 
 def numX():
     """
-    Return the max number of crystals and quasi-crystals
+    Return the max number of crystals and sudo-crystals
     """
     return 9
 
@@ -160,7 +162,7 @@ def getInfo100(line, freuse=0, fchans=0, fxstals=[]):
     return info
 
 
-def build100(infile='backgrounds1000.txt', others=1, vcut=1, freuse=0, fchans=0, fxstals=[]):
+def build100(infile='backgrounds1000.txt', others=1, freuse=0, fchans=0, fxstals=[]):
 
     data = {}
     bkgs = {}
@@ -178,7 +180,7 @@ def build100(infile='backgrounds1000.txt', others=1, vcut=1, freuse=0, fchans=0,
         ###    scale by mass or surface area etc. But this
         ###    is okay for now...
         infos=[]
-        if others and ('pmt' in info['key'] or 'internal' in info['key'] or 'copper' in info['key']):
+        if (others or info['xstl']==9) and ('pmt' in info['key'] or 'internal' in info['key'] or 'copper' in info['key']):
         #if others and ('lsveto' not in info['key'] and 'innersteel' not in info['key'] and 'data' not in info['key']):
             key = info['key']
             for i in range(8):
@@ -213,10 +215,10 @@ def build100(infile='backgrounds1000.txt', others=1, vcut=1, freuse=0, fchans=0,
                 data, runtime = buildData100(info, data)
             
             elif 'B' in info['type']:
-                bkgs = buildMC100(info, bkgs, vcut)
+                bkgs = buildMC100(info, bkgs)
             
             elif 'F' in info['type']:
-                sigs = buildMC100(info, sigs, vcut)
+                sigs = buildMC100(info, sigs)
             
             else:
                 print 'WARNING: I do not know what to do with type',info['type'], 'in line:'
@@ -547,7 +549,7 @@ def calib100(i, E):
     return edep, selection
 
 
-def buildMC100(info, mc, vcut):
+def buildMC100(info, mc):
 
     base = baseDir()
 
@@ -676,77 +678,49 @@ def buildMC100(info, mc, vcut):
                     histo = TH1F(key, longNames(i), pars[0], pars[1], pars[2])
                     #-----------------------------------------------------------------------
                     
-                    ### totally hacking away at this bit of code
+
+                    ###  put together all the cuts you need...
                     #=====================================================================================
-                    #=====================================================================================
-                    
+
+                    ### general energy cut
                     energyCut = TCut('(edep['+str(i)+']*1000. > 0.0)')
-                    if pushpasMC:
-                        energyCut = TCut('(edep[6]*1000. > 0.0)')
-                    
+                    if pushpasMC: energyCut = TCut('(edep[6]*1000. > 0.0)')
                     
                     if info['chan'] == 'S':
-                        ### main single/multi hit cut
-                        #hitCut = '((singleHitTag['+str(i)+'] > 0.0) && (multipleHitTag['+str(i)+'] < 0.0))'
+                        
+                        ### single-hit cut
                         hitCut = '((singleHitTag['+str(i)+'] == 1.0))'
-                        if pushpasMC:
-                            hitCut = '((singleHitTag[6] == 1.0))'
-                        ### do i have the single multi hit cuts wrong??
-                        #hitCut = '((singleHitTag['+str(i)+'] > 0.0))'
-                        #hitCut = '((singleHitTag['+str(i)+'] < 0.0))'
+                        if pushpasMC: hitCut = '((singleHitTag[6] == 1.0))'
                         
-                        ### liquid scint veto cut - from Estella
+                        ### ls veto cut
                         lsvetocut = '(edep[8]*1000. < 20.0)'
-                        #lsvetocut = '(edep[8]*1000. < 50.0)'
-                        ### do we need a lsveto cut for MC?
-                        #lsvetocut = '(1)'
                         
+                        ### combined cuts
                         chanCut = TCut('(('+hitCut+') && ('+lsvetocut+'))')
-                        ### skip the lsvetocut because it's always 1
-                        #chanCut = TCut('(('+hitCut+'))')
                         
                     elif info['chan'] == 'M':
-                        ### main single/multi hit cut
-                        #hitCut = '((singleHitTag['+str(i)+'] < 0.0) && (multipleHitTag['+str(i)+'] > 0.0))'
+                        
+                        ### multi-hit cut
                         hitCut = '((multipleHitTag['+str(i)+'] == 1.0))'
-                        if pushpasMC:
-                            hitCut = '((multipleHitTag[6] == 1.0))'
-                        ### do i have the single multi hit cuts wrong??
-                        #hitCut = '((multipleHitTag['+str(i)+'] > 0.0))'
-                        #hitCut = '((multipleHitTag['+str(i)+'] < 0.0))'
+                        if pushpasMC: hitCut = '((multipleHitTag[6] == 1.0))'
                         
-                        ### liquid scint veto cut - from Estella
+                        ### ls veto cut
                         lsvetocut = '(edep[8]*1000. > 20.0)'
-                        #lsvetocut = '(edep[8]*1000. > 50.0)'
-                        #lsvetocut = '(1)'
                         
+                        ### combined cuts
                         chanCut = TCut('(('+hitCut+') || ('+lsvetocut+'))')
-                        #chanCut = TCut('(('+hitCut+') && ('+lsvetocut+'))')
-                        ### skip the lsvetocut because it's always 1
-                        #chanCut = TCut('(('+hitCut+'))')
                         
                     else:
                         print 'ERROR: I do not know what to do with channel -->', info['chan']
                         print 'Available channels are [S]Single-hits, [M]Multi-hits'
                         sys.exit()
+                    
 
-
-                    ### trying to figure out lsveto weirdness
-                    #if info['loca'] == 'lsveto':
-                        #chanCut = TCut('('+hitCut+')')
-                        #chanCut = TCut('('+lsvetocut+')')
-                        #chanCut = TCut('(1)')
+                    ###  primary volume cuts
+                    #-------------------------------------------------------------------------------
                     
-                    
-                    #=====================================================================================
-                    #=====================================================================================
-                    
-                    
-                    #pmt1 = str((int(info['xstl'])*2)-2)
-                    #pmt2 = str((int(info['xstl'])*2)-1)
                     pmt1 = str((int(info['from'])*2)-2)
                     pmt2 = str((int(info['from'])*2)-1)
-                    #print pmt1,pmt2
                     
                     volumeCut = TCut('(1)')
                     if info['loca'] == 'internal':
@@ -771,8 +745,7 @@ def buildMC100(info, mc, vcut):
                         # Estellas MC
                         volumeCut = TCut('(primVolumeName == "NaIDet0'+str(i+1)+'Teflon")')
                         # Pushpas C7 Surface MC
-                        if pushpasMC:
-                            volumeCut = TCut('(primVolumeName == "NaIDet07Teflon")')
+                        if pushpasMC: volumeCut = TCut('(primVolumeName == "NaIDet07Teflon")')
                     
                     elif 'cusurf' in info['loca']:
                         # Estellas MC
@@ -818,11 +791,14 @@ def buildMC100(info, mc, vcut):
                         print "WARNING: No selection criteria for  --> ", info['loca']
                         continue
 
-                    
+
+                    ### broken chain / group number cut
                     brokenChainCut = groupNum93(info)
+
+                    ### event type cut
                     eventTypeCut = TCut('(evt_Type > 10)')
                     generatedCuts = TCut('(evt_Type < 10)'+' && '+volumeCut.GetTitle())
-                    
+                    # special case for H3
                     if info['chst'] == 'H3':
                         generatedCuts = TCut('(evt_Type > 10)'+' && '+volumeCut.GetTitle())
                     
@@ -865,7 +841,7 @@ def buildMC100(info, mc, vcut):
 
                     if i == 8:
                         # XXX : not sure if these cuts are right
-                        #print 'INFO: using lsveto settings for MC...'
+                        #       but they seem to be working well...
                         masterCut = TCut('('+
                                     energyCut.GetTitle()+' && '+
                                     eventTypeCut.GetTitle()+' && '+
@@ -877,22 +853,16 @@ def buildMC100(info, mc, vcut):
                         selection = '(edepResol[8] * 1000.)'
                         
                     #=====================================================================
-                                        
+                    
                     chain.Draw(selection+' >> '+key, masterCut)
-                                        
                     detected = histo.GetEntries()
-
+                    mc[key]['hist'] = histo
                     """
                     if (c=='S' and e==0) or (c=='M' and e==1):
                         print 'DEBUG:', key, 'generated events =', generated
                         print 'DEBUG:', key, 'detected events =', detected
                         print 'DEBUG:', key, 'efficiency =', round(100*detected/generated, 2), '%'
                     """
-                    
-                    mc[key]['hist'] = histo
-                    #mc[key]['hist'].Sumw2()
-            #print ''
-                    
         else:
             print 'ERROR: no MC files found for -->', \
                 'x'+str(info['xstl']), info['floca'], info['isof']
@@ -916,26 +886,21 @@ def scaleBkgs100(bkgs, runtime=0):
         if runtime: day = float(runtime)
         keVperBin  = 1./float(bkgs[key]['pars'][3])
         nmass      = cmass(int(x[-1])-1)
+        surf       = 1.
         pmts       = 2.
         extpmts    = 14.
-        
-        #-------------------------------------------------------------
-        #-------------------------------------------------------------
         xkgs       = cmass(int(x[-1])-1)
         lskg       = 1800.
-        ### how to get the lsveto data/mc this to normalize right?
-        # XXX : this probably isn't right yet...
-        if int(x[-1]) == 9:
-            xkgs   = 106.14
-            lskg   = 1.
-        #-------------------------------------------------------------
-        #-------------------------------------------------------------
-        
         steel      = 1600.
         innersteel = 4000.
         
-        ### treat the NaI surface and the copper and teflon as 1 unit
-        surf = 1.
+        #-------------------------------------------------------------
+        # XXX : how to get the lsveto MC to normalize right?
+        if int(x[-1]) == 9:
+            xkgs       = 1800.
+            #xkgs       = 106.14
+            #lskg       = 1.
+        #-------------------------------------------------------------
         
         generated = float(bkgs[key]['generated'])
         if generated < 1:
@@ -1007,4 +972,161 @@ def scaleBkgs100(bkgs, runtime=0):
             sys.exit()
 
     return bkgs
+
+
+
+def scaleSigs100(sigkeys, sigs, runtime=0):
+
+    for key in sigkeys:
+
+        try:
+            test = sigs[key]['fitscale']
+        except:
+            print 'WARNING: no fitscale for', key
+            sigs[key]['info']['fitacti'] = 0
+            sigs[key]['info']['fiterro'] = 0
+            continue
+        
+        x = key.split('-')[0]
+        loca = key.split('-')[1]
+        e = key.split('-')[-1]
+
+        ### 1 day in seconds
+        day = 86400.
+        if runtime: day = float(runtime)
+        keVperBin  = 1./float(sigs[key]['pars'][3])
+        nmass      = cmass(int(x[-1])-1)
+        surf       = 1.
+        pmts       = 2.
+        extpmts    = 14.
+        xkgs       = cmass(int(x[-1])-1)
+        lskg       = 1800.
+        steel      = 1600.
+        innersteel = 4000.
+        
+        #-------------------------------------------------------------
+        # XXX : how to get the lsveto MC to normalize right?
+        if int(x[-1]) == 9:
+            xkgs       = 1800.
+            #xkgs       = 106.14
+            #lskg       = 1.
+        #-------------------------------------------------------------
+        
+        generated = float(sigs[key]['generated'])
+        if generated < 1:
+            print "WARNING: 0 events generated for -->", key
+            continue
+        
+        if loca == 'internal':
+            fitActivity = sigs[key]['fitscale'] * (1./nmass) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
+            sigs[key]['info']['fitacti'] = fitActivity
+            sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
+            
+        elif 'surf' in loca:
+            fitActivity = sigs[key]['fitscale'] * (1./surf) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
+            sigs[key]['info']['fitacti'] = fitActivity
+            sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
+            
+        elif 'teflon' in loca:
+            fitActivity = sigs[key]['fitscale'] * (1./surf) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
+            sigs[key]['info']['fitacti'] = fitActivity
+            sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
+            
+        elif loca == 'copper':
+            fitActivity = sigs[key]['fitscale'] * (1./surf) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
+            sigs[key]['info']['fitacti'] = fitActivity
+            sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
+            
+        elif loca == 'cucase' or loca == 'coppercase':
+            fitActivity = sigs[key]['fitscale'] * (1./surf) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
+            sigs[key]['info']['fitacti'] = fitActivity
+            sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
+            
+        elif loca == 'pmt':
+            fitActivity = sigs[key]['fitscale'] * (1./pmts) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
+            sigs[key]['info']['fitacti'] = fitActivity
+            sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
+            
+        elif loca == 'extpmt':
+            fitActivity = sigs[key]['fitscale'] * (1./extpmts) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
+            sigs[key]['info']['fitacti'] = fitActivity
+            sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
+            
+        elif loca == 'lsveto':
+            fitActivity = sigs[key]['fitscale'] * (1./lskg) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
+            sigs[key]['info']['fitacti'] = fitActivity
+            sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
+            
+        elif loca == 'lsvetoair':
+            fitActivity = sigs[key]['fitscale'] * (1./nmass) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
+            sigs[key]['info']['fitacti'] = fitActivity
+            sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
+            
+        elif loca == 'airshield':
+            fitActivity = sigs[key]['fitscale'] * (1./nmass) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
+            sigs[key]['info']['fitacti'] = fitActivity
+            sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
+            
+        elif loca == 'steel':
+            fitActivity = sigs[key]['fitscale'] * (1./steel) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
+            sigs[key]['info']['fitacti'] = fitActivity
+            sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
+
+        elif loca == 'innersteel':
+            fitActivity = sigs[key]['fitscale'] * (1./innersteel) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
+            sigs[key]['info']['fitacti'] = fitActivity
+            sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
+            
+        else:
+            print "ERROR: no signal scaling for -->", loca
+            sys.exit()
+
+    return sigs
+
+
+def combineOthers100(sigs, globalMC):
+    donekeys=[]
+    delete=[]
+    temps={}
+    for key in sigs:
+        if key in donekeys:
+            continue
+        bits = key.split('-')
+        if len(bits) != 6:
+            continue
+        # don't combine if combining in global fit anyway?
+        if bits[1] in globalMC and bits[0] != 'x9':
+            continue
+        
+        X = int(bits[0][1])
+        for F in range(1, numX()+1):
+            if F == X: continue
+            try:
+                default = 'x'+str(X)+'-'+bits[1]+'-'+bits[2]+'-f'+str(X)+'-'+bits[4]+'-'+bits[5]
+                newkey  = 'x'+str(X)+'-'+bits[1]+'-'+bits[2]+'-f'+str(F)+'-'+bits[4]+'-'+bits[5]
+                #print '!!! adding ', newkey, ' to ', default
+                if X==9:
+                    if F==1:
+                        temps[default] = deepcopy(sigs[newkey])
+                    else:
+                        temps[default]['hist'].Add(sigs[newkey]['hist'])
+                else:
+                    sigs[default]['hist'].Add(sigs[newkey]['hist'])
+
+                donekeys.append(default)
+                donekeys.append(newkey)
+                delete.append(newkey)
+            except:
+                pass
+
+    # transfer new keys into sigs
+    for key in temps:
+        sigs[key] = deepcopy(temps[key])
+        
+    # delete the other histograms
+    for key in delete:
+        #print '!!! deleting -fx key ', key
+        del sigs[key]
+    
+    return sigs
 
