@@ -290,7 +290,7 @@ BR	SM	5	innersteel	Th232	Th232	GRND	4.00e-01	1	10	./root-join-read/build91/build
 ###   CRYSTAL 6
 ########################
 DR	SM	6	./set1_00-04-04.dat	set1	./root-join-read/build93/build93-c6-dataset1.root
-
+"""
 FR	SM	6	nai-surf-10um	Pb210	Pb210	GRND	1	0	10	./root-join-read/build93/build93-naisurf10umPb210_GRND.root
 FR	SM	6	teflon-bulk	Pb210	Pb210	GRND    5	0	3	./root-join-read/build93/build93-teflonbulkPb210_GRND.root
 FR	SM	6	copper		Co60	Co60	GRND	10	0	2	./root-join-read/build93/build93-copperCo60_GRND.root
@@ -304,13 +304,13 @@ FR	SM	6	internal	Te121m	Te121m	GRND	0.2	0	2	./root-join-read/build92/build92-int
 FR	SM	6	internal	Te123m	Te123m	GRND	0.1	0	2	./root-join-read/build92/build92-internalTe123m_GRND.root
 FR	SM	6	internal	Te125m	Te125m	GRND	0.1	0	2	./root-join-read/build92/build92-internalTe125m_GRND.root
 FR	SM	6	internal	Te127m	Te127m	GRND	0.2	0	2	./root-join-read/build92/build92-internalTe127m_GRND.root
-
+"""
 FR	SM	6	internal	K40	K40	GRND	0.50e+00	0.8	1.2	./root-join-read/build92/build92-internalK40_GRND.root
 FR	SM	6	internal	U238	U238	Th230	3.28e-04	0.8	1.2	./root-join-read/build92/build92-internalU238_Th230.root
 FR	SM	6	internal	Pb210	Pb210	GRND	1.52e+00	0.9	10	./root-join-read/build92/build92-internalPb210_GRND.root
 FR	SM	6	internal	Th232	Ra228	Th228	2.30e-03	0.8	1.2	./root-join-read/build92/build92-internalRa228_Th228.root
 FR	SM	6	internal	Th232	Th228	GRND	2.30e-03	0.8	1.2	./root-join-read/build92/build92-internalTh228_GRND.root
-
+"""
 FR	SM	6	pmt		K40	K40	GRND	5.80e+01	0.5	2	./root-join-read/build91/c6/build91-pmtK40_GRND.root
 FR	SM	6	pmt		U238	U238	Th230	2.50e+01	0.5	5	./root-join-read/build91/c6/build91-pmtU238_Th230.root
 #FR	SM	6	pmt		U238	Th230	Ra226	2.50e+01	0.5	5	./root-join-read/build91/c6/build91-pmtTh230_Ra226.root
@@ -328,7 +328,7 @@ FR	SM	6	lsveto		U238	Pb210	GRND	9.00e-02	0.1	100	./root-join-read/build70/build7
 FR	SM	6	lsveto		Th232	Th232	Ra228	2.00e-02	0.1	100	./root-join-read/build70/build70-lsvetoTh232_Ra228.root
 FR	SM	6	lsveto		Th232	Ra228	Th228	2.00e-02	0.1	100	./root-join-read/build70/build70-lsvetoRa228_Th228.root
 FR	SM	6	lsveto		Th232	Th228	GRND	2.00e-02	5	100	./root-join-read/build70/build70-lsvetoTh228_GRND.root
-
+"""
 BR	SM	6	innersteel	U238	U238	GRND	1.50e-01	1	10	./root-join-read/build91/build91-innersteelU238_GRND.root
 BR	SM	6	innersteel	Th232	Th232	GRND	4.00e-01	1	10	./root-join-read/build91/build91-innersteelTh232_GRND.root
 

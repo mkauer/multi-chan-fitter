@@ -42,7 +42,8 @@ import ROOT
 
 sys.path.append("/home/mkauer/COSINE/CUP/mc-fitting/")
 sys.path.append("/home/mkauer/mc-fitting/")
-from funcs92 import *
+#from funcs92 import *
+from funcs_misc import *
 
 
 def build93(infile='backgrounds900.txt', others=1, vcut=1, freuse=0, fchans=0, fxstals=[]):
@@ -980,4 +981,314 @@ def calib93(i,E):
         selection = edep
     
     return edep, selection
+
+
+#=====================================================================
+#  Other old functions that are needed...
+#=====================================================================
+
+
+def getInfo91(line, freuse=0, fchans=0, fxstals=[]):
+    
+    info={}
+    
+    info['line'] = line
+    
+    bits = line.split()
+    ### probably don't need to use 're' since split() is working fine
+    #import re
+    #bits = filter(None, re.split("[ \s\t]+", line.strip()))
+    
+    # data type
+    info['type'] = str(bits[0])
+    
+    #-----------------------------------------------------------------
+    # reuse a joined rootfile
+    if 'R' in info['type']: info['reuse'] = 1
+    else: info['reuse'] = 0
+    # force reuse of everything - nice for debugging
+    if freuse == 1: info['reuse'] = 1
+    # force not reuse of everything - nice for debugging
+    if freuse == 2: info['reuse'] = 0
+    #-----------------------------------------------------------------
+    
+    #-----------------------------------------------------------------
+    # channel
+    info['chans'] = str(bits[1])
+    # force a channel(s) of data selection
+    if fchans:
+        info['chans'] = fchans
+    #-----------------------------------------------------------------
+    
+    #-----------------------------------------------------------------
+    # crystal
+    info['xstl'] = int(bits[2])
+    # force only a particular crystal(s) and skip the others
+    if len(fxstals) > 0 and info['xstl'] not in fxstals:
+        return []
+    # what crystal is the background from?
+    # set to xstl by default - can be updated later
+    info['from'] = int(bits[2])
+    #-----------------------------------------------------------------
+    
+    #-----------------------------------------------------------------
+    # reuse rootfile name
+    r=0
+    if 'root' in str(bits[-1]):
+        r=-1
+        temp = str(bits[-1])
+        for i in range(2):
+            if '.' in temp[0] or '/' in temp[0]:
+                temp = temp[1:]
+        info['rootfile'] = temp
+    else:
+        info['rootfile'] = 0
+    #-----------------------------------------------------------------
+    
+
+    if 'D' in info['type']:
+        
+        ### data file
+        temp = str(bits[3])
+        for i in range(2):
+            if '.' in temp[0] or '/' in temp[0]:
+                temp = temp[1:]
+        info['file'] = temp
+        
+        ### data tag
+        info['tag'] = str(bits[4])
+
+        ### processing version
+        #info['build'] = str(bits[5])
+
+        ### build the histo key
+        key  = 'x'+str(info['xstl'])
+        key += '-data'
+        key += '-'+str(info['tag'])
+        #key += '-c'+info['chan']
+        info['key'] = key
+        
+    else:
+        
+        ### background location help
+        info['floca'] = str(bits[3])
+        # without any '-' for hist key help
+        info['loca'] = str(bits[3]).replace('-','')
+        
+        ### top level isotope file name
+        info['isof'] = str(bits[4])
+
+        ### isotope chain break start
+        info['chst'] = str(bits[5])
+
+        ### isotope chain break stop
+        info['chsp'] = str(bits[6])
+
+        ### activity
+        info['acti'] = float(bits[7])
+
+        ### error on activity
+        ### do not need this anymore
+        #info['erro'] = float(bits[8])
+
+        ### fit bounds
+        #info['fbnd'] = [float(bits[9]), float(bits[10])]
+        info['fbnd'] = [float(bits[r-2]), float(bits[r-1])]
+        
+        ### build the histo key
+        key  = 'x'+str(info['xstl'])
+        key += '-'+info['loca']
+        #if info['chst'] == info['chsp']: key += '-'+info['chst']
+        #if info['chsp'] == 'GRND': key += '-'+info['chst']
+        #else: key += '-'+info['chst']+'_'+info['chsp']
+        key += '-'+info['chst']+'_'+info['chsp']
+        info['key'] = key
+
+        ### assign a plotting group to the isotope-location
+        info['group'] = setGroup(info)
+        
+    return info
+
+
+def sortDataKeys92(data):
+    datkeys=[]
+    for key in data:
+        datkeys.append(key)
+    datkeys.sort()
+    return datkeys
+
+
+def sortSimKeys92(sigs):
+    sigkeys=[]
+    """
+    delete=[]
+    for key in sigs:
+        if sigs[key]['hist'].Integral() > 0:
+            sigkeys.append(key)
+        else: delete.append(key)
+    for key in delete:
+        print 'INFO: deleting sigs key', key
+        del sigs[key]
+    """
+    for key in sigs:
+        sigkeys.append(key)
+    sigkeys.sort()
+    return sigs, sigkeys
+
+
+
+def scaleData70(data, dru=0):
+    """
+    Scale for DRU or not
+    """
+    for key in data:
+        i = int(key.split('-')[0].split('x')[-1]) - 1
+        days = 1.
+        xkgs = 1.
+        keVperBin = 1.
+        if dru: days = float((data[key]['runtime'])/86400.)
+        xkgs = float(cmass(i))
+        keVperBin = 1./float(data[key]['pars'][3])
+        scale = float(1./(days*xkgs*keVperBin))
+        data[key]['hist'].Scale(scale)
+        data[key]['druScale'] = scale
+    return data
+
+
+
+def combineOthers92(sigs, globalMC):
+    donekeys=[]
+    delete=[]
+    #for key in sigkeys:
+    for key in sigs:
+        if key in donekeys: continue
+        bits = key.split('-')
+        if len(bits) != 6: continue
+        # don't combine if combining in global fit anyway?
+        if bits[1] in globalMC: continue
+        for F in range(1,9):
+            X = int(bits[0][1])
+            if F == X: continue
+            try:
+                default = 'x'+str(X)+'-'+bits[1]+'-'+bits[2]+'-f'+str(X)+'-'+bits[4]+'-'+bits[5]
+                newkey  = 'x'+str(X)+'-'+bits[1]+'-'+bits[2]+'-f'+str(F)+'-'+bits[4]+'-'+bits[5]
+                #print '!!! adding ', newkey, ' to ', default
+                sigs[default]['hist'].Add(sigs[newkey]['hist'])
+                donekeys.append(default)
+                donekeys.append(newkey)
+                delete.append(newkey)
+            except:
+                pass
+    
+    # delete this histograms?
+    for key in delete:
+        #print '!!! deleting -fx key ', key
+        del sigs[key]
+    
+    return sigs
+
+
+def updateBkgsFile70(bkgsfile, resultsfile, newbkgs, BF='BR'):
+
+    for thisfile in [bkgsfile, resultsfile]:
+        if not os.path.exists(thisfile):
+            print 'WARNING: file not found -->', thisfile
+            return
+    
+    with open(bkgsfile) as fbkgs:
+        bkgslines = fbkgs.read().splitlines()
+    fbkgs.close()
+
+    with open(resultsfile) as ffits:
+        fitlines = ffits.read().splitlines()
+    ffits.close()
+
+    output = open(newbkgs, 'w')
+
+    print ''
+    print 'INFO: Updating bkgsfile -->',bkgsfile
+    print '      To a new bkgsfile -->',newbkgs
+    print ''
+
+    skip = 0
+    for bline in bkgslines:
+
+        #bline = bline.strip()
+        if not bline:
+            output.write('\n')
+            continue
+        
+        if bline.startswith('\"\"\"'):
+            if skip == 0: skip = 1
+            else: skip = 0
+            output.write(bline+'\n')
+            continue
+        if skip:
+            output.write(bline+'\n')
+            continue
+        
+        if bline.startswith('#'):
+            if 'version' in bline:
+                output.write('# NEW GENERATED backgrounds file from fit!\n\n')
+                output.write(bline+'\n')
+            else:
+                output.write(bline+'\n')
+            continue
+        
+        #bbits = bline.split()
+        bbits = filter(None, re.split("[ \s\t\n\r,:]+", bline.strip()))
+        if 'F' not in bbits[0]:
+            for bits in bbits:
+                output.write(bits+'\t')
+            output.write('\n')
+            continue
+        
+        replaced = 0
+        for fline in fitlines:
+            if not replaced:
+                #fline = fline.strip()
+                if not fline:
+                    continue
+                #fbits = fline.split()
+                fbits = filter(None, re.split("[ \s\t\n\r,:]+", fline.strip()))
+
+                ### ------------------------------------------------------------
+                ### if output format changes, this is generally the part that fails...
+                #if fbits[-1] == 'mBq' or fbits[-3] == 'mBq':
+                if fbits[0] == 'fit':
+                    xstal = fbits[1].split('-')[0].split('x')[1]
+                    loca  = fbits[1].split('-')[1]
+                    chst  = fbits[1].split('-')[2].split('_')[0]
+                    chsp  = fbits[1].split('-')[2].split('_')[1]
+                    acti  = str(fbits[3])
+
+                    lenbbits = len(bbits)
+                    if bbits[2] == xstal and bbits[3].replace('-','') == loca and bbits[5] == chst and bbits[6] == chsp:
+                        for i in range(lenbbits):
+                            if i == 0:
+                                output.write(BF+'\t')
+                            elif i == 7:
+                                if acti != '0.0': output.write(acti+'\t')
+                                else: output.write(bbits[i]+'\t')
+                            #elif i==9:
+                            elif i==(lenbbits-3):
+                                output.write('0.1\t')
+                            #elif i==10:
+                            elif i==(lenbbits-2):
+                                output.write('10\t')
+                            elif i==(lenbbits-1):
+                                output.write(bbits[i])
+                            else:
+                                output.write(bbits[i]+'\t')
+                        output.write('\n')
+                        replaced = 1
+        
+        if not replaced:
+            output.write(bline+'\n')
+            print '\nWARNING: Could not match -->', filter(None, re.split("[ \s\t\n\r,:]+", bline.strip()))[3:7]
+            #print '\nWARNING: Could not match line -->',fline.split('\n')[0]
+            #print   '         To line -->',bline.split('\n')[0]
+    
+    output.close()
+    return
 

@@ -34,6 +34,7 @@ import ROOT
 
 sys.path.append("/home/mkauer/COSINE/CUP/mc-fitting/")
 sys.path.append("/home/mkauer/mc-fitting/")
+from funcs-misc import *
 from funcs93 import *
 
 
