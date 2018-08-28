@@ -12,6 +12,20 @@
 # ====================================================================
 
 
+# 2018-08-28
+# --------------------------------------------------------------------
+# ~ change the lsveto energy cut to use resolution smearing
+#   for example (edepResol[8]*1000. > 20.0)
+# ~ now generate "others" for everything except lsveto and innersteel
+
+
+# 2018-06-28
+# --------------------------------------------------------------------
+# ~ couples tweaks to v93-fix-other-crystals.py for cross-checking
+# ~ simplified scaleBkgs100() and scaleSigs100()
+# ~ select crystal mass by which crystal the background is FROM
+
+
 # 2018-06-27
 # --------------------------------------------------------------------
 # ~ fitting is now working but activity scaling I think is still wrong

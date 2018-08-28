@@ -4,10 +4,14 @@
 # 
 # Adding LS-veto functionality!
 # 
-# version: 2018-06-27
+# version: 2018-08-28
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# ~ change the lsveto energy cut to use resolution smearing
+# ~ now generate "others" for everything except lsveto and innersteel
+# ~ tweaked the cuts to exclude lsveto single-hit
+# ~ select crystal mass by the crystal the background is FROM
 # + scaleSigs100() and tweaked the lsveto
 # + combineOthers100() and tweaked for the lsveto pmt sigs
 # + buildMC100() and scaleBkgs100()
@@ -174,14 +178,17 @@ def build100(infile='backgrounds1000.txt', others=1, freuse=0, fchans=0, fxstals
         if len(info) == 0:
             continue
         
-        #+++++++++++++++++++++++++++++++++++++++++++++++++++
-        #+++++++++++++++++++++++++++++++++++++++++++++++++++
-        ### This isn't correct because internals, teflon, copper
-        ###    scale by mass or surface area etc. But this
-        ###    is okay for now...
+        #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # XXX : This isn't correct because internals, teflon,
+        #       copper, etc. scale by mass or surface area
+        #       But this is okay for now...
         infos=[]
-        if (others or info['xstl']==9) and ('pmt' in info['key'] or 'internal' in info['key'] or 'copper' in info['key']):
-        #if others and ('lsveto' not in info['key'] and 'innersteel' not in info['key'] and 'data' not in info['key']):
+        exclude = bool('data' in info['key']
+                       or 'lsveto' in info['key']
+                       or 'innersteel' in info['key'])
+        if info['xstl']==9 and not exclude:
+            #print 'DEBUG: if info[xstl]==9 and not exclude: --> ', info['key']
             key = info['key']
             for i in range(8):
                 #info['key'] = key+'-f'+str(i+1)
@@ -189,25 +196,30 @@ def build100(infile='backgrounds1000.txt', others=1, freuse=0, fchans=0, fxstals
                 newinfo['key'] = key+'-f'+str(i+1)
                 newinfo['from'] = str(i+1)
                 infos.append(newinfo)
-        elif not others and ('pmt' in info['key'] or 'internal' in info['key'] or 'copper' in info['key']):
-        #elif not others and ('lsveto' not in info['key'] and 'innersteel' not in info['key'] and 'data' not in info['key']):
+        elif others and not exclude:
+            #print 'DEBUG: elif others and not exclude: --> ', info['key']
+            key = info['key']
+            for i in range(8):
+                #info['key'] = key+'-f'+str(i+1)
+                newinfo = deepcopy(info)
+                newinfo['key'] = key+'-f'+str(i+1)
+                newinfo['from'] = str(i+1)
+                infos.append(newinfo)
+        elif not others and not exclude:
+            #print 'DEBUG: elif not others and not exclude: --> ', info['key']
             key = info['key']
             newinfo = deepcopy(info)
             newinfo['key'] = key+'-f'+str(info['xstl'])
             newinfo['from'] = info['xstl']
             infos.append(newinfo)
-        # force these to not grab "others" until fixed
-        #elif ('surf' in info['key'] or 'teflon' in info['key'] or 'copper' in info['key'] or 'case' in info['key']):
-        elif ('surf' in info['key'] or 'teflon' in info['key'] or 'case' in info['key']):
-            key = info['key']
-            newinfo = deepcopy(info)
-            newinfo['key'] = key+'-f'+str(info['xstl'])
-            newinfo['from'] = info['xstl']
-            infos.append(newinfo)
-        else:
+        elif exclude:
+            #print 'DEBUG: elif exclude: --> ', info['key']
             infos.append(info)
-        #+++++++++++++++++++++++++++++++++++++++++++++++++++
-        #+++++++++++++++++++++++++++++++++++++++++++++++++++
+        else:
+            #print '!!!!! DEBUG: else: --> ', info['key']
+            infos.append(info)
+        #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         
         for info in infos:
             #print info['key']
@@ -221,7 +233,7 @@ def build100(infile='backgrounds1000.txt', others=1, freuse=0, fchans=0, fxstals
                 sigs = buildMC100(info, sigs)
             
             else:
-                print 'WARNING: I do not know what to do with type',info['type'], 'in line:'
+                print 'WARNING: I do not know type',info['type'],'in line:'
                 print info['line']
                 continue
     
@@ -376,16 +388,25 @@ def cutsBDT100(i, C, E, edep, selection):
     """
     From: https://cupwiki.ibs.re.kr/Kims/SET1EventSelection
     """
-
-    # i = 0-7 is crystals
-    # i = 8 is lsveto
-
+    
+    ### special cuts for the LS veto
+    ### i = 0-7 is crystals
+    ### i =  8  is lsveto
     if i == 8:
-        coinc  = '(BLSVeto.isCoincident == 1)'
-        #lsveto = '(BLSVeto.Charge/143.8 > 20)'
-        lsveto = '(BLSVeto.Charge/143.8 > 0)'
-        masterCut = TCut(coinc+' && '+lsveto)
-        return masterCut
+        if C == 'S':
+            #coinc  = '(BLSVeto.isCoincident == 0)'
+            #lsveto = '(BLSVeto.Charge/143.8 > 0)'
+            #return TCut(coinc+' && '+lsveto)
+            return TCut('0')
+        elif C == 'M':
+            coinc  = '(BLSVeto.isCoincident == 1)'
+            lsveto = '(BLSVeto.Charge/143.8 > 0)'
+            return TCut(coinc+' && '+lsveto)
+        else:
+            print 'ERROR: I do not know what to do with channel -->', C
+            print 'Available channels are [S]Single-hits, [M]Multi-hits'
+            sys.exit()
+
     
     # values for the alpha cut
     alpha = [2.660,
@@ -452,9 +473,10 @@ def cutsBDT100(i, C, E, edep, selection):
     bdta   = '(bdtA['+str(i+1)+'] > '+str(cutbdta[i])+')'
     
     #bdtCuts  = '('+bdt+' && '+bdte+' && '+bdta+')'
-    # i kinda don't like that bdte energy dependent cut
+    ### I don't like that bdte energy dependent cut
     bdtCuts  = '('+bdt+' && '+bdta+')'
     
+
     if C == 'S':
         lsveto = '(BLSVeto.Charge/143.8 < 20)'
         hits   = '('
@@ -466,8 +488,7 @@ def cutsBDT100(i, C, E, edep, selection):
 
         # BDT cuts ONLY for low energy spectrum!!
         masterCut = TCut(bdtCuts+' && '+noiseCut+' && '+'('+lsveto+' && '+hits+')'+' && '+alphaCut)
-        if E:
-            masterCut = TCut(noiseCut+' && '+'('+lsveto+' && '+hits+')'+' && '+alphaCut)
+        if E: masterCut = TCut(noiseCut+' && '+'('+lsveto+' && '+hits+')'+' && '+alphaCut)
         return masterCut
     
     elif C == 'M':
@@ -481,8 +502,7 @@ def cutsBDT100(i, C, E, edep, selection):
 
         # BDT cuts ONLY for low energy spectrum!!
         masterCut = TCut(bdtCuts+' && '+noiseCut+' && '+'('+lsveto+' || '+hits+')'+' && '+alphaCut)
-        if E:
-            masterCut = TCut(noiseCut+' && '+'('+lsveto+' || '+hits+')'+' && '+alphaCut)
+        if E: masterCut = TCut(noiseCut+' && '+'('+lsveto+' || '+hits+')'+' && '+alphaCut)
         return masterCut
 
     else:
@@ -655,7 +675,7 @@ def buildMC100(info, mc):
         
         if nfiles > 0:
             
-            #print 'INFO:',nfiles,'files found for', info['loca'], info['isof']
+            print 'INFO:',nfiles,'files found for', info['loca'], info['isof']
             
             for c in info['chans']:
                 info['chan'] = c
@@ -681,32 +701,39 @@ def buildMC100(info, mc):
 
                     ###  put together all the cuts you need...
                     #=====================================================================================
-
+                    
                     ### general energy cut
                     energyCut = TCut('(edep['+str(i)+']*1000. > 0.0)')
                     if pushpasMC: energyCut = TCut('(edep[6]*1000. > 0.0)')
+                    if info['xstl'] == 9: energyCut = TCut('(edepResol[8]*1000. > 0.0)')
                     
+                    ### single hit cuts
                     if info['chan'] == 'S':
                         
                         ### single-hit cut
-                        hitCut = '((singleHitTag['+str(i)+'] == 1.0))'
-                        if pushpasMC: hitCut = '((singleHitTag[6] == 1.0))'
+                        hitCut = '((singleHitTag['+str(i)+'] == 1) && (multipleHitTag['+str(i)+'] == -1))'
+                        if pushpasMC: hitCut = '((singleHitTag[6] == 1) && (multipleHitTag[6] == -1))'
                         
                         ### ls veto cut
-                        lsvetocut = '(edep[8]*1000. < 20.0)'
+                        ### need to use smeared resolution
+                        lsvetocut = '(edepResol[8]*1000. < 20.0)'
                         
                         ### combined cuts
                         chanCut = TCut('(('+hitCut+') && ('+lsvetocut+'))')
-                        
+
+                    ### multi hit cuts
                     elif info['chan'] == 'M':
                         
                         ### multi-hit cut
-                        hitCut = '((multipleHitTag['+str(i)+'] == 1.0))'
-                        if pushpasMC: hitCut = '((multipleHitTag[6] == 1.0))'
+                        hitCut = '((multipleHitTag['+str(i)+'] == 1) && (singleHitTag['+str(i)+'] == -1))'
+                        if pushpasMC: hitCut = '((multipleHitTag[6] == 1) && (singleHitTag[6] == -1))'
                         
                         ### ls veto cut
-                        lsvetocut = '(edep[8]*1000. > 20.0)'
-                        
+                        ### need to use smeared resolution
+                        lsvetocut = '(edepResol[8]*1000. > 20.0)'
+                        if info['xstl'] == 9:
+                            lsvetocut = '(edepResol[8]*1000. >= 0.0)'
+                            
                         ### combined cuts
                         chanCut = TCut('(('+hitCut+') || ('+lsvetocut+'))')
                         
@@ -836,9 +863,9 @@ def buildMC100(info, mc):
                                          +')')
 
                         selection = '((edep['+str(i)+']*1000.) + (sigma*edep['+str(i)+']*1000.*rng))'
-                        if pushpasMC:
-                            selection = '((edep[6]*1000.) + (sigma*edep[6]*1000.*rng))'
+                        if pushpasMC: selection = '((edep[6]*1000.) + (sigma*edep[6]*1000.*rng))'
 
+                    ### if lsveto
                     if i == 8:
                         # XXX : not sure if these cuts are right
                         #       but they seem to be working well...
@@ -850,7 +877,7 @@ def buildMC100(info, mc):
                                     volumeCut.GetTitle()
                                          +')')
                         
-                        selection = '(edepResol[8] * 1000.)'
+                        selection = '(edepResol[8]*1000.)'
                         
                     #=====================================================================
                     
@@ -877,108 +904,92 @@ def scaleBkgs100(bkgs, runtime=0):
         
         #print 'scaling -->',key
         
-        x = key.split('-')[0]
-        loca = key.split('-')[1]
-        e = key.split('-')[-1]
-
-        ### 1 day in seconds
-        day = 86400.
-        if runtime: day = float(runtime)
+        bits = key.split('-')
+        x    = int(bits[0][-1])
+        loca = bits[1]
+        isos = bits[2]
+        f    = 0
+        c    = bits[-2][-1]
+        e    = bits[-1][-1]
+        if len(bits)==6:
+            f = int(bits[3][-1])
+        
+        # conversion factors for things
         keVperBin  = 1./float(bkgs[key]['pars'][3])
-        nmass      = cmass(int(x[-1])-1)
+        if runtime:
+            day    = float(runtime)
+        else:
+            day    = 86400.
+        if f:
+            nmass  = cmass(f-1)
+        else:
+            nmass  = cmass(x-1)
         surf       = 1.
         pmts       = 2.
         extpmts    = 14.
-        xkgs       = cmass(int(x[-1])-1)
+        xkgs       = cmass(x-1)
         lskg       = 1800.
         steel      = 1600.
         innersteel = 4000.
+        generated  = float(bkgs[key]['generated'])
         
-        #-------------------------------------------------------------
-        # XXX : how to get the lsveto MC to normalize right?
-        if int(x[-1]) == 9:
-            xkgs       = 1800.
-            #xkgs       = 106.14
-            #lskg       = 1.
-        #-------------------------------------------------------------
+        ### XXX: if lsveto - TESTING
+        if x==9:
+            pmts       = 2/16.  # what I had before... # still looks the best so far
+            #pmts       = 16.    # too little pmt in crystal - too much pmt in lsveto
+            #pmts       = 2/8.   # little worse than the 2/16 test?
+            #pmts       = 1/16.  # very similar to the 2/16 test as expected...
+            #pmts       = 8.     # too little in crystal - too much in lsveto
+            
+            lskg       = 1.  # is this right??
+            
         
-        generated = float(bkgs[key]['generated'])
         if generated < 1:
             print "WARNING: 0 events generated for -->", key
             continue
         
         if loca == 'internal':
             scale = bkgs[key]['info']['acti'] * (nmass) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
-            bkgs[key]['hist'].Scale(scale)
-            bkgs[key]['scale'] = scale
-            
         elif 'surf' in loca:
             scale = bkgs[key]['info']['acti'] * (surf) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
-            bkgs[key]['hist'].Scale(scale)
-            bkgs[key]['scale'] = scale
-            
         elif 'teflon' in loca:
             scale = bkgs[key]['info']['acti'] * (surf) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
-            bkgs[key]['hist'].Scale(scale)
-            bkgs[key]['scale'] = scale
-            
         elif loca == 'copper':
             scale = bkgs[key]['info']['acti'] * (surf) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
-            bkgs[key]['hist'].Scale(scale)
-            bkgs[key]['scale'] = scale
-
-        elif loca == 'cucase' or loca == 'coppercase':
+        elif loca == 'cucase':
             scale = bkgs[key]['info']['acti'] * (surf) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
-            bkgs[key]['hist'].Scale(scale)
-            bkgs[key]['scale'] = scale
-
+        elif loca == 'coppercase':
+            scale = bkgs[key]['info']['acti'] * (surf) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
         elif loca == 'pmt':
             scale = bkgs[key]['info']['acti'] * (pmts) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
-            bkgs[key]['hist'].Scale(scale)
-            bkgs[key]['scale'] = scale
-            
         elif loca == 'extpmt':
             scale = bkgs[key]['info']['acti'] * (extpmts) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
-            bkgs[key]['hist'].Scale(scale)
-            bkgs[key]['scale'] = scale
-            
         elif loca == 'lsveto':
             scale = bkgs[key]['info']['acti'] * (lskg) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
-            bkgs[key]['hist'].Scale(scale)
-            bkgs[key]['scale'] = scale
-            
         elif loca == 'lsvetoair':
-            scale = bkgs[key]['info']['acti'] * (nmass) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
-            bkgs[key]['hist'].Scale(scale)
-            bkgs[key]['scale'] = scale
-            
+            scale = bkgs[key]['info']['acti'] * (surf) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
         elif loca == 'airshield':
-            scale = bkgs[key]['info']['acti'] * (nmass) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
-            bkgs[key]['hist'].Scale(scale)
-            bkgs[key]['scale'] = scale
-            
+            scale = bkgs[key]['info']['acti'] * (surf) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
         elif loca == 'steel':
             scale = bkgs[key]['info']['acti'] * (steel) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
-            bkgs[key]['hist'].Scale(scale)
-            bkgs[key]['scale'] = scale
-
         elif loca == 'innersteel':
             scale = bkgs[key]['info']['acti'] * (innersteel) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
-            bkgs[key]['hist'].Scale(scale)
-            bkgs[key]['scale'] = scale
-            
         else:
             print "ERROR: no background scaling for -->", loca
             sys.exit()
-
+        
+        bkgs[key]['hist'].Scale(scale)
+        bkgs[key]['scale'] = scale
+    
     return bkgs
-
 
 
 def scaleSigs100(sigkeys, sigs, runtime=0):
 
     for key in sigkeys:
-
+        
+        #print 'scaling -->',key
+        
         try:
             test = sigs[key]['fitscale']
         except:
@@ -987,100 +998,72 @@ def scaleSigs100(sigkeys, sigs, runtime=0):
             sigs[key]['info']['fiterro'] = 0
             continue
         
-        x = key.split('-')[0]
-        loca = key.split('-')[1]
-        e = key.split('-')[-1]
-
-        ### 1 day in seconds
-        day = 86400.
-        if runtime: day = float(runtime)
+        bits = key.split('-')
+        x    = int(bits[0][-1])
+        loca = bits[1]
+        isos = bits[2]
+        f = 0
+        c    = bits[-2][-1]
+        e    = bits[-1][-1]
+        if len(bits)==6:
+            f = int(bits[3][-1])
+        
+        # conversion factors for things
         keVperBin  = 1./float(sigs[key]['pars'][3])
-        nmass      = cmass(int(x[-1])-1)
+        if runtime:
+            day    = float(runtime)
+        else:
+            day    = 86400.
+        if f:
+            nmass  = cmass(f-1)
+        else:
+            nmass  = cmass(x-1)
         surf       = 1.
         pmts       = 2.
         extpmts    = 14.
-        xkgs       = cmass(int(x[-1])-1)
+        xkgs       = cmass(x-1)
         lskg       = 1800.
         steel      = 1600.
         innersteel = 4000.
+        generated  = float(sigs[key]['generated'])
         
-        #-------------------------------------------------------------
-        # XXX : how to get the lsveto MC to normalize right?
-        if int(x[-1]) == 9:
-            xkgs       = 1800.
-            #xkgs       = 106.14
-            #lskg       = 1.
-        #-------------------------------------------------------------
-        
-        generated = float(sigs[key]['generated'])
         if generated < 1:
             print "WARNING: 0 events generated for -->", key
             continue
         
         if loca == 'internal':
             fitActivity = sigs[key]['fitscale'] * (1./nmass) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
-            sigs[key]['info']['fitacti'] = fitActivity
-            sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
-            
         elif 'surf' in loca:
             fitActivity = sigs[key]['fitscale'] * (1./surf) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
-            sigs[key]['info']['fitacti'] = fitActivity
-            sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
-            
         elif 'teflon' in loca:
             fitActivity = sigs[key]['fitscale'] * (1./surf) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
-            sigs[key]['info']['fitacti'] = fitActivity
-            sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
-            
         elif loca == 'copper':
             fitActivity = sigs[key]['fitscale'] * (1./surf) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
-            sigs[key]['info']['fitacti'] = fitActivity
-            sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
-            
-        elif loca == 'cucase' or loca == 'coppercase':
+        elif loca == 'cucase':
             fitActivity = sigs[key]['fitscale'] * (1./surf) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
-            sigs[key]['info']['fitacti'] = fitActivity
-            sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
-            
+        elif loca == 'coppercase':
+            fitActivity = sigs[key]['fitscale'] * (1./surf) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
         elif loca == 'pmt':
             fitActivity = sigs[key]['fitscale'] * (1./pmts) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
-            sigs[key]['info']['fitacti'] = fitActivity
-            sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
-            
         elif loca == 'extpmt':
             fitActivity = sigs[key]['fitscale'] * (1./extpmts) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
-            sigs[key]['info']['fitacti'] = fitActivity
-            sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
-            
         elif loca == 'lsveto':
             fitActivity = sigs[key]['fitscale'] * (1./lskg) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
-            sigs[key]['info']['fitacti'] = fitActivity
-            sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
-            
         elif loca == 'lsvetoair':
-            fitActivity = sigs[key]['fitscale'] * (1./nmass) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
-            sigs[key]['info']['fitacti'] = fitActivity
-            sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
-            
+            fitActivity = sigs[key]['fitscale'] * (1./surf) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
         elif loca == 'airshield':
-            fitActivity = sigs[key]['fitscale'] * (1./nmass) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
-            sigs[key]['info']['fitacti'] = fitActivity
-            sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
-            
+            fitActivity = sigs[key]['fitscale'] * (1./surf) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
         elif loca == 'steel':
             fitActivity = sigs[key]['fitscale'] * (1./steel) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
-            sigs[key]['info']['fitacti'] = fitActivity
-            sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
-
         elif loca == 'innersteel':
             fitActivity = sigs[key]['fitscale'] * (1./innersteel) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
-            sigs[key]['info']['fitacti'] = fitActivity
-            sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
-            
         else:
             print "ERROR: no signal scaling for -->", loca
             sys.exit()
-
+        
+        sigs[key]['info']['fitacti'] = fitActivity
+        sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
+            
     return sigs
 
 
@@ -1095,7 +1078,8 @@ def combineOthers100(sigs, globalMC):
         if len(bits) != 6:
             continue
         # don't combine if combining in global fit anyway?
-        if bits[1] in globalMC and bits[0] != 'x9':
+        #if bits[1] in globalMC and bits[0] != 'x9':
+        if bits[1] in globalMC:
             continue
         
         X = int(bits[0][1])

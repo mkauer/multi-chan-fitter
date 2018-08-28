@@ -13,7 +13,7 @@ V = 'v100'
 #   a lot of the same infrastructure. And might as well revamp into
 #   python class structure. 
 # 
-# version: 2018-06-27
+# version: 2018-08-28
 # 
 # see CHANGELOG for changes
 ######################################################################
@@ -34,7 +34,7 @@ sys.path.append("/home/mkauer/COSINE/CUP/mc-fitting/")
 sys.path.append("/home/mkauer/mc-fitting/")
 from funcs100 import *
 
-### number of crystals
+### get the number of crystals
 numx = numX()
 
 ### use pushpa's fitting ranges and binning?
@@ -46,13 +46,16 @@ pushpa = 0
 note = 0
 #note = 'default'
 
-mcfile = 'backgrounds1000.txt'
-
+mcfile = 'backgrounds1001.txt'
 
 print '\nINFO: using backgrounds config file -->', mcfile
 
 
 ### ==========  FITTING OPTIONS  ===========================
+
+### select channels to fit
+fitchans = 'SM'
+
 ### fitting ranges and rebinnings
 if pushpa:
     fLoE = [6,  70]   # Pushpa style
@@ -63,21 +66,19 @@ else:
     fLoE = [6, 76]
     fHiE = [70, 2770]
     # lsveto testing
-    fLoE = [30, 180]
-    fHiE = [200, 4000]
+    fLoE = [80, 200]
+    #fLoE = [0, 0]
+    fHiE = [80, 4000]
     loEfitRebin = 3
     hiEfitRebin = 4
-    
-### select channels to fit
-fitchans = 'M'
 
 
 ### ==========  EXTRA MC OPTIONS  ==========================
 ### which MC to fit globally (to all crystals simultaneously)?
 globalmc = []
-#globalmc = ['lsveto', 'pmt', 'innersteel']
+globalmc = ['lsveto', 'pmt', 'innersteel']
 ### include bkgs from 'other' pmts and internals?
-others  = 0
+others  = 1
 
 ### plot components in groups? [0,1]
 ingroups = 1
@@ -98,7 +99,7 @@ combine = 1
 reuse = 0
 
 ### update and save new backgrounds file with fit results
-updateMCfile = 0
+updateMCfile = 1
 
 
 ### ==========  OTHER FITTING OPTIONS  =====================
@@ -129,8 +130,8 @@ pltchans = 'SM'
 ### plotting ranges
 #loer = [0,   70]   # pushpa style
 #hier = [100, 2000] # pushpa style
-loer = [0, 200]
-hier = [0, 4000]
+loer = [0, 100]
+hier = [0, 3000]
 
 eran = [loer, hier]
 
@@ -191,7 +192,7 @@ def myself(argv):
     xstals = []
     
     if len(argv) > 0:
-        batch = 1
+        batch = 0
         xstals = []
         for c in argv:
             xstals.append(int(c))
@@ -223,7 +224,18 @@ def myself(argv):
     data, bkgs, sigs, runtime = build100(mcfile, others, reuse, allchans, xstals)
     print 'INFO: runtime =', runtime, '(seconds)'
 
-    #sys.exit()
+    # 2018-07-01
+    # a little bug info on what "others" are being generated for lsveto
+    # looks correct...
+    """
+    keys=[]
+    for key in bkgs:
+        keys.append(key)
+    keys.sort()
+    for key in keys:
+        print key
+    sys.exit()
+    """
     
     datkeys = sortDataKeys92(data)
     if datsumw2:
@@ -255,7 +267,7 @@ def myself(argv):
     sigs, sigkeys = sortSimKeys92(sigs)
     #-----------------------------------------------------------------
     #-----------------------------------------------------------------
-
+    
     # plot all crystals that have data
     justthese=[]
     for i in range(1, numx+1):
@@ -346,12 +358,14 @@ def myself(argv):
     bpkvLo = params[0][3]
     fLo = [int(fLoE[0]*bpkvLo/loEfitRebin), int(fLoE[1]*bpkvLo/loEfitRebin)]
     fLoBins = fLo[1]-fLo[0]
-    keVperBinLoE = (fLoE[1]-fLoE[0])/float(fLoBins)
+    try: keVperBinLoE = (fLoE[1]-fLoE[0])/float(fLoBins)
+    except: keVperBinLoE = 0
     
     bpkvHi = params[1][3]
     fHi = [int(fHiE[0]*bpkvHi/hiEfitRebin), int(fHiE[1]*bpkvHi/hiEfitRebin)]
     fHiBins = fHi[1]-fHi[0]
-    keVperBinHiE = (fHiE[1]-fHiE[0])/float(fHiBins)
+    try: keVperBinHiE = (fHiE[1]-fHiE[0])/float(fHiBins)
+    except: keVperBinHiE = 0
     
     fbins = int(fLoBins+fHiBins)
     
@@ -363,7 +377,11 @@ def myself(argv):
         fmax = fbins*len(fitchans)
     #=================================================================
     
-
+    
+    ### copy the backgrounds file
+    shutil.copyfile(mcfile, './plots/'+mcfile)
+    
+    
     ### need seperate dicts for rebinned data and MC for plotting to
     ### to work right - they need their own memory space
     #-----------------------------------------------------------------
@@ -1092,11 +1110,13 @@ def myself(argv):
         ### set the fit range
         fit.SetRangeX(0, fmax*numx)
 
-        #sys.exit()
         ### do the fit
         status = fit.Fit()
-
-        print '\n\n******************* FIT IS DONE *******************\n\n'
+        if status != 0:
+            print '\n\n*******************  FIT FAILURE  *******************\n\n'
+            sys.exit()
+        
+        print '\n\n*******************  SUCCESSFUL FIT  *******************\n\n'
         
         chi2 = fit.GetChisquare()
         ndf  = fit.GetNDF()
@@ -1214,7 +1234,6 @@ def myself(argv):
         ### scale the signals to mBq/kg
         if dru: sigs = scaleSigs100(sigkeys, sigs)
         else: sigs = scaleSigs100(sigkeys, sigs, runtime)
-
         
         ### print the fit activities
         for i in range(numx):
@@ -1335,18 +1354,16 @@ def myself(argv):
         save += '_'+V
         
 
-        ### print out the results and update the backgrounds file
-        #-------------------------------------------------------------
-        ### sort all the fitresults
-        resultskeys=[]
-        for rskey in fitresults:
-            resultskeys.append(rskey)
-        resultskeys.sort()
-
-        
         ### only write out files if fit is successful
         #-------------------------------------------------------------
         if status == 0:
+            
+            ### sort the fitresults keys
+            resultskeys = []
+            for rskey in fitresults:
+                resultskeys.append(rskey)
+            resultskeys.sort()
+                    
             ### write results to file
             resultsfile = './plots/'+save+'_fit-results.txt'
             outfile = open(resultsfile, 'w')
@@ -1357,8 +1374,8 @@ def myself(argv):
             outfile.close()
             
             ### create the updated backgrounds file
+            #shutil.copyfile(mcfile, './plots/'+mcfile)
             if updateMCfile:
-                shutil.copyfile(mcfile, './plots/'+mcfile)
                 newbkgs = './plots/'+mcfile[:-4]+'-update.txt'
                 updateBkgsFile70(mcfile, resultsfile, newbkgs, BF='BR')
             
@@ -1384,7 +1401,8 @@ def myself(argv):
         #=================================================================
 
         fcanv = TCanvas('fcanv', 'fcanv', 0, 0, 1400, 900)
-        fcanv.Divide(4,2)
+        #fcanv.Divide(4,2)
+        fcanv.Divide(5,2)
         """
         gStyle.SetPadTopMargin    (0.06)
         gStyle.SetPadBottomMargin (0.12)
@@ -1831,7 +1849,7 @@ def myself(argv):
         # '5' secondary and '05' primary
         fresid.GetYaxis().SetNdivisions(505)
         
-        fresid.SetAxisRange(0.1,10,'y')
+        fresid.SetAxisRange(0.1, 10, 'y')
         
         fresid.SetAxisRange(0, fmax*numx, 'x')
         
@@ -2085,17 +2103,16 @@ def myself(argv):
                             if E: data[dkey]['hist'].SetAxisRange(2e-3, 2e1, 'y')
                             else: data[dkey]['hist'].SetAxisRange(2e-3, 3e2, 'y')
 
-                            ### for lsveto spectra
                             if E and i==8:
-                                data[dkey]['hist'].SetAxisRange(0, 3500, 'x')
-                                data[dkey]['hist'].SetAxisRange(2e-5, 30, 'y')
+                                #data[dkey]['hist'].SetAxisRange(0, 3500, 'x')
+                                data[dkey]['hist'].SetAxisRange(2e-5, 2e1, 'y')
                                 
                         #popt = 'P E1'
                         #popt = 'HIST'
                         popt = ''
                         data[dkey]['hist'].Draw()
                         #days = round(data[dkey]['runtime']/86400.,2)
-                        days = round(runtime/86400.,2)
+                        days = round(runtime/86400., 2)
                         
                         if ingroups:
                             legs[C][E][i].AddEntry(data[dkey]['hist'], 'Data', lopt)
@@ -2256,9 +2273,10 @@ def myself(argv):
                 #print total[C][E][i].GetNbinsX()
                 
                 if dkey and tcount:
-                    pval  = data[dkey]['hist'].Chi2TestX(total[C][E][i], chi2, ndf, igood, chiopt)
-                    #print 'INFO:',dkey,'pval =',pval,'chi2 =',chi2,'ndf =',ndf,'igood =',igood
-                    print 'INFO:',dkey,'total MC chi2/ndf =',round(chi2/data[dkey]['druScale']/ndf,2)
+                    if data[dkey]['hist'].GetEntries() > 0:
+                        pval  = data[dkey]['hist'].Chi2TestX(total[C][E][i], chi2, ndf, igood, chiopt)
+                        #print 'INFO:',dkey,'pval =',pval,'chi2 =',chi2,'ndf =',ndf,'igood =',igood
+                        print 'INFO:',dkey,'total MC chi2/ndf =',round(chi2/data[dkey]['druScale']/ndf,2)
                 #-----------------------------------------------------------------------------
                 #=============================================================================
 
