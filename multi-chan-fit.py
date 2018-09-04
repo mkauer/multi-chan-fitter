@@ -66,9 +66,9 @@ else:
     fLoE = [6, 76]
     fHiE = [70, 2770]
     # lsveto testing
-    fLoE = [80, 200]
+    #fLoE = [80, 200]
     #fLoE = [0, 0]
-    fHiE = [80, 4000]
+    #fHiE = [80, 4000]
     loEfitRebin = 3
     hiEfitRebin = 4
 
@@ -376,10 +376,6 @@ def myself(argv):
         #fmax = fbins*nchans
         fmax = fbins*len(fitchans)
     #=================================================================
-    
-    
-    ### copy the backgrounds file
-    shutil.copyfile(mcfile, './plots/'+mcfile)
     
     
     ### need seperate dicts for rebinned data and MC for plotting to
@@ -1905,7 +1901,10 @@ def myself(argv):
         #raw_input('[Enter] to quit \n')
         
     ### end of fitting bit if you have signals
+
     
+    ### copy the backgrounds file
+    shutil.copyfile(mcfile, './plots/'+mcfile)
     
     
     # plot the lo and hi energy histograms for all channels

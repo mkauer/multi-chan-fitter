@@ -34,7 +34,6 @@ import ROOT
 
 sys.path.append("/home/mkauer/COSINE/CUP/mc-fitting/")
 sys.path.append("/home/mkauer/mc-fitting/")
-from funcs-misc import *
 from funcs93 import *
 
 
@@ -185,11 +184,27 @@ def build100(infile='backgrounds1000.txt', others=1, freuse=0, fchans=0, fxstals
         #       copper, etc. scale by mass or surface area
         #       But this is okay for now...
         infos=[]
-        exclude = bool('data' in info['key']
-                       or 'lsveto' in info['key']
+        exclude = bool('lsveto' in info['key']
                        or 'innersteel' in info['key'])
-        if info['xstl']==9 and not exclude:
-            #print 'DEBUG: if info[xstl]==9 and not exclude: --> ', info['key']
+        
+        #exception = bool('surf' in info['key']
+        #                 or 'teflon' in info['key']
+        #                 or 'case' in info['key'])
+        exception = 0
+        
+        debug=0
+        if 'data' in info['key']:
+            if debug: print 'DEBUG: if data in info[key]: --> ', info['key']
+            infos.append(info)
+        elif exception:
+            if debug: print 'DEBUG: elif exception: --> ', info['key']
+            key = info['key']
+            newinfo = deepcopy(info)
+            newinfo['key'] = key+'-f'+str(info['xstl'])
+            newinfo['from'] = info['xstl']
+            infos.append(newinfo)
+        elif info['xstl']==9 and not exclude:
+            if debug: print 'DEBUG: elif info[xstl]==9 and not exclude: --> ', info['key']
             key = info['key']
             for i in range(8):
                 #info['key'] = key+'-f'+str(i+1)
@@ -198,7 +213,7 @@ def build100(infile='backgrounds1000.txt', others=1, freuse=0, fchans=0, fxstals
                 newinfo['from'] = str(i+1)
                 infos.append(newinfo)
         elif others and not exclude:
-            #print 'DEBUG: elif others and not exclude: --> ', info['key']
+            if debug: print 'DEBUG: elif others and not exclude: --> ', info['key']
             key = info['key']
             for i in range(8):
                 #info['key'] = key+'-f'+str(i+1)
@@ -207,17 +222,18 @@ def build100(infile='backgrounds1000.txt', others=1, freuse=0, fchans=0, fxstals
                 newinfo['from'] = str(i+1)
                 infos.append(newinfo)
         elif not others and not exclude:
-            #print 'DEBUG: elif not others and not exclude: --> ', info['key']
+            if debug: print 'DEBUG: elif not others and not exclude: --> ', info['key']
             key = info['key']
             newinfo = deepcopy(info)
             newinfo['key'] = key+'-f'+str(info['xstl'])
             newinfo['from'] = info['xstl']
             infos.append(newinfo)
         elif exclude:
-            #print 'DEBUG: elif exclude: --> ', info['key']
+            if debug: print 'DEBUG: elif exclude: --> ', info['key']
             infos.append(info)
         else:
-            #print '!!!!! DEBUG: else: --> ', info['key']
+            print 'WARNING:',info['key'],'does not fit any known criteria'
+            print '         Please check out build100() '
             infos.append(info)
         #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
