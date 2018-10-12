@@ -4,10 +4,12 @@
 # 
 # Adding LS-veto functionality!
 # 
-# version: 2018-08-28
+# version: 2018-10-12
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# ~ fix scalings for lsveto, steel, pmts in the lsveto
+# ~ include all pmts for x9 in combineOthers100()
 # ~ change the lsveto energy cut to use resolution smearing
 # ~ now generate "others" for everything except lsveto and innersteel
 # ~ tweaked the cuts to exclude lsveto single-hit
@@ -35,6 +37,7 @@ import ROOT
 sys.path.append("/home/mkauer/COSINE/CUP/mc-fitting/")
 sys.path.append("/home/mkauer/mc-fitting/")
 from funcs93 import *
+from funcs_misc import *
 
 
 def numX():
@@ -895,7 +898,7 @@ def buildMC100(info, mc):
                                          +')')
                         
                         selection = '(edepResol[8]*1000.)'
-                        
+                                                
                     #=====================================================================
                     
                     chain.Draw(selection+' >> '+key, masterCut)
@@ -949,17 +952,6 @@ def scaleBkgs100(bkgs, runtime=0):
         steel      = 1600.
         innersteel = 4000.
         generated  = float(bkgs[key]['generated'])
-        
-        ### XXX: if lsveto - TESTING
-        if x==9:
-            pmts       = 2/16.  # what I had before... # still looks the best so far
-            #pmts       = 16.    # too little pmt in crystal - too much pmt in lsveto
-            #pmts       = 2/8.   # little worse than the 2/16 test?
-            #pmts       = 1/16.  # very similar to the 2/16 test as expected...
-            #pmts       = 8.     # too little in crystal - too much in lsveto
-            
-            lskg       = 1.  # is this right??
-            
         
         if generated < 1:
             print "WARNING: 0 events generated for -->", key
@@ -1043,7 +1035,7 @@ def scaleSigs100(sigkeys, sigs, runtime=0):
         steel      = 1600.
         innersteel = 4000.
         generated  = float(sigs[key]['generated'])
-        
+
         if generated < 1:
             print "WARNING: 0 events generated for -->", key
             continue
@@ -1089,14 +1081,18 @@ def combineOthers100(sigs, globalMC):
     delete=[]
     temps={}
     for key in sigs:
+
         if key in donekeys:
             continue
+
         bits = key.split('-')
         if len(bits) != 6:
             continue
+        
         # don't combine if combining in global fit anyway?
-        #if bits[1] in globalMC and bits[0] != 'x9':
-        if bits[1] in globalMC:
+        # unless you are lsveto... 2018-10-09
+        if bits[1] in globalMC and bits[0] != 'x9':
+        #if bits[1] in globalMC:
             continue
         
         X = int(bits[0][1])
@@ -1105,7 +1101,7 @@ def combineOthers100(sigs, globalMC):
             try:
                 default = 'x'+str(X)+'-'+bits[1]+'-'+bits[2]+'-f'+str(X)+'-'+bits[4]+'-'+bits[5]
                 newkey  = 'x'+str(X)+'-'+bits[1]+'-'+bits[2]+'-f'+str(F)+'-'+bits[4]+'-'+bits[5]
-                #print '!!! adding ', newkey, ' to ', default
+                #print 'DEBUG: adding ', newkey, ' to ', default
                 if X==9:
                     if F==1:
                         temps[default] = deepcopy(sigs[newkey])

@@ -3,17 +3,14 @@
 ######################################################################
 # Matt Kauer - mkauer@physics.wisc.edu
 ######################################################################
-# 100-add-lsveto.py
+# 101-better-bounds.py
 
-V = 'v100'
+V = 'v101'
 
-# Include the LS veto as a 9th crystal!
-#   This will take some major refactoring. I should try to include
-#   separate S and M fit ranges here too since it's going to effect
-#   a lot of the same infrastructure. And might as well revamp into
-#   python class structure. 
+# Use better bounds handling for single and multi hit channels as well
+#   as different bounds for the LSveto (x9).
 # 
-# version: 2018-08-28
+# version: 2018-10-12
 # 
 # see CHANGELOG for changes
 ######################################################################
@@ -32,7 +29,7 @@ ROOT.gErrorIgnoreLevel = kWarning
 
 sys.path.append("/home/mkauer/COSINE/CUP/mc-fitting/")
 sys.path.append("/home/mkauer/mc-fitting/")
-from funcs100 import *
+from funcs101 import *
 
 ### get the number of crystals
 numx = numX()
@@ -46,7 +43,9 @@ pushpa = 0
 note = 0
 #note = 'default'
 
-mcfile = 'backgrounds1001.txt'
+#mcfile = 'backgrounds_101.0.txt'
+mcfile = 'backgrounds_101.1.txt'
+
 
 print '\nINFO: using backgrounds config file -->', mcfile
 
@@ -68,7 +67,7 @@ else:
     # lsveto testing
     #fLoE = [80, 200]
     #fLoE = [0, 0]
-    #fHiE = [80, 4000]
+    fHiE = [300, 3300]
     loEfitRebin = 3
     hiEfitRebin = 4
 
@@ -76,7 +75,10 @@ else:
 ### ==========  EXTRA MC OPTIONS  ==========================
 ### which MC to fit globally (to all crystals simultaneously)?
 globalmc = []
+#globalmc = ['lsveto', 'pmt', 'innersteel']
+#globalmc = ['lsveto', 'pmt', 'copper']
 globalmc = ['lsveto', 'pmt', 'innersteel']
+
 ### include bkgs from 'other' pmts and internals?
 others  = 1
 
@@ -221,7 +223,8 @@ def myself(argv):
     #-----------------------------------------------------------------
     #-----------------------------------------------------------------
     allchans = uniqString(fitchans+pltchans)
-    data, bkgs, sigs, runtime = build100(mcfile, others, reuse, allchans, xstals)
+    #data, bkgs, sigs, runtime = build100(mcfile, others, reuse, allchans, xstals)
+    data, bkgs, sigs, runtime = build101(mcfile, others, reuse, allchans, xstals)
     print 'INFO: runtime =', runtime, '(seconds)'
 
     # 2018-07-01
@@ -455,6 +458,10 @@ def myself(argv):
                 for dkey in datkeys:
                     # lo E
                     if 'x'+str(i+1) in dkey and '-c'+C in dkey and '-e0' in dkey:
+                        # skip lsveto in low energy
+                        #if i==8:
+                        #    print 'skipping',dkey
+                        #    continue
                         rldata[dkey]['hist'] = copy.deepcopy(data[dkey]['hist'])
                         rldata[dkey]['hist'].Rebin(loEfitRebin)
                         if loEfitRebinScale:
@@ -505,6 +512,10 @@ def myself(argv):
                     
                     # lo E
                     if 'x'+str(i+1) in skey and '-c'+C in skey and '-e0' in skey:
+                        # skip lsveto in low energy
+                        #if i==8:
+                        #    print 'skipping',skey
+                        #    continue
                         fskey = skey.split('-c'+C+'-e0')[0]
                         if sinit:
                             fsig = TH1F(fskey, fskey, fmax*numx, 0, fmax*numx)
@@ -548,6 +559,10 @@ def myself(argv):
                 for bkey in bakkeys:
                     # lo E
                     if 'x'+str(i+1) in bkey and '-c'+C in bkey and '-e0' in bkey:
+                        # skip lsveto in low energy
+                        #if i==8:
+                        #    print 'skipping',bkey
+                        #    continue
                         fbkey = bkey.split('-c'+C+'-e0')[0]
                         if binit:
                             fbak = TH1F(fbkey, fbkey, fmax*numx, 0, fmax*numx)
@@ -944,7 +959,7 @@ def myself(argv):
             fitresults[str(i)].append('hist extend = '+str(extend))
             fitresults[str(i)].append('norm to dru = '+str(dru))
             fitresults[str(i)].append('lo-E fit range = '+str(fLoE[0])+' - '+str(fLoE[1])+' keV')
-            fitresults[str(i)].append('lo-E fit binbing = '+str(keVperBinLoE)+' keV/bin')
+            fitresults[str(i)].append('lo-E fit binning = '+str(keVperBinLoE)+' keV/bin')
             fitresults[str(i)].append('hi-E fit range = '+str(fHiE[0])+' - '+str(fHiE[1])+' keV')
             fitresults[str(i)].append('hi-E fit binning = '+str(keVperBinHiE)+' keV/bin')
 
@@ -2028,10 +2043,11 @@ def myself(argv):
                 total[C][E][i].Rebin(plotRebin)
                 #total[C][E][i].Scale(1./float(plotRebin))
                 #total[C][E][i].Sumw2()
-                if dru:
+                if dru and i!=8:
                     #total[C][E][i].GetYaxis().SetTitle('counts / day / kg / keV  (dru)')
                     if E: total[C][E][i].SetAxisRange(2e-3, 2e1, 'y')
                     else: total[C][E][i].SetAxisRange(2e-3, 3e2, 'y')
+                    #if i==8: total[C][E][i].SetAxisRange(2e-4, 2e0, 'y')
                 #else: total[C][E][i].GetYaxis().SetTitle('arb. counts')
 
                 # just draw to show plots
@@ -2097,14 +2113,15 @@ def myself(argv):
                         if E: data[dkey]['hist'].SetAxisRange(hier[0], hier[1], 'x')
                         else: data[dkey]['hist'].SetAxisRange(loer[0], loer[1], 'x')
 
-                        if dru:
+                        if dru and i!=8:
                             #data[dkey]['hist'].SetAxisRange(2e-3, 2e1, 'y')
                             if E: data[dkey]['hist'].SetAxisRange(2e-3, 2e1, 'y')
                             else: data[dkey]['hist'].SetAxisRange(2e-3, 3e2, 'y')
 
-                            if E and i==8:
-                                #data[dkey]['hist'].SetAxisRange(0, 3500, 'x')
-                                data[dkey]['hist'].SetAxisRange(2e-5, 2e1, 'y')
+                        ### LSveto plotting
+                        if E and i==8:
+                            data[dkey]['hist'].SetAxisRange(0, 3500, 'x')
+                            #data[dkey]['hist'].SetAxisRange(7e-6, 2e-1, 'y')
                                 
                         #popt = 'P E1'
                         #popt = 'HIST'
@@ -2333,8 +2350,12 @@ def myself(argv):
                 if E: resid[C][E][i].SetAxisRange(hier[0], hier[1], 'x')
                 else: resid[C][E][i].SetAxisRange(loer[0], loer[1], 'x')
 
+                ### LSveto plotting
+                if E and i==8:
+                    resid[C][E][i].SetAxisRange(0, 3500, 'x')
+                
                 resid[C][E][i].SetAxisRange(0.1,10,'y')
-
+                
                 
                 ###---------------------------------------------
                 if linres:
@@ -2383,6 +2404,8 @@ def myself(argv):
 
                 # set my line to '1'
                 zero = TLine(eran[E][0], 1, eran[E][1], 1)
+                if E and i==8:
+                    zero = TLine(0, 1, 3500, 1)
                 zeros[C][E].append(zero)
                 zeros[C][E][i].SetLineColor(kRed)
                 zeros[C][E][i].SetLineWidth(1)

@@ -6,10 +6,11 @@
 # 
 # Works with v93 and later versions
 # 
-# version: 2018-06-27
+# version: 2018-09-11
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# ~ tweaked makePlots93()
 # ~ was using groupNo 1 for K40! changed to 31 in groupNum93()
 # ~ fixed the H3 normalization - it was still wrong!
 # + added calib93() and buildData93()
@@ -663,7 +664,7 @@ def scaleBkgs93(bkgs,runtime=0):
     return bkgs
 
 
-def makePlots93(bkgs, combine, others, vcut):
+def makePlots93(bkgs, combine, others, vcut=0):
     
     gStyle.SetPadTopMargin    (0.07)
     gStyle.SetPadBottomMargin (0.11)
@@ -692,6 +693,7 @@ def makePlots93(bkgs, combine, others, vcut):
                 for E in [0, 1]:
                     
                     canvas.cd(i)
+                    temp[i-1] = TH1F('temp','temp',4000,0,4000)
                     
                     #==========================================================
                     #==========================================================
@@ -705,22 +707,28 @@ def makePlots93(bkgs, combine, others, vcut):
                         newkey += '-f'+crystal[-1]
                     newkey += '-c'+C
                     newkey += '-e'+str(E)
-                    temp[i-1] = deepcopy(bkgs[newkey]['hist'])
+                    try:
+                        temp[i-1] = deepcopy(bkgs[newkey]['hist'])
+                    except:
+                        #print 'skipping key -->', newkey
+                        pass
                     
-                    if combine and (location == 'pmt' or location == 'internal'):
+                    #if combine and (location == 'pmt' or location == 'internal'):
                     #if combine and (location != 'lsveto' and location != 'innersteel'):
-                        for k in range(1,9):
+                    if combine:
+                        for k in range(1,10):
                             if k != int(crystal[-1]):
-                                newkey  = crystal
-                                newkey += '-'+location
-                                newkey += '-'+isotope
-                                newkey += '-f'+str(k)
-                                newkey += '-c'+C
-                                newkey += '-e'+str(E)
-                                #try:
-                                temp[i-1].Add(deepcopy(bkgs[newkey]['hist']))
-                                #except:
-                                #    pass
+                                newerkey  = crystal
+                                newerkey += '-'+location
+                                newerkey += '-'+isotope
+                                newerkey += '-f'+str(k)
+                                newerkey += '-c'+C
+                                newerkey += '-e'+str(E)
+                                try:
+                                    temp[i-1].Add(deepcopy(bkgs[newerkey]['hist']))
+                                except:
+                                    #print 'skipping key -->', newerkey
+                                    pass
                     #==========================================================
                     #==========================================================
                     
@@ -731,11 +739,11 @@ def makePlots93(bkgs, combine, others, vcut):
                     
                     if E:
                         temp[i-1].Rebin(int(10/kvpb))
-                        temp[i-1].SetAxisRange(0, 3000, 'x')
+                        temp[i-1].SetAxisRange(0, 4000, 'x')
                         #temp[i-1].SetAxisRange(1e-3, 1, 'y')
                     else:
                         temp[i-1].Rebin(int(1/kvpb))
-                        temp[i-1].SetAxisRange(0, 100, 'x')
+                        temp[i-1].SetAxisRange(0, 200, 'x')
                         #temp[i-1].SetAxisRange(1e-2, 10, 'y')
                         
                     what=''
@@ -1136,7 +1144,6 @@ def sortSimKeys92(sigs):
     return sigs, sigkeys
 
 
-
 def scaleData70(data, dru=0):
     """
     Scale for DRU or not
@@ -1146,14 +1153,21 @@ def scaleData70(data, dru=0):
         days = 1.
         xkgs = 1.
         keVperBin = 1.
-        if dru: days = float((data[key]['runtime'])/86400.)
+        if dru:
+            days = float((data[key]['runtime'])/86400.)
         xkgs = float(cmass(i))
         keVperBin = 1./float(data[key]['pars'][3])
+        """
+        print 'DEBUG: data key =', key
+        print 'DEBUG: time in days =', days
+        print 'DEBUG: mass in kg =', xkgs
+        print 'DEBUG: keV/bin =', keVperBin
+        print 'DEBUG: total events =', data[key]['hist'].GetEntries()
+        """
         scale = float(1./(days*xkgs*keVperBin))
         data[key]['hist'].Scale(scale)
         data[key]['druScale'] = scale
     return data
-
 
 
 def combineOthers92(sigs, globalMC):
@@ -1291,4 +1305,38 @@ def updateBkgsFile70(bkgsfile, resultsfile, newbkgs, BF='BR'):
     
     output.close()
     return
+
+
+def resol80(i, E=0, pushpaC7Surf=0):
+    """
+    https://cupwiki.ibs.re.kr/Kims/NaICalibration
+    """
+    # res = p[0]/sqrt(x) + p[1]
+    # low energy
+    loEresol = [[0.2413,  0.01799],
+	        [0.2951,  0.01427],
+	        [0.3106,  0.007894],
+	        [0.3894, -0.001437],
+                [0.8, 0], # tweaking C5
+	        [0.3620,  0.0006355],
+	        [0.3042,  0.009784],
+                [1.3, 0]] # tweaking C8
+    # high energy
+    hiEresol = [[0.6729, 0.009374],
+	        [0.6531, 0.006627],
+	        [0.5926, 0.009506],
+	        [0.7227, 0.004790],
+                [1.7, 0], # tweaking C5
+	        [0.6498, 0.009670],
+	        [0.7034, 0.007812],
+                [4.0, 0]] # tweaking C8
+    if E:
+        p0, p1 = hiEresol[int(i)]
+    else:
+        p0, p1 = loEresol[int(i)]
+
+    selection = '(('+str(float(p0))+'/sqrt(edep['+str(i)+']*1000.)) + '+str(float(p1))+')'
+    if pushpaC7Surf:
+        selection = '(('+str(float(p0))+'/sqrt(edep[6]*1000.)) + '+str(float(p1))+')'
+    return selection
 

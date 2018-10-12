@@ -12,8 +12,31 @@
 # ====================================================================
 
 
+# 2018-10-12
+# --------------------------------------------------------------------
+# ~ regenerate steel MC
+# + add steel to the build101() exclude list
+# ~ fix scalings for lsveto, steel, pmts in the lsveto
+
+
+# 2018-10-09
+# --------------------------------------------------------------------
+# + generate all new MC with the > 0.1 keV requirement
+# + lsveto needs minimum energy deposit in any crystal > 0.1 keV
+# + test Estella's LSveto background model
+# + generate MC for steel
+# ~ include all pmts for x9 in combineOthers100()
+
+
+# 2018-09-13
+# --------------------------------------------------------------------
+# + generate new rootfiles with lsveto energy resolution of 0.95
+# ~ fixed the lsveto signal scalings for lsveto and pmt backgrounds
+
+
 # 2018-09-04
 # --------------------------------------------------------------------
+# V switch to 101-better-bounds.py
 # + cut a release v10.0
 
 
