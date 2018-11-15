@@ -3,17 +3,13 @@
 ######################################################################
 # Matt Kauer - mkauer@physics.wisc.edu
 ######################################################################
-# 101-better-bounds.py
+# 200-refactor.py
 
-V = 'v101'
+V = 'v200'
 
-# Use better bounds handling for single and multi hit channels as well
-#   as different bounds for the LSveto (x9).
-# This turned into fixing some bugs with steel and testing out
-#   smoothing functions so I didn't actually change anything with
-#   with the fit bounds. Will do that in v102.
+# Refactoring / testing using separate bounds for each crystal
 # 
-# version: 2018-11-06
+# version: 2018-11-15
 # 
 # see CHANGELOG for changes
 ######################################################################
@@ -28,7 +24,8 @@ import numpy as np
 import ROOT
 from ROOT import *
 ROOT.gROOT.Reset()
-ROOT.gErrorIgnoreLevel = kWarning
+#ROOT.gErrorIgnoreLevel = kWarning
+ROOT.gErrorIgnoreLevel = kError
 
 sys.path.append("/home/mkauer/COSINE/CUP/mc-fitting/")
 sys.path.append("/home/mkauer/mc-fitting/")
@@ -45,51 +42,45 @@ debug = 0
 ### ==========  GENERAL INPUTS  ======================================
 ### note to add to saved plot names?
 note = 0
-#note = 'default'
+#note = ''
 
-#mcfile = 'backgrounds_101.0.txt'
-mcfile = 'backgrounds_101.1.txt'
-#mcfile = 'backgrounds_101.1-update.txt'
-
+#mcfile = 'backgrounds_101.1.txt'
+mcfile = 'backgrounds_200.txt'
 
 print 'INFO: using backgrounds config file -->', mcfile
 
 
 ### ==========  OPTIMIZATION OPTIONS  ================================
 ### MC smoothing? Specify a smoothing window in +/- number of bins
-smoothing = 5
-#smoothing = 0
+#smoothing = 5
+smoothing = 0
 
 
 ### ==========  FITTING OPTIONS  =====================================
-### use pushpa's fitting ranges and binning?
-pushpa = 0
 
 ### select channels to fit
 fitchans = 'SM'
 
-### fitting ranges and rebinnings
-if pushpa:
-    fLoE = [6,  70]   # Pushpa style
-    fHiE = [70, 2000] # Pushpa style
-    loEfitRebin = 6   # Pushpa style
-    hiEfitRebin = 2   # Pushpa style
-else:
-    fLoE = [6, 76]
-    fHiE = [70, 2770]
-    # lsveto testing
-    #fLoE = [80, 200]
-    #fLoE = [0, 0]
-    fHiE = [300, 3300]
-    loEfitRebin = 3
-    hiEfitRebin = 4
-
+### Let's finally try different fit ranges!!
+fitranges = [{} for x in range(numx)]
+for i in range(numx):
+    ### format = [rebin, xmin, xmax]
+    fitranges[i]['S0'] = [3,  6,   76]  # single-hit low-energy
+    fitranges[i]['S1'] = [4, 70, 2770]  # single-hit high-energy
+    fitranges[i]['M0'] = [3,  2,   70]  # multi-hit low-energy
+    fitranges[i]['M1'] = [4, 70, 2770]  # multi-hit high-energy
+    ### separate range for lsveto
+    if i == 8:
+        fitranges[i]['S0'] = [0,0,0]
+        fitranges[i]['S1'] = [0,0,0]
+        fitranges[i]['M0'] = [0,0,0]
+        fitranges[i]['M1'] = [4, 300, 2700]
+        
 
 ### ==========  EXTRA MC OPTIONS  ====================================
 ### which MC to fit globally (to all crystals simultaneously)?
 globalmc = []
 #globalmc = ['lsveto', 'pmt', 'innersteel']
-#globalmc = ['lsveto', 'pmt', 'copper']
 globalmc = ['lsveto', 'pmt', 'innersteel', 'steel']
 
 ### include bkgs from 'other' pmts and internals?
@@ -97,12 +88,16 @@ others  = 1
 
 ### plot components in groups? [0,1]
 ingroups = 1
+
 ### show the total? [0,1]
 showTotal = 1
+
 ### show the legends? [0,1]
 showlegs = 1
+
 ### plot the total in red? [0,1]
 redtotal = 1
+
 ### combine 'others' into the makePlots() plots?
 combine = 1
 
@@ -124,15 +119,12 @@ updateMCfile = 1
 ### [2] use 'newBounds' specified below (as percent of activity)
 ### [3] use 'otherBnds' specified below (as a fractional scaling)
 useBounds = 1
+
 ### new bounds to overwrite from file (as a percent of activity)
 newBounds = [0.7, 1.3]
+
 ### else use these other bounds (as fractional scaling)
 otherBnds = [1e-6, 0.9]
-
-### decide to stack or extend the channels [0,1]
-### [0] for stacking
-### [1] for extending
-extend = 1
 
 
 ### ==========  PLOTTING OPTIONS  ====================================
@@ -143,25 +135,18 @@ indi = 1
 pltchans = 'SM'
 
 ### plotting ranges
-#loer = [0,   70]   # pushpa style
-#hier = [100, 2000] # pushpa style
 loer = [0, 100]
 hier = [0, 3000]
 
 eran = [loer, hier]
 
 ### rebin the final plots [1,inf]
-if pushpa:
-    loEplotRebin = 6  # Pushpa style
-    hiEplotRebin = 2  # Pushpa style
-else:
-    #loEplotRebin = 6
-    #hiEplotRebin = 2
-    loEplotRebin = loEfitRebin
-    hiEplotRebin = hiEfitRebin
+loEplotRebin = 3
+hiEplotRebin = 4
 
 ### use linear residual scale? [0,1]
 linres = 1
+
 ### set y scale on resid plot
 lrs = [0, 2]
 
@@ -175,15 +160,13 @@ dru = 1
 
 ### This doesn't seem to effect the fit results at all
 ### set MC sumw2()? [0,1]
-mcsumw2  = 0
+mcsumw2 = 0
+
 ### set data sumw2()? [0,1]
 datsumw2 = 1
-### set error on the total? [0,1]
-toterr   = 0
 
-### Scale data and mc by 1/fitRebin factor? [0,1]
-loEfitRebinScale = 0
-hiEfitRebinScale = 0
+### set error on the total? [0,1]
+toterr = 0
 
 ### chi2 test option
 ### ["UU", "UW", "WW", "NORM"]
@@ -221,10 +204,6 @@ def main(argv):
     gStyle.SetOptStat ('')
     gStyle.SetOptFit  (0)
     
-    #gStyle.SetPadBottomMargin (0.12)
-    #gStyle.SetPadLeftMargin   (0.12)
-    #gStyle.SetPadRightMargin  (0.05)
-    
     ### for saving the plots...
     if not os.path.exists('./plots'): 
         os.makedirs('./plots')
@@ -238,29 +217,14 @@ def main(argv):
     #-----------------------------------------------------------------
     #-----------------------------------------------------------------
     allchans = uniqString(fitchans+pltchans)
-    #data, bkgs, sigs, runtime = build100(mcfile, others, reuse, allchans, xstals)
     data, bkgs, sigs, runtime = build101(mcfile, others, reuse, allchans, xstals)
     print 'INFO: runtime =', runtime, '(seconds)'
 
-    # 2018-07-01
-    # a little debug info on what "others" are being generated for lsveto
-    # looks correct...
-    """
-    keys=[]
-    for key in bkgs:
-        keys.append(key)
-    keys.sort()
-    for key in keys:
-        print key
-    sys.exit()
-    """
-    
     datkeys = sortDataKeys92(data)
     if datsumw2:
         for key in datkeys:
             data[key]['hist'].Sumw2()
-
-
+    
     ### scale into dru units
     if dru:
         data = scaleData70(data, 1)
@@ -300,31 +264,25 @@ def main(argv):
     #-----------------------------------------------------------------
     
     ### plot all crystals that have data
-    justthese=[]
+    justthese = []
     for i in range(1, numx+1):
         for key in datkeys:
             if 'x'+str(i) in key and i not in justthese:
                 justthese.append(i)
+    justthese.sort()
     print 'INFO: plotting crystals -->', justthese
     
     ### assume all data is using same runs and hist params
-    try: runtag = data[datkeys[0]]['info']['tag']
+    try:    runtag = data[datkeys[0]]['info']['tag']
     except: runtag = 'none'
-    try:
-        #allchans  = data[datkeys[0]]['info']['chans']
-        params = globalParams(data)
-    except:
-        #allchans  = bkgs[bakkeys[0]]['info']['chans']
-        params = globalParams(bkgs)
-    
-    #print params
-    #sys.exit()
+    try:    params = globalParams(data)
+    except: params = globalParams(bkgs)
     
     ### find unique names for color scheme?
     ### "internal-K40" for example
     uniqBkgs = []
     uniqSigs = []
-    uniqAll = []
+    uniqAll  = []
     for key in bakkeys:
         uniqBkgs.append(key.split('-')[1]+'-'+key.split('-')[2])
         uniqAll.append(key.split('-')[1]+'-'+key.split('-')[2])
@@ -334,7 +292,7 @@ def main(argv):
 
     uniqBkgs = sorted(list(set(uniqBkgs)))
     uniqSigs = sorted(list(set(uniqSigs)))
-    uniqAll = sorted(list(set(uniqAll)))
+    uniqAll  = sorted(list(set(uniqAll)))
     #print 'INFO: Unique bkgs =',uniqBkgs
     #print 'INFO: Unique sigs =',uniqSigs
     #print 'INFO: Unique bkgs and sigs =',uniqAll
@@ -382,262 +340,142 @@ def main(argv):
     ylegstop  = 0.91
     ylegstart = ylegstop-(0.04*6)
     
-
-    ### set fit bounds for the fit
-    #=================================================================
-    # NOTE: These need to be integers!!!
-    bpkvLo = params[0][3]
-    fLo = [int(fLoE[0]*bpkvLo/loEfitRebin), int(fLoE[1]*bpkvLo/loEfitRebin)]
-    fLoBins = fLo[1]-fLo[0]
-    try: keVperBinLoE = (fLoE[1]-fLoE[0])/float(fLoBins)
-    except: keVperBinLoE = 0
-    
-    bpkvHi = params[1][3]
-    fHi = [int(fHiE[0]*bpkvHi/hiEfitRebin), int(fHiE[1]*bpkvHi/hiEfitRebin)]
-    fHiBins = fHi[1]-fHi[0]
-    try: keVperBinHiE = (fHiE[1]-fHiE[0])/float(fHiBins)
-    except: keVperBinHiE = 0
-    
-    fbins = int(fLoBins+fHiBins)
-    
-    fmin = 0
-    fmax = fbins
-    #nchans = len(fitchans)
-    if extend:
-        #fmax = fbins*nchans
-        fmax = fbins*len(fitchans)
-    #=================================================================
-    
-    
-    ### need seperate dicts for rebinned data and MC for plotting to
-    ### to work right - they need their own memory space
-    #-----------------------------------------------------------------
-    ### init dict for rebinned data
-    rldata = {}
-    rhdata = {}
-    for dkey in datkeys:
-        #print dkey
-        rldata[dkey] = {}
-        rhdata[dkey] = {}
-        
-    ### init dict for rebinned backgrounds
-    rlbkgs = {}
-    rhbkgs = {}
-    for bkey in bakkeys:
-        #print bkey
-        rlbkgs[bkey] = {}
-        rhbkgs[bkey] = {}
-        
-    ### init dict for rebinned MC/signals 
-    rlsigs = {}
-    rhsigs = {}
-    for skey in sigkeys:
-        #print skey
-        rlsigs[skey] = {}
-        rhsigs[skey] = {}
-        
-    #-----------------------------------------------------------------
-    
     
     ### This part puts the histos together to get ready for the fitting
     ##################################################################
     ### only do the fit if you have signals and data!
-    #globstr = ''
+    
     resultsfile = ''
-    fitting=0
+    fitting = 0
+    
     if len(sigs) > 0:
         fitting=1
         
-        #fitdata = []
         fitsigs = {}
         fitbkgs = {}
         
         fitglob = {}
         fglobkeys = []
 
-        #ftotal = []
-        #fresid = []
-        #druscale = [1 for x in range(numx)]
+        fitdata = TH1F('globData', 'globData', 1, 0, 1)
+        
+        ### I think I need to build the fitdata histogram first
+        ### store start/stop bins for each crystal
+        xstalbins = [[0,0] for x in range(numx)]
+        for i in range(numx):
+            startbin = fitdata.GetXaxis().GetNbins()
+            for C in fitchans:
+                for dkey in datkeys:
+                    # low Energy
+                    if 'x'+str(i+1) in dkey and '-c'+C in dkey and '-e0' in dkey:
+                        fitdata = extendHist(fitdata,
+                                    fitPrep(data, dkey, fitranges[i][C+'0']))
+                    # high Energy
+                    if 'x'+str(i+1) in dkey and '-c'+C in dkey and '-e1' in dkey:
+                        fitdata = extendHist(fitdata,
+                                    fitPrep(data, dkey, fitranges[i][C+'1']))
+            stopbin = fitdata.GetXaxis().GetNbins()
+            xstalbins[i] = [startbin, stopbin]
+        
+        ### the number of bins in fitdata should be used...
+        fitbins = fitdata.GetNbinsX()
 
-        fitdata = TH1F('globData', 'globData', fmax*numx, 0, fmax*numx)
-
-        ftotal = TH1F('globTotal', 'globTotal', fmax*numx, 0, fmax*numx)
+        ftotal = TH1F('globTotal', 'globTotal', fitbins, 0, fitbins)
         ftotal.SetLineColor(kGray+1)
         ftotal.SetMarkerColor(kGray+1)
         ftotal.SetLineWidth(1)
 
-        fresid = TH1F('globResid', 'globResid', fmax*numx, 0, fmax*numx)
+        fresid = TH1F('globResid', 'globResid', fitbins, 0, fitbins)
         fresid.SetLineColor(kBlack)
         fresid.SetMarkerColor(kBlack)
         fresid.SetLineWidth(1)
-
-        ### fill fitdata and fitsigs
+        
+        ### now build the fitsigs and fitbkgs histograms
         for i in range(numx):
-            
-            # cycle through the channels
-            sinit = 1
-            binit = 1
-            tmpscale1 = 0
-            tmpscale2 = 0
             for nc, C in enumerate(fitchans):
-                
-                # build the histos for fitting
-                #-----------------------------------------------------------------------------
-                for dkey in datkeys:
-                    # lo E
-                    if 'x'+str(i+1) in dkey and '-c'+C in dkey and '-e0' in dkey:
-                        # skip lsveto in low energy
-                        #if i==8:
-                        #    print 'skipping',dkey
-                        #    continue
-                        rldata[dkey]['hist'] = copy.deepcopy(data[dkey]['hist'])
-                        rldata[dkey]['hist'].Rebin(loEfitRebin)
-                        if loEfitRebinScale:
-                            rldata[dkey]['hist'].Scale(1./loEfitRebin)
-                        for n in range(fLoBins):
-                            if extend:
-                                fitdata.SetBinContent(n+1+(fbins*nc)+(i*fmax),
-                                                      fitdata.GetBinContent(n+1+(fbins*nc)+(i*fmax))
-                                                      + rldata[dkey]['hist'].GetBinContent(fLo[0]+n))
-                            else:
-                                fitdata.SetBinContent(n+1+(i*fmax),
-                                                      fitdata.GetBinContent(n+1+(i*fmax))
-                                                      + rldata[dkey]['hist'].GetBinContent(fLo[0]+n))
-                    # hi E
-                    if 'x'+str(i+1) in dkey and '-c'+C in dkey and '-e1' in dkey:
-                        rhdata[dkey]['hist'] = copy.deepcopy(data[dkey]['hist'])
-                        rhdata[dkey]['hist'].Rebin(hiEfitRebin)
-                        if hiEfitRebinScale:
-                            rhdata[dkey]['hist'].Scale(1./hiEfitRebin)
-                        r = 0
-                        for n in range(fLoBins,fbins):
-                            if extend:
-                                fitdata.SetBinContent(n+1+(fbins*nc)+(i*fmax),
-                                                      fitdata.GetBinContent(n+1+(fbins*nc)+(i*fmax))
-                                                      + rhdata[dkey]['hist'].GetBinContent(fHi[0]+r))
-                            else:
-                                fitdata.SetBinContent(n+1+(i*fmax),
-                                                      fitdata.GetBinContent(n+1+(i*fmax))
-                                                      + rhdata[dkey]['hist'].GetBinContent(fHi[0]+r))
-                            r += 1
-                
-                
-                for skey in sigkeys:
 
-                    ### init lsveto histo to globals
+                # signals
+                #---------------------------------------------------------------
+                for skey in sigkeys:
+                    
+                    ### init histograms for global MC (pmt, lsveto, steel, etc.)
                     for gmckey in globalmc:
-                        #if 'lsveto' in skey or 'pmt' in skey:
                         if gmckey in skey:
-                            #print skey.split('-')
                             bits = skey.split('-')
                             fgkey = bits[1]+'-'+bits[2]
                             if fgkey not in fglobkeys:
                                 fglobkeys.append(fgkey)
                                 fitglob[fgkey] = {}
-                                fglob = TH1F(fgkey, fgkey, fmax*numx, 0, fmax*numx)
+                                fglob = TH1F(fgkey, fgkey, fitbins, 0, fitbins)
                                 fitglob[fgkey]['hist'] = fglob
-                            #continue
                     
-                    # lo E
+                    # pad out the blank extra crystals
+                    if i+1 in justthese and 'x'+str(i+1) not in skey:
+                        if '-c'+C in skey and '-e0' in skey:
+                            fskey = skey.split('-c'+C+'-e0')[0]
+                            fitsigs = addHistKey(fitsigs, fskey)
+                            fitsigs[fskey]['hist'] = extendHist(fitsigs[fskey]['hist'],
+                                                fitPrep(sigs, skey, fitranges[i][C+'0'], 1))
+                        if '-c'+C in skey and '-e1' in skey:
+                            fskey = skey.split('-c'+C+'-e1')[0]
+                            fitsigs = addHistKey(fitsigs, fskey)
+                            fitsigs[fskey]['hist'] = extendHist(fitsigs[fskey]['hist'],
+                                                fitPrep(sigs, skey, fitranges[i][C+'1'], 1))
+                    
+                    # low Energy
                     if 'x'+str(i+1) in skey and '-c'+C in skey and '-e0' in skey:
-                        # skip lsveto in low energy
-                        #if i==8:
-                        #    print 'skipping',skey
-                        #    continue
                         fskey = skey.split('-c'+C+'-e0')[0]
-                        if sinit:
-                            fsig = TH1F(fskey, fskey, fmax*numx, 0, fmax*numx)
-                            fitsigs[fskey] = {}
-                            fitsigs[fskey]['hist'] = fsig
-                        rlsigs[skey]['hist'] = copy.deepcopy(sigs[skey]['hist'])
-                        rlsigs[skey]['hist'].Rebin(loEfitRebin)
-                        if loEfitRebinScale: rlsigs[skey]['hist'].Scale(1./loEfitRebin)
-                        for n in range(fLoBins):
-                            try:
-                                if extend:
-                                    fitsigs[fskey]['hist'].SetBinContent(n+1+(fbins*nc)+(i*fmax),
-                                            fitsigs[fskey]['hist'].GetBinContent(n+1+(fbins*nc)+(i*fmax))
-                                            + rlsigs[skey]['hist'].GetBinContent(fLo[0]+n))
-                                else:
-                                    fitsigs[fskey]['hist'].SetBinContent(n+1+(i*fmax),
-                                            fitsigs[fskey]['hist'].GetBinContent(n+1+(i*fmax))
-                                            + rlsigs[skey]['hist'].GetBinContent(fLo[0]+n))
-                            except: pass
-                    # hi E
+                        fitsigs = addHistKey(fitsigs, fskey)
+                        fitsigs[fskey]['hist'] = extendHist(fitsigs[fskey]['hist'],
+                                                fitPrep(sigs, skey, fitranges[i][C+'0']))
+                    
+                    # high Energy
                     if 'x'+str(i+1) in skey and '-c'+C in skey and '-e1' in skey:
-                        rhsigs[skey]['hist'] = copy.deepcopy(sigs[skey]['hist'])
-                        rhsigs[skey]['hist'].Rebin(hiEfitRebin)
-                        if hiEfitRebinScale: rhsigs[skey]['hist'].Scale(1./hiEfitRebin)
                         fskey = skey.split('-c'+C+'-e1')[0]
-                        r = 0
-                        for n in range(fLoBins,fbins):
-                            try:
-                                if extend:
-                                    fitsigs[fskey]['hist'].SetBinContent(n+1+(fbins*nc)+(i*fmax),
-                                            fitsigs[fskey]['hist'].GetBinContent(n+1+(fbins*nc)+(i*fmax))
-                                            + rhsigs[skey]['hist'].GetBinContent(fHi[0]+r))
-                                else:
-                                    fitsigs[fskey]['hist'].SetBinContent(n+1+(i*fmax),
-                                            fitsigs[fskey]['hist'].GetBinContent(n+1+(i*fmax))
-                                            + rhsigs[skey]['hist'].GetBinContent(fHi[0]+r))
-                            except: pass
-                            r += 1
-                sinit=0
-                
+                        fitsigs = addHistKey(fitsigs, fskey)
+                        fitsigs[fskey]['hist'] = extendHist(fitsigs[fskey]['hist'],
+                                                fitPrep(sigs, skey, fitranges[i][C+'1']))
+
+                        
+                # backgrounds
+                #---------------------------------------------------------------
                 for bkey in bakkeys:
-                    # lo E
+
+                    # pad out the blank extra crystals
+                    if i+1 in justthese and 'x'+str(i+1) not in bkey:
+                        if '-c'+C in bkey and '-e0' in bkey:
+                            fbkey = bkey.split('-c'+C+'-e0')[0]
+                            fitbkgs = addHistKey(fitbkgs, fbkey)
+                            fitbkgs[fbkey]['hist'] = extendHist(fitbkgs[fbkey]['hist'],
+                                                    fitPrep(bkgs, bkey, fitranges[i][C+'0'], 1))
+                        if '-c'+C in bkey and '-e1' in bkey:
+                            fbkey = bkey.split('-c'+C+'-e1')[0]
+                            fitbkgs = addHistKey(fitbkgs, fbkey)
+                            fitbkgs[fbkey]['hist'] = extendHist(fitbkgs[fbkey]['hist'],
+                                                    fitPrep(bkgs, bkey, fitranges[i][C+'1'], 1))
+                    
+                    # low Energy
                     if 'x'+str(i+1) in bkey and '-c'+C in bkey and '-e0' in bkey:
-                        # skip lsveto in low energy
-                        #if i==8:
-                        #    print 'skipping',bkey
-                        #    continue
                         fbkey = bkey.split('-c'+C+'-e0')[0]
-                        if binit:
-                            fbak = TH1F(fbkey, fbkey, fmax*numx, 0, fmax*numx)
-                            fitbkgs[fbkey] = {}
-                            fitbkgs[fbkey]['hist'] = fbak
-                        rlbkgs[bkey]['hist'] = copy.deepcopy(bkgs[bkey]['hist'])
-                        rlbkgs[bkey]['hist'].Rebin(loEfitRebin)
-                        if loEfitRebinScale: rlbkgs[bkey]['hist'].Scale(1./loEfitRebin)
-                        for n in range(fLoBins):
-                            try:
-                                if extend:
-                                    fitbkgs[fbkey]['hist'].SetBinContent(n+1+(fbins*nc)+(i*fmax),
-                                            fitbkgs[fbkey]['hist'].GetBinContent(n+1+(fbins*nc)+(i*fmax))
-                                            + rlbkgs[bkey]['hist'].GetBinContent(fLo[0]+n))
-                                else:
-                                    fitbkgs[fbkey]['hist'].SetBinContent(n+1+(i*fmax),
-                                            fitbkgs[fbkey]['hist'].GetBinContent(n+1+(i*fmax))
-                                            + rlbkgs[bkey]['hist'].GetBinContent(fLo[0]+n))
-                            except: pass
-                    # hi E
+                        fitbkgs = addHistKey(fitbkgs, fbkey)
+                        fitbkgs[fbkey]['hist'] = extendHist(fitbkgs[fbkey]['hist'],
+                                                fitPrep(bkgs, bkey, fitranges[i][C+'0']))
+                    # high Energy
                     if 'x'+str(i+1) in bkey and '-c'+C in bkey and '-e1' in bkey:
-                        rhbkgs[bkey]['hist'] = copy.deepcopy(bkgs[bkey]['hist'])
-                        rhbkgs[bkey]['hist'].Rebin(hiEfitRebin)
-                        if hiEfitRebinScale: rhbkgs[bkey]['hist'].Scale(1./hiEfitRebin)
                         fbkey = bkey.split('-c'+C+'-e1')[0]
-                        r = 0
-                        for n in range(fLoBins,fbins):
-                            try:
-                                if extend:
-                                    fitbkgs[fbkey]['hist'].SetBinContent(n+1+(fbins*nc)+(i*fmax),
-                                            fitbkgs[fbkey]['hist'].GetBinContent(n+1+(fbins*nc)+(i*fmax))
-                                            + rhbkgs[bkey]['hist'].GetBinContent(fHi[0]+r))
-                                else:
-                                    fitbkgs[fbkey]['hist'].SetBinContent(n+1+(i*fmax),
-                                            fitbkgs[fbkey]['hist'].GetBinContent(n+1+(i*fmax))
-                                            + rhbkgs[bkey]['hist'].GetBinContent(fHi[0]+r))
-                            except: pass
-                            r += 1
-                binit=0
+                        fitbkgs = addHistKey(fitbkgs, fbkey)
+                        fitbkgs[fbkey]['hist'] = extendHist(fitbkgs[fbkey]['hist'],
+                                                fitPrep(bkgs, bkey, fitranges[i][C+'1']))
                 
 
             ### subtract fixed MC from data
-            #-----------------------------------------------
+            #-------------------------------------------------------------------
             for key in fitbkgs:
                 if 'x'+str(i+1) in key:
+                    if fitdata.GetNbinsX() != fitbkgs[key]['hist'].GetNbinsX():
+                        print '-1-', fitdata.GetNbinsX(), fitbkgs[key]['hist'].GetNbinsX(), key
                     fitdata.Add(fitbkgs[key]['hist'], -1)
-            #-----------------------------------------------
+            #-------------------------------------------------------------------
 
         
         ### sort all the fbakkeys
@@ -665,25 +503,14 @@ def main(argv):
         fsigkeys.sort()
 
         ### sort all the fglobkeys
-        """
-        delete=[]
-        fglobkeys=[]
-        for fgkey in fitglob:
-            if fitglob[fgkey]['hist'].Integral() > 0:
-                fglobkeys.append(fgkey)
-            else: delete.append(fgkey)
-        for key in delete:
-            print 'INFO: deleting fit glob key', key
-            del fitglob[key]
-        """
         fglobkeys.sort()
-        
         
         ### build global sigs
         for fskey in fsigkeys:
             for fgkey in fglobkeys:
                 if fgkey in fskey:
                     #print 'INFO: adding',fskey,'to',fgkey
+                    #print '-2-', fitglob[fgkey]['hist'].GetNbinsX(), fitsigs[fskey]['hist'].GetNbinsX(), fskey
                     fitglob[fgkey]['hist'].Add(fitsigs[fskey]['hist'])
         
         ### remove global sigs from fit sigs
@@ -710,43 +537,6 @@ def main(argv):
             del fitglob[key]
         fglobkeys.sort()
 
-        ### global fit debug infos
-        #=============================================================
-        """
-        tmpcand = TCanvas('tmpcand','tmpcand',1200,600)
-        fitdata.Draw()
-        fitdata.SetAxisRange(2e-3, 3e2, 'y')
-        tmpcand.SetLogy(1)
-        tmpcand.Update()
-        #raw_input('Enter to continue')
-        
-        tmpcanb = TCanvas('tmpcanb','tmpcanb',1200,600)
-        for bkey in fbakkeys:
-            fitbkgs[bkey]['hist'].Draw('same')
-            fitbkgs[bkey]['hist'].SetAxisRange(2e-3, 3e2, 'y')
-        tmpcanb.SetLogy(1)
-        tmpcanb.Update()
-        #raw_input('Enter to continue')
-        
-        tmpcans = TCanvas('tmpcans','tmpcans',1200,600)
-        for skey in fsigkeys:
-            fitsigs[skey]['hist'].Draw('same')
-            fitsigs[skey]['hist'].SetAxisRange(2e-3, 3e2, 'y')
-        tmpcans.SetLogy(1)
-        tmpcans.Update()
-        #raw_input('Enter to continue')
-        
-        tmpcang = TCanvas('tmpcang','tmpcang',1200,600)
-        for gkey in fglobkeys:
-            fitglob[gkey]['hist'].Draw('same')
-            fitglob[gkey]['hist'].SetAxisRange(2e-3, 3e2, 'y')
-        tmpcang.SetLogy(1)
-        tmpcang.Update()
-        #raw_input('Enter to continue')
-        """
-        #=============================================================
-        
-        
         sigObj = []
         fit = []
         fitresults = {}
@@ -755,111 +545,20 @@ def main(argv):
         bounds = []
         
         ### data integral to normalize signal to
-        dat_int = fitdata.Integral(0, fmax*numx)
-
+        dat_int = fitdata.Integral()
+        
         ### set up the fitting object for TFractionFitter
         for i in range(numx):
-            
             fitresults[str(i)] = []
-            
-            """
-            ### Do a per crystal unique of the signals to see how many
-            ### signal channels each crystal fit will have
-            uniqSig = []
-            noEvents = []
             for fskey in fsigkeys:
                 if 'x'+str(i+1) in fskey:
-                    mc_int = fitsigs[fskey]['hist'].Integral(i*fmax,(i+1)*fmax)
-                    if mc_int > 0.0:
-                        #print 'Integral of', fskey, '=', mc_int
-                        uniqSig.append(fskey.split('-')[1]+'-'+fskey.split('-')[2])
-                    else:
-                        print '\nWARNING: No events for --> ',fskey
-                        print   '         Maybe set it as a background...\n'
-                        noEvents.append(fskey)
-            
-            uniqSig = sorted(list(set(uniqSig)))
-            
-            ### delete out keys that have noEntries
-            if len(noEvents) > 0:
-                ### delete the key out of fsigkeys so it does
-                ### not get plotted in the fit histos!
-                ### go in reverse to preserve index
-                L = len(fsigkeys)-1
-                for k,fskey in enumerate(reversed(fsigkeys)):
-                    if 'x'+str(i+1) in fskey and fskey in noEvents:
-                        print 'INFO: deleting fit key',fsigkeys[L-k]
-                        del fsigkeys[L-k]
-
-                ### and delete it out of sigs so it does not
-                ### get plotted in the lo-E and hi-E histos
-                ### go in reverse to preserve index
-                L = len(sigkeys)-1
-                for k,skey in enumerate(reversed(sigkeys)):
-                    for noEvt in noEvents:
-                        if 'x'+str(i+1) in skey and noEvt in skey:
-                            print 'INFO: deleting signal key',sigkeys[L-k]
-                            del sigkeys[L-k]
-            
-            ### TFractionFitter wants at least 2 MC to converge the fit
-            if len(uniqSig) < 2:
-                print "\nWARNING: TFractionFitter needs at least 2 MC to converge"
-                print   "         Skipping fit to crystal",str(i+1)
-
-                ### delete the key out of fsigkeys so it does
-                ### not get plotted in the fit histos!
-                ### go in reverse to preserve index
-                L = len(fsigkeys)-1
-                for k,fskey in enumerate(reversed(fsigkeys)):
-                    if 'x'+str(i+1) in fskey:
-                        print 'INFO: deleting fit key',fsigkeys[L-k]
-                        del fsigkeys[L-k]
-                        
-                ### and delete it out of sigs so it does not
-                ### get plotted in the lo-E and hi-E histos
-                ### go in reverse to preserve index
-                L = len(sigkeys)-1
-                for k,skey in enumerate(reversed(sigkeys)):
-                    if 'x'+str(i+1) in skey:
-                        print 'INFO: deleting signal key',sigkeys[L-k]
-                        del sigkeys[L-k]
-                        
-                continue
-            
-            print '\nINFO: Fitting crystal',str(i+1),'with',uniqSig,'\n'
-            
-            
-            #sigObj.append(TObjArray(Nsigs)) # number of MC to fit to
-            sigObj.append(TObjArray(len(uniqSig))) # number of MC to fit to
-            
-            if datsumw2:
-                fitdata.Sumw2()
-            """
-            
-            
-            for fskey in fsigkeys:
-                if 'x'+str(i+1) in fskey:
-
-                    ### 2018-03-05
-                    ### remove keys and hists with no events
-                    """
-                    if fitsigs[fskey]['hist'].Integral(i*fmax,(i+1)*fmax) <= 0:
-                        print '\nINFO: No events for --> ',fskey
-                        print   '      deleting fitsigs key', fskey
-                        del fitsigs[fskey]
-                        for k,key in enumerate(fsigkeys):
-                            if key == fskey:
-                                print   '      deleting fsigkeys',k,key,fskey
-                                del fsigkeys[k]
-                        continue
-                    """
-                        
-                    mc_int = fitsigs[fskey]['hist'].Integral(i*fmax,(i+1)*fmax) # MC integral
-
+                                            
+                    mc_int = fitsigs[fskey]['hist'].Integral()
+                    
                     ### to weight or not to weight...
                     if mcsumw2:
                         fitsigs[fskey]['hist'].Sumw2() # set stat weights
-
+                    
                     ### normalize MC to total data
                     ### needed for TFractionFitter to work right
                     ### still don't fully understand why
@@ -870,72 +569,33 @@ def main(argv):
                         print   '       Remove it from the fit? \n'
                         sys.exit()
 
-                        ### some crystals don't have events from "other" crystals
-                        #print '\nINFO: No events for --> ',fskey
-                        #print   '      Deleting/ignoring this histogram...\n'
-                        #for key in fsigkeys:
-                        #del fsigkeys[fskey]
-                        #del fitsigs[fskey]
-                        
                     for C in allchans:
                         for E in range(2):
                             E=str(E)
                             
                             #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-                            #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                            
                             newkeys = []
                             try:
-                                tmpkey=fskey+'-c'+C+'-e'+E
+                                tmpkey = fskey+'-c'+C+'-e'+E
                                 test = sigs[tmpkey]['hist']
                                 newkeys.append(tmpkey)
                             except:
                                 for F in range(numx):
-                                    F=str(F+1)
+                                    F = str(F+1)
                                     try:
-                                        tmpkey=fskey+'-f'+F+'-c'+C+'-e'+E
+                                        tmpkey = fskey+'-f'+F+'-c'+C+'-e'+E
                                         test = sigs[tmpkey]['hist']
                                         newkeys.append(tmpkey)
                                     except:
                                         continue
-                            """
-                            if 'pmt' not in fskey:
-                                tmpkey=fskey+'-c'+C+'-e'+E
-                                try:
-                                    test = sigs[tmpkey]['hist'].Integral()
-                                    #print test,tmpkey
-                                    #newkeys.append(tmpkey)
-                                except:
-                                    print 'INFO: skipping', tmpkey
-                                    continue
-                                newkeys.append(tmpkey)
-                            else:
-                                for F in range(numx):
-                                    F=str(F+1)
-                                    tmpkey=fskey+'-f'+F+'-c'+C+'-e'+E
-                                    try:
-                                        test = sigs[tmpkey]['hist'].Integral()
-                                        #print test,tmpkey
-                                        #newkeys.append(tmpkey)
-                                    except:
-                                        print 'INFO: skipping', tmpkey
-                                        continue
-                                    newkeys.append(tmpkey)
-                            """
-                            #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
                             #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                             
                             for newkey in newkeys:
 
-                                ### delete if there are no events in the hist
-                                #try:
-                                #    if sigs[newkey]['hist'].Integral() <= 0:
-                                        
-                                #try:
                                 sigs[newkey]['hist'].Scale(dat_int/mc_int)
                                 sigs[newkey]['fitscale'] = sigs[newkey]['scale'] * dat_int/mc_int
-                                #except:
-                                #    sigs[newkey]['fitscale'] = sigs[newkey]['scale']
-                                #    print '\nWARNING: No events for --> ',newkey
                                 
                                 ### rescale the bounds to the normalized fraction
                                 ### and save new values to the sigs info
@@ -968,17 +628,6 @@ def main(argv):
                     ### set errors to zero?
                     fitsigs[fskey]['hist'] = zeroBinError(fitsigs[fskey]['hist'])
 
-            ### Print out the fit infos
-            """
-            ### First make a string list of the globals
-            globstr = ''
-            if len(globalmc) == 0:
-                globstr = 'none'
-            else:
-                for txt in globalmc:
-                    globstr += txt+'-'
-                globstr = globstr[:-1]
-            """
             
             fitresults[str(i)].append('Crystal-'+str(i+1)+' fit results')
             fitresults[str(i)].append('runtime = '+str(round(runtime/60./60./24., 2))+' days')
@@ -987,19 +636,19 @@ def main(argv):
             fitresults[str(i)].append('channels fit = '+fitchans)
             fitresults[str(i)].append('global fits = '+globstr)
             fitresults[str(i)].append('other pmts = '+str(others))
-            fitresults[str(i)].append('hist extend = '+str(extend))
+            #fitresults[str(i)].append('hist extend = '+str(extend))
             fitresults[str(i)].append('norm to dru = '+str(dru))
-            fitresults[str(i)].append('lo-E fit range = '+str(fLoE[0])+' - '+str(fLoE[1])+' keV')
-            fitresults[str(i)].append('lo-E fit binning = '+str(keVperBinLoE)+' keV/bin')
-            fitresults[str(i)].append('hi-E fit range = '+str(fHiE[0])+' - '+str(fHiE[1])+' keV')
-            fitresults[str(i)].append('hi-E fit binning = '+str(keVperBinHiE)+' keV/bin')
+            #fitresults[str(i)].append('lo-E fit range = '+str(fLoE[0])+' - '+str(fLoE[1])+' keV')
+            #fitresults[str(i)].append('lo-E fit binning = '+str(keVperBinLoE)+' keV/bin')
+            #fitresults[str(i)].append('hi-E fit range = '+str(fHiE[0])+' - '+str(fHiE[1])+' keV')
+            #fitresults[str(i)].append('hi-E fit binning = '+str(keVperBinHiE)+' keV/bin')
 
         
         ### do the same to the global lsveto
-        boundskeys=[]
+        boundskeys = []
         for fgkey in fglobkeys:
-                
-            mc_int = fitglob[fgkey]['hist'].Integral(0, fmax*numx) # total MC integral
+            
+            mc_int = fitglob[fgkey]['hist'].Integral()
             
             ### to weight or not to weight...
             if mcsumw2:
@@ -1015,8 +664,6 @@ def main(argv):
                 print   '       Remove it from the fit!\n'
                 sys.exit()
             
-            #newkey=0
-            #boundskeys=[]
             for i in range(numx):
                 X = str(i+1)
                 for C in allchans:
@@ -1082,44 +729,6 @@ def main(argv):
             fitglob[fgkey]['hist'] = zeroBinError(fitglob[fgkey]['hist'])
         
         
-        ### global fit debug infos
-        #=============================================================
-        """
-        tmpcand2 = TCanvas('tmpcand2','tmpcand2',1200,600)
-        fitdata.Draw()
-        fitdata.SetAxisRange(2e-3, 3e2, 'y')
-        tmpcand2.SetLogy(1)
-        tmpcand2.Update()
-        #raw_input('Enter to continue')
-        
-        tmpcanb2 = TCanvas('tmpcanb2','tmpcanb2',1200,600)
-        for bkey in fbakkeys:
-            fitbkgs[bkey]['hist'].Draw('same')
-            fitbkgs[bkey]['hist'].SetAxisRange(2e-3, 3e2, 'y')
-        tmpcanb2.SetLogy(1)
-        tmpcanb2.Update()
-        #raw_input('Enter to continue')
-        
-        tmpcans2 = TCanvas('tmpcans2','tmpcans2',1200,600)
-        for skey in fsigkeys:
-            fitsigs[skey]['hist'].Draw('same')
-            fitsigs[skey]['hist'].SetAxisRange(2e-3, 3e2, 'y')
-        tmpcans2.SetLogy(1)
-        tmpcans2.Update()
-        #raw_input('Enter to continue')
-        
-        tmpcang2 = TCanvas('tmpcang2','tmpcang2',1200,600)
-        for gkey in fglobkeys:
-            fitglob[gkey]['hist'].Draw('same')
-            fitglob[gkey]['hist'].SetAxisRange(2e-3, 3e2, 'y')
-        tmpcang2.SetLogy(1)
-        tmpcang2.Update()
-        #raw_input('Enter to continue')
-        """
-        #=============================================================
-
-
-        
         ### conflict of interests going on here
         #=========================================================
         if datsumw2:
@@ -1150,8 +759,9 @@ def main(argv):
             fit.Constrain(l+1, bounds[l][0], bounds[l][1])
         
         ### set the fit range
-        fit.SetRangeX(0, fmax*numx)
-
+        #fit.SetRangeX(0, fmax*numx)
+        fit.SetRangeX(0, fitbins)
+        
         ### do the fit
         status = fit.Fit()
         if status != 0:
@@ -1166,7 +776,7 @@ def main(argv):
 
         ### get non-zero ndf
         NDF=0
-        for n in range(fmax*numx):
+        for n in range(fitbins):
             if fitdata.GetBinContent(n) > 0:
                 NDF+=1
         ndf=NDF
@@ -1260,22 +870,9 @@ def main(argv):
                                     sigs[newkey]['fiterror'] = 1.
 
         
-        ### double check for broken keys
-        """
-        newkeys=[]
-        for skey in sigkeys:
-            try:
-                test = sigs[skey]
-                newkeys.append(skey)
-            except:
-                pass
-        sigkeys = newkeys
-        sigkeys.sort()
-        """
-        
         ### scale the signals to mBq/kg
         if dru: sigs = scaleSigs100(sigkeys, sigs)
-        else: sigs = scaleSigs100(sigkeys, sigs, runtime)
+        else:   sigs = scaleSigs100(sigkeys, sigs, runtime)
         
         ### print the fit activities
         for i in range(numx):
@@ -1376,10 +973,10 @@ def main(argv):
         save += str(runtag)
         save += '_Nchan-fit'
         save += '_globals-'+globstr
-        save += '_loEfit-'+str(int(fLoE[0]))+'-'+str(int(fLoE[1]))
-        save += '_hiEfit-'+str(int(fHiE[0]))+'-'+str(int(fHiE[1]))
-        save += '_loEfitRebin-'+str(loEfitRebin)
-        save += '_hiEfitRebin-'+str(hiEfitRebin)
+        #save += '_loEfit-'+str(int(fLoE[0]))+'-'+str(int(fLoE[1]))
+        #save += '_hiEfit-'+str(int(fHiE[0]))+'-'+str(int(fHiE[1]))
+        #save += '_loEfitRebin-'+str(loEfitRebin)
+        #save += '_hiEfitRebin-'+str(hiEfitRebin)
         #save += '_loEfitRebinScale'+str(loEfitRebinScale)
         #save += '_hiEfitRebinScale'+str(hiEfitRebinScale)
         #save += '_useBounds'+str(useBounds)
@@ -1445,33 +1042,21 @@ def main(argv):
         fcanv = TCanvas('fcanv', 'fcanv', 0, 0, 1400, 900)
         #fcanv.Divide(4,2)
         fcanv.Divide(5,2)
-        """
-        gStyle.SetPadTopMargin    (0.06)
-        gStyle.SetPadBottomMargin (0.12)
-        gStyle.SetPadLeftMargin   (0.12)
-        #gStyle.SetPadRightMargin  (0.05)
-        gStyle.SetPadRightMargin  (0.02)
-        """
-        ftoppad=[]
-        fbotpad=[]
+
+        ftoppad = []
+        fbotpad = []
 
         sepfitdata = [0 for x in range(numx)]
         sepfitsigs = [0 for x in range(numx)]
         sepfitglob = [0 for x in range(numx)]
         
-        #sepFitPlots=[]
+        #sepFitPlots = []
         
-        flegs=[]
-        flegs2=[]
+        flegs = []
+        flegs2 = []
 
-        fzeros=[]
+        fzeros = []
         
-        """
-        font=63
-        size=13
-        yoff=4.2
-        xoff=8
-        """
         for i in range(numx):
             fcanv.cd(i+1)
             
@@ -1525,7 +1110,7 @@ def main(argv):
             fitdata.Draw()
             #flegs[i].AddEntry(fitdata, 'data - bkgs', lopt)
             if dru: fitdata.SetAxisRange(2e-3, 2e3, 'y')
-            fitdata.SetAxisRange(i*fmax, (i+1)*fmax, 'x')
+            fitdata.SetAxisRange(xstalbins[i][0], xstalbins[i][1], 'x')
             
             
             Nfsigs=0
@@ -1543,6 +1128,7 @@ def main(argv):
                     fitsigs[fskey]['hist'].Draw('same')
 
                     ### add MC to total MC hist
+                    #print '-3-', ftotal.GetNbinsX(), fitsigs[fskey]['hist'].GetNbinsX(), fskey
                     ftotal.Add(fitsigs[fskey]['hist'])
 
             for fgkey in fglobkeys:
@@ -1560,11 +1146,12 @@ def main(argv):
 
                 if i==0:
                     ### add MC to total MC hist
+                    #print '-4-', ftotal.GetNbinsX(), fitglob[fgkey]['hist'].GetNbinsX(), fgkey
                     ftotal.Add(fitglob[fgkey]['hist'])
                 
                 
             ### select the right range
-            ftotal.SetAxisRange(i*fmax, (i+1)*fmax, 'x')
+            ftotal.SetAxisRange(xstalbins[i][0], xstalbins[i][1], 'x')
             
             ### build legend after getting the numbers of signals
             Nfs = Nfsigs+2
@@ -1658,7 +1245,7 @@ def main(argv):
             
             fresid.SetAxisRange(0.1,10,'y')
 
-            fresid.SetAxisRange(i*fmax, (i+1)*fmax, 'x')
+            fresid.SetAxisRange(xstalbins[i][0], xstalbins[i][1], 'x')
 
             if linres:
                 fbotpad[i].SetLogy(0)
@@ -1671,7 +1258,7 @@ def main(argv):
             #fzeros[i].SetLineColor(kRed)
             #fzeros[i].SetLineWidth(1)
             
-            zero = TLine(i*fmax, 1, (i+1)*fmax, 1)
+            zero = TLine(xstalbins[i][0], 1, xstalbins[i][1], 1)
             #fzeros.SetAxisRange(i*fmax, (i+1)*fmax, 'x')
             fzeros.append(zero)
             fzeros[i].SetLineColor(kRed)
@@ -1699,11 +1286,11 @@ def main(argv):
                     fisave += 'x'+str(i+1)
                     fisave += '_fit'
                     fisave += '_globals-'+globstr
-                    fisave += '_loEfRS'+str(loEfitRebinScale)
-                    fisave += '_hiEfRS'+str(hiEfitRebinScale)
+                    #fisave += '_loEfRS'+str(loEfitRebinScale)
+                    #fisave += '_hiEfRS'+str(hiEfitRebinScale)
                     fisave += '_dru'+str(dru)
                     fisave += '_cs'+str(fitchans)
-                    fisave += '_ext'+str(extend)
+                    #fisave += '_ext'+str(extend)
                     fisave += '_oth'+str(others)
                     if note: fisave += '_'+str(note)
                     fisave += '_'+str(V)
@@ -1769,7 +1356,7 @@ def main(argv):
         fitdata.Draw()
         #flegs[i].AddEntry(fitdata, 'data - bkgs', lopt)
         if dru: fitdata.SetAxisRange(2e-3, 2e3, 'y')
-        fitdata.SetAxisRange(0, fmax*numx, 'x')
+        fitdata.SetAxisRange(0, fitbins, 'x')
         
         
         Nfsigs=0
@@ -1809,7 +1396,7 @@ def main(argv):
 
                 
         ### select the right range
-        ftotal.SetAxisRange(0, fmax*numx, 'x')
+        ftotal.SetAxisRange(0, fitbins, 'x')
         ftotal.Draw('same')
         
         ### build legend after getting the numbers of signals
@@ -1893,7 +1480,7 @@ def main(argv):
         
         fresid.SetAxisRange(0.1, 10, 'y')
         
-        fresid.SetAxisRange(0, fmax*numx, 'x')
+        fresid.SetAxisRange(0, fitbins, 'x')
         
         if linres:
             mbotpad.SetLogy(0)
@@ -1906,7 +1493,7 @@ def main(argv):
         #fzeros[i].SetLineColor(kRed)
         #fzeros[i].SetLineWidth(1)
 
-        mzero = TLine(0, 1, fmax*numx, 1)
+        mzero = TLine(0, 1, fitbins, 1)
         #fzeros.SetAxisRange(i*fmax, (i+1)*fmax, 'x')
         #fzeros.append(zero)
         mzero.SetLineColor(kRed)
@@ -1921,10 +1508,10 @@ def main(argv):
         msave  = ''
         msave += str(runtag)
         msave += '_globals-'+globstr
-        msave += '_loEfit-'+str(int(fLoE[0]))+'-'+str(int(fLoE[1]))
-        msave += '_hiEfit-'+str(int(fHiE[0]))+'-'+str(int(fHiE[1]))
-        msave += '_loEfitRebin-'+str(loEfitRebin)
-        msave += '_hiEfitRebin-'+str(hiEfitRebin)
+        #msave += '_loEfit-'+str(int(fLoE[0]))+'-'+str(int(fLoE[1]))
+        #msave += '_hiEfit-'+str(int(fHiE[0]))+'-'+str(int(fHiE[1]))
+        #msave += '_loEfitRebin-'+str(loEfitRebin)
+        #msave += '_hiEfitRebin-'+str(hiEfitRebin)
         #msave += '_loEfitRebinScale'+str(loEfitRebinScale)
         #msave += '_hiEfitRebinScale'+str(hiEfitRebinScale)
         #msave += '_useBounds'+str(useBounds)
@@ -1961,30 +1548,21 @@ def main(argv):
     # number of channels (single, multi, lsveto, alpha)
     numC = len(pltchans)
     
-    #canvs  = [[[] for x in range(numE)] for x in range(numC)]
     canvs  = [[0 for x in range(numE)] for x in range(numC)]
     
     ### for separate plots
-    #sepPlots = [[[[] for x in range(numx)] for x in range(numE)] for x in range(numC)]
     sepPlots = [[[0 for x in range(numx)] for x in range(numE)] for x in range(numC)]
     sepTopPad = [[[0 for x in range(numx)] for x in range(numE)] for x in range(numC)]
     sepBotPad = [[[0 for x in range(numx)] for x in range(numE)] for x in range(numC)]
     
     ### seperate memory space for the pads is key!!!!
-    #toppad = [[[] for x in range(numE)] for x in range(numC)]
-    #botpad = [[[] for x in range(numE)] for x in range(numC)]
     toppad = [[0 for x in range(numE)] for x in range(numC)]
     botpad = [[0 for x in range(numE)] for x in range(numC)]
     
-    #legs   = [[[] for x in range(numE)] for x in range(numC)]
-    #legs2  = [[[] for x in range(numE)] for x in range(numC)]
-    #zeros  = [[[] for x in range(numE)] for x in range(numC)]
     legs   = [[0 for x in range(numE)] for x in range(numC)]
     legs2  = [[0 for x in range(numE)] for x in range(numC)]
     zeros  = [[0 for x in range(numE)] for x in range(numC)]
     
-    #total  = [[[] for x in range(numE)] for x in range(numC)]
-    #resid  = [[[] for x in range(numE)] for x in range(numC)]
     total  = [[0 for x in range(numE)] for x in range(numC)]
     resid  = [[0 for x in range(numE)] for x in range(numC)]
     
@@ -2221,12 +1799,6 @@ def main(argv):
                         sigs[key]['hist'].SetMarkerColor(uniqColor[cname])
                         sigs[key]['hist'].SetLineColor(uniqColor[cname])
 
-                        # don't think I need this anymore
-                        #if dru1 or dru2:
-                        #    druScale = data['x'+str(i+1)+'-data'+'-e'+str(E)]['druScale']
-                        #if dru2:
-                        #    sigs[key]['hist'].Scale(druScale)
-
                         #if E and plotRebin:
                         sigs[key]['hist'].Rebin(plotRebin)
                         sigs[key]['hist'].Scale(1./float(plotRebin))
@@ -2294,8 +1866,6 @@ def main(argv):
                 
                 ### you need to scale the error by the dru scaling and/or the rebinning
                 #-----------------------------------------------------------------------------
-                #total[C][E][i].Sumw2()
-                
                 # don't set the error on total until I understand what's going on?
                 if toterr:
                     if dru:
@@ -2452,11 +2022,12 @@ def main(argv):
             #else: save += 'on-cup'
             save += str(runtag)
             save += '_globals-'+globstr
+            save += '_chan'+chan
             save += '_E'+str(E)
-            save += '_loEfit-'+str(int(fLoE[0]))+'-'+str(int(fLoE[1]))
-            save += '_hiEfit-'+str(int(fHiE[0]))+'-'+str(int(fHiE[1]))
-            save += '_loEfitRebin-'+str(loEfitRebin)
-            save += '_hiEfitRebin-'+str(hiEfitRebin)
+            #save += '_loEfit-'+str(int(fLoE[0]))+'-'+str(int(fLoE[1]))
+            #save += '_hiEfit-'+str(int(fHiE[0]))+'-'+str(int(fHiE[1]))
+            #save += '_loEfitRebin-'+str(loEfitRebin)
+            #save += '_hiEfitRebin-'+str(hiEfitRebin)
             #save += '_loEfitRebinScale'+str(loEfitRebinScale)
             #save += '_hiEfitRebinScale'+str(hiEfitRebinScale)
             #save += '_useBounds'+str(useBounds)
@@ -2467,7 +2038,7 @@ def main(argv):
             #save += '_hiEplotRebin-'+str(hiEplotRebin)
             #save += '_reuse'+str(reuse)
             #save += '_chans'+fitchans
-            save += '_chan'+chan
+            #save += '_chan'+chan
             #save += '_extend'+str(extend)
             #save += '_others'+str(others)
             if note: save += '_'+note
@@ -2497,7 +2068,7 @@ def main(argv):
                             isave += '-cs'+str(fitchans)
                             isave += '-c'+str(chan)
                             isave += '-e'+str(E)
-                            isave += '-ext'+str(extend)
+                            #isave += '-ext'+str(extend)
                             isave += '-oth'+str(others)
                             if note: isave += '_'+str(note)
                             isave += '_'+str(V)
@@ -2534,7 +2105,7 @@ def main(argv):
                     csave += 'x'+str(i+1)
                     csave += '_combined'
                     csave += '_globals-'+globstr
-                    csave += '_ext'+str(extend)
+                    #csave += '_ext'+str(extend)
                     csave += '_oth'+str(others)
                     if note: csave += '_'+str(note)
                     csave += '_'+str(V)
