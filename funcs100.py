@@ -1077,9 +1077,13 @@ def scaleSigs100(sigkeys, sigs, runtime=0):
 
 
 def combineOthers100(sigs, globalMC):
-    donekeys=[]
-    delete=[]
-    temps={}
+
+    debug = 0
+    
+    donekeys = []
+    delete = []
+    temps = {}
+    
     for key in sigs:
 
         if key in donekeys:
@@ -1087,12 +1091,14 @@ def combineOthers100(sigs, globalMC):
 
         bits = key.split('-')
         if len(bits) != 6:
+            if debug: print 'DEBUG: not combining', key
             continue
         
         # don't combine if combining in global fit anyway?
         # unless you are lsveto... 2018-10-09
         if bits[1] in globalMC and bits[0] != 'x9':
         #if bits[1] in globalMC:
+            if debug: print 'DEBUG: not combining', key
             continue
         
         X = int(bits[0][1])
@@ -1101,7 +1107,7 @@ def combineOthers100(sigs, globalMC):
             try:
                 default = 'x'+str(X)+'-'+bits[1]+'-'+bits[2]+'-f'+str(X)+'-'+bits[4]+'-'+bits[5]
                 newkey  = 'x'+str(X)+'-'+bits[1]+'-'+bits[2]+'-f'+str(F)+'-'+bits[4]+'-'+bits[5]
-                #print 'DEBUG: adding ', newkey, ' to ', default
+                if debug: print 'DEBUG: adding', newkey, 'to', default
                 if X==9:
                     if F==1:
                         temps[default] = deepcopy(sigs[newkey])
@@ -1122,7 +1128,7 @@ def combineOthers100(sigs, globalMC):
         
     # delete the other histograms
     for key in delete:
-        #print '!!! deleting -fx key ', key
+        if debug: print 'DEBUG: deleting -fx key', key
         del sigs[key]
     
     return sigs

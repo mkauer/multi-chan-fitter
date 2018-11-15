@@ -12,6 +12,49 @@
 # ====================================================================
 
 
+# 2018-11-15
+#---------------------------------------------------------------------
+
+# + using [0,0,0] in the fit params does ignore separate channels
+#   which is great for the lsveto!
+# - removed a lot of old outdated commented out code blocks
+
+
+# 2018-11-14
+#---------------------------------------------------------------------
+# ~ now have separate bounds for each crystal and channel!
+# ~ major refactor to how the fitting histograms are put together
+# + keep track of order when extending histgrams
+# + expand usage to signals and backgrounds
+# + reproduce old fits by using pre rebinned and cropped histograms
+# + addHistKey() to test if a key already exists and create one if not
+# ~ tweaked extendHist() because it had a couple bugs
+# + fitPrep() to rebin and resize the histograms
+
+
+# 2018-11-06
+#---------------------------------------------------------------------
+# ~ trying to get activities for steel and innersteel
+# ~ testing fits with and without smoothing
+# + add rootSmoothing() - uses ROOTs TH1.Smooth() method
+# + add averageSmoothing()
+# ~ don't overwrite bin[i] with smoothed value until all done
+# ~ renamed smoothXbins() to triangleSmoothing()
+# ~ do the smoothing after combining the histos
+
+
+# 2018-11-05
+#---------------------------------------------------------------------
+# + add smoothXbins() for testing - this works! - Awesome!!
+
+
+# 2018-10-23
+#---------------------------------------------------------------------
+# ~ fixed issue with steel vs innersteel unique key names
+# - do not init THF1 in makePlots93()
+# + add steel to makePlots93() exclude list
+
+
 # 2018-10-12
 # --------------------------------------------------------------------
 # ~ regenerate steel MC

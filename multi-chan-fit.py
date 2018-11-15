@@ -9,8 +9,11 @@ V = 'v101'
 
 # Use better bounds handling for single and multi hit channels as well
 #   as different bounds for the LSveto (x9).
+# This turned into fixing some bugs with steel and testing out
+#   smoothing functions so I didn't actually change anything with
+#   with the fit bounds. Will do that in v102.
 # 
-# version: 2018-10-12
+# version: 2018-11-06
 # 
 # see CHANGELOG for changes
 ######################################################################
@@ -31,26 +34,36 @@ sys.path.append("/home/mkauer/COSINE/CUP/mc-fitting/")
 sys.path.append("/home/mkauer/mc-fitting/")
 from funcs101 import *
 
+
 ### get the number of crystals
 numx = numX()
 
-### use pushpa's fitting ranges and binning?
-pushpa = 0
+### print debug info
+debug = 0
 
 
-### ========== GENERAL INPUTS ==============================
+### ==========  GENERAL INPUTS  ======================================
 ### note to add to saved plot names?
 note = 0
 #note = 'default'
 
 #mcfile = 'backgrounds_101.0.txt'
 mcfile = 'backgrounds_101.1.txt'
+#mcfile = 'backgrounds_101.1-update.txt'
 
 
-print '\nINFO: using backgrounds config file -->', mcfile
+print 'INFO: using backgrounds config file -->', mcfile
 
 
-### ==========  FITTING OPTIONS  ===========================
+### ==========  OPTIMIZATION OPTIONS  ================================
+### MC smoothing? Specify a smoothing window in +/- number of bins
+smoothing = 5
+#smoothing = 0
+
+
+### ==========  FITTING OPTIONS  =====================================
+### use pushpa's fitting ranges and binning?
+pushpa = 0
 
 ### select channels to fit
 fitchans = 'SM'
@@ -72,12 +85,12 @@ else:
     hiEfitRebin = 4
 
 
-### ==========  EXTRA MC OPTIONS  ==========================
+### ==========  EXTRA MC OPTIONS  ====================================
 ### which MC to fit globally (to all crystals simultaneously)?
 globalmc = []
 #globalmc = ['lsveto', 'pmt', 'innersteel']
 #globalmc = ['lsveto', 'pmt', 'copper']
-globalmc = ['lsveto', 'pmt', 'innersteel']
+globalmc = ['lsveto', 'pmt', 'innersteel', 'steel']
 
 ### include bkgs from 'other' pmts and internals?
 others  = 1
@@ -104,7 +117,7 @@ reuse = 0
 updateMCfile = 1
 
 
-### ==========  OTHER FITTING OPTIONS  =====================
+### ==========  OTHER FITTING OPTIONS  ===============================
 ### use fit bounds from backgrounds file? [0,1,2,3]
 ### [0] max bounds are 0-1
 ### [1] use bounds specified in backgrounds file (as percent of activity)
@@ -122,7 +135,7 @@ otherBnds = [1e-6, 0.9]
 extend = 1
 
 
-### ==========  PLOTTING OPTIONS  ==========================
+### ==========  PLOTTING OPTIONS  ====================================
 ### individual plots for all crystals? [0,1]
 indi = 1
 
@@ -156,7 +169,7 @@ lrs = [0, 2]
 liny = 0
 
 
-### ==========  CAN EFFECT FIT RESULTS  ====================
+### ==========  CAN EFFECT FIT RESULTS  ==============================
 ### scale to dru?
 dru = 1
 
@@ -182,8 +195,10 @@ chiopt = 'WU'
 zeroFitDataError = 1
 
 
-### ==========  MAIN FUNCTION  =============================
-def myself(argv):
+### ==========  MAIN FUNCTION  =======================================
+### ==================================================================
+
+def main(argv):
     
     batch = 0
     if onCup(): batch = 1
@@ -228,7 +243,7 @@ def myself(argv):
     print 'INFO: runtime =', runtime, '(seconds)'
 
     # 2018-07-01
-    # a little bug info on what "others" are being generated for lsveto
+    # a little debug info on what "others" are being generated for lsveto
     # looks correct...
     """
     keys=[]
@@ -244,8 +259,9 @@ def myself(argv):
     if datsumw2:
         for key in datkeys:
             data[key]['hist'].Sumw2()
-            
-    # scale into dru units
+
+
+    ### scale into dru units
     if dru:
         data = scaleData70(data, 1)
         bkgs = scaleBkgs100(bkgs)
@@ -255,23 +271,35 @@ def myself(argv):
         bkgs = scaleBkgs100(bkgs, runtime)
         sigs = scaleBkgs100(sigs, runtime)
 
-    # make plots before combining!!!
+    ### make plots before combining?
     #makePlots93(bkgs, combine, others)
     #makePlots93(sigs, combine, others)
     #sys.exit()
     
-    # combine after scaling?
-    # FIX ME - combine but don't delete others?
+    ### combine after scaling?
+    ### FIX ME - combine but don't delete others?
     sigs = combineOthers100(sigs, globalmc)
     bkgs = combineOthers100(bkgs, globalmc)
     
-    # now sort and remove empty histos
+    ### now sort and remove empty histos
     bkgs, bakkeys = sortSimKeys92(bkgs)
     sigs, sigkeys = sortSimKeys92(sigs)
+
+    ### make plots after combining?
+    #makePlots93(bkgs, combine, others)
+    #makePlots93(sigs, combine, others)
+    #sys.exit()
+    
+    ### do histogram smoothing?
+    if smoothing:
+        bkgs = smooth(bkgs, smoothing)
+        sigs = smooth(sigs, smoothing)
+        print 'INFO: done smoothing histograms'
+    
     #-----------------------------------------------------------------
     #-----------------------------------------------------------------
     
-    # plot all crystals that have data
+    ### plot all crystals that have data
     justthese=[]
     for i in range(1, numx+1):
         for key in datkeys:
@@ -279,7 +307,7 @@ def myself(argv):
                 justthese.append(i)
     print 'INFO: plotting crystals -->', justthese
     
-    # assume all data is using same runs and hist params
+    ### assume all data is using same runs and hist params
     try: runtag = data[datkeys[0]]['info']['tag']
     except: runtag = 'none'
     try:
@@ -311,7 +339,7 @@ def myself(argv):
     #print 'INFO: Unique sigs =',uniqSigs
     #print 'INFO: Unique bkgs and sigs =',uniqAll
     
-    # make a string list of the globals
+    ### make a string list of the globals
     globstr = ''
     if len(globalmc) == 0:
         globstr = 'none'
@@ -400,7 +428,7 @@ def myself(argv):
         rlbkgs[bkey] = {}
         rhbkgs[bkey] = {}
         
-    # init dict for rebinned MC/signals 
+    ### init dict for rebinned MC/signals 
     rlsigs = {}
     rhsigs = {}
     for skey in sigkeys:
@@ -438,7 +466,7 @@ def myself(argv):
         ftotal.SetMarkerColor(kGray+1)
         ftotal.SetLineWidth(1)
 
-        fresid = TH1F('globRsid', 'globResid', fmax*numx, 0, fmax*numx)
+        fresid = TH1F('globResid', 'globResid', fmax*numx, 0, fmax*numx)
         fresid.SetLineColor(kBlack)
         fresid.SetMarkerColor(kBlack)
         fresid.SetLineWidth(1)
@@ -620,7 +648,7 @@ def myself(argv):
                 fbakkeys.append(fbkey)
             else: delete.append(fbkey)
         for key in delete:
-            #print 'INFO: deleting fit bak key', key
+            if debug: print 'DEBUG: zero events so deleting bkg key', key
             del fitbkgs[key]
         fbakkeys.sort()
 
@@ -632,7 +660,7 @@ def myself(argv):
                 fsigkeys.append(fskey)
             else: delete.append(fskey)
         for key in delete:
-            #print 'INFO: deleting fit sig key', key
+            if debug: print 'DEBUG: zero events so deleting sig key', key
             del fitsigs[key]
         fsigkeys.sort()
 
@@ -660,11 +688,14 @@ def myself(argv):
         
         ### remove global sigs from fit sigs
         L = len(fsigkeys)-1
-        for k,fskey in enumerate(reversed(fsigkeys)):
+        for k, fskey in enumerate(reversed(fsigkeys)):
             for gmckey in globalmc:
+                ### make gmckey unique (steel vs innersteel) 2018-10-23
+                gmckey = '-'+gmckey+'-'
+                #if debug: print 'DEBUG: is',gmckey,'in',fskey
                 #if 'lsveto' in fskey or 'pmt' in fskey:
                 if gmckey in fskey:
-                    #print 'INFO: deleting fit key',fsigkeys[L-k]
+                    if debug: print 'DEBUG: remove global key from sigs', fsigkeys[L-k]
                     del fsigkeys[L-k]
 
         ### now delete the empty histos
@@ -675,7 +706,7 @@ def myself(argv):
                 fglobkeys.append(fgkey)
             else: delete.append(fgkey)
         for key in delete:
-            #print 'INFO: deleting fit glob key', key
+            if debug: print 'DEBUG: zero events so deleting global key', key
             del fitglob[key]
         fglobkeys.sort()
 
@@ -2556,5 +2587,5 @@ def myself(argv):
 ######################################################################
 
 if __name__ == "__main__":
-    myself(sys.argv[1:])
+    main(sys.argv[1:])
 

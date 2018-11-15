@@ -6,10 +6,12 @@
 # 
 # Works with v93 and later versions
 # 
-# version: 2018-09-11
+# version: 2018-10-23
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# - do not init THF1 in makePlots93()
+# + add steel to makePlots93() exceptions
 # ~ tweaked makePlots93()
 # ~ was using groupNo 1 for K40! changed to 31 in groupNum93()
 # ~ fixed the H3 normalization - it was still wrong!
@@ -693,7 +695,8 @@ def makePlots93(bkgs, combine, others, vcut=0):
                 for E in [0, 1]:
                     
                     canvas.cd(i)
-                    temp[i-1] = TH1F('temp','temp',4000,0,4000)
+                    # do not do this 2018-10-23
+                    #temp[i-1] = TH1F('temp','temp',4000,0,4000)
                     
                     #==========================================================
                     #==========================================================
@@ -703,7 +706,8 @@ def makePlots93(bkgs, combine, others, vcut=0):
                     newkey += '-'+location
                     newkey += '-'+isotope
                     #if location == 'pmt' or location == 'internal':
-                    if location != 'lsveto' and location != 'innersteel':
+                    # add 'steel' exception 2018-10-23
+                    if location != 'lsveto' and location != 'innersteel' and location != 'steel':
                         newkey += '-f'+crystal[-1]
                     newkey += '-c'+C
                     newkey += '-e'+str(E)
@@ -1299,10 +1303,8 @@ def updateBkgsFile70(bkgsfile, resultsfile, newbkgs, BF='BR'):
         
         if not replaced:
             output.write(bline+'\n')
-            print '\nWARNING: Could not match -->', filter(None, re.split("[ \s\t\n\r,:]+", bline.strip()))[3:7]
-            #print '\nWARNING: Could not match line -->',fline.split('\n')[0]
-            #print   '         To line -->',bline.split('\n')[0]
-    
+            #print 'WARNING: Could not match -->', filter(None, re.split("[ \s\t\n\r,:]+", bline.strip()))[3:7]
+            
     output.close()
     return
 

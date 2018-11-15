@@ -4,10 +4,18 @@
 # 
 # Get all the default functions in here
 # 
-# version: 2018-08-28
+# version: 2018-11-14
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# + addHistKey() to test if a key already exists and create one if not
+# ~ tweaked extendHist() because it had a couple bugs
+# + fitPrep() to rebin and resize the histograms
+# + add rootSmoothing() - uses ROOTs TH1.Smooth() method
+# + add averageSmoothing()
+# ~ don't overwrite bin[i] with smoothed value until all done
+# ~ renamed smoothXbins() to triangleSmoothing()
+# + add an extend function to easily extend histograms
 # ~ updated the naming of stuff for the lsveto (crystal 9)
 # ~ tweaked readFile() so the # search is after the """ search
 # ~ tweaked histparam() to also return bins per keV
@@ -358,7 +366,6 @@ def onCup():
         return 0
 
 
-
 def setBinError(histo):
     for n in range(histo.GetNbinsX()+1):
         histo.SetBinError(n, sqrt(histo.GetBinContent(n)))
@@ -417,4 +424,170 @@ def histparam64(E):
 
     pars = [bins, hmin, hmax, bpkv]
     return pars
+
+
+def triangleSmoothing(hists, s=0):
+
+    if s <= 0:
+        print 'WARNING: not smoothing!'
+        return hists
+
+    print 'INFO: triangle smoothing...'
+    for key in hists:
+
+        ### get the number of bins
+        bins = hists[key]['hist'].GetNbinsX()
+
+        ### create a different hist to save the smoothed data to
+        newhist = deepcopy(hists[key]['hist'])
+        
+        for i in range(s, bins-s):
+            ### "i" is the bin you are smoothing
+            ### "s" is the +/- bin range you are smoothing over
+            smoothed = 0
+
+            ### grab previous (s) bins
+            for j, k in enumerate(range(-s, 0)):
+                smoothed += hists[key]['hist'].GetBinContent(i+k)*(j+1)
+
+            ### grab current bin
+            smoothed += hists[key]['hist'].GetBinContent(i)*(s+1)
+
+            ### grab following (s) bins
+            for j, k in enumerate(range(1, s+1)):
+                smoothed += hists[key]['hist'].GetBinContent(i+k)*(s-j)
+
+            ### normalize
+            newhist.SetBinContent(i, smoothed/float((s+1.)**2.))
+
+        ### save the new hist back into the dictionary
+        hists[key]['hist'] = deepcopy(newhist)
+        del newhist
+    
+    return hists
+
+
+def averageSmoothing(hists, s=0):
+
+    if s <= 0:
+        print 'WARNING: not smoothing!'
+        return hists
+    
+    print 'INFO: average smoothing...'
+    for key in hists:
+
+        ### get the number of bins
+        bins = hists[key]['hist'].GetNbinsX()
+
+        ### create a different hist to save the smoothed data to
+        newhist = deepcopy(hists[key]['hist'])
+        
+        for i in range(s, bins-s):
+            ### "i" is the bin you are smoothing
+            ### "s" is the +/- bin range you are smoothing over
+            smoothed = 0
+
+            ### grab previous (s) bins
+            for j, k in enumerate(range(-s, 0)):
+                smoothed += hists[key]['hist'].GetBinContent(i+k)
+
+            ### grab current bin
+            smoothed += hists[key]['hist'].GetBinContent(i)
+
+            ### grab following (s) bins
+            for j, k in enumerate(range(1, s+1)):
+                smoothed += hists[key]['hist'].GetBinContent(i+k)
+
+            ### normalize
+            newhist.SetBinContent(i, smoothed/float(2.*s+1.))
+
+        ### save the new hist back into the dictionary
+        hists[key]['hist'] = deepcopy(newhist)
+        del newhist
+    
+    return hists
+
+
+def rootSmoothing(hists, s=0):
+    
+    if s <= 0:
+        print 'WARNING: not smoothing!'
+        return hists
+    
+    print 'INFO: root TH1 smoothing...'
+    for key in hists:
+        ### smooth the hist s times
+        hists[key]['hist'].Smooth(s)
+        
+    return hists
+
+
+def smooth(hists, s=0):
+    
+    hists = averageSmoothing(hists, s)
+    #hists = rootSmoothing(hists, s)
+    #hists = triangleSmoothing(hists, s)
+    
+    return hists
+
+
+def extendHist(hist1, hist2):
+    
+    name  = hist1.GetName()
+    bins1 = hist1.GetNbinsX()
+    bins2 = hist2.GetNbinsX()
+    bins  = bins1 + bins2
+    hist3 = TH1F(name, name, bins, 0, bins)
+    for n in range(bins1):
+        hist3.SetBinContent(n, hist1.GetBinContent(n))
+    for n in range(bins2):
+        hist3.SetBinContent(n+bins1, hist2.GetBinContent(n))
+        
+    return hist3
+
+
+def fitPrep(hists, key, params, zeros=0):
+    
+    # params needs to be a list of length 3 [rebin, kevfmin, kevfmax]
+    rebin   = params[0]
+    kevfmin = params[1]
+    kevfmax = params[2]
+
+    # if you rebin now, you need to deepcopy the original hist
+    hist = deepcopy(hists[key]['hist'])
+    if rebin > 1: hist.Rebin(rebin)
+    
+    bins   = hist.GetXaxis().GetNbins()
+    kevmin = hist.GetXaxis().GetBinUpEdge(0)
+    kevmax = hist.GetXaxis().GetBinUpEdge(bins)
+
+    # keV to bin number scaling
+    ktb      = bins/(kevmax-kevmin)
+    startbin = int(kevfmin*ktb)
+    stopbin  = int(kevfmax*ktb)
+    newbins  = int(stopbin-startbin)
+    
+    temp = TH1F(key, key, newbins, 0, newbins)
+    if zeros:
+        del hist
+        return temp
+    
+    for i in range(newbins):
+        temp.SetBinContent(i, hist.GetBinContent(startbin+i))
+
+    del hist
+    return temp
+
+
+def addHistKey(hists, key):
+    
+    try:
+        tmp = hists[key]
+        #del tmp
+    except:
+        hist = TH1F(key, key, 1, 0, 1)
+        hists[key] = {}
+        hists[key]['hist'] = hist
+        
+    return hists
 

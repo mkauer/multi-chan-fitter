@@ -4,10 +4,12 @@
 # 
 # Remove LSveto low-energy from the histograms
 # 
-# version: 2018-10-12
+# version: 2018-11-06
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# ~ move smoothXbins() to funcs_misc.py
+# + add smoothXbins() for testing - this works!
 # + add steel to the build101() exclude list
 # + lsveto needs minimum energy deposit in any crystal > 0.1 keV
 # ~ set lsveto mc energy resolution back to default
@@ -33,6 +35,8 @@ from funcs_misc import *
 
 def build101(infile='backgrounds1010.txt', others=1, freuse=0, fchans=0, fxstals=[]):
 
+    debug = 0
+
     data = {}
     bkgs = {}
     sigs = {}
@@ -53,19 +57,18 @@ def build101(infile='backgrounds1010.txt', others=1, freuse=0, fchans=0, fxstals
                        or 'steel' in info['key'])
         infos = []
         exception = 0
-        debug = 0
         if 'data' in info['key']:
-            if debug: print 'DEBUG: if data in info[key]: --> ', info['key']
+            if debug: print 'DEBUG: if data in info[key]: -->', info['key']
             infos.append(info)
         elif exception:
-            if debug: print 'DEBUG: elif exception: --> ', info['key']
+            if debug: print 'DEBUG: elif exception: -->', info['key']
             key = info['key']
             newinfo = deepcopy(info)
             newinfo['key'] = key+'-f'+str(info['xstl'])
             newinfo['from'] = info['xstl']
             infos.append(newinfo)
         elif info['xstl']==9 and not exclude:
-            if debug: print 'DEBUG: elif info[xstl]==9 and not exclude: --> ', info['key']
+            if debug: print 'DEBUG: elif info[xstl]==9 and not exclude: -->', info['key']
             key = info['key']
             for i in range(8):
                 #info['key'] = key+'-f'+str(i+1)
@@ -74,7 +77,7 @@ def build101(infile='backgrounds1010.txt', others=1, freuse=0, fchans=0, fxstals
                 newinfo['from'] = str(i+1)
                 infos.append(newinfo)
         elif others and not exclude:
-            if debug: print 'DEBUG: elif others and not exclude: --> ', info['key']
+            if debug: print 'DEBUG: elif others and not exclude: -->', info['key']
             key = info['key']
             for i in range(8):
                 #info['key'] = key+'-f'+str(i+1)
@@ -83,14 +86,14 @@ def build101(infile='backgrounds1010.txt', others=1, freuse=0, fchans=0, fxstals
                 newinfo['from'] = str(i+1)
                 infos.append(newinfo)
         elif not others and not exclude:
-            if debug: print 'DEBUG: elif not others and not exclude: --> ', info['key']
+            if debug: print 'DEBUG: elif not others and not exclude: -->', info['key']
             key = info['key']
             newinfo = deepcopy(info)
             newinfo['key'] = key+'-f'+str(info['xstl'])
             newinfo['from'] = info['xstl']
             infos.append(newinfo)
         elif exclude:
-            if debug: print 'DEBUG: elif exclude: --> ', info['key']
+            if debug: print 'DEBUG: elif exclude: -->', info['key']
             infos.append(info)
         else:
             print 'WARNING:',info['key'],'does not fit any known criteria'
@@ -520,10 +523,10 @@ def buildMC101(info, mc):
 
                     elif info['loca'] == 'airshield':
                         volumeCut = TCut('(primVolumeName == "LSVetoAirRoom")')
-
+                        
                     elif info['loca'] == 'steel':
                         volumeCut = TCut('((primVolumeName == "SteelSupport") || (primVolumeName == "SteelSupportTop"))')
-
+                        
                     elif info['loca'] == 'innersteel':
                         volumeCut = TCut('(primVolumeName == "InnerSteel")')
                     

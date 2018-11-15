@@ -9,6 +9,14 @@
 # 1 ppm K40   = 30.960 mBq/kg
 #-----------------------------------------------------------
 
+
+# 2018-11-14
+# setting pmt K40 as a global background doesn't seem to work yet...
+
+
+# 2018-11-12
+# testing for v200... comment out the innersteel and steel for 6 7 9 
+
 # 2018-11-06
 # tweaked things for innersteel and steel fitting
 # see fitting plots from 2018-11-06
@@ -389,11 +397,11 @@ FR	SM	6	lsveto		Th232	Th232	Ra228	2.00e-02	0.1	100	./root-join-read/build101/bui
 FR	SM	6	lsveto		Th232	Ra228	Th228	2.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoRa228_Th228.root
 FR	SM	6	lsveto		Th232	Th228	GRND	2.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoTh228_GRND.root
 
-FR	SM	6	innersteel	Th232	Th228	GRND	3.80e+01	0.9	10	./root-join-read/build101/build101-innersteelTh228_GRND.root
-FR	SM	6	innersteel	U238	U238	Th230	6.50e+01	0.9	10	./root-join-read/build101/build101-innersteelU238_Th230.root
+#FR	SM	6	innersteel	Th232	Th228	GRND	3.80e+01	0.9	10	./root-join-read/build101/build101-innersteelTh228_GRND.root
+#FR	SM	6	innersteel	U238	U238	Th230	6.50e+01	0.9	10	./root-join-read/build101/build101-innersteelU238_Th230.root
 
-FR	SM	6	steel		Th232	Th228	GRND	3.80e+01	0.9	10	./root-join-read/build101/build101-steelTh228_GRND.root
-FR	SM	6	steel		U238	U238	Th230	6.50e+01	0.9	10	./root-join-read/build101/build101-steelU238_Th230.root
+#FR	SM	6	steel		Th232	Th228	GRND	3.80e+01	0.9	10	./root-join-read/build101/build101-steelTh228_GRND.root
+#FR	SM	6	steel		U238	U238	Th230	6.50e+01	0.9	10	./root-join-read/build101/build101-steelU238_Th230.root
 
 
 ########################
@@ -439,11 +447,11 @@ FR	SM	7	lsveto		Th232	Th232	Ra228	2.00e-02	0.1	1e4	./root-join-read/build101/bui
 FR	SM	7	lsveto		Th232	Ra228	Th228	2.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoRa228_Th228.root
 FR	SM	7	lsveto		Th232	Th228	GRND	2.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoTh228_GRND.root
 
-FR	SM	7	innersteel	Th232	Th228	GRND	3.80e+01	0.9	10	./root-join-read/build101/build101-innersteelTh228_GRND.root
-FR	SM	7	innersteel	U238	U238	Th230	6.50e+01	0.9	10	./root-join-read/build101/build101-innersteelU238_Th230.root
+#FR	SM	7	innersteel	Th232	Th228	GRND	3.80e+01	0.9	10	./root-join-read/build101/build101-innersteelTh228_GRND.root
+#FR	SM	7	innersteel	U238	U238	Th230	6.50e+01	0.9	10	./root-join-read/build101/build101-innersteelU238_Th230.root
 
-FR	SM	7	steel		Th232	Th228	GRND	3.80e+01	0.9	10	./root-join-read/build101/build101-steelTh228_GRND.root
-FR	SM	7	steel		U238	U238	Th230	6.50e+01	0.9	10	./root-join-read/build101/build101-steelU238_Th230.root
+#FR	SM	7	steel		Th232	Th228	GRND	3.80e+01	0.9	10	./root-join-read/build101/build101-steelTh228_GRND.root
+#FR	SM	7	steel		U238	U238	Th230	6.50e+01	0.9	10	./root-join-read/build101/build101-steelU238_Th230.root
 
 """
 ########################
