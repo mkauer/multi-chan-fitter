@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 
-# 2018-06-28
+# 2018-12-11
+
+# add I126 and I129
+# add plastic
 
 import os
 
@@ -13,6 +16,8 @@ allTheThings = [
     ['internal','H3','H3','GRND'],
     ['internal','Na22','Na22','GRND'],
     ['internal','I125','I125','GRND'],
+    ['internal','I126','I126','GRND'],
+    ['internal','I129','I129','GRND'],
     ['internal','Te121m','Te121m','GRND'],
     ['internal','Te123m','Te123m','GRND'],
     ['internal','Te125m','Te125m','GRND'],
@@ -42,6 +47,18 @@ allTheThings = [
     ['pmt','Th232','Th232','Ra228'],
     ['pmt','Th232','Ra228','Th228'],
     ['pmt','Th232','Th228','GRND'],
+    ['plastic','K40','K40','GRND'],
+    ['plastic','U238','U238','GRND'],
+    ['plastic','U238','U238','Pb210'],
+    ['plastic','U238','U238','Th230'],
+    ['plastic','U238','Th230','Ra226'],
+    ['plastic','U238','Ra226','Rn222'],
+    ['plastic','U238','Rn222','Pb210'],
+    ['plastic','U238','Pb210','GRND'],
+    ['plastic','Th232','Th232','GRND'],
+    ['plastic','Th232','Th232','Ra228'],
+    ['plastic','Th232','Ra228','Th228'],
+    ['plastic','Th232','Th228','GRND'],
     ['lsveto','K40','K40','GRND'],
     ['lsveto','U238','U238','GRND'],
     ['lsveto','U238','U238','Pb210'],

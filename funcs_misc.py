@@ -4,10 +4,12 @@
 # 
 # Get all the default functions in here
 # 
-# version: 2018-11-14
+# version: 2018-12-11
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# + add I129 to setGroup()
+# + add plastic to setGroup()
 # + addHistKey() to test if a key already exists and create one if not
 # ~ tweaked extendHist() because it had a couple bugs
 # + fitPrep() to rebin and resize the histograms
@@ -390,19 +392,19 @@ def setGroup(info):
     if info['loca'] == 'internal':
         if info['isof'] in ['Cd109',  'Sn113',
                             'H3',     'Na22',
-                            'I125',   'I126',
+                            'I125',   'I126',   'I129',
                             'Te121',  'Te121m',
-                            'Te123m', 'Te125m',
-                            'Te127m']:
+                            'Te123m', 'Te125m', 'Te127m']:
             return 'cosmo'
         else: return 'internal'
-    if 'pmt'    in info['loca']: return 'pmts'
-    if 'surf'   in info['loca']: return 'surface'
-    if 'cucase' in info['loca']: return 'copper'
-    if 'copper' in info['loca']: return 'copper'
-    if 'steel'  in info['loca']: return 'steel'
-    if 'teflon' in info['loca']: return 'surface'
-    if 'veto'   in info['loca']: return 'lsveto'
+    if 'pmt'     in info['loca']: return 'pmts'
+    if 'surf'    in info['loca']: return 'surface'
+    if 'cucase'  in info['loca']: return 'copper'
+    if 'copper'  in info['loca']: return 'copper'
+    if 'steel'   in info['loca']: return 'steel'
+    if 'teflon'  in info['loca']: return 'surface'
+    if 'veto'    in info['loca']: return 'lsveto'
+    if 'plastic' in info['loca']: return 'plastic'
     return 'none'
 
 

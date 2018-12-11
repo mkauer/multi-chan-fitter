@@ -9,6 +9,10 @@
 # 1 ppm K40   = 30.960 mBq/kg
 #-----------------------------------------------------------
 
+# 2018-12-04
+# set PMT Tl208 upper bound to 2.9 - now works for c1234679 fit!
+# set PMT Tl208 upper bound to 1.1 - too low
+# reset the PMT and LSVETO activities to what is in the backgrounds paper!
 
 # 2018-11-15
 # setting pmt K40 as a global background now works for 201-global-bkgs.py
@@ -127,23 +131,25 @@ FR	SM	1	internal	Pb210	Pb210	GRND	3.20e+00	0.9	2	./root-join-read/build101/build
 FR	SM	1	internal	Th232	Ra228	Th228	5.37e-03	0.8	1.2	./root-join-read/build101/build101-internalRa228_Th228.root
 FR	SM	1	internal	Th232	Th228	GRND	5.37e-03	0.8	1.2	./root-join-read/build101/build101-internalTh228_GRND.root
 
-FR	SM	1	pmt		K40	K40	GRND	5.80e+01	0.5	2	./root-join-read/build101/build101-pmtK40_GRND.root
-FR	SM	1	pmt		U238	U238	Th230	2.50e+01	0.5	5	./root-join-read/build101/build101-pmtU238_Th230.root
-#FR	SM	1	pmt		U238	Th230	Ra226	2.50e+01	0.5	5	./root-join-read/build101/build101-pmtTh230_Ra226.root
-FR	SM	1	pmt		U238	Ra226	Rn222	6.00e+01	0.5	5	./root-join-read/build101/build101-pmtRa226_Rn222.root
-FR	SM	1	pmt		U238	Rn222	Pb210	2.50e+01	0.5	5	./root-join-read/build101/build101-pmtRn222_Pb210.root
-FR	SM	1	pmt		Th232	Ra228	Th228	1.20e+01	0.5	5	./root-join-read/build101/build101-pmtRa228_Th228.root
-FR	SM	1	pmt		Th232	Th228	GRND	3.80e+00	0.5	5	./root-join-read/build101/build101-pmtTh228_GRND.root
+FR	SM	1	pmt		K40	K40	GRND	5.80e+01	0.51	6.1	./root-join-read/build101/build101-pmtK40_GRND.root
+FR	SM	1	pmt		U238	U238	Th230	2.50e+01	0.51	6.1	./root-join-read/build101/build101-pmtU238_Th230.root
+FR	SM	1	pmt		U238	Th230	Ra226	2.50e+01	0.51	6.1	./root-join-read/build101/build101-pmtTh230_Ra226.root
+FR	SM	1	pmt		U238	Ra226	Rn222	2.50e+01	0.51	6.1	./root-join-read/build101/build101-pmtRa226_Rn222.root
+FR	SM	1	pmt		U238	Rn222	Pb210	2.50e+01	0.51	6.1	./root-join-read/build101/build101-pmtRn222_Pb210.root
+FR	SM	1	pmt		U238	Pb210	GRND	2.50e+01	0.51	6.1	./root-join-read/build101/build101-pmtPb210_GRND.root
+FR	SM	1	pmt		Th232	Th232	Ra228	1.20e+01	0.51	6.1	./root-join-read/build101/build101-pmtTh232_Ra228.root
+FR	SM	1	pmt		Th232	Ra228	Th228	1.20e+01	0.51	6.1	./root-join-read/build101/build101-pmtRa228_Th228.root
+FR	SM	1	pmt		Th232	Th228	GRND	1.20e+01	0.51	2.9	./root-join-read/build101/build101-pmtTh228_GRND.root
 
-FR	SM	1	lsveto		K40	K40	GRND	1.20e+01	0.5	5	./root-join-read/build101/build101-lsvetoK40_GRND.root
-FR	SM	1	lsveto		U238	U238	Th230	9.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoU238_Th230.root
-FR	SM	1	lsveto		U238	Th230	Ra226	9.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoTh230_Ra226.root
-FR	SM	1	lsveto		U238	Ra226	Rn222	9.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoRa226_Rn222.root
-FR	SM	1	lsveto		U238	Rn222	Pb210	9.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoRn222_Pb210.root
-FR	SM	1	lsveto		U238	Pb210	GRND	9.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoPb210_GRND.root
-FR	SM	1	lsveto		Th232	Th232	Ra228	2.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoTh232_Ra228.root
-FR	SM	1	lsveto		Th232	Ra228	Th228	2.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoRa228_Th228.root
-FR	SM	1	lsveto		Th232	Th228	GRND	2.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoTh228_GRND.root
+FR	SM	1	lsveto		K40	K40	GRND	7.00e+00	0.1	10	./root-join-read/build101/build101-lsvetoK40_GRND.root
+FR	SM	1	lsveto		U238	U238	Th230	2.70e+00	0.1	10	./root-join-read/build101/build101-lsvetoU238_Th230.root
+FR	SM	1	lsveto		U238	Th230	Ra226	2.70e+00	0.1	10	./root-join-read/build101/build101-lsvetoTh230_Ra226.root
+FR	SM	1	lsveto		U238	Ra226	Rn222	2.70e+00	0.1	10	./root-join-read/build101/build101-lsvetoRa226_Rn222.root
+FR	SM	1	lsveto		U238	Rn222	Pb210	2.70e+00	0.1	10	./root-join-read/build101/build101-lsvetoRn222_Pb210.root
+FR	SM	1	lsveto		U238	Pb210	GRND	2.70e+00	0.1	10	./root-join-read/build101/build101-lsvetoPb210_GRND.root
+FR	SM	1	lsveto		Th232	Th232	Ra228	3.30e+00	0.1	10	./root-join-read/build101/build101-lsvetoTh232_Ra228.root
+FR	SM	1	lsveto		Th232	Ra228	Th228	3.30e+00	0.1	10	./root-join-read/build101/build101-lsvetoRa228_Th228.root
+FR	SM	1	lsveto		Th232	Th228	GRND	3.30e+00	0.1	10	./root-join-read/build101/build101-lsvetoTh228_GRND.root
 
 FR	SM	1	innersteel	Th232	Th228	GRND	3.80e+01	0.1	10	./root-join-read/build101/build101-innersteelTh228_GRND.root
 FR	SM	1	innersteel	U238	U238	Th230	6.50e+01	0.1	10	./root-join-read/build101/build101-innersteelU238_Th230.root
@@ -171,23 +177,25 @@ FR	SM	2	internal	Pb210	Pb210	GRND	2.06e+00	0.9	2	./root-join-read/build101/build
 FR	SM	2	internal	Th232	Ra228	Th228	2.58e-03	0.8	1.2	./root-join-read/build101/build101-internalRa228_Th228.root
 FR	SM	2	internal	Th232	Th228	GRND	2.58e-03	0.8	1.2	./root-join-read/build101/build101-internalTh228_GRND.root
 
-FR	SM	2	pmt		K40	K40	GRND	5.80e+01	0.5	2	./root-join-read/build101/build101-pmtK40_GRND.root
-FR	SM	2	pmt		U238	U238	Th230	2.50e+01	0.5	5	./root-join-read/build101/build101-pmtU238_Th230.root
-#FR	SM	2	pmt		U238	Th230	Ra226	2.50e+01	0.5	5	./root-join-read/build101/build101-pmtTh230_Ra226.root
-FR	SM	2	pmt		U238	Ra226	Rn222	6.00e+01	0.5	5	./root-join-read/build101/build101-pmtRa226_Rn222.root
-FR	SM	2	pmt		U238	Rn222	Pb210	2.50e+01	0.5	5	./root-join-read/build101/build101-pmtRn222_Pb210.root
-FR	SM	2	pmt		Th232	Ra228	Th228	1.20e+01	0.5	5	./root-join-read/build101/build101-pmtRa228_Th228.root
-FR	SM	2	pmt		Th232	Th228	GRND	3.80e+00	0.5	5	./root-join-read/build101/build101-pmtTh228_GRND.root
+FR	SM	2	pmt		K40	K40	GRND	5.80e+01	0.51	6.1	./root-join-read/build101/build101-pmtK40_GRND.root
+FR	SM	2	pmt		U238	U238	Th230	2.50e+01	0.51	6.1	./root-join-read/build101/build101-pmtU238_Th230.root
+FR	SM	2	pmt		U238	Th230	Ra226	2.50e+01	0.51	6.1	./root-join-read/build101/build101-pmtTh230_Ra226.root
+FR	SM	2	pmt		U238	Ra226	Rn222	2.50e+01	0.51	6.1	./root-join-read/build101/build101-pmtRa226_Rn222.root
+FR	SM	2	pmt		U238	Rn222	Pb210	2.50e+01	0.51	6.1	./root-join-read/build101/build101-pmtRn222_Pb210.root
+FR	SM	2	pmt		U238	Pb210	GRND	2.50e+01	0.51	6.1	./root-join-read/build101/build101-pmtPb210_GRND.root
+FR	SM	2	pmt		Th232	Th232	Ra228	1.20e+01	0.51	6.1	./root-join-read/build101/build101-pmtTh232_Ra228.root
+FR	SM	2	pmt		Th232	Ra228	Th228	1.20e+01	0.51	6.1	./root-join-read/build101/build101-pmtRa228_Th228.root
+FR	SM	2	pmt		Th232	Th228	GRND	1.20e+01	0.51	2.9	./root-join-read/build101/build101-pmtTh228_GRND.root
 
-FR	SM	2	lsveto		K40	K40	GRND	1.20e+01	0.5	5	./root-join-read/build101/build101-lsvetoK40_GRND.root
-FR	SM	2	lsveto		U238	U238	Th230	9.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoU238_Th230.root
-FR	SM	2	lsveto		U238	Th230	Ra226	9.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoTh230_Ra226.root
-FR	SM	2	lsveto		U238	Ra226	Rn222	9.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoRa226_Rn222.root
-FR	SM	2	lsveto		U238	Rn222	Pb210	9.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoRn222_Pb210.root
-FR	SM	2	lsveto		U238	Pb210	GRND	9.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoPb210_GRND.root
-FR	SM	2	lsveto		Th232	Th232	Ra228	2.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoTh232_Ra228.root
-FR	SM	2	lsveto		Th232	Ra228	Th228	2.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoRa228_Th228.root
-FR	SM	2	lsveto		Th232	Th228	GRND	2.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoTh228_GRND.root
+FR	SM	2	lsveto		K40	K40	GRND	7.00e+00	0.1	10	./root-join-read/build101/build101-lsvetoK40_GRND.root
+FR	SM	2	lsveto		U238	U238	Th230	2.70e+00	0.1	10	./root-join-read/build101/build101-lsvetoU238_Th230.root
+FR	SM	2	lsveto		U238	Th230	Ra226	2.70e+00	0.1	10	./root-join-read/build101/build101-lsvetoTh230_Ra226.root
+FR	SM	2	lsveto		U238	Ra226	Rn222	2.70e+00	0.1	10	./root-join-read/build101/build101-lsvetoRa226_Rn222.root
+FR	SM	2	lsveto		U238	Rn222	Pb210	2.70e+00	0.1	10	./root-join-read/build101/build101-lsvetoRn222_Pb210.root
+FR	SM	2	lsveto		U238	Pb210	GRND	2.70e+00	0.1	10	./root-join-read/build101/build101-lsvetoPb210_GRND.root
+FR	SM	2	lsveto		Th232	Th232	Ra228	3.30e+00	0.1	10	./root-join-read/build101/build101-lsvetoTh232_Ra228.root
+FR	SM	2	lsveto		Th232	Ra228	Th228	3.30e+00	0.1	10	./root-join-read/build101/build101-lsvetoRa228_Th228.root
+FR	SM	2	lsveto		Th232	Th228	GRND	3.30e+00	0.1	10	./root-join-read/build101/build101-lsvetoTh228_GRND.root
 
 FR	SM	2	innersteel	Th232	Th228	GRND	3.80e+01	0.1	10	./root-join-read/build101/build101-innersteelTh228_GRND.root
 FR	SM	2	innersteel	U238	U238	Th230	6.50e+01	0.1	10	./root-join-read/build101/build101-innersteelU238_Th230.root
@@ -220,23 +228,25 @@ FR	SM	3	internal	Pb210	Pb210	GRND	0.76e+00	0.9	2	./root-join-read/build101/build
 FR	SM	3	internal	Th232	Ra228	Th228	1.80e-03	0.8	1.2	./root-join-read/build101/build101-internalRa228_Th228.root
 FR	SM	3	internal	Th232	Th228	GRND	1.80e-03	0.8	1.2	./root-join-read/build101/build101-internalTh228_GRND.root
 
-FR	SM	3	pmt		K40	K40	GRND	5.80e+01	0.5	2	./root-join-read/build101/build101-pmtK40_GRND.root
-FR	SM	3	pmt		U238	U238	Th230	2.50e+01	0.5	5	./root-join-read/build101/build101-pmtU238_Th230.root
-#FR	SM	3	pmt		U238	Th230	Ra226	2.50e+01	0.5	5	./root-join-read/build101/build101-pmtTh230_Ra226.root
-FR	SM	3	pmt		U238	Ra226	Rn222	6.00e+01	0.5	5	./root-join-read/build101/build101-pmtRa226_Rn222.root
-FR	SM	3	pmt		U238	Rn222	Pb210	2.50e+01	0.5	5	./root-join-read/build101/build101-pmtRn222_Pb210.root
-FR	SM	3	pmt		Th232	Ra228	Th228	1.20e+01	0.5	5	./root-join-read/build101/build101-pmtRa228_Th228.root
-FR	SM	3	pmt		Th232	Th228	GRND	3.80e+00	0.5	5	./root-join-read/build101/build101-pmtTh228_GRND.root
+FR	SM	3	pmt		K40	K40	GRND	5.80e+01	0.51	6.1	./root-join-read/build101/build101-pmtK40_GRND.root
+FR	SM	3	pmt		U238	U238	Th230	2.50e+01	0.51	6.1	./root-join-read/build101/build101-pmtU238_Th230.root
+FR	SM	3	pmt		U238	Th230	Ra226	2.50e+01	0.51	6.1	./root-join-read/build101/build101-pmtTh230_Ra226.root
+FR	SM	3	pmt		U238	Ra226	Rn222	2.50e+01	0.51	6.1	./root-join-read/build101/build101-pmtRa226_Rn222.root
+FR	SM	3	pmt		U238	Rn222	Pb210	2.50e+01	0.51	6.1	./root-join-read/build101/build101-pmtRn222_Pb210.root
+FR	SM	3	pmt		U238	Pb210	GRND	2.50e+01	0.51	6.1	./root-join-read/build101/build101-pmtPb210_GRND.root
+FR	SM	3	pmt		Th232	Th232	Ra228	1.20e+01	0.51	6.1	./root-join-read/build101/build101-pmtTh232_Ra228.root
+FR	SM	3	pmt		Th232	Ra228	Th228	1.20e+01	0.51	6.1	./root-join-read/build101/build101-pmtRa228_Th228.root
+FR	SM	3	pmt		Th232	Th228	GRND	1.20e+01	0.51	2.9	./root-join-read/build101/build101-pmtTh228_GRND.root
 
-FR	SM	3	lsveto		K40	K40	GRND	1.20e+01	0.5	5	./root-join-read/build101/build101-lsvetoK40_GRND.root
-FR	SM	3	lsveto		U238	U238	Th230	9.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoU238_Th230.root
-FR	SM	3	lsveto		U238	Th230	Ra226	9.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoTh230_Ra226.root
-FR	SM	3	lsveto		U238	Ra226	Rn222	9.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoRa226_Rn222.root
-FR	SM	3	lsveto		U238	Rn222	Pb210	9.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoRn222_Pb210.root
-FR	SM	3	lsveto		U238	Pb210	GRND	9.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoPb210_GRND.root
-FR	SM	3	lsveto		Th232	Th232	Ra228	2.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoTh232_Ra228.root
-FR	SM	3	lsveto		Th232	Ra228	Th228	2.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoRa228_Th228.root
-FR	SM	3	lsveto		Th232	Th228	GRND	2.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoTh228_GRND.root
+FR	SM	3	lsveto		K40	K40	GRND	7.00e+00	0.1	10	./root-join-read/build101/build101-lsvetoK40_GRND.root
+FR	SM	3	lsveto		U238	U238	Th230	2.70e+00	0.1	10	./root-join-read/build101/build101-lsvetoU238_Th230.root
+FR	SM	3	lsveto		U238	Th230	Ra226	2.70e+00	0.1	10	./root-join-read/build101/build101-lsvetoTh230_Ra226.root
+FR	SM	3	lsveto		U238	Ra226	Rn222	2.70e+00	0.1	10	./root-join-read/build101/build101-lsvetoRa226_Rn222.root
+FR	SM	3	lsveto		U238	Rn222	Pb210	2.70e+00	0.1	10	./root-join-read/build101/build101-lsvetoRn222_Pb210.root
+FR	SM	3	lsveto		U238	Pb210	GRND	2.70e+00	0.1	10	./root-join-read/build101/build101-lsvetoPb210_GRND.root
+FR	SM	3	lsveto		Th232	Th232	Ra228	3.30e+00	0.1	10	./root-join-read/build101/build101-lsvetoTh232_Ra228.root
+FR	SM	3	lsveto		Th232	Ra228	Th228	3.30e+00	0.1	10	./root-join-read/build101/build101-lsvetoRa228_Th228.root
+FR	SM	3	lsveto		Th232	Th228	GRND	3.30e+00	0.1	10	./root-join-read/build101/build101-lsvetoTh228_GRND.root
 
 FR	SM	3	innersteel	Th232	Th228	GRND	3.80e+01	0.1	10	./root-join-read/build101/build101-innersteelTh228_GRND.root
 FR	SM	3	innersteel	U238	U238	Th230	6.50e+01	0.1	10	./root-join-read/build101/build101-innersteelU238_Th230.root
@@ -269,23 +279,25 @@ FR	SM	4	internal	Pb210	Pb210	GRND	0.74e+00	0.9	2	./root-join-read/build101/build
 FR	SM	4	internal	Th232	Ra228	Th228	1.23e-03	0.8	1.2	./root-join-read/build101/build101-internalRa228_Th228.root
 FR	SM	4	internal	Th232	Th228	GRND	1.23e-03	0.8	1.2	./root-join-read/build101/build101-internalTh228_GRND.root
 
-FR	SM	4	pmt		K40	K40	GRND	5.80e+01	0.5	2	./root-join-read/build101/build101-pmtK40_GRND.root
-FR	SM	4	pmt		U238	U238	Th230	2.50e+01	0.5	5	./root-join-read/build101/build101-pmtU238_Th230.root
-#FR	SM	4	pmt		U238	Th230	Ra226	2.50e+01	0.5	5	./root-join-read/build101/build101-pmtTh230_Ra226.root
-FR	SM	4	pmt		U238	Ra226	Rn222	6.00e+01	0.5	5	./root-join-read/build101/build101-pmtRa226_Rn222.root
-FR	SM	4	pmt		U238	Rn222	Pb210	2.50e+01	0.5	5	./root-join-read/build101/build101-pmtRn222_Pb210.root
-FR	SM	4	pmt		Th232	Ra228	Th228	1.20e+01	0.5	5	./root-join-read/build101/build101-pmtRa228_Th228.root
-FR	SM	4	pmt		Th232	Th228	GRND	3.80e+00	0.5	5	./root-join-read/build101/build101-pmtTh228_GRND.root
+FR	SM	4	pmt		K40	K40	GRND	5.80e+01	0.51	6.1	./root-join-read/build101/build101-pmtK40_GRND.root
+FR	SM	4	pmt		U238	U238	Th230	2.50e+01	0.51	6.1	./root-join-read/build101/build101-pmtU238_Th230.root
+FR	SM	4	pmt		U238	Th230	Ra226	2.50e+01	0.51	6.1	./root-join-read/build101/build101-pmtTh230_Ra226.root
+FR	SM	4	pmt		U238	Ra226	Rn222	2.50e+01	0.51	6.1	./root-join-read/build101/build101-pmtRa226_Rn222.root
+FR	SM	4	pmt		U238	Rn222	Pb210	2.50e+01	0.51	6.1	./root-join-read/build101/build101-pmtRn222_Pb210.root
+FR	SM	4	pmt		U238	Pb210	GRND	2.50e+01	0.51	6.1	./root-join-read/build101/build101-pmtPb210_GRND.root
+FR	SM	4	pmt		Th232	Th232	Ra228	1.20e+01	0.51	6.1	./root-join-read/build101/build101-pmtTh232_Ra228.root
+FR	SM	4	pmt		Th232	Ra228	Th228	1.20e+01	0.51	6.1	./root-join-read/build101/build101-pmtRa228_Th228.root
+FR	SM	4	pmt		Th232	Th228	GRND	1.20e+01	0.51	2.9	./root-join-read/build101/build101-pmtTh228_GRND.root
 
-FR	SM	4	lsveto		K40	K40	GRND	1.20e+01	0.5	5	./root-join-read/build101/build101-lsvetoK40_GRND.root
-FR	SM	4	lsveto		U238	U238	Th230	9.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoU238_Th230.root
-FR	SM	4	lsveto		U238	Th230	Ra226	9.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoTh230_Ra226.root
-FR	SM	4	lsveto		U238	Ra226	Rn222	9.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoRa226_Rn222.root
-FR	SM	4	lsveto		U238	Rn222	Pb210	9.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoRn222_Pb210.root
-FR	SM	4	lsveto		U238	Pb210	GRND	9.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoPb210_GRND.root
-FR	SM	4	lsveto		Th232	Th232	Ra228	2.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoTh232_Ra228.root
-FR	SM	4	lsveto		Th232	Ra228	Th228	2.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoRa228_Th228.root
-FR	SM	4	lsveto		Th232	Th228	GRND	2.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoTh228_GRND.root
+FR	SM	4	lsveto		K40	K40	GRND	7.00e+00	0.1	10	./root-join-read/build101/build101-lsvetoK40_GRND.root
+FR	SM	4	lsveto		U238	U238	Th230	2.70e+00	0.1	10	./root-join-read/build101/build101-lsvetoU238_Th230.root
+FR	SM	4	lsveto		U238	Th230	Ra226	2.70e+00	0.1	10	./root-join-read/build101/build101-lsvetoTh230_Ra226.root
+FR	SM	4	lsveto		U238	Ra226	Rn222	2.70e+00	0.1	10	./root-join-read/build101/build101-lsvetoRa226_Rn222.root
+FR	SM	4	lsveto		U238	Rn222	Pb210	2.70e+00	0.1	10	./root-join-read/build101/build101-lsvetoRn222_Pb210.root
+FR	SM	4	lsveto		U238	Pb210	GRND	2.70e+00	0.1	10	./root-join-read/build101/build101-lsvetoPb210_GRND.root
+FR	SM	4	lsveto		Th232	Th232	Ra228	3.30e+00	0.1	10	./root-join-read/build101/build101-lsvetoTh232_Ra228.root
+FR	SM	4	lsveto		Th232	Ra228	Th228	3.30e+00	0.1	10	./root-join-read/build101/build101-lsvetoRa228_Th228.root
+FR	SM	4	lsveto		Th232	Th228	GRND	3.30e+00	0.1	10	./root-join-read/build101/build101-lsvetoTh228_GRND.root
 
 FR	SM	4	innersteel	Th232	Th228	GRND	3.80e+01	0.1	10	./root-join-read/build101/build101-innersteelTh228_GRND.root
 FR	SM	4	innersteel	U238	U238	Th230	6.50e+01	0.1	10	./root-join-read/build101/build101-innersteelU238_Th230.root
@@ -318,13 +330,13 @@ FR	SM	5	internal	Pb210	Pb210	GRND	2.06e+00	0.9	2	./root-join-read/build101/build
 FR	SM	5	internal	Th232	Ra228	Th228	9.63e-03	0.8	1.2	./root-join-read/build101/build101-internalRa228_Th228.root
 FR	SM	5	internal	Th232	Th228	GRND	9.63e-03	0.8	1.2	./root-join-read/build101/build101-internalTh228_GRND.root
 
-FR	SM	5	pmt		K40	K40	GRND	5.80e+01	0.5	2	./root-join-read/build101/build101-pmtK40_GRND.root
-FR	SM	5	pmt		U238	U238	Th230	2.50e+01	0.5	5	./root-join-read/build101/build101-pmtU238_Th230.root
-#FR	SM	5	pmt		U238	Th230	Ra226	2.50e+01	0.5	5	./root-join-read/build101/build101-pmtTh230_Ra226.root
-FR	SM	5	pmt		U238	Ra226	Rn222	6.00e+01	0.5	5	./root-join-read/build101/build101-pmtRa226_Rn222.root
-FR	SM	5	pmt		U238	Rn222	Pb210	2.50e+01	0.5	5	./root-join-read/build101/build101-pmtRn222_Pb210.root
-FR	SM	5	pmt		Th232	Ra228	Th228	1.20e+01	0.5	5	./root-join-read/build101/build101-pmtRa228_Th228.root
-FR	SM	5	pmt		Th232	Th228	GRND	3.80e+00	0.5	5	./root-join-read/build101/build101-pmtTh228_GRND.root
+FR	SM	5	pmt		K40	K40	GRND	5.80e+01	0.51	6.1	./root-join-read/build101/build101-pmtK40_GRND.root
+FR	SM	5	pmt		U238	U238	Th230	2.50e+01	0.51	6.1	./root-join-read/build101/build101-pmtU238_Th230.root
+#FR	SM	5	pmt		U238	Th230	Ra226	2.50e+01	0.51	6.1	./root-join-read/build101/build101-pmtTh230_Ra226.root
+FR	SM	5	pmt		U238	Ra226	Rn222	6.00e+01	0.51	6.1	./root-join-read/build101/build101-pmtRa226_Rn222.root
+FR	SM	5	pmt		U238	Rn222	Pb210	2.50e+01	0.51	6.1	./root-join-read/build101/build101-pmtRn222_Pb210.root
+FR	SM	5	pmt		Th232	Ra228	Th228	1.20e+01	0.51	6.1	./root-join-read/build101/build101-pmtRa228_Th228.root
+FR	SM	5	pmt		Th232	Th228	GRND	3.80e+00	0.51	6.1	./root-join-read/build101/build101-pmtTh228_GRND.root
 
 FR	SM	5	lsveto		K40	K40	GRND	1.20e+01	0.5	5	./root-join-read/build101/build101-lsvetoK40_GRND.root
 FR	SM	5	lsveto		U238	U238	Th230	9.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoU238_Th230.root
@@ -377,23 +389,25 @@ FR	SM	6	internal	Pb210	Pb210	GRND	1.52e+00	0.9	10	./root-join-read/build101/buil
 FR	SM	6	internal	Th232	Ra228	Th228	2.30e-03	0.8	1.2	./root-join-read/build101/build101-internalRa228_Th228.root
 FR	SM	6	internal	Th232	Th228	GRND	2.30e-03	0.8	1.2	./root-join-read/build101/build101-internalTh228_GRND.root
 
-FR	SM	6	pmt		K40	K40	GRND	5.80e+01	0.5	2	./root-join-read/build101/build101-pmtK40_GRND.root
-FR	SM	6	pmt		U238	U238	Th230	2.50e+01	0.5	5	./root-join-read/build101/build101-pmtU238_Th230.root
-#FR	SM	6	pmt		U238	Th230	Ra226	2.50e+01	0.5	5	./root-join-read/build101/build101-pmtTh230_Ra226.root
-FR	SM	6	pmt		U238	Ra226	Rn222	6.00e+01	0.5	5	./root-join-read/build101/build101-pmtRa226_Rn222.root
-FR	SM	6	pmt		U238	Rn222	Pb210	2.50e+01	0.5	5	./root-join-read/build101/build101-pmtRn222_Pb210.root
-FR	SM	6	pmt		Th232	Ra228	Th228	1.20e+01	0.5	5	./root-join-read/build101/build101-pmtRa228_Th228.root
-FR	SM	6	pmt		Th232	Th228	GRND	3.80e+00	0.5	5	./root-join-read/build101/build101-pmtTh228_GRND.root
+FR	SM	6	pmt		K40	K40	GRND	5.80e+01	0.51	6.1	./root-join-read/build101/build101-pmtK40_GRND.root
+FR	SM	6	pmt		U238	U238	Th230	2.50e+01	0.51	6.1	./root-join-read/build101/build101-pmtU238_Th230.root
+FR	SM	6	pmt		U238	Th230	Ra226	2.50e+01	0.51	6.1	./root-join-read/build101/build101-pmtTh230_Ra226.root
+FR	SM	6	pmt		U238	Ra226	Rn222	2.50e+01	0.51	6.1	./root-join-read/build101/build101-pmtRa226_Rn222.root
+FR	SM	6	pmt		U238	Rn222	Pb210	2.50e+01	0.51	6.1	./root-join-read/build101/build101-pmtRn222_Pb210.root
+FR	SM	6	pmt		U238	Pb210	GRND	2.50e+01	0.51	6.1	./root-join-read/build101/build101-pmtPb210_GRND.root
+FR	SM	6	pmt		Th232	Th232	Ra228	1.20e+01	0.51	6.1	./root-join-read/build101/build101-pmtTh232_Ra228.root
+FR	SM	6	pmt		Th232	Ra228	Th228	1.20e+01	0.51	6.1	./root-join-read/build101/build101-pmtRa228_Th228.root
+FR	SM	6	pmt		Th232	Th228	GRND	1.20e+01	0.51	2.9	./root-join-read/build101/build101-pmtTh228_GRND.root
 
-FR	SM	6	lsveto		K40	K40	GRND	1.20e+01	0.5	5	./root-join-read/build101/build101-lsvetoK40_GRND.root
-FR	SM	6	lsveto		U238	U238	Th230	9.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoU238_Th230.root
-FR	SM	6	lsveto		U238	Th230	Ra226	9.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoTh230_Ra226.root
-FR	SM	6	lsveto		U238	Ra226	Rn222	9.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoRa226_Rn222.root
-FR	SM	6	lsveto		U238	Rn222	Pb210	9.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoRn222_Pb210.root
-FR	SM	6	lsveto		U238	Pb210	GRND	9.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoPb210_GRND.root
-FR	SM	6	lsveto		Th232	Th232	Ra228	2.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoTh232_Ra228.root
-FR	SM	6	lsveto		Th232	Ra228	Th228	2.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoRa228_Th228.root
-FR	SM	6	lsveto		Th232	Th228	GRND	2.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoTh228_GRND.root
+FR	SM	6	lsveto		K40	K40	GRND	7.00e+00	0.1	10	./root-join-read/build101/build101-lsvetoK40_GRND.root
+FR	SM	6	lsveto		U238	U238	Th230	2.70e+00	0.1	10	./root-join-read/build101/build101-lsvetoU238_Th230.root
+FR	SM	6	lsveto		U238	Th230	Ra226	2.70e+00	0.1	10	./root-join-read/build101/build101-lsvetoTh230_Ra226.root
+FR	SM	6	lsveto		U238	Ra226	Rn222	2.70e+00	0.1	10	./root-join-read/build101/build101-lsvetoRa226_Rn222.root
+FR	SM	6	lsveto		U238	Rn222	Pb210	2.70e+00	0.1	10	./root-join-read/build101/build101-lsvetoRn222_Pb210.root
+FR	SM	6	lsveto		U238	Pb210	GRND	2.70e+00	0.1	10	./root-join-read/build101/build101-lsvetoPb210_GRND.root
+FR	SM	6	lsveto		Th232	Th232	Ra228	3.30e+00	0.1	10	./root-join-read/build101/build101-lsvetoTh232_Ra228.root
+FR	SM	6	lsveto		Th232	Ra228	Th228	3.30e+00	0.1	10	./root-join-read/build101/build101-lsvetoRa228_Th228.root
+FR	SM	6	lsveto		Th232	Th228	GRND	3.30e+00	0.1	10	./root-join-read/build101/build101-lsvetoTh228_GRND.root
 
 FR	SM	6	innersteel	Th232	Th228	GRND	3.80e+01	0.1	10	./root-join-read/build101/build101-innersteelTh228_GRND.root
 FR	SM	6	innersteel	U238	U238	Th230	6.50e+01	0.1	10	./root-join-read/build101/build101-innersteelU238_Th230.root
@@ -426,23 +440,25 @@ FR	SM	7	internal	Pb210	Pb210	GRND	1.54e+00	0.9	10	./root-join-read/build101/buil
 FR	SM	7	internal	Th232	Ra228	Th228	2.30e-03	0.8	1.2	./root-join-read/build101/build101-internalRa228_Th228.root
 FR	SM	7	internal	Th232	Th228	GRND	2.30e-03	0.8	1.2	./root-join-read/build101/build101-internalTh228_GRND.root
 
-FR	SM	7	pmt		K40	K40	GRND	5.80e+01	0.5	2	./root-join-read/build101/build101-pmtK40_GRND.root
-FR	SM	7	pmt		U238	U238	Th230	2.50e+01	0.5	5	./root-join-read/build101/build101-pmtU238_Th230.root
-#FR	SM	7	pmt		U238	Th230	Ra226	2.50e+01	0.5	5	./root-join-read/build101/build101-pmtTh230_Ra226.root
-FR	SM	7	pmt		U238	Ra226	Rn222	6.00e+01	0.5	5	./root-join-read/build101/build101-pmtRa226_Rn222.root
-FR	SM	7	pmt		U238	Rn222	Pb210	2.50e+01	0.5	5	./root-join-read/build101/build101-pmtRn222_Pb210.root
-FR	SM	7	pmt		Th232	Ra228	Th228	1.20e+01	0.5	5	./root-join-read/build101/build101-pmtRa228_Th228.root
-FR	SM	7	pmt		Th232	Th228	GRND	3.80e+00	0.5	5	./root-join-read/build101/build101-pmtTh228_GRND.root
+FR	SM	7	pmt		K40	K40	GRND	5.80e+01	0.51	6.1	./root-join-read/build101/build101-pmtK40_GRND.root
+FR	SM	7	pmt		U238	U238	Th230	2.50e+01	0.51	6.1	./root-join-read/build101/build101-pmtU238_Th230.root
+FR	SM	7	pmt		U238	Th230	Ra226	2.50e+01	0.51	6.1	./root-join-read/build101/build101-pmtTh230_Ra226.root
+FR	SM	7	pmt		U238	Ra226	Rn222	2.50e+01	0.51	6.1	./root-join-read/build101/build101-pmtRa226_Rn222.root
+FR	SM	7	pmt		U238	Rn222	Pb210	2.50e+01	0.51	6.1	./root-join-read/build101/build101-pmtRn222_Pb210.root
+FR	SM	7	pmt		U238	Pb210	GRND	2.50e+01	0.51	6.1	./root-join-read/build101/build101-pmtPb210_GRND.root
+FR	SM	7	pmt		Th232	Th232	Ra228	1.20e+01	0.51	6.1	./root-join-read/build101/build101-pmtTh232_Ra228.root
+FR	SM	7	pmt		Th232	Ra228	Th228	1.20e+01	0.51	6.1	./root-join-read/build101/build101-pmtRa228_Th228.root
+FR	SM	7	pmt		Th232	Th228	GRND	1.20e+01	0.51	2.9	./root-join-read/build101/build101-pmtTh228_GRND.root
 
-FR	SM	7	lsveto		K40	K40	GRND	1.20e+01	0.5	5	./root-join-read/build101/build101-lsvetoK40_GRND.root
-FR	SM	7	lsveto		U238	U238	Th230	9.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoU238_Th230.root
-FR	SM	7	lsveto		U238	Th230	Ra226	9.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoTh230_Ra226.root
-FR	SM	7	lsveto		U238	Ra226	Rn222	9.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoRa226_Rn222.root
-FR	SM	7	lsveto		U238	Rn222	Pb210	9.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoRn222_Pb210.root
-FR	SM	7	lsveto		U238	Pb210	GRND	9.00e-02	0.1	1e4	./root-join-read/build101/build101-lsvetoPb210_GRND.root
-FR	SM	7	lsveto		Th232	Th232	Ra228	2.00e-02	0.1	1e4	./root-join-read/build101/build101-lsvetoTh232_Ra228.root
-FR	SM	7	lsveto		Th232	Ra228	Th228	2.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoRa228_Th228.root
-FR	SM	7	lsveto		Th232	Th228	GRND	2.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoTh228_GRND.root
+FR	SM	7	lsveto		K40	K40	GRND	7.00e+00	0.1	10	./root-join-read/build101/build101-lsvetoK40_GRND.root
+FR	SM	7	lsveto		U238	U238	Th230	2.70e+00	0.1	10	./root-join-read/build101/build101-lsvetoU238_Th230.root
+FR	SM	7	lsveto		U238	Th230	Ra226	2.70e+00	0.1	10	./root-join-read/build101/build101-lsvetoTh230_Ra226.root
+FR	SM	7	lsveto		U238	Ra226	Rn222	2.70e+00	0.1	10	./root-join-read/build101/build101-lsvetoRa226_Rn222.root
+FR	SM	7	lsveto		U238	Rn222	Pb210	2.70e+00	0.1	10	./root-join-read/build101/build101-lsvetoRn222_Pb210.root
+FR	SM	7	lsveto		U238	Pb210	GRND	2.70e+00	0.1	10	./root-join-read/build101/build101-lsvetoPb210_GRND.root
+FR	SM	7	lsveto		Th232	Th232	Ra228	3.30e+00	0.1	10	./root-join-read/build101/build101-lsvetoTh232_Ra228.root
+FR	SM	7	lsveto		Th232	Ra228	Th228	3.30e+00	0.1	10	./root-join-read/build101/build101-lsvetoRa228_Th228.root
+FR	SM	7	lsveto		Th232	Th228	GRND	3.30e+00	0.1	10	./root-join-read/build101/build101-lsvetoTh228_GRND.root
 
 FR	SM	7	innersteel	Th232	Th228	GRND	3.80e+01	0.1	10	./root-join-read/build101/build101-innersteelTh228_GRND.root
 FR	SM	7	innersteel	U238	U238	Th230	6.50e+01	0.1	10	./root-join-read/build101/build101-innersteelU238_Th230.root
@@ -475,13 +491,13 @@ FR	SM	8	internal	Pb210	Pb210	GRND	2.05e+00	0.9	2	./root-join-read/build101/build
 FR	SM	8	internal	Th232	Ra228	Th228	5.74e-03	0.8	1.2	./root-join-read/build101/build101-internalRa228_Th228.root
 FR	SM	8	internal	Th232	Th228	GRND	5.74e-03	0.8	1.2	./root-join-read/build101/build101-internalTh228_GRND.root
 
-FR	SM	8	pmt		K40	K40	GRND	5.80e+01	0.5	2	./root-join-read/build101/build101-pmtK40_GRND.root
-FR	SM	8	pmt		U238	U238	Th230	2.50e+01	0.5	5	./root-join-read/build101/build101-pmtU238_Th230.root
-#FR	SM	8	pmt		U238	Th230	Ra226	2.50e+01	0.5	5	./root-join-read/build101/build101-pmtTh230_Ra226.root
-FR	SM	8	pmt		U238	Ra226	Rn222	6.00e+01	0.5	5	./root-join-read/build101/build101-pmtRa226_Rn222.root
-FR	SM	8	pmt		U238	Rn222	Pb210	2.50e+01	0.5	5	./root-join-read/build101/build101-pmtRn222_Pb210.root
-FR	SM	8	pmt		Th232	Ra228	Th228	1.20e+01	0.5	5	./root-join-read/build101/build101-pmtRa228_Th228.root
-FR	SM	8	pmt		Th232	Th228	GRND	3.80e+00	0.5	5	./root-join-read/build101/build101-pmtTh228_GRND.root
+FR	SM	8	pmt		K40	K40	GRND	5.80e+01	0.51	6.1	./root-join-read/build101/build101-pmtK40_GRND.root
+FR	SM	8	pmt		U238	U238	Th230	2.50e+01	0.51	6.1	./root-join-read/build101/build101-pmtU238_Th230.root
+#FR	SM	8	pmt		U238	Th230	Ra226	2.50e+01	0.51	6.1	./root-join-read/build101/build101-pmtTh230_Ra226.root
+FR	SM	8	pmt		U238	Ra226	Rn222	6.00e+01	0.51	6.1	./root-join-read/build101/build101-pmtRa226_Rn222.root
+FR	SM	8	pmt		U238	Rn222	Pb210	2.50e+01	0.51	6.1	./root-join-read/build101/build101-pmtRn222_Pb210.root
+FR	SM	8	pmt		Th232	Ra228	Th228	1.20e+01	0.51	6.1	./root-join-read/build101/build101-pmtRa228_Th228.root
+FR	SM	8	pmt		Th232	Th228	GRND	3.80e+00	0.51	6.1	./root-join-read/build101/build101-pmtTh228_GRND.root
 
 FR	SM	8	lsveto		K40	K40	GRND	1.20e+01	0.5	5	./root-join-read/build101/build101-lsvetoK40_GRND.root
 FR	SM	8	lsveto		U238	U238	Th230	9.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoU238_Th230.root
@@ -536,23 +552,25 @@ BR	SM	9	internal	Th232	Ra228	Th228	1.84e-03	0.1	10	./root-join-read/build101/bui
 BR	SM	9	internal	Th232	Th228	GRND	2.76e-03	0.1	10	./root-join-read/build101/build101-internalTh228_GRND.root
 
 ### use default values and bounds
-FR	SM	9	pmt		K40	K40	GRND	5.80e+01	0.5	2	./root-join-read/build101/build101-pmtK40_GRND.root
-FR	SM	9	pmt		U238	U238	Th230	2.50e+01	0.5	5	./root-join-read/build101/build101-pmtU238_Th230.root
-#FR	SM	9	pmt		U238	Th230	Ra226	2.50e+01	0.5	5	./root-join-read/build101/build101-pmtTh230_Ra226.root
-FR	SM	9	pmt		U238	Ra226	Rn222	6.00e+01	0.5	5	./root-join-read/build101/build101-pmtRa226_Rn222.root
-FR	SM	9	pmt		U238	Rn222	Pb210	2.50e+01	0.5	5	./root-join-read/build101/build101-pmtRn222_Pb210.root
-FR	SM	9	pmt		Th232	Ra228	Th228	1.20e+01	0.5	5	./root-join-read/build101/build101-pmtRa228_Th228.root
-FR	SM	9	pmt		Th232	Th228	GRND	3.80e+00	0.5	5	./root-join-read/build101/build101-pmtTh228_GRND.root
+FR	SM	9	pmt		K40	K40	GRND	5.80e+01	0.51	6.1	./root-join-read/build101/build101-pmtK40_GRND.root
+FR	SM	9	pmt		U238	U238	Th230	2.50e+01	0.51	6.1	./root-join-read/build101/build101-pmtU238_Th230.root
+FR	SM	9	pmt		U238	Th230	Ra226	2.50e+01	0.51	6.1	./root-join-read/build101/build101-pmtTh230_Ra226.root
+FR	SM	9	pmt		U238	Ra226	Rn222	2.50e+01	0.51	6.1	./root-join-read/build101/build101-pmtRa226_Rn222.root
+FR	SM	9	pmt		U238	Rn222	Pb210	2.50e+01	0.51	6.1	./root-join-read/build101/build101-pmtRn222_Pb210.root
+FR	SM	9	pmt		U238	Pb210	GRND	2.50e+01	0.51	6.1	./root-join-read/build101/build101-pmtPb210_GRND.root
+FR	SM	9	pmt		Th232	Th232	Ra228	1.20e+01	0.51	6.1	./root-join-read/build101/build101-pmtTh232_Ra228.root
+FR	SM	9	pmt		Th232	Ra228	Th228	1.20e+01	0.51	6.1	./root-join-read/build101/build101-pmtRa228_Th228.root
+FR	SM	9	pmt		Th232	Th228	GRND	1.20e+01	0.51	2.9	./root-join-read/build101/build101-pmtTh228_GRND.root
 
-FR	SM	9	lsveto		K40	K40	GRND	1.20e+01	0.5	5	./root-join-read/build101/build101-lsvetoK40_GRND.root
-FR	SM	9	lsveto		U238	U238	Th230	9.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoU238_Th230.root
-FR	SM	9	lsveto		U238	Th230	Ra226	9.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoTh230_Ra226.root
-FR	SM	9	lsveto		U238	Ra226	Rn222	9.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoRa226_Rn222.root
-FR	SM	9	lsveto		U238	Rn222	Pb210	9.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoRn222_Pb210.root
-FR	SM	9	lsveto		U238	Pb210	GRND	9.00e-02	0.1	1e4	./root-join-read/build101/build101-lsvetoPb210_GRND.root
-FR	SM	9	lsveto		Th232	Th232	Ra228	2.00e-02	0.1	1e4	./root-join-read/build101/build101-lsvetoTh232_Ra228.root
-FR	SM	9	lsveto		Th232	Ra228	Th228	2.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoRa228_Th228.root
-FR	SM	9	lsveto		Th232	Th228	GRND	2.00e-02	0.1	100	./root-join-read/build101/build101-lsvetoTh228_GRND.root
+FR	SM	9	lsveto		K40	K40	GRND	7.00e+00	0.1	10	./root-join-read/build101/build101-lsvetoK40_GRND.root
+FR	SM	9	lsveto		U238	U238	Th230	2.70e+00	0.1	10	./root-join-read/build101/build101-lsvetoU238_Th230.root
+FR	SM	9	lsveto		U238	Th230	Ra226	2.70e+00	0.1	10	./root-join-read/build101/build101-lsvetoTh230_Ra226.root
+FR	SM	9	lsveto		U238	Ra226	Rn222	2.70e+00	0.1	10	./root-join-read/build101/build101-lsvetoRa226_Rn222.root
+FR	SM	9	lsveto		U238	Rn222	Pb210	2.70e+00	0.1	10	./root-join-read/build101/build101-lsvetoRn222_Pb210.root
+FR	SM	9	lsveto		U238	Pb210	GRND	2.70e+00	0.1	10	./root-join-read/build101/build101-lsvetoPb210_GRND.root
+FR	SM	9	lsveto		Th232	Th232	Ra228	3.30e+00	0.1	10	./root-join-read/build101/build101-lsvetoTh232_Ra228.root
+FR	SM	9	lsveto		Th232	Ra228	Th228	3.30e+00	0.1	10	./root-join-read/build101/build101-lsvetoRa228_Th228.root
+FR	SM	9	lsveto		Th232	Th228	GRND	3.30e+00	0.1	10	./root-join-read/build101/build101-lsvetoTh228_GRND.root
 
 ### from fit to just c9
 FR	SM	9	innersteel	Th232	Th228	GRND	3.80e+01	0.1	10	./root-join-read/build101/build101-innersteelTh228_GRND.root

@@ -4,10 +4,11 @@
 # 
 # Adding LS-veto functionality!
 # 
-# version: 2018-10-12
+# version: 2018-12-10
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# + add plastic to the bkg and sig scaling
 # ~ fix scalings for lsveto, steel, pmts in the lsveto
 # ~ include all pmts for x9 in combineOthers100()
 # ~ change the lsveto energy cut to use resolution smearing
@@ -567,7 +568,10 @@ def calib100(i, E):
     
     if i == 8:
         edep = '(BLSVeto.Charge)'
-        selection = '(BLSVeto.Charge/143.8)'
+        selection = '(BLSVeto.Charge / 143.8)'
+        # try shifting this a little bit...
+        #selection = '(BLSVeto.Charge / 130.0)'
+        
         return edep, selection
     
     hiE = [[1.0,  -6],
@@ -948,7 +952,9 @@ def scaleBkgs100(bkgs, runtime=0):
         pmts       = 2.
         extpmts    = 14.
         xkgs       = cmass(x-1)
-        lskg       = 1800.
+        plastic    = 1800. # set same as lsveto for comparison
+        lsveto     = 1800.
+        air        = 1.
         steel      = 1600.
         innersteel = 4000.
         generated  = float(bkgs[key]['generated'])
@@ -974,11 +980,13 @@ def scaleBkgs100(bkgs, runtime=0):
         elif loca == 'extpmt':
             scale = bkgs[key]['info']['acti'] * (extpmts) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
         elif loca == 'lsveto':
-            scale = bkgs[key]['info']['acti'] * (lskg) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
+            scale = bkgs[key]['info']['acti'] * (lsveto) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
+        elif loca == 'plastic':
+            scale = bkgs[key]['info']['acti'] * (plastic) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
         elif loca == 'lsvetoair':
-            scale = bkgs[key]['info']['acti'] * (surf) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
+            scale = bkgs[key]['info']['acti'] * (air) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
         elif loca == 'airshield':
-            scale = bkgs[key]['info']['acti'] * (surf) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
+            scale = bkgs[key]['info']['acti'] * (air) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
         elif loca == 'steel':
             scale = bkgs[key]['info']['acti'] * (steel) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
         elif loca == 'innersteel':
@@ -1031,7 +1039,9 @@ def scaleSigs100(sigkeys, sigs, runtime=0):
         pmts       = 2.
         extpmts    = 14.
         xkgs       = cmass(x-1)
-        lskg       = 1800.
+        plastic    = 1800. # set same as lsveto for comparison
+        lsveto     = 1800.
+        air        = 1.
         steel      = 1600.
         innersteel = 4000.
         generated  = float(sigs[key]['generated'])
@@ -1057,11 +1067,13 @@ def scaleSigs100(sigkeys, sigs, runtime=0):
         elif loca == 'extpmt':
             fitActivity = sigs[key]['fitscale'] * (1./extpmts) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
         elif loca == 'lsveto':
-            fitActivity = sigs[key]['fitscale'] * (1./lskg) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
+            fitActivity = sigs[key]['fitscale'] * (1./lsveto) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
+        elif loca == 'plastic':
+            fitActivity = sigs[key]['fitscale'] * (1./plastic) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
         elif loca == 'lsvetoair':
-            fitActivity = sigs[key]['fitscale'] * (1./surf) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
+            fitActivity = sigs[key]['fitscale'] * (1./air) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
         elif loca == 'airshield':
-            fitActivity = sigs[key]['fitscale'] * (1./surf) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
+            fitActivity = sigs[key]['fitscale'] * (1./air) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
         elif loca == 'steel':
             fitActivity = sigs[key]['fitscale'] * (1./steel) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
         elif loca == 'innersteel':

@@ -6,10 +6,11 @@
 # 
 # Works with v93 and later versions
 # 
-# version: 2018-10-23
+# version: 2018-12-11
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# + add I129 to groupNum93()
 # - do not init THF1 in makePlots93()
 # + add steel to makePlots93() exceptions
 # ~ tweaked makePlots93()
@@ -796,7 +797,12 @@ def groupNum93(info):
     # 31: K40
 
     
-    if info['chst'] in ['Te121m','Te123m','Te125m','Te127m','I125','Cd109','Na22','H3','Co60','Sn113']:
+    if info['chst'] in ['Te121',  'Te121m',
+                        'Te123m', 'Te125m', 'Te127m',
+                        'I125',   'I126',   'I129',
+                        'Na22',   'H3',
+                        'Cd109',  'Sn113',
+                        'Co60' ]:
         return TCut('(groupNo == 0)')
     
     if info['chst'] == 'K40':
@@ -1167,10 +1173,12 @@ def scaleData70(data, dru=0):
         print 'DEBUG: mass in kg =', xkgs
         print 'DEBUG: keV/bin =', keVperBin
         print 'DEBUG: total events =', data[key]['hist'].GetEntries()
+        print ''
         """
         scale = float(1./(days*xkgs*keVperBin))
         data[key]['hist'].Scale(scale)
         data[key]['druScale'] = scale
+
     return data
 
 

@@ -3,13 +3,13 @@
 ######################################################################
 # Matt Kauer - mkauer@physics.wisc.edu
 ######################################################################
-# 200-refactor.py
+# 201-global-bkgs.py
 
-V = 'v200'
+V = 'v201'
 
-# Refactoring / testing using separate bounds for each crystal
+# Add global MC that are backgrounds and not signals - deep bug fix
 # 
-# version: 2018-11-15
+# version: 2018-12-10
 # 
 # see CHANGELOG for changes
 ######################################################################
@@ -42,10 +42,13 @@ debug = 0
 ### ==========  GENERAL INPUTS  ======================================
 ### note to add to saved plot names?
 note = 0
-#note = ''
+#note = 'calib-130'
 
-#mcfile = 'backgrounds_101.1.txt'
-mcfile = 'backgrounds_200.txt'
+#mcfile = 'backgrounds_200.txt'
+#mcfile = 'backgrounds_201.txt'
+mcfile = 'backgrounds_202.txt'
+
+#mcfile = 'lsveto-testing.txt'
 
 print 'INFO: using backgrounds config file -->', mcfile
 
@@ -67,7 +70,7 @@ for i in range(numx):
     ### format = [rebin, xmin, xmax]
     fitranges[i]['S0'] = [3,  6,   76]  # single-hit low-energy
     fitranges[i]['S1'] = [4, 70, 2770]  # single-hit high-energy
-    fitranges[i]['M0'] = [3,  2,   70]  # multi-hit low-energy
+    fitranges[i]['M0'] = [3,  2,   72]  # multi-hit low-energy
     fitranges[i]['M1'] = [4, 70, 2770]  # multi-hit high-energy
     ### separate range for lsveto
     if i == 8:
@@ -75,13 +78,23 @@ for i in range(numx):
         fitranges[i]['S1'] = [0,0,0]
         fitranges[i]['M0'] = [0,0,0]
         fitranges[i]['M1'] = [4, 300, 2700]
-        
+
+"""
+# v101 fit ranges for comparison with c9 fit range
+for i in range(numx):
+    ### format = [rebin, xmin, xmax]
+    fitranges[i]['S0'] = [3,   6,   76]
+    fitranges[i]['S1'] = [4, 300, 3300]
+    fitranges[i]['M0'] = [3,   6,   76]
+    fitranges[i]['M1'] = [4, 300, 3300]
+"""
 
 ### ==========  EXTRA MC OPTIONS  ====================================
 ### which MC to fit globally (to all crystals simultaneously)?
 globalmc = []
-#globalmc = ['lsveto', 'pmt', 'innersteel']
-globalmc = ['lsveto', 'pmt', 'innersteel', 'steel']
+globalmc = ['pmt', 'plastic', 'lsveto', 'innersteel', 'steel']
+#globalmc = ['pmt', 'plastic', 'lsveto', 'innersteel', 'steel', 'copper']
+
 
 ### include bkgs from 'other' pmts and internals?
 others  = 1
@@ -137,8 +150,10 @@ pltchans = 'SM'
 ### plotting ranges
 loer = [0, 100]
 hier = [0, 3000]
-
 eran = [loer, hier]
+
+### special energy range for lsveto
+lsHiE = 3500
 
 ### rebin the final plots [1,inf]
 loEplotRebin = 3
@@ -305,7 +320,7 @@ def main(argv):
         for txt in globalmc:
             globstr += txt+'-'
         globstr = globstr[:-1]
-    print 'INFO: global fits to -->',globstr
+    print 'INFO: global fits to -->', globstr
     
     ### Number of colors
     Nc = len(uniqAll)
@@ -326,6 +341,7 @@ def main(argv):
            'internal': kBlue,
            'pmts':     kGreen+1,
            'copper':   kYellow+1,
+           'plastic':  kOrange+2,
            'none':     kRed-1}
 
     ### legend length = MC + data + total
@@ -349,13 +365,20 @@ def main(argv):
     fitting = 0
     
     if len(sigs) > 0:
-        fitting=1
+        
+        print 'INFO: building histograms for fit...'
+
+        fitting = 1
         
         fitsigs = {}
         fitbkgs = {}
-        
-        fitglob = {}
-        fglobkeys = []
+
+        ### have separate global signals and backgrounds
+        ### 2018-11-15
+        fitglobsigs = {}
+        fglobsigkeys = []
+        fitglobbkgs = {}
+        fglobbkgkeys = []
 
         fitdata = TH1F('globData', 'globData', 1, 0, 1)
         
@@ -393,21 +416,21 @@ def main(argv):
         ### now build the fitsigs and fitbkgs histograms
         for i in range(numx):
             for nc, C in enumerate(fitchans):
-
+                
                 # signals
                 #---------------------------------------------------------------
                 for skey in sigkeys:
                     
-                    ### init histograms for global MC (pmt, lsveto, steel, etc.)
+                    ### init histograms for global signals (pmt, lsveto, steel, etc.)
                     for gmckey in globalmc:
                         if gmckey in skey:
                             bits = skey.split('-')
                             fgkey = bits[1]+'-'+bits[2]
-                            if fgkey not in fglobkeys:
-                                fglobkeys.append(fgkey)
-                                fitglob[fgkey] = {}
+                            if fgkey not in fglobsigkeys:
+                                fglobsigkeys.append(fgkey)
+                                fitglobsigs[fgkey] = {}
                                 fglob = TH1F(fgkey, fgkey, fitbins, 0, fitbins)
-                                fitglob[fgkey]['hist'] = fglob
+                                fitglobsigs[fgkey]['hist'] = fglob
                     
                     # pad out the blank extra crystals
                     if i+1 in justthese and 'x'+str(i+1) not in skey:
@@ -440,7 +463,18 @@ def main(argv):
                 # backgrounds
                 #---------------------------------------------------------------
                 for bkey in bakkeys:
-
+                    
+                    ### init histograms for global backgrounds (pmt, lsveto, steel, etc.)
+                    for gmckey in globalmc:
+                        if gmckey in bkey:
+                            bits = bkey.split('-')
+                            fgbkey = bits[1]+'-'+bits[2]
+                            if fgbkey not in fglobbkgkeys:
+                                fglobbkgkeys.append(fgbkey)
+                                fitglobbkgs[fgbkey] = {}
+                                fglob = TH1F(fgbkey, fgbkey, fitbins, 0, fitbins)
+                                fitglobbkgs[fgbkey]['hist'] = fglob
+                    
                     # pad out the blank extra crystals
                     if i+1 in justthese and 'x'+str(i+1) not in bkey:
                         if '-c'+C in bkey and '-e0' in bkey:
@@ -466,33 +500,19 @@ def main(argv):
                         fitbkgs = addHistKey(fitbkgs, fbkey)
                         fitbkgs[fbkey]['hist'] = extendHist(fitbkgs[fbkey]['hist'],
                                                 fitPrep(bkgs, bkey, fitranges[i][C+'1']))
-                
+            
 
-            ### subtract fixed MC from data
-            #-------------------------------------------------------------------
-            for key in fitbkgs:
-                if 'x'+str(i+1) in key:
-                    if fitdata.GetNbinsX() != fitbkgs[key]['hist'].GetNbinsX():
-                        print '-1-', fitdata.GetNbinsX(), fitbkgs[key]['hist'].GetNbinsX(), key
-                    fitdata.Add(fitbkgs[key]['hist'], -1)
-            #-------------------------------------------------------------------
-
+        ### ====================================================================
+        ###     DEAL WITH THE GLOBAL SIGNALS AND BACKGROUNDS
+        ### ====================================================================
         
-        ### sort all the fbakkeys
-        delete=[]
-        fbakkeys=[]
-        for fbkey in fitbkgs:
-            if fitbkgs[fbkey]['hist'].Integral() > 0:
-                fbakkeys.append(fbkey)
-            else: delete.append(fbkey)
-        for key in delete:
-            if debug: print 'DEBUG: zero events so deleting bkg key', key
-            del fitbkgs[key]
-        fbakkeys.sort()
-
-        ### sort all the fsigkeys
-        delete=[]
-        fsigkeys=[]
+        ### --------------------------------------------------------------------
+        ###         GLOBAL SIGNALS 
+        ### --------------------------------------------------------------------
+        
+        # (1) delete/sort the fsigkeys
+        delete = []
+        fsigkeys = []
         for fskey in fitsigs:
             if fitsigs[fskey]['hist'].Integral() > 0:
                 fsigkeys.append(fskey)
@@ -502,41 +522,101 @@ def main(argv):
             del fitsigs[key]
         fsigkeys.sort()
 
-        ### sort all the fglobkeys
-        fglobkeys.sort()
-        
-        ### build global sigs
+        # (2) sort the global sig keys
+        fglobsigkeys.sort()
+
+        # (3) build global sigs
         for fskey in fsigkeys:
-            for fgkey in fglobkeys:
-                if fgkey in fskey:
-                    #print 'INFO: adding',fskey,'to',fgkey
-                    #print '-2-', fitglob[fgkey]['hist'].GetNbinsX(), fitsigs[fskey]['hist'].GetNbinsX(), fskey
-                    fitglob[fgkey]['hist'].Add(fitsigs[fskey]['hist'])
+            for fgskey in fglobsigkeys:
+                if fgskey in fskey:
+                    fitglobsigs[fgskey]['hist'].Add(fitsigs[fskey]['hist'])
         
-        ### remove global sigs from fit sigs
+        # (4) remove global sigs from fit sigs
         L = len(fsigkeys)-1
         for k, fskey in enumerate(reversed(fsigkeys)):
             for gmckey in globalmc:
                 ### make gmckey unique (steel vs innersteel) 2018-10-23
                 gmckey = '-'+gmckey+'-'
-                #if debug: print 'DEBUG: is',gmckey,'in',fskey
-                #if 'lsveto' in fskey or 'pmt' in fskey:
                 if gmckey in fskey:
-                    if debug: print 'DEBUG: remove global key from sigs', fsigkeys[L-k]
+                    if debug: print 'DEBUG: remove global key from fit sigs', fsigkeys[L-k]
                     del fsigkeys[L-k]
 
-        ### now delete the empty histos
-        delete=[]
-        fglobkeys=[]
-        for fgkey in fitglob:
-            if fitglob[fgkey]['hist'].Integral() > 0:
-                fglobkeys.append(fgkey)
-            else: delete.append(fgkey)
+        # (5) now delete the empty sig histos
+        delete = []
+        fglobsigkeys = []
+        for fgskey in fitglobsigs:
+            if fitglobsigs[fgskey]['hist'].Integral() > 0:
+                fglobsigkeys.append(fgskey)
+            else: delete.append(fgskey)
         for key in delete:
-            if debug: print 'DEBUG: zero events so deleting global key', key
-            del fitglob[key]
-        fglobkeys.sort()
+            if debug: print 'DEBUG: zero events so deleting global sigs key', key
+            del fitglobsigs[key]
+        fglobsigkeys.sort()
 
+        ### --------------------------------------------------------------------
+        ###         GLOBAL BACKGROUNDS
+        ### --------------------------------------------------------------------
+        
+        # (1) delete/sort the fbakkeys
+        delete = []
+        fbkgkeys = []
+        for fbkey in fitbkgs:
+            if fitbkgs[fbkey]['hist'].Integral() > 0:
+                fbkgkeys.append(fbkey)
+            else: delete.append(fbkey)
+        for key in delete:
+            if debug: print 'DEBUG: zero events so deleting bkg key', key
+            del fitbkgs[key]
+        fbkgkeys.sort()
+
+        # (2) sort the global bkg keys
+        fglobbkgkeys.sort()
+        
+        # (3) build global bkgs
+        for fbkey in fbkgkeys:
+            for fgbkey in fglobbkgkeys:
+                if fgbkey in fbkey:
+                    fitglobbkgs[fgbkey]['hist'].Add(fitbkgs[fbkey]['hist'])
+        
+        # (4) remove global bkgs from fit bkgs
+        L = len(fbkgkeys)-1
+        for k, fbkey in enumerate(reversed(fbkgkeys)):
+            for gmckey in globalmc:
+                ### make gmckey unique (steel vs innersteel) 2018-10-23
+                gmckey = '-'+gmckey+'-'
+                if gmckey in fbkey:
+                    if debug: print 'DEBUG: remove global key from fit bkgs', fbkgkeys[L-k]
+                    del fbkgkeys[L-k]
+
+        # (5) now delete the empty bkg histos
+        delete = []
+        fglobbkgkeys = []
+        for fgbkey in fitglobbkgs:
+            if fitglobbkgs[fgbkey]['hist'].Integral() > 0:
+                fglobbkgkeys.append(fgbkey)
+            else: delete.append(fgbkey)
+        for key in delete:
+            if debug: print 'DEBUG: zero events so deleting global bkgs key', key
+            del fitglobbkgs[key]
+        fglobbkgkeys.sort()
+
+        ### --------------------------------------------------------------------
+        ###         SUBTRACT BACKGROUNDS FROM DATA
+        ### --------------------------------------------------------------------
+
+        # (1) subtract normal backgrounds
+        for key in fbkgkeys:
+            fitdata.Add(fitbkgs[key]['hist'], -1)
+
+        # (2) subtract global backgrounds
+        for key in fglobbkgkeys:
+            fitdata.Add(fitglobbkgs[key]['hist'], -1)
+        
+        ### ====================================================================
+        ###     DONE !!!
+        ### ====================================================================
+        
+        
         sigObj = []
         fit = []
         fitresults = {}
@@ -638,27 +718,29 @@ def main(argv):
             fitresults[str(i)].append('other pmts = '+str(others))
             #fitresults[str(i)].append('hist extend = '+str(extend))
             fitresults[str(i)].append('norm to dru = '+str(dru))
-            #fitresults[str(i)].append('lo-E fit range = '+str(fLoE[0])+' - '+str(fLoE[1])+' keV')
-            #fitresults[str(i)].append('lo-E fit binning = '+str(keVperBinLoE)+' keV/bin')
-            #fitresults[str(i)].append('hi-E fit range = '+str(fHiE[0])+' - '+str(fHiE[1])+' keV')
-            #fitresults[str(i)].append('hi-E fit binning = '+str(keVperBinHiE)+' keV/bin')
+            for key in ['S0', 'S1', 'M0', 'M1']:
+                fitresults[str(i)].append(key+' fit range = '\
+                                          +str(fitranges[i][key][1])\
+                                          +' - '\
+                                          +str(fitranges[i][key][2])\
+                                          +' keV')
 
         
         ### do the same to the global lsveto
         boundskeys = []
-        for fgkey in fglobkeys:
+        for fgkey in fglobsigkeys:
             
-            mc_int = fitglob[fgkey]['hist'].Integral()
+            mc_int = fitglobsigs[fgkey]['hist'].Integral()
             
             ### to weight or not to weight...
             if mcsumw2:
-                fitglob[fgkey]['hist'].Sumw2() # set stat weights
+                fitglobsigs[fgkey]['hist'].Sumw2() # set stat weights
             
             ### normalize MC to total data
             ### needed for TFractionFitter to work right
             ### still don't fully understand why
             try:
-                fitglob[fgkey]['hist'].Scale(dat_int/mc_int) # scale to data integral
+                fitglobsigs[fgkey]['hist'].Scale(dat_int/mc_int) # scale to data integral
             except:
                 print '\nERROR: No events for --> ',fgkey
                 print   '       Remove it from the fit!\n'
@@ -726,7 +808,7 @@ def main(argv):
             
             
             ### set errors to zero?
-            fitglob[fgkey]['hist'] = zeroBinError(fitglob[fgkey]['hist'])
+            fitglobsigs[fgkey]['hist'] = zeroBinError(fitglobsigs[fgkey]['hist'])
         
         
         ### conflict of interests going on here
@@ -739,15 +821,15 @@ def main(argv):
         #=========================================================
 
 
-        totalNumFits = len(fsigkeys)+len(fglobkeys)
+        totalNumFits = len(fsigkeys)+len(fglobsigkeys)
         print 'INFO: total number of hists being fit =', totalNumFits,'\n\n'
         sigObj = TObjArray(totalNumFits)
         
         for fskey in fsigkeys:
             sigObj.append(fitsigs[fskey]['hist'])
 
-        for fgkey in fglobkeys:
-            sigObj.append(fitglob[fgkey]['hist'])
+        for fgkey in fglobsigkeys:
+            sigObj.append(fitglobsigs[fgkey]['hist'])
         
         fit = TFractionFitter(fitdata, sigObj)
         
@@ -822,7 +904,7 @@ def main(argv):
                             
                                 
         ### do the same for the globals lsveto
-        for fgkey in fglobkeys:
+        for fgkey in fglobsigkeys:
 
             fscale = ROOT.Double(0.0)
             ferror = ROOT.Double(0.0)
@@ -830,7 +912,7 @@ def main(argv):
             fit.GetResult(count, fscale, ferror)
             count += 1
             
-            fitglob[fgkey]['hist'].Scale(fscale)
+            fitglobsigs[fgkey]['hist'].Scale(fscale)
             
             #newkey=0
             for i in range(numx):
@@ -913,7 +995,7 @@ def main(argv):
 
         ### do the same for the globals
         for i in range(numx):
-            for fgkey in fglobkeys:
+            for fgkey in fglobsigkeys:
                 X=str(i+1)
                 finit=1
                 for C in allchans:
@@ -1048,7 +1130,7 @@ def main(argv):
 
         sepfitdata = [0 for x in range(numx)]
         sepfitsigs = [0 for x in range(numx)]
-        sepfitglob = [0 for x in range(numx)]
+        sepfitglobsigs = [0 for x in range(numx)]
         
         #sepFitPlots = []
         
@@ -1131,23 +1213,23 @@ def main(argv):
                     #print '-3-', ftotal.GetNbinsX(), fitsigs[fskey]['hist'].GetNbinsX(), fskey
                     ftotal.Add(fitsigs[fskey]['hist'])
 
-            for fgkey in fglobkeys:
+            for fgkey in fglobsigkeys:
                 #if i==0:
                 Nfsigs+=1
                 
                 # find the unique name for color and set color
                 #cname = fskey.split('-')[1]+'-'+fskey.split('-')[2]
                 cname = fgkey
-                fitglob[fgkey]['hist'].SetMarkerColor(uniqColor[cname])
-                fitglob[fgkey]['hist'].SetLineColor(uniqColor[cname])
+                fitglobsigs[fgkey]['hist'].SetMarkerColor(uniqColor[cname])
+                fitglobsigs[fgkey]['hist'].SetLineColor(uniqColor[cname])
                 
                 ### draw the sigs
-                fitglob[fgkey]['hist'].Draw('same')
+                fitglobsigs[fgkey]['hist'].Draw('same')
 
                 if i==0:
                     ### add MC to total MC hist
-                    #print '-4-', ftotal.GetNbinsX(), fitglob[fgkey]['hist'].GetNbinsX(), fgkey
-                    ftotal.Add(fitglob[fgkey]['hist'])
+                    #print '-4-', ftotal.GetNbinsX(), fitglobsigs[fgkey]['hist'].GetNbinsX(), fgkey
+                    ftotal.Add(fitglobsigs[fgkey]['hist'])
                 
                 
             ### select the right range
@@ -1180,9 +1262,9 @@ def main(argv):
                     if name in fskey and 'x'+str(i+1) in fskey:
                         flegs[i].AddEntry(fitsigs[fskey]['hist'], fskey, lopt)
                 # and for globals
-                for fgkey in fglobkeys:
+                for fgkey in fglobsigkeys:
                     if name in fgkey:
-                        flegs[i].AddEntry(fitglob[fgkey]['hist'], fgkey, lopt)
+                        flegs[i].AddEntry(fitglobsigs[fgkey]['hist'], fgkey, lopt)
             
             ### get the chi2 of the total fit mc compared to data
             #-------------------------------------------------------------------
@@ -1377,22 +1459,22 @@ def main(argv):
             ### add MC to total MC hist
             #ftotal.Add(fitsigs[fskey]['hist'])
 
-        for fgkey in fglobkeys:
+        for fgkey in fglobsigkeys:
             #if i==0:
             Nfsigs+=1
 
             # find the unique name for color and set color
             #cname = fskey.split('-')[1]+'-'+fskey.split('-')[2]
             cname = fgkey
-            fitglob[fgkey]['hist'].SetMarkerColor(uniqColor[cname])
-            fitglob[fgkey]['hist'].SetLineColor(uniqColor[cname])
+            fitglobsigs[fgkey]['hist'].SetMarkerColor(uniqColor[cname])
+            fitglobsigs[fgkey]['hist'].SetLineColor(uniqColor[cname])
 
             ### draw the sigs
-            fitglob[fgkey]['hist'].Draw('same')
+            fitglobsigs[fgkey]['hist'].Draw('same')
 
             #if i==0:
                 ### add MC to total MC hist
-                #ftotal.Add(fitglob[fgkey]['hist'])
+                #ftotal.Add(fitglobsigs[fgkey]['hist'])
 
                 
         ### select the right range
@@ -1429,9 +1511,9 @@ def main(argv):
                 if name in fskey:
                     mleg.AddEntry(fitsigs[fskey]['hist'], fskey, lopt)
             # and for globals
-            for fgkey in fglobkeys:
+            for fgkey in fglobsigkeys:
                 if name in fgkey:
-                    mleg.AddEntry(fitglob[fgkey]['hist'], fgkey, lopt)
+                    mleg.AddEntry(fitglobsigs[fgkey]['hist'], fgkey, lopt)
 
         #ftotal.Draw('same')
 
@@ -1729,8 +1811,8 @@ def main(argv):
 
                         ### LSveto plotting
                         if E and i==8:
-                            data[dkey]['hist'].SetAxisRange(0, 3500, 'x')
-                            #data[dkey]['hist'].SetAxisRange(7e-6, 2e-1, 'y')
+                            data[dkey]['hist'].SetAxisRange(0, lsHiE, 'x')
+                            data[dkey]['hist'].SetAxisRange(1e-5, 0.5, 'y')
                                 
                         #popt = 'P E1'
                         #popt = 'HIST'
@@ -1953,7 +2035,7 @@ def main(argv):
 
                 ### LSveto plotting
                 if E and i==8:
-                    resid[C][E][i].SetAxisRange(0, 3500, 'x')
+                    resid[C][E][i].SetAxisRange(0, lsHiE, 'x')
                 
                 resid[C][E][i].SetAxisRange(0.1,10,'y')
                 
@@ -2006,7 +2088,7 @@ def main(argv):
                 # set my line to '1'
                 zero = TLine(eran[E][0], 1, eran[E][1], 1)
                 if E and i==8:
-                    zero = TLine(0, 1, 3500, 1)
+                    zero = TLine(0, 1, lsHiE, 1)
                 zeros[C][E].append(zero)
                 zeros[C][E][i].SetLineColor(kRed)
                 zeros[C][E][i].SetLineWidth(1)

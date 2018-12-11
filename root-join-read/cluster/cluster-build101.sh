@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# 2018-10-09
+# 2018-12-10
 
 # ~ use the medium queue
 # ~ regenerate everything!!!
@@ -25,7 +25,8 @@ joinscript=$base/$join
 #for mcfile in c9-dataset1
 #for mcfile in `ls $configdir | grep -i pb210_grnd`
 #for mcfile in `ls $configdir | grep -v dataset`
-for mcfile in `ls $configdir | grep -v innersteel | grep steel`
+#for mcfile in `ls $configdir | grep -v innersteel | grep steel`
+for mcfile in `ls $configdir | grep I129`
 do
     echo -e $mcfile
     file="$clustdir/$build-$mcfile.sh"

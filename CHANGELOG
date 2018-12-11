@@ -12,9 +12,37 @@
 # ====================================================================
 
 
+# 2018-12-11
+#---------------------------------------------------------------------
+# + generating reduced MC for I129
+# + add I129 to groupNum93()
+# + add I129 to setGroup()
+# + add I129 to background model
+
+
+# 2018-12-10
+#---------------------------------------------------------------------
+# + add new color for plastic group
+# + add plastic to setGroup()
+# + generating reduced MC for the plastic
+# + add plastic to globalMC in 201-global-bkgs.py
+# + add plastic to the backgrounds file
+# + add plastic to build101() exclude list
+# + add plastic to scaleBkgs100()
+# + add plastic to scaleSigs100()
+# + add plastic to buildMC101()
+
+
+# 2018-12-05
+#---------------------------------------------------------------------
+# ~ comparing my generated lsveto to estella's lsveto
+# ~ now have a working background model including innersteel! 
+
+
 # 2018-11-15
 #---------------------------------------------------------------------
-
+# + setting pmt K40 as a global background now works in 201-global-bkgs.py
+# + added more code to handle global backgrounds like PMT K40 for example
 # + using [0,0,0] in the fit params does ignore separate channels
 #   which is great for the lsveto!
 # - removed a lot of old outdated commented out code blocks

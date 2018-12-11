@@ -4,10 +4,12 @@
 # 
 # Remove LSveto low-energy from the histograms
 # 
-# version: 2018-11-06
+# version: 2018-12-10
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# + add plastic to build101() exclude list
+# + add plastic to buildMC101()
 # ~ move smoothXbins() to funcs_misc.py
 # + add smoothXbins() for testing - this works!
 # + add steel to the build101() exclude list
@@ -48,13 +50,13 @@ def build101(infile='backgrounds1010.txt', others=1, freuse=0, fchans=0, fxstals
             continue
         
         #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        # XXX : This isn't correct because internals, teflon,
-        #       copper, etc. scale by mass or surface area
-        #       But this is okay for now...
+        # These are mandatory excludes because they are always global
         exclude = bool('lsveto' in info['key']
-                       or 'innersteel' in info['key']
-                       or 'steel' in info['key'])
+                    or 'plastic' in info['key']
+                    or 'innersteel' in info['key']
+                    or 'steel' in info['key'])
+        #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        
         infos = []
         exception = 0
         if 'data' in info['key']:
@@ -272,7 +274,6 @@ def buildData101(info, data):
     return data, runtime
 
 
-
 def buildMC101(info, mc):
 
     base = baseDir()
@@ -354,25 +355,44 @@ def buildMC101(info, mc):
                 path2 = 'anal_lsvetofull-Teflon-surface_all-Pb210-*.root'
             if location == 'copper-case':
                 path1 = '/data/MC/COSINE/V3.1.1/reprocessed/'
-
+        
         ### many special cases for Pushpa's MC locations
         if (info['isof'] == 'Cd109' or info['isof'] == 'H3') and location == 'internal':
             path2 = '*'+info['isof']+'*.root'
+        
         if info['isof'] == 'Co60' and location == 'copper-case':
-            path2 = '*'+'CuCase-'+info['isof']+'*.root'
+            path2 = '*-CuCase-'+info['isof']+'*.root'
+        
         if info['isof'] == 'Co60' and location == 'copper':
             path1 = '/data/MC/COSINE/V3.1.1/reprocessed/Co60'
-            path2 = '*'+'Copper-'+info['isof']+'*.root'
+            path2 = '*-Copper-'+info['isof']+'*.root'
+        
         if info['isof'] == 'Sn113' and location == 'internal':
             path1 = '/data/MC/COSINE/V3.1.1/reprocessed'
-            path2 = '*'+'internal-'+info['isof']+'*.root'
+            path2 = '*-internal-'+info['isof']+'*.root'
         
+        if info['isof'] == 'I129' and location == 'internal':
+            path1 = '/data/COSINE/WORK/pushpa/sim/sim_data'
+            path2 = '*-internal-'+info['isof']+'*.root'
         
+        if location == 'plastic':
+            path1 = '/data/MC/COSINE/V3.1.1/reprocessed'
+            path2 = '*-Plasssupport-*'+info['isof']+'*.root'
+        
+
+        ### append the path if running locally 
         if not onCup():
             path1 = '/home/mkauer/COSINE/CUP/mc-fitting'+path1
         
-        #print 'INFO: looking for files with -->', os.path.join(path1, path2)
-
+        
+        ### quick hack to test my new lsveto MC
+        #if location == 'lsveto':
+        #    path1 = '/home/mkauer/COSINE/CUP/processed'
+        #    path2 = '*'+location+info['isof']+'*root'
+        
+        
+        print 'INFO: looking for files with -->', os.path.join(path1, path2)
+        
         pushpasMC = 0
         if location in pushpas: #or info['isof'] in ['Cd109', 'H3']:
             pushpasMC = 1
@@ -415,7 +435,15 @@ def buildMC101(info, mc):
                     if pushpasMC: energyCut = TCut('(edep[6]*1000. > 0.0)')
                     if info['xstl'] == 9:
                         #energyCut = TCut('(edepResol[8]*1000. > 0.0)')
-                        energyCut = TCut('((edepResol[8]*1000. > 0.0) && (edep[0]*1e3 > 0.1 || edep[1]*1e3 > 0.1 || edep[2]*1e3 > 0.1 || edep[3]*1e3 > 0.1 || edep[4]*1e3 > 0.1 || edep[5]*1e3 > 0.1 || edep[6]*1e3 > 0.1 || edep[7]*1e3 > 0.1))')
+                        energyCut = TCut('((edepResol[8]*1000. > 0.0) && '
+                                         +'(edep[0]*1e3 > 0.1 || '
+                                         + 'edep[1]*1e3 > 0.1 || '
+                                         + 'edep[2]*1e3 > 0.1 || '
+                                         + 'edep[3]*1e3 > 0.1 || '
+                                         + 'edep[4]*1e3 > 0.1 || '
+                                         + 'edep[5]*1e3 > 0.1 || '
+                                         + 'edep[6]*1e3 > 0.1 || '
+                                         + 'edep[7]*1e3 > 0.1))')
                     
                     # skip low energy lsveto
                     if info['xstl'] == 9 and (e == 0 or info['chan'] == 'S'):
@@ -530,21 +558,28 @@ def buildMC101(info, mc):
                     elif info['loca'] == 'innersteel':
                         volumeCut = TCut('(primVolumeName == "InnerSteel")')
                     
+                    elif info['loca'] == 'plastic':
+                        volumeCut = TCut('(primVolumeName == "PlasSupport")')
+                    
                     else:
                         print "WARNING: No selection criteria for  --> ", info['loca']
                         continue
-
-
+                    
+                    
                     ### broken chain / group number cut
                     brokenChainCut = groupNum93(info)
-
+                    
                     ### event type cut
-                    eventTypeCut = TCut('(evt_Type > 10)')
-                    generatedCuts = TCut('(evt_Type < 10)'+' && '+volumeCut.GetTitle())
-                    #generatedCuts = TCut('(evt_Type < 10)'+' && '+volumeCut.GetTitle()+' && '+energyCut.GetTitle())
-                    # special case for H3
+                    evType = 'evt_Type'  # old processing - still works with new processing
+                    #evType = 'event_info.Type'  # new processing
+                    
+                    eventTypeCut = TCut('('+evType+' > 10)')
+                    generatedCuts = TCut('('+evType+' < 10)'+' && '+volumeCut.GetTitle())
+                    #generatedCuts = TCut('('+evType+' < 10)'+' && '+volumeCut.GetTitle()+' && '+energyCut.GetTitle())
+                    
+                    ### special case for H3
                     if info['chst'] == 'H3':
-                        generatedCuts = TCut('(evt_Type > 10)'+' && '+volumeCut.GetTitle())
+                        generatedCuts = TCut('('+evType+' > 10)'+' && '+volumeCut.GetTitle())
                     
                     
                     ### create a hist of the generated events
@@ -596,9 +631,7 @@ def buildMC101(info, mc):
                         
                         #masterCut = TCut('1')
                         
-                        # XXX : I think the resolution function is smearing
-                        # too much, so I'm tweaking it a little bit...
-                        # innersteel MC is the focus here...
+                        # XXX : I think the resolution function is smearing too much?
                         selection = '(edepResol[8] * 1000.)'
                         #selection = '(edep[8] * 1000.)'
                         #selection = '(0.95 * edepResol[8] * 1000.)'
@@ -641,7 +674,8 @@ def cutsBDT101(i, C, E, edep, selection):
             return TCut('0')
         elif C == 'M' and E == 1:
             coinc  = '(BLSVeto.isCoincident == 1)'
-            lsveto = '(BLSVeto.Charge/143.8 > 0.0)'
+            #lsveto = '(BLSVeto.Charge/143.8 > 0.0)'
+            lsveto = '('+selection+' > 0.0)'
             return TCut(coinc+' && '+lsveto)
         else:
             print 'ERROR: I do not know what to do with channel -->', C
