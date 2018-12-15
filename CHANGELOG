@@ -12,6 +12,21 @@
 # ====================================================================
 
 
+# 2018-12-14
+#---------------------------------------------------------------------
+# + surface components are nomalized to the crystal surface area (m^2)
+# ~ fixed a weird issue with the mass normalization when fitting
+#   the lsveto and setting a component to global - the internals and
+#   surface components were bugy but the effect is small.
+
+
+# 2018-12-12
+#---------------------------------------------------------------------
+# ~ still need to change versions in main program to v101 and test
+# + add scaleBkgs101() and scaleSigs101() to account for surface area
+# + add surfArea() calculation for surface components
+
+
 # 2018-12-11
 #---------------------------------------------------------------------
 # + generating reduced MC for I129

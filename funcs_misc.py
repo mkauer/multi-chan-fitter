@@ -125,10 +125,36 @@ def cmass(i):
         12.50,
         12.50,
         18.28,
-        1800.0   # XXX : ls veto mass in kg
-        #106.14  # sum of 8 crystal masses
-        ]
+        ### average crystal mass if grouped into lsveto
+        106.14/8. ]
     return mass[int(i)]
+
+
+def surfArea(i):
+    """
+    crystal surface area in m^2
+    """
+    diameter = [ 5.0,
+                 4.2,
+                 4.2,
+                 5.0,
+                 5.0,
+                 4.8,
+                 4.8,
+                 5.0 ]
+    length = [  7.0,
+               11.0,
+               11.0,
+               15.3,
+               15.5,
+               11.8,
+               11.8,
+               15.5 ]
+    if i == 8:
+        ### average surface area if grouped into lesveto
+        return 3.1416 * (sum(np.asarray(diameter)*np.asarray(length))/8.) * 0.00064516
+    else:
+        return 3.1416 * (diameter[i]*length[i]) * 0.00064516
 
 
 def energyNames(E=0):

@@ -9,7 +9,7 @@ V = 'v201'
 
 # Add global MC that are backgrounds and not signals - deep bug fix
 # 
-# version: 2018-12-10
+# version: 2018-12-14
 # 
 # see CHANGELOG for changes
 ######################################################################
@@ -48,6 +48,7 @@ note = 0
 #mcfile = 'backgrounds_201.txt'
 mcfile = 'backgrounds_202.txt'
 
+#mcfile = 'backgrounds_202-update.txt'
 #mcfile = 'lsveto-testing.txt'
 
 print 'INFO: using backgrounds config file -->', mcfile
@@ -60,7 +61,6 @@ smoothing = 0
 
 
 ### ==========  FITTING OPTIONS  =====================================
-
 ### select channels to fit
 fitchans = 'SM'
 
@@ -79,22 +79,15 @@ for i in range(numx):
         fitranges[i]['M0'] = [0,0,0]
         fitranges[i]['M1'] = [4, 300, 2700]
 
-"""
-# v101 fit ranges for comparison with c9 fit range
-for i in range(numx):
-    ### format = [rebin, xmin, xmax]
-    fitranges[i]['S0'] = [3,   6,   76]
-    fitranges[i]['S1'] = [4, 300, 3300]
-    fitranges[i]['M0'] = [3,   6,   76]
-    fitranges[i]['M1'] = [4, 300, 3300]
-"""
-
+        
 ### ==========  EXTRA MC OPTIONS  ====================================
 ### which MC to fit globally (to all crystals simultaneously)?
-globalmc = []
+#globalmc = []
+#globalmc = ['plastic', 'lsveto', 'innersteel', 'steel']
 globalmc = ['pmt', 'plastic', 'lsveto', 'innersteel', 'steel']
-#globalmc = ['pmt', 'plastic', 'lsveto', 'innersteel', 'steel', 'copper']
-
+#globalmc = ['copper', 'pmt', 'plastic', 'lsveto', 'innersteel', 'steel']
+#globalmc = ['pmt', 'plastic', 'lsveto', 'innersteel', 'steel',
+#            'nai-surf-10um', 'teflon-bulk', 'internal', 'copper']
 
 ### include bkgs from 'other' pmts and internals?
 others  = 1
@@ -243,12 +236,12 @@ def main(argv):
     ### scale into dru units
     if dru:
         data = scaleData70(data, 1)
-        bkgs = scaleBkgs100(bkgs)
-        sigs = scaleBkgs100(sigs)
+        bkgs = scaleBkgs101(bkgs)
+        sigs = scaleBkgs101(sigs)
     else:
         data = scaleData70(data, 0)
-        bkgs = scaleBkgs100(bkgs, runtime)
-        sigs = scaleBkgs100(sigs, runtime)
+        bkgs = scaleBkgs101(bkgs, runtime)
+        sigs = scaleBkgs101(sigs, runtime)
 
     ### make plots before combining?
     #makePlots93(bkgs, combine, others)
@@ -953,8 +946,8 @@ def main(argv):
 
         
         ### scale the signals to mBq/kg
-        if dru: sigs = scaleSigs100(sigkeys, sigs)
-        else:   sigs = scaleSigs100(sigkeys, sigs, runtime)
+        if dru: sigs = scaleSigs101(sigkeys, sigs)
+        else:   sigs = scaleSigs101(sigkeys, sigs, runtime)
         
         ### print the fit activities
         for i in range(numx):

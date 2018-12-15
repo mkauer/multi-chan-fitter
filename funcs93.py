@@ -1166,6 +1166,7 @@ def scaleData70(data, dru=0):
         if dru:
             days = float((data[key]['runtime'])/86400.)
         xkgs = float(cmass(i))
+        if i==8: xkgs = 1800.
         keVperBin = 1./float(data[key]['pars'][3])
         """
         print 'DEBUG: data key =', key

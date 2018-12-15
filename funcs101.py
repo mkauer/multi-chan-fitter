@@ -4,10 +4,12 @@
 # 
 # Remove LSveto low-energy from the histograms
 # 
-# version: 2018-12-10
+# version: 2018-12-12
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# + add scaleBkgs101() and scaleSigs101() to account for surface area
+# + add surfArea() calculation for surface components
 # + add plastic to build101() exclude list
 # + add plastic to buildMC101()
 # ~ move smoothXbins() to funcs_misc.py
@@ -99,7 +101,7 @@ def build101(infile='backgrounds1010.txt', others=1, freuse=0, fchans=0, fxstals
             infos.append(info)
         else:
             print 'WARNING:',info['key'],'does not fit any known criteria'
-            print '         Please check out build100() '
+            print '         Please check out build101() '
             infos.append(info)
         #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -784,4 +786,179 @@ def cutsBDT101(i, C, E, edep, selection):
         print 'ERROR: I do not know what to do with channel -->', C
         print 'Available channels are [S]Single-hits, [M]Multi-hits'
         sys.exit()
+
+        
+def scaleBkgs101(bkgs, runtime=0):
+    
+    for key in bkgs:
+        
+        #print 'scaling -->',key
+        
+        bits = key.split('-')
+        x    = int(bits[0][-1])
+        loca = bits[1]
+        isos = bits[2]
+        f    = 0
+        c    = bits[-2][-1]
+        e    = bits[-1][-1]
+        if len(bits)==6:
+            f = int(bits[3][-1])
+        
+        # conversion factors for things
+        keVperBin  = 1./float(bkgs[key]['pars'][3])
+        if runtime:
+            day    = float(runtime)
+        else:
+            day    = 86400.
+        if f:
+            nmass  = cmass(f-1)
+            surf   = surfArea(f-1)
+        else:
+            nmass  = cmass(x-1)
+            surf   = surfArea(x-1)
+
+        xkgs       = cmass(x-1)
+        if x==9: xkgs = 1800.
+        
+        pmts       = 2.
+        extpmts    = 14.
+        plastic    = 1800. # set same as lsveto for comparison
+        lsveto     = 1800.
+        air        = 1.
+        steel      = 1600.
+        innersteel = 4000.
+        generated  = float(bkgs[key]['generated'])
+        
+        if generated < 1:
+            print "WARNING: 0 events generated for -->", key
+            continue
+        
+        if loca == 'internal':
+            scale = bkgs[key]['info']['acti'] * (nmass)      * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
+        elif 'surf' in loca:
+            scale = bkgs[key]['info']['acti'] * (surf)       * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
+        elif 'teflon' in loca:
+            scale = bkgs[key]['info']['acti'] * (surf)       * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
+        elif loca == 'copper':
+            scale = bkgs[key]['info']['acti'] * (surf)       * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
+        elif loca == 'cucase':
+            scale = bkgs[key]['info']['acti'] * (surf)       * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
+        elif loca == 'coppercase':
+            scale = bkgs[key]['info']['acti'] * (surf)       * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
+        elif loca == 'pmt':
+            scale = bkgs[key]['info']['acti'] * (pmts)       * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
+        elif loca == 'extpmt':
+            scale = bkgs[key]['info']['acti'] * (extpmts)    * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
+        elif loca == 'lsveto':
+            scale = bkgs[key]['info']['acti'] * (lsveto)     * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
+        elif loca == 'plastic':
+            scale = bkgs[key]['info']['acti'] * (plastic)    * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
+        elif loca == 'lsvetoair':
+            scale = bkgs[key]['info']['acti'] * (air)        * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
+        elif loca == 'airshield':
+            scale = bkgs[key]['info']['acti'] * (air)        * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
+        elif loca == 'steel':
+            scale = bkgs[key]['info']['acti'] * (steel)      * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
+        elif loca == 'innersteel':
+            scale = bkgs[key]['info']['acti'] * (innersteel) * (1./1000) * (1./generated) * (day) * (1./xkgs) * (1./keVperBin)
+        else:
+            print "ERROR: no background scaling for -->", loca
+            sys.exit()
+        
+        bkgs[key]['hist'].Scale(scale)
+        bkgs[key]['scale'] = scale
+    
+    return bkgs
+
+
+def scaleSigs101(sigkeys, sigs, runtime=0):
+
+    for key in sigkeys:
+        
+        #print 'scaling -->',key
+        
+        try:
+            test = sigs[key]['fitscale']
+        except:
+            print 'WARNING: no fitscale for', key
+            sigs[key]['info']['fitacti'] = 0
+            sigs[key]['info']['fiterro'] = 0
+            continue
+        
+        bits = key.split('-')
+        x    = int(bits[0][-1])
+        loca = bits[1]
+        isos = bits[2]
+        f = 0
+        c    = bits[-2][-1]
+        e    = bits[-1][-1]
+        if len(bits)==6:
+            f = int(bits[3][-1])
+        
+        # conversion factors for things
+        keVperBin  = 1./float(sigs[key]['pars'][3])
+        if runtime:
+            day    = float(runtime)
+        else:
+            day    = 86400.
+        if f:
+            nmass  = cmass(f-1)
+            surf   = surfArea(f-1)
+        else:
+            nmass  = cmass(x-1)
+            surf   = surfArea(x-1)
+        
+        xkgs       = cmass(x-1)
+        if x==9: xkgs = 1800.
+        
+        pmts       = 2.
+        extpmts    = 14.
+        plastic    = 1800. # set same as lsveto for comparison
+        lsveto     = 1800.
+        air        = 1.
+        steel      = 1600.
+        innersteel = 4000.
+        generated  = float(sigs[key]['generated'])
+
+        if generated < 1:
+            print "WARNING: 0 events generated for -->", key
+            continue
+        
+        if loca == 'internal':
+            fitActivity = sigs[key]['fitscale'] * (1./nmass)      * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
+        elif 'surf' in loca:
+            fitActivity = sigs[key]['fitscale'] * (1./surf)       * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
+        elif 'teflon' in loca:
+            fitActivity = sigs[key]['fitscale'] * (1./surf)       * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
+        elif loca == 'copper':
+            fitActivity = sigs[key]['fitscale'] * (1./surf)       * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
+        elif loca == 'cucase':
+            fitActivity = sigs[key]['fitscale'] * (1./surf)       * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
+        elif loca == 'coppercase':
+            fitActivity = sigs[key]['fitscale'] * (1./surf)       * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
+        elif loca == 'pmt':
+            fitActivity = sigs[key]['fitscale'] * (1./pmts)       * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
+        elif loca == 'extpmt':
+            fitActivity = sigs[key]['fitscale'] * (1./extpmts)    * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
+        elif loca == 'lsveto':
+            fitActivity = sigs[key]['fitscale'] * (1./lsveto)     * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
+        elif loca == 'plastic':
+            fitActivity = sigs[key]['fitscale'] * (1./plastic)    * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
+        elif loca == 'lsvetoair':
+            fitActivity = sigs[key]['fitscale'] * (1./air)        * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
+        elif loca == 'airshield':
+            fitActivity = sigs[key]['fitscale'] * (1./air)        * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
+        elif loca == 'steel':
+            fitActivity = sigs[key]['fitscale'] * (1./steel)      * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
+        elif loca == 'innersteel':
+            fitActivity = sigs[key]['fitscale'] * (1./innersteel) * (1000.) * (generated) * (1./day) * (xkgs) * (keVperBin)
+        else:
+            print "ERROR: no signal scaling for -->", loca
+            sys.exit()
+        
+        sigs[key]['info']['fitacti'] = fitActivity
+        sigs[key]['info']['fiterro'] = fitActivity * sigs[key]['fiterror']
+            
+    return sigs
+
 
