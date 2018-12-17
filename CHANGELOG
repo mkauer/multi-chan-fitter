@@ -12,8 +12,14 @@
 # ====================================================================
 
 
+# 2018-12-17
+#---------------------------------------------------------------------
+# ~ redo the fits using plastic as the external
+
+
 # 2018-12-14
 #---------------------------------------------------------------------
+# ~ fixed up the background model - it works great now!
 # + surface components are nomalized to the crystal surface area (m^2)
 # ~ fixed a weird issue with the mass normalization when fitting
 #   the lsveto and setting a component to global - the internals and
