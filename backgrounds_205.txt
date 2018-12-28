@@ -9,6 +9,9 @@
 # 1 ppm K40   = 30.960 mBq/kg
 #-----------------------------------------------------------
 
+# 2018-12-28
+# using set12 v00-04-12 data
+
 # 2018-12-14
 # tweaking crystals on an individual basis - see crystal notes
 # testing fixed internal-Pb210 and I129 in other crystals
@@ -133,6 +136,32 @@
 
 
 #==========================================================================================================================================
+#                  Data Sets
+#---------------------------------------------------------------------
+# 2018-12-28
+#   use SET12 V00-04-12
+#==========================================================================================================================================
+DR	SM	1	./set12_V00-04-12.dat	set12	./root-join-read/build101/build101-c1-dataset12-V00-04-12.root
+DR	SM	2	./set12_V00-04-12.dat	set12	./root-join-read/build101/build101-c2-dataset12-V00-04-12.root
+DR	SM	3	./set12_V00-04-12.dat	set12	./root-join-read/build101/build101-c3-dataset12-V00-04-12.root
+DR	SM	4	./set12_V00-04-12.dat	set12	./root-join-read/build101/build101-c4-dataset12-V00-04-12.root
+#DR	SM	5	./set12_V00-04-12.dat	set12	./root-join-read/build101/build101-c5-dataset12-V00-04-12.root
+DR	SM	6	./set12_V00-04-12.dat	set12	./root-join-read/build101/build101-c6-dataset12-V00-04-12.root
+DR	SM	7	./set12_V00-04-12.dat	set12	./root-join-read/build101/build101-c7-dataset12-V00-04-12.root
+#DR	SM	8	./set12_V00-04-12.dat	set12	./root-join-read/build101/build101-c8-dataset12-V00-04-12.root
+DR	SM	9	./set12_V00-04-12.dat	set12	./root-join-read/build101/build101-c9-dataset12-V00-04-12.root
+"""
+DR	SM	1	./set1_V00-04-04.dat	set1	./root-join-read/build101/build101-c1-dataset1-V00-04-04.root
+DR	SM	2	./set1_V00-04-04.dat	set1	./root-join-read/build101/build101-c2-dataset1-V00-04-04.root
+DR	SM	3	./set1_V00-04-04.dat	set1	./root-join-read/build101/build101-c3-dataset1-V00-04-04.root
+DR	SM	4	./set1_V00-04-04.dat	set1	./root-join-read/build101/build101-c4-dataset1-V00-04-04.root
+#DR	SM	5	./set1_V00-04-04.dat	set1	./root-join-read/build101/build101-c5-dataset1-V00-04-04.root
+DR	SM	6	./set1_V00-04-04.dat	set1	./root-join-read/build101/build101-c6-dataset1-V00-04-04.root
+DR	SM	7	./set1_V00-04-04.dat	set1	./root-join-read/build101/build101-c7-dataset1-V00-04-04.root
+#DR	SM	8	./set1_V00-04-04.dat	set1	./root-join-read/build101/build101-c8-dataset1-V00-04-04.root
+DR	SM	9	./set1_V00-04-04.dat	set1	./root-join-read/build101/build101-c9-dataset1-V00-04-04.root
+"""
+#==========================================================================================================================================
 #                  Crystal  1
 #---------------------------------------------------------------------
 # 2018-12-14
@@ -140,8 +169,6 @@
 #   include I129
 #   set internal Pb210 3.20e+00 bounds to [0.1, 0.9]
 #==========================================================================================================================================
-DR	SM	1	./set1_00-04-04.dat	set1	./root-join-read/build101/build101-c1-dataset1.root
-
 FR	SM	1	nai-surf-10um	Pb210	Pb210	GRND	1	0	5	./root-join-read/build101/build101-nai-surf-10umPb210_GRND.root
 FR	SM	1	teflon-bulk	Pb210	Pb210	GRND    10	0	5	./root-join-read/build101/build101-teflon-bulkPb210_GRND.root
 FR	SM	1	copper		Co60	Co60	GRND	50	0	5	./root-join-read/build101/build101-copperCo60_GRND.root
@@ -197,8 +224,6 @@ FR	SM	1	innersteel	U238	U238	Th230	6.50e+01	0.1	10	./root-join-read/build101/bui
 #   include I129
 #   set internal Pb210 2.06e+00 bounds to [0.1, 0.7]
 #==========================================================================================================================================
-DR      MS      2     ./set1_00-04-04.dat      set1      ./root-join-read/build101/build101-c2-dataset1.root
-
 FR	SM	2	nai-surf-10um	Pb210	Pb210	GRND	1	0	5	./root-join-read/build101/build101-nai-surf-10umPb210_GRND.root
 FR	SM	2	teflon-bulk	Pb210	Pb210	GRND    10	0	5	./root-join-read/build101/build101-teflon-bulkPb210_GRND.root
 FR	SM	2	copper		Co60	Co60	GRND	50	0	5	./root-join-read/build101/build101-copperCo60_GRND.root
@@ -253,8 +278,6 @@ FR	SM	2	innersteel	U238	U238	Th230	6.50e+01	0.1	10	./root-join-read/build101/bui
 #   include I129
 #   fix the internal Pb210 activity to 0.76e+00
 #==========================================================================================================================================
-DR	SM	3	./set1_00-04-04.dat	set1	./root-join-read/build101/build101-c3-dataset1.root
-
 FR	SM	3	nai-surf-10um	Pb210	Pb210	GRND	1	0	5	./root-join-read/build101/build101-nai-surf-10umPb210_GRND.root
 FR	SM	3	teflon-bulk	Pb210	Pb210	GRND    10	0	5	./root-join-read/build101/build101-teflon-bulkPb210_GRND.root
 FR	SM	3	copper		Co60	Co60	GRND	50	0	5	./root-join-read/build101/build101-copperCo60_GRND.root
@@ -309,8 +332,6 @@ FR	SM	3	innersteel	U238	U238	Th230	6.50e+01	0.1	10	./root-join-read/build101/bui
 #   include I129
 #   fix the internal Pb210 activity to 0.74e+00
 #==========================================================================================================================================
-DR	SM	4	./set1_00-04-04.dat	set1	./root-join-read/build101/build101-c4-dataset1.root
-
 FR	SM	4	nai-surf-10um	Pb210	Pb210	GRND	1	0	5	./root-join-read/build101/build101-nai-surf-10umPb210_GRND.root
 FR	SM	4	teflon-bulk	Pb210	Pb210	GRND    10	0	5	./root-join-read/build101/build101-teflon-bulkPb210_GRND.root
 FR	SM	4	copper		Co60	Co60	GRND	50	0	5	./root-join-read/build101/build101-copperCo60_GRND.root
@@ -363,8 +384,6 @@ FR	SM	4	innersteel	U238	U238	Th230	6.50e+01	0.1	10	./root-join-read/build101/bui
 #---------------------------------------------------------------------
 # 2018-12-14 - not using c5 at this point
 #==========================================================================================================================================
-DR	SM	5	./set1_00-04-04.dat	set1	./root-join-read/build101/build101-c5-dataset1.root
-
 FR	SM	5	nai-surf-10um	Pb210	Pb210	GRND	1	0	10	./root-join-read/build101/build101-nai-surf-10umPb210_GRND.root
 FR	SM	5	teflon-bulk	Pb210	Pb210	GRND    5	0	3	./root-join-read/build101/build101-teflon-bulkPb210_GRND.root
 FR	SM	5	copper		Co60	Co60	GRND	10	0	2	./root-join-read/build101/build101-copperCo60_GRND.root
@@ -426,8 +445,6 @@ FR	SM	5	innersteel	Th232	Th228	GRND	4.00e-01	0.1	1e4	./root-join-read/build101/b
 #   include I129
 #   fix the internal Pb210 activity to 1.52e+00
 #==========================================================================================================================================
-DR	SM	6	./set1_00-04-04.dat	set1	./root-join-read/build101/build101-c6-dataset1.root
-
 FR	SM	6	nai-surf-10um	Pb210	Pb210	GRND	1	0	5	./root-join-read/build101/build101-nai-surf-10umPb210_GRND.root
 FR	SM	6	teflon-bulk	Pb210	Pb210	GRND    10	0	5	./root-join-read/build101/build101-teflon-bulkPb210_GRND.root
 FR	SM	6	copper		Co60	Co60	GRND	50	0	5	./root-join-read/build101/build101-copperCo60_GRND.root
@@ -492,8 +509,6 @@ FR	SM	6	innersteel	U238	U238	Th230	6.50e+01	0.1	10	./root-join-read/build101/bui
 #   include I129
 #   fix the internal Pb210 activity to 1.54e+00
 #==========================================================================================================================================
-DR	SM	7	./set1_00-04-04.dat	set1	./root-join-read/build101/build101-c7-dataset1.root
-
 FR	SM	7	nai-surf-10um	Pb210	Pb210	GRND	1	0	5	./root-join-read/build101/build101-nai-surf-10umPb210_GRND.root
 FR	SM	7	teflon-bulk	Pb210	Pb210	GRND    10	0	5	./root-join-read/build101/build101-teflon-bulkPb210_GRND.root
 FR	SM	7	copper		Co60	Co60	GRND	50	0	5	./root-join-read/build101/build101-copperCo60_GRND.root
@@ -556,8 +571,6 @@ FR	SM	7	innersteel	U238	U238	Th230	6.50e+01	0.1	10	./root-join-read/build101/bui
 #---------------------------------------------------------------------
 # 2018-12-14 - not using c8 at this point
 #==========================================================================================================================================
-DR	SM	8	./set1_00-04-04.dat	set1	./root-join-read/build101/build101-c8-dataset1.root
-
 FR	SM	8	nai-surf-10um	Pb210	Pb210	GRND	1	0	10	./root-join-read/build101/build101-nai-surf-10umPb210_GRND.root
 FR	SM	8	teflon-bulk	Pb210	Pb210	GRND    5	0	10	./root-join-read/build101/build101-teflon-bulkPb210_GRND.root
 FR	SM	8	copper		Co60	Co60	GRND	10	0	2	./root-join-read/build101/build101-copperCo60_GRND.root
@@ -618,8 +631,6 @@ FR	SM	8	innersteel	Th232	Th228	GRND	4.00e-01	0.1	1e4	./root-join-read/build101/b
 # 2018-12-14
 #   fix internal activities what I measured with c67 including all backgrounds as globally fit
 #==========================================================================================================================================
-DR	SM	9	./set1_00-04-04.dat	set1	./root-join-read/build101/build101-c9-dataset1.root
-
 ### from the c67 everything global fit
 BR	SM	9	nai-surf-10um	Pb210	Pb210	GRND	3.22e+00	0.1	10	./root-join-read/build101/build101-nai-surf-10umPb210_GRND.root
 BR	SM	9	teflon-bulk	Pb210	Pb210	GRND	9.38e+00	0.1	10	./root-join-read/build101/build101-teflon-bulkPb210_GRND.root
