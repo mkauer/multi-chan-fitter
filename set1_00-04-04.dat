@@ -2,9 +2,7 @@
 
 # set1_00-04-04.dat
 
-# version 2017-12-05
-
-# $ ls -1 /data/COSINE/MRGD/phys/V00-04-04/* | grep -E "M001544|M001546" | sort
+# ls -1 /data/COSINE/MRGD/phys/V00-04-04/* | grep -E "M001544|M001546" | sort > ~/set1_00-04-04.dat
 
 /data/COSINE/MRGD/phys/V00-04-04/mrgd_M001544.root.000
 /data/COSINE/MRGD/phys/V00-04-04/mrgd_M001544.root.001

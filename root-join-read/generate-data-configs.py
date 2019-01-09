@@ -5,7 +5,13 @@
 import os
 
 path = './'
-setnum = 'set12'
+
+#setnum = 'set1'
+#proc = 'V00-04-04'
+
+setnum = 'set1'
+#setnum = 'set2'
+#setnum = 'set12'
 proc = 'V00-04-12'
 
 datfile = path+setnum+'_'+proc+'.dat'

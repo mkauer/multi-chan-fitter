@@ -2,9 +2,7 @@
 
 # set12_00-04-12.dat
 
-# version 2018-12-27
-
-#$ ls -1 /data/COSINE/MRGD/phys/V00-04-12/* | sort > temp-data-files.txt
+# ls -1 /data/COSINE/MRGD/phys/V00-04-12/* | sort > ~/set12_00-04-12.dat
 
 /data/COSINE/MRGD/phys/V00-04-12/mrgd_M001544.root.000
 /data/COSINE/MRGD/phys/V00-04-12/mrgd_M001544.root.001
