@@ -4,11 +4,10 @@
 # 
 # Remove LSveto low-energy from the histograms
 # 
-# version: 2019-01-08
+# version: 2019-01-09
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
-# + add calib101() with new calibration functions
 # + add scaleBkgs101() and scaleSigs101() to account for surface area
 # + add surfArea() calculation for surface components
 # + add plastic to build101() exclude list
@@ -946,48 +945,4 @@ def cutsBDT101(i, C, E, edep, selection):
         print 'ERROR: I do not know what to do with channel -->', C
         print 'Available channels are [S]Single-hits, [M]Multi-hits'
         sys.exit()
-
-        
-def calib101(i, E):
-    
-    if i==8: # C9 - lsveto
-        edep = '(BLSVeto.Charge)'
-        selection = '('+edep+' / 143.8)'
-        return edep, selection
-    
-    ### use Govindha's fits (does not have C5 or C8)
-    hiE = [[1813, 316],
-           [1485, 315],
-           [1370, 323],
-           [1213, 294],
-           [1, 1],
-           [1479, 286],
-           [1069, 295],
-           [1, 1]]
-    """
-    loE = [[1,1],
-           [1,1],
-           [1,1],
-           [1,1],
-           [1,1],
-           [-1591, 8491],
-           [1,1],
-           [1,1]]
-    """
-    if E:
-        edep = '(crystal'+str(i+1)+'.rqcD1_5)'
-        selection = '('+edep+'-'+str(hiE[i][0])+')/('+str(hiE[i][1])+')'
-        if i==4 or i==7: # C5 and C8 high energy
-            edep = '(crystal'+str(i+1)+'.energyD)'
-            selection = '('+edep+')'
-    else:
-        edep = '(crystal'+str(i+1)+'.energy)'
-        selection = edep
-        """
-        if i==5: # C6 low energy
-            edep = '(crystal'+str(i+1)+'.qc5)'
-            selection = '('+edep+'-'+str(loE[i][0])+')/('+str(loE[i][1])+')'
-        """
-    return edep, selection
-
 

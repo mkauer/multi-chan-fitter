@@ -4,10 +4,11 @@
 # 
 # Get all the default functions in here
 # 
-# version: 2018-12-11
+# version: 2019-01-09
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# + add numX()
 # + add I129 to setGroup()
 # + add plastic to setGroup()
 # + addHistKey() to test if a key already exists and create one if not
@@ -35,24 +36,37 @@
 ######################################################################
 
 import os,sys
+import socket
 from copy import deepcopy
 import numpy as np
 from ROOT import *
 import ROOT
 
 
+def numX():
+    # number of crystals (including lsveto)
+    return 9
+
+
 def amLocal():
-    """
-    Check to see what machine you're on so you can get right paths
-    """
-    import socket
-    ### master.cunpa.ibs
-    local = 1
-    host = str(socket.gethostname())
-    #print 'hostname =',host
-    if 'cunpa' in host:
-        local = 0
-    return local
+    if 'cunpa' in str(socket.gethostname()):
+        return 0
+    else:
+        return 1
+
+
+def onCup():
+    if 'cunpa' in str(socket.gethostname()):
+        return 1
+    else:
+        return 0
+
+
+def baseDir():
+    if 'cunpa' in socket.gethostname():
+        return '/home/mkauer/mc-fitting/'
+    else:
+        return '/home/mkauer/COSINE/CUP/mc-fitting/'
 
 
 def sortKeys(data, bkgs, sigs):
@@ -370,28 +384,6 @@ def getDuration(rootfile):
         return duration
     except:
         return -1
-
-
-def baseDir():
-    """
-    Define your main basedir paths here
-    """
-    if onCup():
-        return '/home/mkauer/mc-fitting/'
-    else:
-        return '/home/mkauer/COSINE/CUP/mc-fitting/'
-
-
-def onCup():
-    """
-    Check to see if running on cup
-    """
-    import socket
-    ### master.cunpa.ibs
-    if 'cunpa' in str(socket.gethostname()):
-        return 1
-    else:
-        return 0
 
 
 def setBinError(histo):

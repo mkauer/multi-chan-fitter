@@ -4,10 +4,11 @@
 # 
 # Adding LS-veto functionality!
 # 
-# version: 2018-12-10
+# version: 2019-01-09
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# - remove numX()
 # + add plastic to the bkg and sig scaling
 # ~ fix scalings for lsveto, steel, pmts in the lsveto
 # ~ include all pmts for x9 in combineOthers100()
@@ -39,13 +40,6 @@ sys.path.append("/home/mkauer/COSINE/CUP/mc-fitting/")
 sys.path.append("/home/mkauer/mc-fitting/")
 from funcs93 import *
 from funcs_misc import *
-
-
-def numX():
-    """
-    Return the max number of crystals and sudo-crystals
-    """
-    return 9
 
 
 def getInfo100(line, freuse=0, fchans=0, fxstals=[]):
