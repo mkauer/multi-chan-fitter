@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-# 2019-01-09
+# 2019-01-11
+# for v300 and later
 
 import os
 
@@ -16,7 +17,7 @@ proc = 'V00-04-04'
 
 datfile = path+setnum+'_'+proc+'.dat'
 
-ws = '\t'
+ws='  '
 for i in range(1, 10):
     output = 'D' + ws + \
              str(i) + ws + \

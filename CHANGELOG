@@ -12,6 +12,26 @@
 # ====================================================================
 
 
+# 2019-01-11
+#---------------------------------------------------------------------
+# ~ updated config generation scripts for new backgrounds file format
+# ~ create processed rootfiles after the processing is done
+# ~ separate MC paths and handling for v3.1.1 and v4.0.1
+# ~ separate calibrations for v00-04-04 and v-00-04-12
+# ~ major refactor of the backgrounds file format
+# + add updateBkgsFile300() for new backgrounds file format
+# + add mcPath101() and mcPath300() for different mc paths
+# + add calib300() for v00-04-12 calibrations from govinda
+# + add buildData300() and buildMC300() for new processing info
+# + add getInfo300() and build300() for new processing info
+
+
+# 2019-01-10
+#---------------------------------------------------------------------
+# V switch to funcs300.py
+# V switch to 300-g410-set12.py
+
+
 # 2019-01-09
 #---------------------------------------------------------------------
 # + cut release v10.2

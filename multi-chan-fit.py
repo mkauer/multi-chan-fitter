@@ -3,13 +3,13 @@
 ######################################################################
 # Matt Kauer - mkauer@physics.wisc.edu
 ######################################################################
-# 201-global-bkgs.py
+# 300-g410-set12.py
 
-V = 'v201'
+V = 'v300'
 
-# Add global MC that are backgrounds and not signals - deep bug fix
+# Prepare for G4.10 simulations and SET2 data
 # 
-# version: 2018-12-14
+# version: 2019-01-11
 # 
 # see CHANGELOG for changes
 ######################################################################
@@ -29,7 +29,7 @@ ROOT.gErrorIgnoreLevel = kError
 
 sys.path.append("/home/mkauer/COSINE/CUP/mc-fitting/")
 sys.path.append("/home/mkauer/mc-fitting/")
-from funcs101 import *
+from funcs300 import *
 
 
 ### get the number of crystals
@@ -42,13 +42,12 @@ debug = 0
 ### ==========  GENERAL INPUTS  ======================================
 ### note to add to saved plot names?
 note = 0
-#note = 'calib-130'
+#note = ''
 
-#mcfile = 'backgrounds_200.txt'
-#mcfile = 'backgrounds_201.txt'
-#mcfile = 'backgrounds_202.txt' # lsveto
-#mcfile = 'backgrounds_203.txt' # plastic
-#mcfile = 'backgrounds_204.txt' # lsveto again
+mcfile = 'backgrounds_300.txt'
+
+#mcfile = 'testing-data.txt'
+#mcfile = 'testing-sim.txt'
 
 print 'INFO: using backgrounds config file -->', mcfile
 
@@ -190,8 +189,7 @@ zeroFitDataError = 1
 
 def main(argv):
     
-    batch = 0
-    if onCup(): batch = 1
+    batch = onCup()
     
     #-----------------------------------------
     # set as an empty list for default action
@@ -224,7 +222,7 @@ def main(argv):
     #-----------------------------------------------------------------
     #-----------------------------------------------------------------
     allchans = uniqString(fitchans+pltchans)
-    data, bkgs, sigs, runtime = build101(mcfile, others, reuse, allchans, xstals)
+    data, bkgs, sigs, runtime = build300(mcfile, others, reuse, allchans, xstals)
     print 'INFO: runtime =', runtime, '(seconds)'
 
     datkeys = sortDataKeys92(data)
@@ -324,7 +322,7 @@ def main(argv):
     for i, key in enumerate(uniqAll):
         #print key
         uniqColor[key] = cis[i]
-
+    
     ### colors for the groups
     gis = {'steel':    kYellow,
            'cosmo':    kMagenta+1,
@@ -335,7 +333,13 @@ def main(argv):
            'copper':   kYellow+1,
            'plastic':  kOrange+2,
            'none':     kRed-1}
-
+    
+    ### colors for multiple data sets
+    dcs = [kBlack,
+           kBlue,
+           kGreen+1,
+           kYellow+1]
+    
     ### legend length = MC + data + total
     Nlg = Nc+2
     lnc = 1
@@ -1089,8 +1093,8 @@ def main(argv):
             ### create the updated backgrounds file
             #shutil.copyfile(mcfile, './plots/'+mcfile)
             if updateMCfile:
-                newbkgs = './plots/'+mcfile[:-4]+'-update.txt'
-                updateBkgsFile70(mcfile, resultsfile, newbkgs, BF='BR')
+                #newbkgs = './plots/'+mcfile[:-4]+'_update.txt'
+                updateBkgsFile300(xstals, mcfile, resultsfile)
             
             ### save histograms to a rootfile
             rootoutfile = TFile("./plots/histograms.root", "RECREATE")
@@ -1182,7 +1186,6 @@ def main(argv):
             #fitdata.GetXaxis().SetLabelSize(size)
             
             fitdata.Draw()
-            #flegs[i].AddEntry(fitdata, 'data - bkgs', lopt)
             if dru: fitdata.SetAxisRange(2e-3, 2e3, 'y')
             fitdata.SetAxisRange(xstalbins[i][0], xstalbins[i][1], 'x')
             
@@ -1244,19 +1247,19 @@ def main(argv):
             flegs[i].SetNColumns(flnc)
             flegs[i].SetFillColor(0)
             flegs[i].SetBorderSize(0)
-            lopt = 'LPE'
+            legopt = 'LPE'
             
-            flegs[i].AddEntry(fitdata, 'data - bkgs', lopt)
+            flegs[i].AddEntry(fitdata, 'data - bkgs', legopt)
             
             ### add legend entries in order
             for name in uniqAll:
                 for fskey in fsigkeys:
                     if name in fskey and 'x'+str(i+1) in fskey:
-                        flegs[i].AddEntry(fitsigs[fskey]['hist'], fskey, lopt)
+                        flegs[i].AddEntry(fitsigs[fskey]['hist'], fskey, legopt)
                 # and for globals
                 for fgkey in fglobsigkeys:
                     if name in fgkey:
-                        flegs[i].AddEntry(fitglobsigs[fgkey]['hist'], fgkey, lopt)
+                        flegs[i].AddEntry(fitglobsigs[fgkey]['hist'], fgkey, legopt)
             
             ### get the chi2 of the total fit mc compared to data
             #-------------------------------------------------------------------
@@ -1276,9 +1279,9 @@ def main(argv):
             
             #if i in wasFit:
             # returned from fit
-            flegs[i].AddEntry(ftotal, 'Fit Total (chi2/ndf = '+str(round(fitchi2ndf,2))+')', lopt)
+            flegs[i].AddEntry(ftotal, 'Fit Total (chi2/ndf = '+str(round(fitchi2ndf,2))+')', legopt)
             # calc by Chi2TestX()
-            #flegs[i].AddEntry(ftotal, 'Fit Total (chi2/ndf = '+str(round(fitchi2ndfv2,2))+')', lopt)
+            #flegs[i].AddEntry(ftotal, 'Fit Total (chi2/ndf = '+str(round(fitchi2ndfv2,2))+')', legopt)
             #print 'INFO: Fit total MC from Chi2TestX chi2/ndf = '+str(round(fitchi2ndfv2,2))
             
             flegs[i].Draw('same')
@@ -1291,7 +1294,7 @@ def main(argv):
             flegs2.append(leg)
             flegs2[i].SetFillColor(0)
             flegs2[i].SetBorderSize(0)
-            lopt = 'LPE'
+            legopt = 'LPE'
 
             fresid.Divide(fitdata, ftotal)
             #fresid.Divide(ftotal, fitdata)
@@ -1339,7 +1342,7 @@ def main(argv):
             fzeros[i].SetLineWidth(1)
             fzeros[i].Draw()
 
-            flegs2[i].AddEntry(fresid,'data / MC',lopt)
+            flegs2[i].AddEntry(fresid,'data / MC',legopt)
             #flegs2[i].Draw()
             #-------------------------------------------------------------
 
@@ -1428,7 +1431,7 @@ def main(argv):
         fitdata.GetYaxis().SetLabelOffset(0.01)
         
         fitdata.Draw()
-        #flegs[i].AddEntry(fitdata, 'data - bkgs', lopt)
+        #flegs[i].AddEntry(fitdata, 'data - bkgs', legopt)
         if dru: fitdata.SetAxisRange(2e-3, 2e3, 'y')
         fitdata.SetAxisRange(0, fitbins, 'x')
         
@@ -1493,27 +1496,27 @@ def main(argv):
         mleg.SetNColumns(flnc)
         mleg.SetFillColor(0)
         mleg.SetBorderSize(0)
-        lopt = 'LPE'
+        legopt = 'LPE'
 
-        mleg.AddEntry(fitdata, 'data - bkgs', lopt)
+        mleg.AddEntry(fitdata, 'data - bkgs', legopt)
 
         ### add legend entries in order
         for name in uniqAll:
             for fskey in fsigkeys:
                 if name in fskey:
-                    mleg.AddEntry(fitsigs[fskey]['hist'], fskey, lopt)
+                    mleg.AddEntry(fitsigs[fskey]['hist'], fskey, legopt)
             # and for globals
             for fgkey in fglobsigkeys:
                 if name in fgkey:
-                    mleg.AddEntry(fitglobsigs[fgkey]['hist'], fgkey, lopt)
+                    mleg.AddEntry(fitglobsigs[fgkey]['hist'], fgkey, legopt)
 
         #ftotal.Draw('same')
 
         #if i in wasFit:
         # returned from fit
-        mleg.AddEntry(ftotal, 'Fit Total (chi2/ndf = '+str(round(fitchi2ndf,2))+')', lopt)
+        mleg.AddEntry(ftotal, 'Fit Total (chi2/ndf = '+str(round(fitchi2ndf,2))+')', legopt)
         # calc by Chi2TestX()
-        #flegs[i].AddEntry(ftotal, 'Fit Total (chi2/ndf = '+str(round(fitchi2ndfv2,2))+')', lopt)
+        #flegs[i].AddEntry(ftotal, 'Fit Total (chi2/ndf = '+str(round(fitchi2ndfv2,2))+')', legopt)
         #print 'INFO: Fit total MC from Chi2TestX chi2/ndf = '+str(round(fitchi2ndfv2,2))
 
         mleg.Draw('same')
@@ -1526,7 +1529,7 @@ def main(argv):
         #flegs2.append(leg)
         mleg2.SetFillColor(0)
         mleg2.SetBorderSize(0)
-        lopt = 'LPE'
+        legopt = 'LPE'
         
         #fresid.Divide(fitdata, ftotal)
                 
@@ -1574,7 +1577,7 @@ def main(argv):
         mzero.SetLineWidth(1)
         mzero.Draw()
         
-        mleg2.AddEntry(fresid,'data / MC',lopt)
+        mleg2.AddEntry(fresid,'data / MC',legopt)
         #flegs2[i].Draw()
         #-------------------------------------------------------------
         
@@ -1619,7 +1622,7 @@ def main(argv):
     
     # number of energy ranges (lo, hi)
     numE = 2
-    # number of channels (single, multi, lsveto, alpha)
+    # number of channels (single and/or multi-hit)
     numC = len(pltchans)
     
     canvs  = [[0 for x in range(numE)] for x in range(numC)]
@@ -1715,7 +1718,7 @@ def main(argv):
                 legs[C][E][i].SetFillColor(0)
                 legs[C][E][i].SetBorderSize(0)
                 legs[C][E][i].SetNColumns(lnc)
-                lopt = 'LPE'
+                legopt = 'LPE'
 
                 if redtotal:
                     total[C][E][i].SetMarkerColor(kRed)
@@ -1741,10 +1744,12 @@ def main(argv):
                 #resid[C][E][i].Sumw2()
                 
                 dkey = 0
+                datasets = 0
                 for key in datkeys:
                     if 'x'+str(i+1) in key and '-c'+chan in key and '-e'+str(E) in key:
-                        
+
                         dkey = key
+                        datasets += 1
                         
                         if dru:
                             data[dkey]['hist'].GetYaxis().SetTitle('counts / day / kg / keV  (dru)')
@@ -1776,9 +1781,26 @@ def main(argv):
                         """
                         #data[dkey]['hist'].SetMarkerStyle(8)
                         #data[dkey]['hist'].SetMarkerSize(.6)
-                        data[dkey]['hist'].SetMarkerColor(kBlack)
-                        data[dkey]['hist'].SetLineColor(kBlack)
+
+                        #+++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                        #+++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                        #  Multiple data sets?
+                        #+++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                        """
+                        if datasets == 1:
+                            data[dkey]['hist'].SetMarkerColor(kBlack)
+                            data[dkey]['hist'].SetLineColor(kBlack)
+                        if datasets == 2:
+                            data[dkey]['hist'].SetMarkerColor(kBlue)
+                            data[dkey]['hist'].SetLineColor(kBlue)
+                        """
+                        data[dkey]['hist'].SetMarkerColor(dcs[datasets-1])
+                        data[dkey]['hist'].SetLineColor(dcs[datasets-1])
+                        #+++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                        #+++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                        
                         data[dkey]['hist'].SetLineWidth(1)
+                        
                         #if redtotal:
                             #data[dkey]['hist'].SetMarkerStyle(7)
                             #data[dkey]['hist'].SetMarkerSize(1)
@@ -1805,19 +1827,17 @@ def main(argv):
                         if E and i==8:
                             data[dkey]['hist'].SetAxisRange(0, lsHiE, 'x')
                             data[dkey]['hist'].SetAxisRange(1e-5, 0.5, 'y')
-                                
-                        #popt = 'P E1'
-                        #popt = 'HIST'
-                        popt = ''
-                        data[dkey]['hist'].Draw()
-                        #days = round(data[dkey]['runtime']/86400.,2)
-                        days = round(runtime/86400., 2)
                         
-                        if ingroups:
-                            legs[C][E][i].AddEntry(data[dkey]['hist'], 'Data', lopt)
-                        else:
-                            legs[C][E][i].AddEntry(data[dkey]['hist'], dkey+' ('+str(days)+' days)', lopt)
-
+                        data[dkey]['hist'].Draw('same')
+                        days = round(data[dkey]['runtime']/86400., 2)
+                        
+                        legs[C][E][i].AddEntry(data[dkey]['hist'],
+                                               data[dkey]['info']['tag']+'  '+data[dkey]['info']['build'],
+                                               legopt)
+                        
+                        #if ingroups: legs[C][E][i].AddEntry(data[dkey]['hist'], 'Data', legopt)
+                        #else: legs[C][E][i].AddEntry(data[dkey]['hist'], dkey+' ('+str(days)+' days)', legopt)
+                        
                 tcount = 0
                 bkey = 0
                 for key in bakkeys:
@@ -1859,7 +1879,7 @@ def main(argv):
                         tcount += 1
                         
                         ### create the legend entry for MC
-                        #legs[C][E][i].AddEntry(bkgs[key]['hist'], key, lopt)
+                        #legs[C][E][i].AddEntry(bkgs[key]['hist'], key, legopt)
 
                 skey = 0
                 for key in sigkeys:
@@ -1901,7 +1921,7 @@ def main(argv):
                         tcount += 1
 
                         ### create the legend entry for MC
-                        #legs[C][E][i].AddEntry(sigs[key]['hist'], key, lopt)
+                        #legs[C][E][i].AddEntry(sigs[key]['hist'], key, legopt)
 
                 if ingroups:
                     groupSort = []
@@ -1914,13 +1934,13 @@ def main(argv):
                             gbkgs[C][E][i][group].SetMarkerColor(gis[group])
                             gbkgs[C][E][i][group].SetLineColor(gis[group])
                             gbkgs[C][E][i][group].Draw('same')
-                            legs[C][E][i].AddEntry(gbkgs[C][E][i][group], group, lopt)
+                            legs[C][E][i].AddEntry(gbkgs[C][E][i][group], group, legopt)
                     if 'none' in groupSort:
                         for key in gbkgs[C][E][i]['none']:
                             gbkgs[C][E][i]['none'][key].SetMarkerColor(gis['none'])
                             gbkgs[C][E][i]['none'][key].SetLineColor(gis['none'])
                             gbkgs[C][E][i]['none'][key].Draw('same')
-                            legs[C][E][i].AddEntry(gbkgs[C][E][i]['none'][key], key, lopt)
+                            legs[C][E][i].AddEntry(gbkgs[C][E][i]['none'][key], key, legopt)
                 else:
                     # add legend entries in order
                     #print uniqAll
@@ -1930,12 +1950,12 @@ def main(argv):
                             if bkey == 'x'+str(i+1)+'-'+name+'-c'+chan+'-e'+str(E) \
                                or bkey == 'x'+str(i+1)+'-'+name+'-f'+str(i+1)+'-c'+chan+'-e'+str(E):
                                 activ = '(%.2e) '%(bkgs[bkey]['info']['acti'])
-                                legs[C][E][i].AddEntry(bkgs[bkey]['hist'], activ+bkey, lopt)
+                                legs[C][E][i].AddEntry(bkgs[bkey]['hist'], activ+bkey, legopt)
                         for skey in sigkeys:
                             if skey == 'x'+str(i+1)+'-'+name+'-c'+chan+'-e'+str(E) \
                                or skey == 'x'+str(i+1)+'-'+name+'-f'+str(i+1)+'-c'+chan+'-e'+str(E):
                                 activ = '(%.2e) '%(sigs[skey]['info']['fitacti'])
-                                legs[C][E][i].AddEntry(sigs[skey]['hist'], activ+skey, lopt)
+                                legs[C][E][i].AddEntry(sigs[skey]['hist'], activ+skey, legopt)
                 
                 
                 ### you need to scale the error by the dru scaling and/or the rebinning
@@ -1980,10 +2000,10 @@ def main(argv):
                     if tcount:
                         total[C][E][i].SetLineWidth(1)
                         if ingroups:
-                            legs[C][E][i].AddEntry(total[C][E][i], 'Total', lopt)
+                            legs[C][E][i].AddEntry(total[C][E][i], 'Total', legopt)
                         else:
                             legs[C][E][i].AddEntry(total[C][E][i],
-                                'Total MC (chi2/ndf = '+str(round(chi2/ndf,2))+')', lopt)
+                                'Total MC (chi2/ndf = '+str(round(chi2/ndf,2))+')', legopt)
 
                 ### show the legends?
                 if showlegs and (dkey or bkey):
@@ -1997,7 +2017,7 @@ def main(argv):
                 legs2[C][E].append(leg)
                 legs2[C][E][i].SetFillColor(0)
                 legs2[C][E][i].SetBorderSize(0)
-                lopt = 'LPE'
+                legopt = 'LPE'
 
                 if tcount and dkey:
                     resid[C][E][i].Divide(data[dkey]['hist'], total[C][E][i])
@@ -2086,7 +2106,7 @@ def main(argv):
                 zeros[C][E][i].SetLineWidth(1)
                 zeros[C][E][i].Draw()
                 
-                #legs2[C][E][i].AddEntry(resid[C][E][i],'data / MC',lopt)
+                #legs2[C][E][i].AddEntry(resid[C][E][i],'data / MC',legopt)
                 #legs2[C][E][i].Draw()
                 #---------------------------------------------------------
             

@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 
-# 2018-12-11
-
-# add I126 and I129
-# add plastic
+# 2019-01-11
+# for v300 and later
 
 import os
 
@@ -11,6 +9,7 @@ allTheThings = [
     ['nai-surf-10um','Pb210','Pb210','GRND'],
     ['teflon-bulk','Pb210','Pb210','GRND'],
     ['copper','Co60','Co60','GRND'],
+    ['coppercase','Co60','Co60','GRND'],
     ['internal','Sn113','Sn113','GRND'],
     ['internal','Cd109','Cd109','GRND'],
     ['internal','H3','H3','GRND'],
@@ -102,14 +101,19 @@ for thing in allTheThings:
     print filename
     
     ws='  '
-    output=''
-    ### all crystals
     for i in range(1, 10):
-    ### just LSveto
-    #for i in [9]:
-        output += 'B'+ws+'SM'+ws+str(i)+ws+thing[0]+ws+thing[1]+ws+thing[2]+ws+thing[3]+ws+'1'+ws+'0.1'+ws+'10'+ws+'./dummy.root\n'
+        output = 'B'+ws+\
+                 str(i)+ws+\
+                 thing[0]+ws+\
+                 thing[1]+ws+\
+                 thing[2]+ws+\
+                 thing[3]+ws+\
+                 '1'+ws+\
+                 '0.1'+ws+\
+                 '10'+ws+\
+                 'v4.0.1'+ws+\
+                 './dummy.root\n'
     
     with open(os.path.join('./temp', filename), 'w') as fconf:
         fconf.write(output)
-
 
