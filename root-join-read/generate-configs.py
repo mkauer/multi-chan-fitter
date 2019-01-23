@@ -1,7 +1,11 @@
 #!/usr/bin/env python
 
-# 2019-01-11
-# for v300 and later
+# 2019-01-23
+
+# add pmt U235
+# add internal Te121
+# add internal U235
+# updated format for v300
 
 import os
 
@@ -17,11 +21,15 @@ allTheThings = [
     ['internal','I125','I125','GRND'],
     ['internal','I126','I126','GRND'],
     ['internal','I129','I129','GRND'],
+    ['internal','Te121','Te121','GRND'],
     ['internal','Te121m','Te121m','GRND'],
     ['internal','Te123m','Te123m','GRND'],
     ['internal','Te125m','Te125m','GRND'],
     ['internal','Te127m','Te127m','GRND'],
     ['internal','K40','K40','GRND'],
+    ['internal','U235','U235','GRND'],
+    ['internal','U235','U235','Pa231'],
+    ['internal','U235','Pa231','GRND'],
     ['internal','U238','U238','GRND'],
     ['internal','U238','U238','Pb210'],
     ['internal','U238','U238','Th230'],
@@ -35,6 +43,9 @@ allTheThings = [
     ['internal','Th232','Ra228','Th228'],
     ['internal','Th232','Th228','GRND'],
     ['pmt','K40','K40','GRND'],
+    ['pmt','U235','U235','GRND'],
+    ['pmt','U235','U235','Pa231'],
+    ['pmt','U235','Pa231','GRND'],
     ['pmt','U238','U238','GRND'],
     ['pmt','U238','U238','Pb210'],
     ['pmt','U238','U238','Th230'],
@@ -101,18 +112,19 @@ for thing in allTheThings:
     print filename
     
     ws='  '
+    output=''
     for i in range(1, 10):
-        output = 'B'+ws+\
-                 str(i)+ws+\
-                 thing[0]+ws+\
-                 thing[1]+ws+\
-                 thing[2]+ws+\
-                 thing[3]+ws+\
-                 '1'+ws+\
-                 '0.1'+ws+\
-                 '10'+ws+\
-                 'v4.0.1'+ws+\
-                 './dummy.root\n'
+        output += 'B'+ws+\
+                  str(i)+ws+\
+                  thing[0]+ws+\
+                  thing[1]+ws+\
+                  thing[2]+ws+\
+                  thing[3]+ws+\
+                  '1'+ws+\
+                  '0.1'+ws+\
+                  '10'+ws+\
+                  'v4.0.1'+ws+\
+                  './dummy.root\n'
     
     with open(os.path.join('./temp', filename), 'w') as fconf:
         fconf.write(output)

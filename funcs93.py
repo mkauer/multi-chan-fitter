@@ -6,10 +6,12 @@
 # 
 # Works with v93 and later versions
 # 
-# version: 2018-12-11
+# version: 2019-01-23
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# + add U235 groupNo 41,42 to groupNum93()
+# + add U235 to groupNum93()
 # + add I129 to groupNum93()
 # - do not init THF1 in makePlots93()
 # + add steel to makePlots93() exceptions
@@ -792,6 +794,12 @@ def groupNum93(info):
     # 22: Ra228 -> Th228
     # 23: Th228 -> ground
 
+    # U235 group numbers
+    # ------------------------
+    # 0: U235 -> ground? (doesn't look like it gets splip up?)
+    # 41: U235 -> Pa231
+    # 42: Pa231 -> ground
+    
     # others
     # ------------------------
     # 31: K40
@@ -802,7 +810,7 @@ def groupNum93(info):
                         'I125',   'I126',   'I129',
                         'Na22',   'H3',
                         'Cd109',  'Sn113',
-                        'Co60' ]:
+                        'Co60']:
         return TCut('(groupNo == 0)')
     
     if info['chst'] == 'K40':
@@ -816,23 +824,35 @@ def groupNum93(info):
     elif info['chst'] == 'Th232': start = 21
     elif info['chst'] == 'Ra228': start = 22
     elif info['chst'] == 'Th228': start = 23
+    elif info['chst'] == 'U235':  start = 41
+    elif info['chst'] == 'Pa231': start = 42
     else: start = -1
     
-    if   info['chsp'] == 'U238':  stop = 11
-    elif info['chsp'] == 'Th230': stop = 12
+    #if   info['chsp'] == 'U238':  stop = 11 # should not be a stop group
+    if   info['chsp'] == 'Th230': stop = 12
     elif info['chsp'] == 'Ra226': stop = 13
     elif info['chsp'] == 'Rn222': stop = 14
     elif info['chsp'] == 'Pb210': stop = 15
-    elif info['chsp'] == 'Th232': stop = 21
+    #elif info['chsp'] == 'Th232': stop = 21 # should not be a stop group
     elif info['chsp'] == 'Ra228': stop = 22
     elif info['chsp'] == 'Th228': stop = 23
-    elif info['chsp'] == 'GRND':  stop = 24
+    #elif info['chsp'] == 'U235':  stop = 41 # should not be a stop group
+    elif info['chsp'] == 'Pa231': stop = 42
+    ### handle the GRND group number better...
+    #elif info['chsp'] == 'GRND':  stop = 16
+    #elif info['chsp'] == 'GRND':  stop = 24
+    #elif info['chsp'] == 'GRND':  stop = 43
+    elif info['chsp'] == 'GRND':
+        if   start in [11,12,13,14,15]: stop = 16
+        elif start in [21,22,23]:       stop = 24
+        elif start in [41,42]:          stop = 43
+        else: stop = -1
     else: stop = -1
 
     if start != -1 and stop != -1:
         return TCut('((groupNo >= '+str(start)+') && (groupNo < '+str(stop)+'))')
     else:
-        print 'ERROR: no groupNo found for -->', info['chst']
+        print 'ERROR: groupNo not found for -->', info['chst']
         sys.exit()
 
 

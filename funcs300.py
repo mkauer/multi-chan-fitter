@@ -899,7 +899,8 @@ def updateBkgsFile300(xstals, bkgsfile, resultsfile, BF='BR'):
     
     newbkgs = './plots/'+bkgsfile[:-4]+'_update.txt'
     output = open(newbkgs, 'w')
-
+    output.write('# -*- sh -*-\n')
+    
     print ''
     print 'INFO: Updating bkgsfile -->',bkgsfile
     print '      To a new bkgsfile -->',newbkgs

@@ -4,11 +4,12 @@
 # 
 # Remove LSveto low-energy from the histograms
 # 
-# version: 2019-01-09
+# version: 2019-01-23
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
-# + add scaleBkgs101() and scaleSigs101() to account for surface area
+# ~ change back to NOT account for surface area - use mBq/kg NaI mass
+# ~ change scaleBkgs101() and scaleSigs101() to account for surface area
 # + add surfArea() calculation for surface components
 # + add plastic to build101() exclude list
 # + add plastic to buildMC101()
@@ -689,10 +690,12 @@ def scaleBkgs101(bkgs, runtime=0):
         
         if f:
             nmass  = cmass(f-1)
-            surf   = surfArea(f-1)
+            surf   = cmass(f-1)
+            #surf   = surfArea(f-1)
         else:
             nmass  = cmass(x-1)
-            surf   = surfArea(x-1)
+            surf   = cmass(x-1)
+            #surf   = surfArea(x-1)
 
         xkgs       = cmass(x-1)
         if x==9: xkgs = 1800.
@@ -770,10 +773,12 @@ def scaleSigs101(sigkeys, sigs, runtime=0):
         
         if f:
             nmass  = cmass(f-1)
-            surf   = surfArea(f-1)
+            surf   = cmass(f-1)
+            #surf   = surfArea(f-1)
         else:
             nmass  = cmass(x-1)
-            surf   = surfArea(x-1)
+            surf   = cmass(x-1)
+            #surf   = surfArea(x-1)
         
         xkgs       = cmass(x-1)
         if x==9: xkgs = 1800.

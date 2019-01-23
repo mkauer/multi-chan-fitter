@@ -12,6 +12,19 @@
 # ====================================================================
 
 
+# 2019-01-23
+#---------------------------------------------------------------------
+# + add Te121 to the fit
+# + add fit time to the printed fit results
+# ~ split U235 into sub-groups 41 and 42 in groupNum93()
+# ~ switch back to representing surface components in mBq/kg
+
+
+# 2019-01-21
+#---------------------------------------------------------------------
+# + add U235 to groupNum93()
+
+
 # 2019-01-11
 #---------------------------------------------------------------------
 # ~ updated config generation scripts for new backgrounds file format

@@ -9,7 +9,7 @@ V = 'v300'
 
 # Prepare for G4.10 simulations and SET2 data
 # 
-# version: 2019-01-11
+# version: 2019-01-23
 # 
 # see CHANGELOG for changes
 ######################################################################
@@ -20,6 +20,7 @@ import socket
 import copy
 import math
 import numpy as np
+import datetime
 
 import ROOT
 from ROOT import *
@@ -44,10 +45,15 @@ debug = 0
 note = 0
 #note = ''
 
-mcfile = 'backgrounds_300.txt'
+#mcfile = 'backgrounds_300.txt' # G4.9 sim
+mcfile = 'backgrounds_301.txt' # G4.10 sim
 
 #mcfile = 'testing-data.txt'
 #mcfile = 'testing-sim.txt'
+#mcfile = 'testing-lsveto.txt'
+#mcfile = 'testing-u235.txt'
+#mcfile = 'testing-te121.txt'
+
 
 print 'INFO: using backgrounds config file -->', mcfile
 
@@ -80,15 +86,13 @@ for i in range(numx):
         
 ### ==========  EXTRA MC OPTIONS  ====================================
 ### which MC to fit globally (to all crystals simultaneously)?
-#globalmc = []
-#globalmc = ['plastic', 'lsveto', 'innersteel', 'steel']
+### this is the default case
 globalmc = ['pmt', 'plastic', 'lsveto', 'innersteel', 'steel']
-#globalmc = ['copper', 'pmt', 'plastic', 'lsveto', 'innersteel', 'steel']
-#globalmc = ['pmt', 'plastic', 'lsveto', 'innersteel', 'steel',
-#            'nai-surf-10um', 'teflon-bulk', 'internal', 'copper']
+### this is a special case for C67 or C679
+#globalmc = ['pmt', 'plastic', 'lsveto', 'innersteel', 'steel', 'nai-surf-10um', 'teflon-bulk', 'internal', 'copper', 'coppercase']
 
 ### include bkgs from 'other' pmts and internals?
-others  = 1
+others = 1
 
 ### plot components in groups? [0,1]
 ingroups = 1
@@ -190,6 +194,8 @@ zeroFitDataError = 1
 def main(argv):
     
     batch = onCup()
+    #batch = 1
+
     
     #-----------------------------------------
     # set as an empty list for default action
@@ -197,7 +203,6 @@ def main(argv):
     xstals = []
     
     if len(argv) > 0:
-        batch = 0
         xstals = []
         for c in argv:
             xstals.append(int(c))
@@ -840,8 +845,15 @@ def main(argv):
         #fit.SetRangeX(0, fmax*numx)
         fit.SetRangeX(0, fitbins)
         
-        ### do the fit
+        #=======================================================================
+        #        MACHEN SIE DAS FITTING!!!
+        #=======================================================================
+        fitStartTime = datetime.datetime.now()
         status = fit.Fit()
+        fitStopTime = datetime.datetime.now()
+        fitTime = int((fitStopTime-fitStartTime).total_seconds())
+        #=======================================================================
+        
         if status != 0:
             print '\n\n*******************  FIT FAILURE  *******************\n\n'
             sys.exit()
@@ -866,6 +878,7 @@ def main(argv):
             fitresults[str(i)].append('returned fit status = '+str(status))
             fitchi2ndf = (chi2/ndf)
             fitresults[str(i)].append('chi2/ndf = %.3g/%s = %.3g'%(chi2,ndf,chi2/ndf))
+            fitresults[str(i)].append('time to complete the fit = '+str(fitTime)+' seconds')
             
             for fskey in fsigkeys:
                 if 'x'+str(i+1) in fskey:

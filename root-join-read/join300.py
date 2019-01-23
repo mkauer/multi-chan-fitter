@@ -19,6 +19,8 @@ ROOT.gErrorIgnoreLevel = kWarning
 
 sys.path.append("/home/mkauer/COSINE/CUP/mc-fitting/")
 sys.path.append("/home/mkauer/mc-fitting/")
+
+### REMEMBER to change the version here!
 from funcs300 import *
 
 local = amLocal()
@@ -40,12 +42,9 @@ def _myself_(argv):
     # or comment out
     #xstal = 2
     
-    ### REMEMBER to change the build version here if it changed!!!
+    ### REMEMBER to change the version here!
     build = 'build300'
-    if xstal: data, bkgs, sigs, runtime = build300(mcfile, 1, 2, 'SM', [xstal])
-    else:     data, bkgs, sigs, runtime = build300(mcfile, 1, 2, 'SM')
 
-    ### create paths and rootfile after processing the data/MC
     if local: outpath = "/home/mkauer/COSINE/CUP/mc-fitting/root-join-read/"+build+'/'
     else:     outpath = "/home/mkauer/mc-fitting/root-join-read/"+build+'/'
     if xstal: outpath += 'c'+str(xstal)+'/'
@@ -55,6 +54,11 @@ def _myself_(argv):
     fname = mcfile.split('/')[-1]
     rootfile = build+'-'+fname+'.root'
     rfile = TFile(outpath+rootfile, 'RECREATE')
+    
+    ### REMEMBER to change the version here!
+    if xstal: data, bkgs, sigs, runtime = build300(mcfile, 1, 2, 'SM', [xstal])
+    else:     data, bkgs, sigs, runtime = build300(mcfile, 1, 2, 'SM')
+
     rfile.Write()
     rfile.Close()
     
