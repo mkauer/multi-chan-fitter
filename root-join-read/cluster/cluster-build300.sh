@@ -21,7 +21,8 @@ joinscript=$base/$join
 #for mcfile in `ls $configdir | grep -v data-`
 #for mcfile in c6-data-SET2-V00-04-12 c7-data-SET2-V00-04-12 c8-data-SET2-V00-04-12
 #for mcfile in `ls $configdir | grep U235`
-for mcfile in `ls $configdir | grep Te121`
+#for mcfile in `ls $configdir | grep Te121`
+for mcfile in `ls $configdir | grep -E "copper|teflon|surf"`
 do
     echo -e $mcfile
     file="$clustdir/$build-$mcfile.sh"

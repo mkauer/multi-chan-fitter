@@ -9,7 +9,7 @@ V = 'v300'
 
 # Prepare for G4.10 simulations and SET2 data
 # 
-# version: 2019-01-23
+# version: 2019-01-28
 # 
 # see CHANGELOG for changes
 ######################################################################
@@ -46,17 +46,17 @@ note = 0
 #note = ''
 
 #mcfile = 'backgrounds_300.txt' # G4.9 sim
-mcfile = 'backgrounds_301.txt' # G4.10 sim
+#mcfile = 'backgrounds_301.txt' # G4.10 sim
 
 #mcfile = 'testing-data.txt'
 #mcfile = 'testing-sim.txt'
 #mcfile = 'testing-lsveto.txt'
 #mcfile = 'testing-u235.txt'
 #mcfile = 'testing-te121.txt'
+mcfile = 'testing-surf.txt'
 
 
 print 'INFO: using backgrounds config file -->', mcfile
-
 
 ### ==========  OPTIMIZATION OPTIONS  ================================
 ### MC smoothing? Specify a smoothing window in +/- number of bins
@@ -95,10 +95,10 @@ globalmc = ['pmt', 'plastic', 'lsveto', 'innersteel', 'steel']
 others = 1
 
 ### plot components in groups? [0,1]
-ingroups = 1
+ingroups = 0
 
 ### show the total? [0,1]
-showTotal = 1
+showTotal = 0
 
 ### show the legends? [0,1]
 showlegs = 1
@@ -1749,8 +1749,6 @@ def main(argv):
                     #if i==8: total[C][E][i].SetAxisRange(2e-4, 2e0, 'y')
                 #else: total[C][E][i].GetYaxis().SetTitle('arb. counts')
 
-                # just draw to show plots
-                if not showTotal: total[C][E][i].Draw()
                 
                 resid[C][E][i].Rebin(plotRebin)
                 #resid[C][E][i].Scale(1./float(plotRebin))
@@ -1850,6 +1848,7 @@ def main(argv):
                         
                         #if ingroups: legs[C][E][i].AddEntry(data[dkey]['hist'], 'Data', legopt)
                         #else: legs[C][E][i].AddEntry(data[dkey]['hist'], dkey+' ('+str(days)+' days)', legopt)
+
                         
                 tcount = 0
                 bkey = 0
@@ -2017,7 +2016,11 @@ def main(argv):
                         else:
                             legs[C][E][i].AddEntry(total[C][E][i],
                                 'Total MC (chi2/ndf = '+str(round(chi2/ndf,2))+')', legopt)
-
+                else:
+                    # draw an empty total hist to preserve plot box layout?
+                    if not tcount and not dkey: total[C][E][i].Draw()
+                
+                
                 ### show the legends?
                 if showlegs and (dkey or bkey):
                     legs[C][E][i].Draw('same')

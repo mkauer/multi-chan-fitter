@@ -12,6 +12,7 @@ import os
 allTheThings = [
     ['nai-surf-10um','Pb210','Pb210','GRND'],
     ['teflon-bulk','Pb210','Pb210','GRND'],
+    ['teflon-surf','Pb210','Pb210','GRND'],
     ['copper','Co60','Co60','GRND'],
     ['coppercase','Co60','Co60','GRND'],
     ['internal','Sn113','Sn113','GRND'],

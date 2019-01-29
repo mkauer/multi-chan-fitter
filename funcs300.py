@@ -4,10 +4,11 @@
 # 
 # Remove LSveto low-energy from the histograms
 # 
-# version: 2019-01-11
+# version: 2019-01-28
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# ~ specify the crystal number for surface components in mcPath300()
 # + add updateBkgsFile300()
 # + add mcPath101() and mcPath300()
 # + add calib300()
@@ -427,10 +428,8 @@ def buildMC300(info, mc):
     else:
         
         ### select correct paths for simulation files
-        if info['sim'] == 'v3.1.1':
-            path1, path2, pushpasMC = mcPath101(info)
-        elif info['sim'] == 'v4.0.1':
-            path1, path2, pushpasMC = mcPath300(info)
+        if   info['sim'] == 'v3.1.1': path1, path2, pushpasMC = mcPath101(info)
+        elif info['sim'] == 'v4.0.1': path1, path2, pushpasMC = mcPath300(info)
         else:
             print 'ERROR: simulation version not valid -->',info['sim']
             sys.exit()
@@ -543,54 +542,67 @@ def buildMC300(info, mc):
                     pmt2 = str((int(info['from'])*2)-1)
                     
                     volumeCut = TCut('(1)')
+                    
                     if info['loca'] == 'internal':
-                        #volumeCut = TCut('(primVolumeName == "NaIDet0'+str(i+1)+'Crystal")')
+                        #volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['xstl'])+'Crystal")')
                         volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['from'])+'Crystal")')
                         
                     elif 'internalsurf' in info['loca']:
-                        volumeCut = TCut('(primVolumeName == "NaIDet0'+str(i+1)+'Crystal")')
-                    
+                        # Estellas MC
+                        #volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['xstl'])+'Crystal")')
+                        volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['from'])+'Crystal")')
+                        
                     elif 'naisurf' in info['loca']:
-                        # Pushpas C7 Surface MC
-                        volumeCut = TCut('(primVolumeName == "NaIDet07Crystal")')
-                    
+                        # Govindas MC
+                        #volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['xstl'])+'Crystal")')
+                        volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['from'])+'Crystal")')
+                        if pushpasMC: volumeCut = TCut('(primVolumeName == "NaIDet07Crystal")')
+                        
                     elif info['loca'] == 'teflon':
-                        volumeCut = TCut('(primVolumeName == "NaIDet0'+str(i+1)+'Teflon")')
-
+                        #volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['xstl'])+'Teflon")')
+                        volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['from'])+'Teflon")')
+                        
                     elif info['loca'] == 'teflonbulk':
-                        # Pushpas C7 Surface MC
-                        volumeCut = TCut('(primVolumeName == "NaIDet07Teflon")')
-                    
+                        # Govindas MC
+                        #volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['xstl'])+'Teflon")')
+                        volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['from'])+'Teflon")')
+                        if pushpasMC: volumeCut = TCut('(primVolumeName == "NaIDet07Teflon")')
+                        
                     elif 'teflonsurf' in info['loca']:
                         # Estellas MC
-                        volumeCut = TCut('(primVolumeName == "NaIDet0'+str(i+1)+'Teflon")')
-                        # Pushpas C7 Surface MC
+                        #volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['xstl'])+'Teflon")')
+                        volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['from'])+'Teflon")')
                         if pushpasMC: volumeCut = TCut('(primVolumeName == "NaIDet07Teflon")')
-                    
+                        
                     elif 'cusurf' in info['loca']:
                         # Estellas MC
-                        volumeCut = TCut('(primVolumeName == "NaIDet0'+str(i+1)+'Case")')
-                    
+                        #volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['xstl'])+'Case")')
+                        volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['from'])+'Case")')
+                        
                     elif info['loca'] == 'cucase':
-                        volumeCut = TCut('(primVolumeName == "NaIDet0'+str(i+1)+'Case")')
-
+                        #volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['xstl'])+'Case")')
+                        volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['from'])+'Case")')
+                        
                     elif info['loca'] == 'coppercase':
-                        # Pushpas MC
-                        volumeCut = TCut('((primVolumeName == "NaIDet07Fringe0")'
-                                    +' || (primVolumeName == "NaIDet07Fringe1")'
-                                    +' || (primVolumeName == "NaIDet07Case"))')
-                    
+                        # Govindas MC
+                        #volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['xstl'])+'Case")')
+                        volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['from'])+'Case")')
+                        if pushpasMC:
+                            volumeCut = TCut('((primVolumeName == "NaIDet07Fringe0")'
+                                             +' || (primVolumeName == "NaIDet07Fringe1")'
+                                             +' || (primVolumeName == "NaIDet07Case"))')
+                        
                     elif info['loca'] == 'copper':
                         # Pushpas MC
                         volumeCut = TCut('((primVolumeName == "NaIDet0'+str(info['from'])+'Fringe0")'
-                                    +' || (primVolumeName == "NaIDet0'+str(info['from'])+'Fringe1")'
-                                    +' || (primVolumeName == "NaIDet0'+str(info['from'])+'Case"))')
-                    
+                                         +' || (primVolumeName == "NaIDet0'+str(info['from'])+'Fringe1")'
+                                         +' || (primVolumeName == "NaIDet0'+str(info['from'])+'Case"))')
+                        
                     elif info['loca'] == 'pmt':
                         volumeCut = TCut('(((primPMTid[0] == '+pmt1+')'
-                                    +' || (primPMTid[0] == '+pmt2+'))'
-                                    +' && primVolumeName == "phys_pmt")')
-                    
+                                         +' || (primPMTid[0] == '+pmt2+'))'
+                                         +' && primVolumeName == "phys_pmt")')
+                        
                     ### I do not use this extpmt tag anymore
                     #elif info['loca'] == 'extpmt':
                     #    volumeCut = TCut('((primPMTid[0] != '+pmt1+') && (primPMTid[0] != '+pmt2+'))')
@@ -599,13 +611,15 @@ def buildMC300(info, mc):
                         volumeCut = TCut('(primVolumeName == "lsveto")')
                     
                     elif info['loca'] == 'lsvetoair':
-                        volumeCut = TCut('((primVolumeName == "DetPMTCover") || (primVolumeName == "DetPMTEnvelope"))')
+                        volumeCut = TCut('((primVolumeName == "DetPMTCover")'
+                                         +' || (primVolumeName == "DetPMTEnvelope"))')
 
                     elif info['loca'] == 'airshield':
                         volumeCut = TCut('(primVolumeName == "LSVetoAirRoom")')
                         
                     elif info['loca'] == 'steel':
-                        volumeCut = TCut('((primVolumeName == "SteelSupport") || (primVolumeName == "SteelSupportTop"))')
+                        volumeCut = TCut('((primVolumeName == "SteelSupport")'
+                                         +' || (primVolumeName == "SteelSupportTop"))')
                         
                     elif info['loca'] == 'innersteel':
                         volumeCut = TCut('(primVolumeName == "InnerSteel")')
@@ -644,8 +658,13 @@ def buildMC300(info, mc):
                     mc[key]['generated_hist'] = temp2
                     generated = temp2.GetEntries()
                     if generated <= 0:
-                        print 'ERROR: no events generated for -->', info['floca'], info['isof']
-                        sys.exit()
+                        if int(info['xstl']) == int(info['from']):
+                            print 'ERROR: no events generated for -->', info['floca'], info['isof'],\
+                                'xstl', info['xstl'], 'from', info['from']
+                            sys.exit()
+                        else:
+                            print 'WARNING: no events generated for -->', info['floca'], info['isof'],\
+                                'xstl', info['xstl'], 'from', info['from']
                     mc[key]['generated'] = generated
                     #---------------------------------------------------------------------
                     
@@ -707,8 +726,10 @@ def buildMC300(info, mc):
                     if (c=='S' and e==0) or (c=='M' and e==1):
                         print 'DEBUG:', key, 'generated events =', generated
                         print 'DEBUG:', key, 'detected events =', detected
-                        print 'DEBUG:', key, 'efficiency =', round(100*detected/generated, 2), '%'
-                    
+                        try: effic = round(100*detected/generated, 2)
+                        except: effic = 0.0
+                        print 'DEBUG:', key, 'efficiency =', effic, '%'
+                        
         else:
             print 'ERROR: no MC files found for -->', \
                 'x'+str(info['xstl']), info['floca'], info['isof']
@@ -833,48 +854,52 @@ def mcPath101(info):
 
 def mcPath300(info):
     
-    ### either use full location-names 'floca'
-    ### OR use the hyphen removed locationnames 'loca'
+    ### use the full location-names 'floca'
     loc = info['floca']
     iso = info['isof']
+    #Cx = 'C'+str(info['xstl'])
+    Cx = 'C*'
     
     name = 'none'
     if loc == 'nai-surf-10um':
         path1 = '/data/MC/COSINE/V4.0.1/reprocessed_SET1'
-        path2 = '*-surfaceNaI-'+iso+'-*root'
-
+        path2 = '*-surfaceNaI-'+Cx+'-10um-'+iso+'-*root'
+        
     elif loc == 'teflon-bulk':
         path1 = '/data/MC/COSINE/V4.0.1/reprocessed_SET1'
-        path2 = '*-bulkTeflon-'+iso+'-*root'
-
+        #path2 = '*-bulkTeflon-'+iso+'-*root'
+        path2 = '*-bulkTeflon-'+Cx+'-'+iso+'-*root'
+        
     elif loc == 'teflon-surf':
         path1 = '/data/MC/COSINE/V4.0.1/reprocessed_SET1'
-        path2 = '*-surfaceTeflon-'+iso+'-*root'
-
+        #path2 = '*-surfaceTeflon-'+iso+'-*root'
+        path2 = '*-surfaceTeflon-'+Cx+'-'+iso+'-*root'
+        
     #elif loc == 'copper':
     #    path1 = '/data/MC/COSINE/V4.0.1/reprocessed_SET1'
     #    path2 = '*-bulkCu-'+iso+'-*root'
-
+    
     elif loc == 'coppercase':
         path1 = '/data/MC/COSINE/V4.0.1/reprocessed_SET1'
-        path2 = '*-bulkCu-'+iso+'-*root'
-
+        #path2 = '*-bulkCu-'+iso+'-*root'
+        path2 = '*-bulkcuCase-'+Cx+'-'+iso+'-*root'
+        
     elif loc == 'internal':
         path1 = '/data/MC/COSINE/V4.0.1/reprocessed_SET1'
         path2 = '*-internal-'+iso+'-*root'
-    
+        
     elif loc == 'pmt':
         path1 = '/data/MC/COSINE/V4.0.1/reprocessed_SET1'
         path2 = '*-pmt-'+iso+'-*root'
-    
+        
     elif loc == 'plastic':
         path1 = '/data/MC/COSINE/V4.0.1/reprocessed_SET1'
         path2 = '*-Acrylic-'+iso+'-*root'
-    
+        
     else:
         print 'ERROR: no location identified for -->',loc
         sys.exit()
-    
+        
     pushpasMC = 0
     return path1, path2, pushpasMC
 

@@ -12,6 +12,16 @@
 # ====================================================================
 
 
+# 2019-01-28
+#---------------------------------------------------------------------
+# ~ fixed the showTotal=0 bit to avoid weird plotting artifacts
+# ~ actually do NOT specify the crystal number for surface components
+#   in mcPath300() because then you can not generate events from the
+#   other surrounding crystals
+# ~ tweaked the primVolumeNames for teflon and copper MC
+# ~ specify the crystal number for surface components in mcPath300()
+
+
 # 2019-01-23
 #---------------------------------------------------------------------
 # + add Te121 to the fit
