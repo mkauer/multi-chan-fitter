@@ -6,10 +6,11 @@
 # 
 # Works with v93 and later versions
 # 
-# version: 2019-01-23
+# version: 2019-01-29
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# + add plastic to makePlots93() exceptions
 # + add U235 groupNo 41,42 to groupNum93()
 # + add U235 to groupNum93()
 # + add I129 to groupNum93()
@@ -708,9 +709,11 @@ def makePlots93(bkgs, combine, others, vcut=0):
                     newkey  = crystal
                     newkey += '-'+location
                     newkey += '-'+isotope
-                    #if location == 'pmt' or location == 'internal':
+                    
                     # add 'steel' exception 2018-10-23
-                    if location != 'lsveto' and location != 'innersteel' and location != 'steel':
+                    # add 'plastic' exception 2019-01-29
+                    if location != 'lsveto' and location != 'innersteel' \
+                      and location != 'steel' and location != 'plastic':
                         newkey += '-f'+crystal[-1]
                     newkey += '-c'+C
                     newkey += '-e'+str(E)
@@ -719,6 +722,8 @@ def makePlots93(bkgs, combine, others, vcut=0):
                     except:
                         #print 'skipping key -->', newkey
                         pass
+                    
+                    #print newkey
                     
                     #if combine and (location == 'pmt' or location == 'internal'):
                     #if combine and (location != 'lsveto' and location != 'innersteel'):
@@ -744,15 +749,16 @@ def makePlots93(bkgs, combine, others, vcut=0):
                     hmax = temp[i-1].GetBinLowEdge(bins+1)
                     kvpb = (hmax-hmin)/bins
                     
+                    temp[i-1].SetLineColor(kBlack)
                     if E:
                         temp[i-1].Rebin(int(10/kvpb))
-                        temp[i-1].SetAxisRange(0, 4000, 'x')
+                        temp[i-1].SetAxisRange(0, 3000, 'x')
                         #temp[i-1].SetAxisRange(1e-3, 1, 'y')
                     else:
                         temp[i-1].Rebin(int(1/kvpb))
-                        temp[i-1].SetAxisRange(0, 200, 'x')
+                        temp[i-1].SetAxisRange(0, 100, 'x')
                         #temp[i-1].SetAxisRange(1e-2, 10, 'y')
-                        
+                    
                     what=''
                     if C == 'S': what += 'Single-hit'
                     if C == 'M': what += 'Multi-hit'

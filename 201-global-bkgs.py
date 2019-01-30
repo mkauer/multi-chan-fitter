@@ -9,7 +9,7 @@ V = 'v201'
 
 # Add global MC that are backgrounds and not signals - deep bug fix
 # 
-# version: 2018-12-14
+# version: 2019-01-30
 # 
 # see CHANGELOG for changes
 ######################################################################
@@ -50,6 +50,9 @@ note = 0
 #mcfile = 'backgrounds_203.txt' # plastic
 #mcfile = 'backgrounds_204.txt' # lsveto again
 
+mcfile = 'backgrounds_205.txt' # fixed surface normalization 
+
+
 print 'INFO: using backgrounds config file -->', mcfile
 
 
@@ -67,7 +70,8 @@ fitchans = 'SM'
 fitranges = [{} for x in range(numx)]
 for i in range(numx):
     ### format = [rebin, xmin, xmax]
-    fitranges[i]['S0'] = [3,  6,   76]  # single-hit low-energy
+    #fitranges[i]['S0'] = [3,  6,   76]  # single-hit low-energy
+    fitranges[i]['S0'] = [3,  6,  106]  # single-hit low-energy
     fitranges[i]['S1'] = [4, 70, 2770]  # single-hit high-energy
     fitranges[i]['M0'] = [3,  2,   72]  # multi-hit low-energy
     fitranges[i]['M1'] = [4, 70, 2770]  # multi-hit high-energy

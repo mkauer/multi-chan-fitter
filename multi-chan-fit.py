@@ -9,7 +9,7 @@ V = 'v300'
 
 # Prepare for G4.10 simulations and SET2 data
 # 
-# version: 2019-01-28
+# version: 2019-01-29
 # 
 # see CHANGELOG for changes
 ######################################################################
@@ -46,14 +46,14 @@ note = 0
 #note = ''
 
 #mcfile = 'backgrounds_300.txt' # G4.9 sim
-#mcfile = 'backgrounds_301.txt' # G4.10 sim
+mcfile = 'backgrounds_301.txt' # G4.10 sim
 
 #mcfile = 'testing-data.txt'
 #mcfile = 'testing-sim.txt'
 #mcfile = 'testing-lsveto.txt'
 #mcfile = 'testing-u235.txt'
 #mcfile = 'testing-te121.txt'
-mcfile = 'testing-surf.txt'
+#mcfile = 'testing-surf.txt'
 
 
 print 'INFO: using backgrounds config file -->', mcfile
@@ -72,7 +72,8 @@ fitchans = 'SM'
 fitranges = [{} for x in range(numx)]
 for i in range(numx):
     ### format = [rebin, xmin, xmax]
-    fitranges[i]['S0'] = [3,  6,   76]  # single-hit low-energy
+    #fitranges[i]['S0'] = [3,  6,   76]  # single-hit low-energy
+    fitranges[i]['S0'] = [3,  6,  106]  # single-hit low-energy
     fitranges[i]['S1'] = [4, 70, 2770]  # single-hit high-energy
     fitranges[i]['M0'] = [3,  2,   72]  # multi-hit low-energy
     fitranges[i]['M1'] = [4, 70, 2770]  # multi-hit high-energy
@@ -95,10 +96,10 @@ globalmc = ['pmt', 'plastic', 'lsveto', 'innersteel', 'steel']
 others = 1
 
 ### plot components in groups? [0,1]
-ingroups = 0
+ingroups = 1
 
 ### show the total? [0,1]
-showTotal = 0
+showTotal = 1
 
 ### show the legends? [0,1]
 showlegs = 1
@@ -2258,6 +2259,7 @@ def main(argv):
     try: del canvs
     except: pass
     
+    print 'Time to complete the fit = '+str(fitTime)+' sec \n'
     
     if not batch:
         raw_input('[Enter] to quit \n')

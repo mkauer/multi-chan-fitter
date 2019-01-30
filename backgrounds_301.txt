@@ -9,6 +9,14 @@
 # 1 ppm K40   = 30.960 mBq/kg
 #-----------------------------------------------------------
 
+# 2019-01-30
+# test fitting to internal pb210
+# test teflon-surf 
+# tweaked stuff in C6
+
+# 2019-01-29
+# tweaked a bunch of stuff in C7
+
 # 2019-01-23
 # add Te121 to C7
 # go back to surface components quoted in mBq/kg
@@ -354,6 +362,11 @@ FR	4	innersteel	U238	U238	Th230	6.50e+01	0.1	10	v4.0.1	./root-join-read/build101
 #==========================================================================================================================================
 #                  Crystal  6
 #---------------------------------------------------------------------
+# 2019-01-30
+#   test fitting to pb210
+#   test teflon-surf
+#   increase Te123m upper bound 2 --> 5
+#   remove innersteel U238
 # 2019-01-23
 #   set nai-surf, teflon, and copper activity to around the individual fit
 # 2018-12-14
@@ -363,11 +376,11 @@ FR	4	innersteel	U238	U238	Th230	6.50e+01	0.1	10	v4.0.1	./root-join-read/build101
 """
 FR	6	nai-surf-10um	Pb210	Pb210	GRND	1	0	10	v4.0.1	./root-join-read/build300/build300-nai-surf-10umPb210_GRND.root
 FR	6	teflon-bulk	Pb210	Pb210	GRND    5	0	3	v4.0.1	./root-join-read/build300/build300-teflon-bulkPb210_GRND.root
-#FR	6	copper		Co60	Co60	GRND	5	0	2	v4.0.1	./root-join-read/build101/build101-copperCo60_GRND.root
 FR	6	coppercase	Co60	Co60	GRND	5	0	2	v4.0.1	./root-join-read/build300/build300-coppercaseCo60_GRND.root
 """
 FR	6	nai-surf-10um	Pb210	Pb210	GRND	1e-1	0.1	10	v4.0.1	./root-join-read/build300/build300-nai-surf-10umPb210_GRND.root
-FR	6	teflon-bulk	Pb210	Pb210	GRND    1e-2	0.1	10	v4.0.1	./root-join-read/build300/build300-teflon-bulkPb210_GRND.root
+FR	6	teflon-bulk	Pb210	Pb210	GRND    1e-1	0.1	10	v4.0.1	./root-join-read/build300/build300-teflon-bulkPb210_GRND.root
+#FR	6	teflon-surf	Pb210	Pb210	GRND    1e-1	0.1	10	v4.0.1	./root-join-read/build300/build300-teflon-surfPb210_GRND.root
 FR	6	coppercase	Co60	Co60	GRND	5e-1	0.1	10	v4.0.1	./root-join-read/build300/build300-coppercaseCo60_GRND.root
 
 FR	6	internal	Sn113	Sn113	GRND	0.1	0	2	v4.0.1	./root-join-read/build300/build300-internalSn113_GRND.root
@@ -377,13 +390,14 @@ FR	6	internal	Na22	Na22	GRND	1	0	2	v4.0.1	./root-join-read/build300/build300-int
 FR	6	internal	I125	I125	GRND	0.2	0	3	v4.0.1	./root-join-read/build300/build300-internalI125_GRND.root
 FR	6	internal	I129	I129	GRND	1	0	3	v4.0.1	./root-join-read/build300/build300-internalI129_GRND.root
 FR	6	internal	Te121m	Te121m	GRND	0.2	0	2	v4.0.1	./root-join-read/build300/build300-internalTe121m_GRND.root
-FR	6	internal	Te123m	Te123m	GRND	0.1	0	2	v4.0.1	./root-join-read/build300/build300-internalTe123m_GRND.root
+FR	6	internal	Te123m	Te123m	GRND	0.1	0	5	v4.0.1	./root-join-read/build300/build300-internalTe123m_GRND.root
 FR	6	internal	Te125m	Te125m	GRND	0.1	0	2	v4.0.1	./root-join-read/build300/build300-internalTe125m_GRND.root
 FR	6	internal	Te127m	Te127m	GRND	0.2	0	2	v4.0.1	./root-join-read/build300/build300-internalTe127m_GRND.root
 
 FR	6	internal	K40	K40	GRND	0.50e+00	0.8	1.2	v4.0.1	./root-join-read/build300/build300-internalK40_GRND.root
 FR	6	internal	U238	U238	Th230	3.28e-04	0.8	1.2	v4.0.1	./root-join-read/build300/build300-internalU238_Th230.root
-BR	6	internal	Pb210	Pb210	GRND	1.52e+00	0.9	1.1	v4.0.1	./root-join-read/build300/build300-internalPb210_GRND.root
+FR	6	internal	Pb210	Pb210	GRND	1.52e+00	0.9	1.1	v4.0.1	./root-join-read/build300/build300-internalPb210_GRND.root
+#BR	6	internal	Pb210	Pb210	GRND	1.52e+00	0.9	1.1	v4.0.1	./root-join-read/build300/build300-internalPb210_GRND.root
 FR	6	internal	Th232	Ra228	Th228	2.30e-03	0.8	1.2	v4.0.1	./root-join-read/build300/build300-internalRa228_Th228.root
 FR	6	internal	Th232	Th228	GRND	2.30e-03	0.8	1.2	v4.0.1	./root-join-read/build300/build300-internalTh228_GRND.root
 
@@ -418,7 +432,7 @@ FR	6	plastic		Th232	Ra228	Th228	3.30e+00	0.01	10	v4.0.1	./root-join-read/build30
 FR	6	plastic		Th232	Th228	GRND	3.30e+00	0.01	10	v4.0.1	./root-join-read/build300/build300-plasticTh228_GRND.root
 """
 FR	6	innersteel	Th232	Th228	GRND	3.80e+01	0.1	10	v4.0.1	./root-join-read/build101/build101-innersteelTh228_GRND.root
-FR	6	innersteel	U238	U238	Th230	6.50e+01	0.1	10	v4.0.1	./root-join-read/build101/build101-innersteelU238_Th230.root
+#FR	6	innersteel	U238	U238	Th230	6.50e+01	0.1	10	v4.0.1	./root-join-read/build101/build101-innersteelU238_Th230.root
 #FR	6	steel		Th232	Th228	GRND	3.80e+01	0.1	10	v4.0.1	./root-join-read/build101/build101-steelTh228_GRND.root
 #FR	6	steel		U238	U238	Th230	6.50e+01	0.1	10	v4.0.1	./root-join-read/build101/build101-steelU238_Th230.root
 
@@ -426,6 +440,21 @@ FR	6	innersteel	U238	U238	Th230	6.50e+01	0.1	10	v4.0.1	./root-join-read/build101
 #==========================================================================================================================================
 #                  Crystal  7
 #---------------------------------------------------------------------
+# 2019-01-30
+#   test fitting to pb210
+#   test teflon-surf
+# 2019-01-29
+#   still fit to internal Pb210
+#   remove I126
+#   add Te127m back in with 106 keV fit bound
+#   -----
+#   tested fixing Na22 to 0.5
+#   remove innersteel U238
+#   remove Te121
+#   fit to internal Pb210 again [0.9, 1.0]
+#   increase Te123m upper bound 2 --> 5
+#   include I126
+#   remove Te127m
 # 2019-01-23
 #   plastic wont fit unless going back to original surface bounds...
 #   test including Te121
@@ -437,10 +466,10 @@ FR	6	innersteel	U238	U238	Th230	6.50e+01	0.1	10	v4.0.1	./root-join-read/build101
 """
 FR	7	nai-surf-10um	Pb210	Pb210	GRND	1	0	10	v4.0.1	./root-join-read/build300/build300-nai-surf-10umPb210_GRND.root
 FR	7	teflon-bulk	Pb210	Pb210	GRND    5	0	3	v4.0.1	./root-join-read/build300/build300-teflon-bulkPb210_GRND.root
-#FR	7	copper		Co60	Co60	GRND	5	0	2	v4.0.1	./root-join-read/build101/build101-copperCo60_GRND.root
 FR	7	coppercase	Co60	Co60	GRND	5	0	2	v4.0.1	./root-join-read/build300/build300-coppercaseCo60_GRND.root
 """
 FR	7	nai-surf-10um	Pb210	Pb210	GRND	5e-2	0.1	10	v4.0.1	./root-join-read/build300/build300-nai-surf-10umPb210_GRND.root
+#FR	7	teflon-surf	Pb210	Pb210	GRND    1e-1	0.1	10	v4.0.1	./root-join-read/build300/build300-teflon-surfPb210_GRND.root
 FR	7	teflon-bulk	Pb210	Pb210	GRND    1e-1	0.1	10	v4.0.1	./root-join-read/build300/build300-teflon-bulkPb210_GRND.root
 FR	7	coppercase	Co60	Co60	GRND	5e-2	0.1	10	v4.0.1	./root-join-read/build300/build300-coppercaseCo60_GRND.root
 
@@ -448,17 +477,20 @@ FR	7	internal	Sn113	Sn113	GRND	0.1	0	2	v4.0.1	./root-join-read/build300/build300
 FR	7	internal	Cd109	Cd109	GRND	0.1	0	2	v4.0.1	./root-join-read/build300/build300-internalCd109_GRND.root
 FR	7	internal	H3	H3	GRND	1	0	2	v4.0.1	./root-join-read/build300/build300-internalH3_GRND.root
 FR	7	internal	Na22	Na22	GRND	1	0	2	v4.0.1	./root-join-read/build300/build300-internalNa22_GRND.root
+#BR	7	internal	Na22	Na22	GRND	0.5	0	2	v4.0.1	./root-join-read/build300/build300-internalNa22_GRND.root
 FR	7	internal	I125	I125	GRND	0.2	0	3	v4.0.1	./root-join-read/build300/build300-internalI125_GRND.root
+#FR	7	internal	I126	I126	GRND	0.2	0	3	v4.0.1	./root-join-read/build300/build300-internalI126_GRND.root
 FR	7	internal	I129	I129	GRND	1	0	3	v4.0.1	./root-join-read/build300/build300-internalI129_GRND.root
-FR	7	internal	Te121	Te121	GRND	0.2	0	2	v4.0.1	./root-join-read/build300/build300-internalTe121_GRND.root
+#FR	7	internal	Te121	Te121	GRND	0.2	0	2	v4.0.1	./root-join-read/build300/build300-internalTe121_GRND.root
 FR	7	internal	Te121m	Te121m	GRND	0.2	0	2	v4.0.1	./root-join-read/build300/build300-internalTe121m_GRND.root
-FR	7	internal	Te123m	Te123m	GRND	0.1	0	2	v4.0.1	./root-join-read/build300/build300-internalTe123m_GRND.root
+FR	7	internal	Te123m	Te123m	GRND	0.1	0	5	v4.0.1	./root-join-read/build300/build300-internalTe123m_GRND.root
 FR	7	internal	Te125m	Te125m	GRND	0.1	0	2	v4.0.1	./root-join-read/build300/build300-internalTe125m_GRND.root
 FR	7	internal	Te127m	Te127m	GRND	0.2	0	2	v4.0.1	./root-join-read/build300/build300-internalTe127m_GRND.root
 
 FR	7	internal	K40	K40	GRND	0.56e+00	0.8	1.2	v4.0.1	./root-join-read/build300/build300-internalK40_GRND.root
 FR	7	internal	U238	U238	Th230	3.28e-04	0.8	1.2	v4.0.1	./root-join-read/build300/build300-internalU238_Th230.root
-BR	7	internal	Pb210	Pb210	GRND	1.54e+00	0.9	1.1	v4.0.1	./root-join-read/build300/build300-internalPb210_GRND.root
+FR	7	internal	Pb210	Pb210	GRND	1.54e+00	0.9	1.1	v4.0.1	./root-join-read/build300/build300-internalPb210_GRND.root
+#BR	7	internal	Pb210	Pb210	GRND	1.54e+00	0.9	1.1	v4.0.1	./root-join-read/build300/build300-internalPb210_GRND.root
 FR	7	internal	Th232	Ra228	Th228	2.30e-03	0.8	1.2	v4.0.1	./root-join-read/build300/build300-internalRa228_Th228.root
 FR	7	internal	Th232	Th228	GRND	2.30e-03	0.8	1.2	v4.0.1	./root-join-read/build300/build300-internalTh228_GRND.root
 
@@ -493,7 +525,7 @@ FR	7	plastic		Th232	Ra228	Th228	3.30e+00	0.01	10	v4.0.1	./root-join-read/build30
 FR	7	plastic		Th232	Th228	GRND	3.30e+00	0.01	10	v4.0.1	./root-join-read/build300/build300-plasticTh228_GRND.root
 """
 FR	7	innersteel	Th232	Th228	GRND	3.80e+01	0.1	10	v4.0.1	./root-join-read/build101/build101-innersteelTh228_GRND.root
-FR	7	innersteel	U238	U238	Th230	6.50e+01	0.1	10	v4.0.1	./root-join-read/build101/build101-innersteelU238_Th230.root
+#FR	7	innersteel	U238	U238	Th230	6.50e+01	0.1	10	v4.0.1	./root-join-read/build101/build101-innersteelU238_Th230.root
 #FR	7	steel		Th232	Th228	GRND	3.80e+01	0.1	10	v4.0.1	./root-join-read/build101/build101-steelTh228_GRND.root
 #FR	7	steel		U238	U238	Th230	6.50e+01	0.1	10	v4.0.1	./root-join-read/build101/build101-steelU238_Th230.root
 
@@ -501,15 +533,17 @@ FR	7	innersteel	U238	U238	Th230	6.50e+01	0.1	10	v4.0.1	./root-join-read/build101
 #==========================================================================================================================================
 #                  Crystal  9  (lsveto)
 #---------------------------------------------------------------------
+# 2019-01-29
+#   remove innersteel U238
 # 2019-01-23
 #   set nai-surf, teflon, and copper activity to around the C7 individual fit
 # 2018-12-14
 #   fix internal activities what I measured with c67 including all backgrounds as globally fit
 #==========================================================================================================================================
 ### roughly from C7 fit
+
 BR	9	nai-surf-10um	Pb210	Pb210	GRND	5e-2	0.1	10	v4.0.1	./root-join-read/build300/build300-nai-surf-10umPb210_GRND.root
 BR	9	teflon-bulk	Pb210	Pb210	GRND	1e-1	0.1	10	v4.0.1	./root-join-read/build300/build300-teflon-bulkPb210_GRND.root
-#BR	9	copper		Co60	Co60	GRND	5e-2	0.1	10	v4.0.1	./root-join-read/build101/build101-copperCo60_GRND.root
 BR	9	coppercase	Co60	Co60	GRND	5e-2	0.1	10	v4.0.1	./root-join-read/build300/build300-coppercaseCo60_GRND.root
 
 BR	9	internal	Sn113	Sn113	GRND	2.46e-02	0.1	10	v4.0.1	./root-join-read/build300/build300-internalSn113_GRND.root
@@ -524,7 +558,7 @@ BR	9	internal	Te125m	Te125m	GRND	1.83e-02	0.1	10	v4.0.1	./root-join-read/build30
 BR	9	internal	Te127m	Te127m	GRND	6.78e-02	0.1	10	v4.0.1	./root-join-read/build300/build300-internalTe127m_GRND.root
 BR	9	internal	K40	K40	GRND	4.48e-01	0.1	10	v4.0.1	./root-join-read/build300/build300-internalK40_GRND.root
 BR	9	internal	U238	U238	Th230	3.94e-04	0.1	10	v4.0.1	./root-join-read/build300/build300-internalU238_Th230.root
-BR	9	internal	Pb210	Pb210	GRND	1.54e+00	0.9	1.1	v4.0.1	./root-join-read/build300/build300-internalPb210_GRND.root	
+BR	9	internal	Pb210	Pb210	GRND	1.54e+00	0.9	1.1	v4.0.1	./root-join-read/build300/build300-internalPb210_GRND.root
 BR	9	internal	Th232	Ra228	Th228	1.95e-03	0.1	10	v4.0.1	./root-join-read/build300/build300-internalRa228_Th228.root
 BR	9	internal	Th232	Th228	GRND	2.76e-03	0.1	10	v4.0.1	./root-join-read/build300/build300-internalTh228_GRND.root
 
@@ -561,7 +595,7 @@ FR	9	plastic		Th232	Th228	GRND	3.30e+00	0.01	10	v4.0.1	./root-join-read/build300
 """
 ### from fit to just c9
 FR	9	innersteel	Th232	Th228	GRND	3.80e+01	0.1	10	v4.0.1	./root-join-read/build101/build101-innersteelTh228_GRND.root
-FR	9	innersteel	U238	U238	Th230	6.50e+01	0.1	10	v4.0.1	./root-join-read/build101/build101-innersteelU238_Th230.root
+#FR	9	innersteel	U238	U238	Th230	6.50e+01	0.1	10	v4.0.1	./root-join-read/build101/build101-innersteelU238_Th230.root
 #FR	9	steel		Th232	Th228	GRND	3.80e+01	0.1	10	v4.0.1	./root-join-read/build101/build101-steelTh228_GRND.root
 #FR	9	steel		U238	U238	Th230	6.50e+01	0.1	10	v4.0.1	./root-join-read/build101/build101-steelU238_Th230.root
 
