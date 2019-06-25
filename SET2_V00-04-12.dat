@@ -4,6 +4,7 @@
 
 # ls -1 /data/COSINE/MRGD/phys/V00-04-12/* | grep -vE "M001544|M001546" | sort > ~/SET2_V00-04-12.dat
 
+
 /data/COSINE/MRGD/phys/V00-04-12/mrgd_M001616.root.000
 /data/COSINE/MRGD/phys/V00-04-12/mrgd_M001616.root.001
 /data/COSINE/MRGD/phys/V00-04-12/mrgd_M001616.root.002

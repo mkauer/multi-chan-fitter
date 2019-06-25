@@ -9,7 +9,7 @@ V = 'v300'
 
 # Prepare for G4.10 simulations and SET2 data
 # 
-# version: 2019-01-29
+# version: 2019-04-02
 # 
 # see CHANGELOG for changes
 ######################################################################
@@ -33,6 +33,11 @@ sys.path.append("/home/mkauer/mc-fitting/")
 from funcs300 import *
 
 
+### batch job?
+#print 'HOSTNAME:', socket.gethostname()
+batch = onCup()
+#batch = 1
+
 ### get the number of crystals
 numx = numX()
 
@@ -46,7 +51,8 @@ note = 0
 #note = ''
 
 #mcfile = 'backgrounds_300.txt' # G4.9 sim
-mcfile = 'backgrounds_301.txt' # G4.10 sim
+#mcfile = 'backgrounds_301.txt' # G4.10 sim
+mcfile = 'backgrounds_302.txt' # G4.10 testing U235
 
 #mcfile = 'testing-data.txt'
 #mcfile = 'testing-sim.txt'
@@ -54,6 +60,8 @@ mcfile = 'backgrounds_301.txt' # G4.10 sim
 #mcfile = 'testing-u235.txt'
 #mcfile = 'testing-te121.txt'
 #mcfile = 'testing-surf.txt'
+#mcfile = 'testing-cosmo.txt'
+#mcfile = 'testing-paths.txt'
 
 
 print 'INFO: using backgrounds config file -->', mcfile
@@ -194,19 +202,19 @@ zeroFitDataError = 1
 
 def main(argv):
     
-    batch = onCup()
-    #batch = 1
-
-    
     #-----------------------------------------
     # set as an empty list for default action
     #-----------------------------------------
-    xstals = []
-    
     if len(argv) > 0:
-        xstals = []
+        temp = []
         for c in argv:
-            xstals.append(int(c))
+            temp.extend(list(c))
+        temp = [int(s) for s in temp]
+        xstals = list(set(temp))
+        xstals.sort()
+        #print 'xstals -->', xstals
+    else:
+        xstals = []
     #-----------------------------------------
     #-----------------------------------------
     
@@ -214,13 +222,21 @@ def main(argv):
     gStyle.SetPalette (1)
     gStyle.SetOptStat ('')
     gStyle.SetOptFit  (0)
+
+    ### where am I running?
+    if onCup(): here = '/home/mkauer/mc-fitting'
+    else: here = '/home/mkauer/COSINE/CUP/mc-fitting'
     
     ### for saving the plots...
-    if not os.path.exists('./plots'): 
-        os.makedirs('./plots')
-    
-    if not os.path.exists(mcfile):
-        print '\nERROR: could not find backgrounds file -->', mcfile
+    plotdir = here+'/plots/c'
+    for x in xstals:
+        plotdir += str(x)
+    if not os.path.exists(plotdir): 
+        os.makedirs(plotdir)
+
+    #mcfile = os.path.join(here, mcfile)
+    if not os.path.exists(os.path.join(here, mcfile)):
+        print '\nERROR: could not find backgrounds file -->', os.path.join(here, mcfile)
         sys.exit()
     
     
@@ -228,7 +244,7 @@ def main(argv):
     #-----------------------------------------------------------------
     #-----------------------------------------------------------------
     allchans = uniqString(fitchans+pltchans)
-    data, bkgs, sigs, runtime = build300(mcfile, others, reuse, allchans, xstals)
+    data, bkgs, sigs, runtime = build300(os.path.join(here, mcfile), others, reuse, allchans, xstals)
     print 'INFO: runtime =', runtime, '(seconds)'
 
     datkeys = sortDataKeys92(data)
@@ -365,6 +381,10 @@ def main(argv):
     
     resultsfile = ''
     fitting = 0
+    fitStartTime = 0
+    status = 0
+    fitStopTime = 0
+    fitTime = 0
     
     if len(sigs) > 0:
         
@@ -1096,7 +1116,7 @@ def main(argv):
             resultskeys.sort()
                     
             ### write results to file
-            resultsfile = './plots/'+save+'_fit-results.txt'
+            resultsfile = os.path.join(plotdir, save+'_fit-results.txt')
             outfile = open(resultsfile, 'w')
             for key in resultskeys:
                 if int(key)+1 in justthese:
@@ -1105,13 +1125,13 @@ def main(argv):
             outfile.close()
             
             ### create the updated backgrounds file
-            #shutil.copyfile(mcfile, './plots/'+mcfile)
+            #shutil.copyfile(mcfile, plotdir+'/'+mcfile)
             if updateMCfile:
-                #newbkgs = './plots/'+mcfile[:-4]+'_update.txt'
-                updateBkgsFile300(xstals, mcfile, resultsfile)
+                #newbkgs = plotdir+'/'+mcfile[:-4]+'_update.txt'
+                updateBkgsFile300(xstals, os.path.join(here, mcfile), resultsfile, plotdir)
             
             ### save histograms to a rootfile
-            rootoutfile = TFile("./plots/histograms.root", "RECREATE")
+            rootoutfile = TFile(plotdir+"/histograms.root", "RECREATE")
             for key in sigkeys:
                 sigs[key]['hist'].Write(key)
             for key in bakkeys:
@@ -1386,13 +1406,13 @@ def main(argv):
                     if note: fisave += '_'+str(note)
                     fisave += '_'+str(V)
                 
-                    sepFitPlot.Print(str('./plots/'+fisave+'.png'))
+                    sepFitPlot.Print(plotdir+'/'+fisave+'.png')
                 except:
                     print 'WARNING: could not make plot for xstal-'+str(i+1)
                     continue
             
         fcanv.Update()
-        fcanv.Print('./plots/'+save+'.png')
+        fcanv.Print(plotdir+'/'+save+'.png')
 
         
         ### plot the MEGA combined histograms for fun!
@@ -1618,7 +1638,7 @@ def main(argv):
         if note: msave += '_'+note
         msave += '_'+V
         
-        mcanv.Print('./plots/'+msave+'.png')
+        mcanv.Print(plotdir+'/'+msave+'.png')
         #=============================================================
         #=============================================================
 
@@ -1628,7 +1648,7 @@ def main(argv):
 
     
     ### copy the backgrounds file
-    shutil.copyfile(mcfile, './plots/'+mcfile)
+    shutil.copyfile(os.path.join(here, mcfile), os.path.join(plotdir, mcfile))
     
     
     # plot the lo and hi energy histograms for all channels
@@ -2156,7 +2176,7 @@ def main(argv):
             save += '_'+V
             
             canvs[C][E].Update()
-            canvs[C][E].Print('./plots/'+save+'.png')
+            canvs[C][E].Print(plotdir+'/'+save+'.png')
             
             
             ### Save separate crystal histos?
@@ -2184,7 +2204,7 @@ def main(argv):
                             if note: isave += '_'+str(note)
                             isave += '_'+str(V)
                             
-                            sepPlots[C][E][i].Print(str('./plots/'+isave+'.png'))
+                            sepPlots[C][E][i].Print(plotdir+'/'+isave+'.png')
                         except:
                             print 'WARNING: could not make plot for xstal-'+str(i+1)
                             continue
@@ -2221,7 +2241,7 @@ def main(argv):
                     if note: csave += '_'+str(note)
                     csave += '_'+str(V)
                     
-                    combPlots[i].Print(str('./plots/'+csave+'.png'))
+                    combPlots[i].Print(plotdir+'/'+csave+'.png')
                 except:
                     print 'WARNING: could not make plot for xstal-'+str(i+1)
                     continue
@@ -2261,13 +2281,12 @@ def main(argv):
     
     print 'Time to complete the fit = '+str(fitTime)+' sec \n'
     
-    if not batch:
-        raw_input('[Enter] to quit \n')
+    if not batch: raw_input('[Enter] to quit \n')
+    else: print "Running in batch mode - quitting now! \n"
 
+    
     return
 
-######################################################################
-######################################################################
 
 if __name__ == "__main__":
     main(sys.argv[1:])

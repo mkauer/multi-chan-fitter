@@ -4,10 +4,13 @@
 # 
 # Remove LSveto low-energy from the histograms
 # 
-# version: 2019-01-23
+# version: 2019-06-24
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# + add "gamma" as an MC location option in scalings in funcs101.py
+
+# + add "reflector" as an MC location option in scalings
 # ~ change back to NOT account for surface area - use mBq/kg NaI mass
 # ~ change scaleBkgs101() and scaleSigs101() to account for surface area
 # + add surfArea() calculation for surface components
@@ -714,7 +717,8 @@ def scaleBkgs101(bkgs, runtime=0):
             continue
         
         norm = 0
-        if loca == 'internal':      norm = (nmass)
+        if   loca == 'internal':    norm = (nmass)
+        elif loca == 'reflector':   norm = (surf)
         elif 'surf' in loca:        norm = (surf)
         elif 'teflon' in loca:      norm = (surf)
         elif loca == 'copper':      norm = (surf)
@@ -728,6 +732,7 @@ def scaleBkgs101(bkgs, runtime=0):
         elif loca == 'airshield':   norm = (air)
         elif loca == 'steel':       norm = (steel)
         elif loca == 'innersteel':  norm = (innersteel)
+        elif loca == 'gamma':       norm = (innersteel)
         else:
             print "ERROR: no background scaling for -->", loca
             sys.exit()
@@ -797,7 +802,8 @@ def scaleSigs101(sigkeys, sigs, runtime=0):
             continue
         
         norm = 0
-        if loca == 'internal':      norm = (1./nmass)
+        if   loca == 'internal':    norm = (1./nmass)
+        elif loca == 'reflector':   norm = (1./surf)
         elif 'surf' in loca:        norm = (1./surf)
         elif 'teflon' in loca:      norm = (1./surf)
         elif loca == 'copper':      norm = (1./surf)
@@ -811,6 +817,7 @@ def scaleSigs101(sigkeys, sigs, runtime=0):
         elif loca == 'airshield':   norm = (1./air)
         elif loca == 'steel':       norm = (1./steel)
         elif loca == 'innersteel':  norm = (1./innersteel)
+        elif loca == 'gamma':       norm = (1./innersteel)
         else:
             print "ERROR: no signal scaling for -->", loca
             sys.exit()

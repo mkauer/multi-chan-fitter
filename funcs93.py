@@ -6,10 +6,13 @@
 # 
 # Works with v93 and later versions
 # 
-# version: 2019-01-29
+# version: 2019-06-24
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# + added special case for external Tl208 gammas to groupNum93() in funcs93.py
+# + add gamma to makePlots93() exceptions in funcs93.py
+
 # + add plastic to makePlots93() exceptions
 # + add U235 groupNo 41,42 to groupNum93()
 # + add U235 to groupNum93()
@@ -712,8 +715,10 @@ def makePlots93(bkgs, combine, others, vcut=0):
                     
                     # add 'steel' exception 2018-10-23
                     # add 'plastic' exception 2019-01-29
+                    # add 'gamma' exception 2019-06-24
                     if location != 'lsveto' and location != 'innersteel' \
-                      and location != 'steel' and location != 'plastic':
+                      and location != 'steel' and location != 'plastic' \
+                      and location != 'gamma':
                         newkey += '-f'+crystal[-1]
                     newkey += '-c'+C
                     newkey += '-e'+str(E)
@@ -802,7 +807,7 @@ def groupNum93(info):
 
     # U235 group numbers
     # ------------------------
-    # 0: U235 -> ground? (doesn't look like it gets splip up?)
+    #  0: U235 -> ground? (doesn't look like it gets splip up?)
     # 41: U235 -> Pa231
     # 42: Pa231 -> ground
     
@@ -832,6 +837,8 @@ def groupNum93(info):
     elif info['chst'] == 'Th228': start = 23
     elif info['chst'] == 'U235':  start = 41
     elif info['chst'] == 'Pa231': start = 42
+    ### special case for external Tl208 gammas
+    elif info['chst'] == 'Tl208': start = 0
     else: start = -1
     
     #if   info['chsp'] == 'U238':  stop = 11 # should not be a stop group
@@ -852,6 +859,8 @@ def groupNum93(info):
         if   start in [11,12,13,14,15]: stop = 16
         elif start in [21,22,23]:       stop = 24
         elif start in [41,42]:          stop = 43
+        ### special case for external Tl208 gammas
+        elif start in [0]:              stop = 43
         else: stop = -1
     else: stop = -1
 
@@ -1192,7 +1201,9 @@ def scaleData70(data, dru=0):
         if dru:
             days = float((data[key]['runtime'])/86400.)
         xkgs = float(cmass(i))
-        if i==8: xkgs = 1800.
+        if i==8:
+            #xkgs = 1800.
+            xkgs = 1900. # 2019-04-16 increased mass a little 
         keVperBin = 1./float(data[key]['pars'][3])
         """
         print 'DEBUG: data key =', key

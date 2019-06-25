@@ -2,12 +2,35 @@
 ######################################################################
 # funcs300.py
 # 
-# Remove LSveto low-energy from the histograms
-# 
-# version: 2019-01-28
+# version: 2019-06-24
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# + added special event type cut for "*-gamma-CuShield-SET1-Tl208-*"
+# + add location 'gamma' to build300() global excludes in funcs300.py
+# + add location 'gamma' to buildMC300() volumeCut in funcs300.py
+# + add external 'gamma' file location(s) to mcPath301() in funcs300.py
+
+# + added cutsBDT301() for new V00-04-14 BDT cuts
+# + added calib301() to test differences between 04-04 and 04-14
+#   while using the production calibration
+# ~ do not sys.exit() if there are no generated events in buildMC300()
+# + add "reflector" as an MC location option
+# + add mcPath301() to use SET2 simulations
+# ~ lsveto cut on MC now 80keV
+# ~ lsveto cut on data now 80keV
+# + added new cutsBDT300()
+# ~ ah, particle cut needs to be Pb208 to get Tl208 decays
+# ~ trying a bunch of different lsveto calibration functions 
+# ~ tried selecting just Tl208 but it failed...
+# - remove Na22, Te121m, Te127m, Cd109, Sn113 from exceptions
+# + add more exceptions to the generated event type cut...
+#   'Cd109', and 'Sn113'
+# ~ tweaked other paths to be absolute and hopefully more dynamic
+# ~ make rootfile path absolute in getInfo300()
+# ~ tweak updateBkgsFile300() to accept a path for the new file
+# + add more exceptions to the generated event type cut...
+#   'H3', 'Na22', 'Te121m', and 'Te127m'
 # ~ specify the crystal number for surface components in mcPath300()
 # + add updateBkgsFile300()
 # + add mcPath101() and mcPath300()
@@ -32,8 +55,10 @@ from funcs_misc import *
 
 
 def getInfo300(line, freuse=0, fchans='SM', fxstals=[]):
+
+    here = baseDir()
     
-    info={}
+    info = {}
     
     info['line'] = line
     
@@ -74,7 +99,8 @@ def getInfo300(line, freuse=0, fchans='SM', fxstals=[]):
     #-----------------------------------------------------------------
     # reuse rootfile name
     if 'root' in str(bits[-1]):
-        info['rootfile'] = str(bits[-1])
+        info['rootfile'] = os.path.join(here, str(bits[-1]))
+        #info['rootfile'] = str(bits[-1])
     else:
         info['rootfile'] = 0
     #-----------------------------------------------------------------
@@ -89,7 +115,7 @@ def getInfo300(line, freuse=0, fchans='SM', fxstals=[]):
         info['build'] = str(bits[3])
         
         ### data file
-        info['file'] = str(bits[4])
+        info['file'] = os.path.join(here, str(bits[4]))
         
         ### build the histo key
         key  = 'x'+str(info['xstl'])
@@ -154,7 +180,8 @@ def build300(infile='backgrounds300.txt', others=1, freuse=0, fchans='SM', fxsta
         exclude = bool('lsveto' in info['key']
                     or 'plastic' in info['key']
                     or 'innersteel' in info['key']
-                    or 'steel' in info['key'])
+                    or 'steel' in info['key']
+                    or 'gamma' in info['key'])
         #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         
         infos = []
@@ -226,7 +253,7 @@ def build300(infile='backgrounds300.txt', others=1, freuse=0, fchans='SM', fxsta
 
 def buildData300(info, data):
     
-    base = baseDir()
+    #here = baseDir()
     runtime = 0.
     
     if info['reuse']:
@@ -237,7 +264,7 @@ def buildData300(info, data):
                 print 'ERROR: no rootfile specified in backgrounds file'
                 sys.exit()
 
-            rootfile = base+info['rootfile']
+            rootfile = info['rootfile']
             if not os.path.exists(rootfile):
                 print 'ERROR: rootfile not found -->', rootfile
                 sys.exit()
@@ -282,7 +309,7 @@ def buildData300(info, data):
 
     else:
         
-        runfile = base+info['file']
+        runfile = info['file']
         #print 'looking for -->',runfile
         if not os.path.exists(runfile):
             print 'ERROR: runfile not found -->', runfile
@@ -292,21 +319,24 @@ def buildData300(info, data):
         nfiles = 0
         chain = TChain("ntp","")
         for line in readFile(runfile):
+            #fpath = os.path.join(here, line)
             if not onCup():
                 fpath = '/home/mkauer/COSINE/CUP/mc-fitting'+line
             else:
                 fpath = line
-            #print 'INFO: looking for -->', fpath
+            #print 'INFO: looking for data file -->', fpath
             if not os.path.exists(fpath):
+                #print 'WARNING: data file not found for -->', fpath
                 continue
             else:
                 #print 'INFO: adding file -->', fpath
+                tmpruntime = -1
                 tmpruntime = getDuration(fpath)
                 if tmpruntime > 0:
                     runtime += tmpruntime
                     nfiles += chain.Add(fpath)
                 else:
-                    print 'WARNING: no run duration found for',fpath
+                    print 'WARNING: no run duration found for -->', fpath
         
         if nfiles > 0:
             print 'INFO:',nfiles,'files found for data',info['tag'],'build',info['build']
@@ -334,21 +364,62 @@ def buildData300(info, data):
                     # CALIBRATION
                     #-----------------------------------------------------------------------
                     if info['build'] == 'V00-04-04':
-                        edep, selection = calib100(i, E)
-                    if info['build'] == 'V00-04-12':
-                        edep, selection = calib300(i, E)
+                        ### calib100 uses Pushpa's tweaked low energy calibrations
+                        #edep, selection = calib100(i, E)
+                        ### calib301 uses the standard production calibrations
+                        ### and uses my tweaked lsveto calibration
+                        ### testing differences between 04-04, 04-12, and 04-14
+                        edep, selection = calib301(i, E)
+                        
+                    elif info['build'] == 'V00-04-12':
+                        ### calib300 uses Govinda's tweaked high energy calibrations
+                        ### and uses my tweaked lsveto calibration
+                        #edep, selection = calib300(i, E)
+                        ### calib301 uses the standard production calibrations
+                        ### and uses my tweaked lsveto calibration
+                        ### testing differences between 04-04, 04-12, and 04-14
+                        edep, selection = calib301(i, E)
+                        
+                    elif info['build'] == 'V00-04-14':
+                        ### calib301 uses the standard production calibrations
+                        ### and uses my tweaked lsveto calibration
+                        ### testing differences between 04-04, 04-12, and 04-14
+                        edep, selection = calib301(i, E)
+                        
+                    else:
+                        print "ERROR: no info['build'] for the data calibration"
+                        sys.exit()
                     #-----------------------------------------------------------------------
                     
                     
                     # DEFINE CUTS
                     #-----------------------------------------------------------------------
-                    masterCut = cutsBDT101(i, C, E, edep, selection)
+                    ### old V00-04-04 BDT cuts are in cutsBDT101()
+                    #if info['build'] == 'V00-04-04':
+                    #    masterCut = cutsBDT101(i, C, E, edep, selection)
+                    if info['build'] == 'V00-04-04' or info['build'] == 'V00-04-12':
+                        masterCut = cutsBDT300(i, C, E, edep, selection)
+                    ### new BDT cuts for V00-04-14
+                    elif info['build'] == 'V00-04-14':
+                        masterCut = cutsBDT301(i, C, E, edep, selection)
+                    else:
+                        print "ERROR: no info['build'] for the data cuts"
+                        sys.exit()
                     #-----------------------------------------------------------------------
-                                        
+                    
                     
                     # FILL HISTOS
                     #-----------------------------------------------------------------------
+                    #----
+                    ### apply standard cuts
                     chain.Draw(selection+' >> '+key, masterCut)
+                    #----
+                    ### look at the cut data...
+                    #chain.Draw(selection+' >> '+key, "!("+masterCut.GetTitle()+")")
+                    #----
+                    ### apply no cuts
+                    #chain.Draw(selection+' >> '+key)
+                    #----
                     
                     #histo.SetLineColor(kBlack)
                     #histo.SetMarkerColor(kBlack)
@@ -381,7 +452,7 @@ def buildData300(info, data):
 
 def buildMC300(info, mc):
 
-    base = baseDir()
+    #here = baseDir()
     
     if info['reuse']:
         for c in info['chans']:
@@ -391,7 +462,7 @@ def buildMC300(info, mc):
                 print 'ERROR: no rootfile specified in backgrounds file'
                 sys.exit()
             
-            rootfile = base+info['rootfile']
+            rootfile = info['rootfile']
             if not os.path.exists(rootfile):
                 print 'ERROR: rootfile not found -->', rootfile
                 sys.exit()
@@ -428,8 +499,9 @@ def buildMC300(info, mc):
     else:
         
         ### select correct paths for simulation files
-        if   info['sim'] == 'v3.1.1': path1, path2, pushpasMC = mcPath101(info)
-        elif info['sim'] == 'v4.0.1': path1, path2, pushpasMC = mcPath300(info)
+        if   info['sim'] == 'v3.1.1': path1, path2, pushpasMC = mcPath101(info) # G4.9
+        elif info['sim'] == 'v4.0.1': path1, path2, pushpasMC = mcPath300(info) # G4.10 SET1
+        elif info['sim'] == 'v4.0.2': path1, path2, pushpasMC = mcPath301(info) # G4.10 SET2
         else:
             print 'ERROR: simulation version not valid -->',info['sim']
             sys.exit()
@@ -506,7 +578,8 @@ def buildMC300(info, mc):
                         
                         ### ls veto cut
                         ### need to use smeared resolution
-                        lsvetocut = '(edepResol[8]*1000. < 20.0)'
+                        #lsvetocut = '(edepResol[8]*1000. < 20.0)'
+                        lsvetocut = '(edepResol[8]*1000. < 80.0)'
                         if info['xstl'] == 9:
                             lsvetocut = '(edepResol[8]*1000. > 0.0)'
                             
@@ -522,13 +595,14 @@ def buildMC300(info, mc):
                         
                         ### ls veto cut
                         ### need to use smeared resolution
-                        lsvetocut = '(edepResol[8]*1000. > 20.0)'
+                        #lsvetocut = '(edepResol[8]*1000. > 20.0)'
+                        lsvetocut = '(edepResol[8]*1000. > 80.0)'
                         if info['xstl'] == 9:
                             lsvetocut = '(edepResol[8]*1000. > 0.0)'
                             
                         ### combined cuts
                         chanCut = TCut('(('+hitCut+') || ('+lsvetocut+'))')
-                        
+                                                
                     else:
                         print 'ERROR: I do not know what to do with channel -->', info['chan']
                         print 'Available channels are [S]Single-hits, [M]Multi-hits'
@@ -544,48 +618,42 @@ def buildMC300(info, mc):
                     volumeCut = TCut('(1)')
                     
                     if info['loca'] == 'internal':
-                        #volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['xstl'])+'Crystal")')
                         volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['from'])+'Crystal")')
+                        
+                    elif info['loca'] == 'reflector':
+                        volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['from'])+'Reflector")')
                         
                     elif 'internalsurf' in info['loca']:
                         # Estellas MC
-                        #volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['xstl'])+'Crystal")')
                         volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['from'])+'Crystal")')
                         
                     elif 'naisurf' in info['loca']:
                         # Govindas MC
-                        #volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['xstl'])+'Crystal")')
                         volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['from'])+'Crystal")')
                         if pushpasMC: volumeCut = TCut('(primVolumeName == "NaIDet07Crystal")')
                         
                     elif info['loca'] == 'teflon':
-                        #volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['xstl'])+'Teflon")')
                         volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['from'])+'Teflon")')
                         
                     elif info['loca'] == 'teflonbulk':
                         # Govindas MC
-                        #volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['xstl'])+'Teflon")')
                         volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['from'])+'Teflon")')
                         if pushpasMC: volumeCut = TCut('(primVolumeName == "NaIDet07Teflon")')
                         
                     elif 'teflonsurf' in info['loca']:
                         # Estellas MC
-                        #volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['xstl'])+'Teflon")')
                         volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['from'])+'Teflon")')
                         if pushpasMC: volumeCut = TCut('(primVolumeName == "NaIDet07Teflon")')
                         
                     elif 'cusurf' in info['loca']:
                         # Estellas MC
-                        #volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['xstl'])+'Case")')
                         volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['from'])+'Case")')
                         
                     elif info['loca'] == 'cucase':
-                        #volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['xstl'])+'Case")')
                         volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['from'])+'Case")')
                         
                     elif info['loca'] == 'coppercase':
                         # Govindas MC
-                        #volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['xstl'])+'Case")')
                         volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['from'])+'Case")')
                         if pushpasMC:
                             volumeCut = TCut('((primVolumeName == "NaIDet07Fringe0")'
@@ -603,10 +671,6 @@ def buildMC300(info, mc):
                                          +' || (primPMTid[0] == '+pmt2+'))'
                                          +' && primVolumeName == "phys_pmt")')
                         
-                    ### I do not use this extpmt tag anymore
-                    #elif info['loca'] == 'extpmt':
-                    #    volumeCut = TCut('((primPMTid[0] != '+pmt1+') && (primPMTid[0] != '+pmt2+'))')
-                    
                     elif info['loca'] == 'lsveto':
                         volumeCut = TCut('(primVolumeName == "lsveto")')
                     
@@ -627,10 +691,20 @@ def buildMC300(info, mc):
                     elif info['loca'] == 'plastic':
                         volumeCut = TCut('(primVolumeName == "PlasSupport")')
                     
+                    elif info['loca'] == 'gamma':
+                        #volumeCut = TCut('(primVolumeName == "lsvetoair")')
+                        volumeCut = TCut('(1)')
+                        #volumeCut = TCut('(primParticleName == "Pb208")')
+                        
                     else:
                         print "WARNING: No selection criteria for  --> ", info['loca']
                         continue
+
                     
+                    ### select a specific particle?
+                    ### this is not generally used
+                    ### only in special test cases for example Tl208 spectra...
+                    #particleCut = TCut('(primParticleName == "Pb208")')
                     
                     ### broken chain / group number cut
                     brokenChainCut = groupNum93(info)
@@ -640,14 +714,22 @@ def buildMC300(info, mc):
                     #evType = 'event_info.Type'  # new processing
                     
                     eventTypeCut = TCut('('+evType+' > 10)')
+
                     generatedCuts = TCut('('+evType+' < 10)'+' && '+volumeCut.GetTitle())
-                    #generatedCuts = TCut('('+evType+' < 10)'+' && '+volumeCut.GetTitle()+' && '+energyCut.GetTitle())
-                    
+                    #generatedCuts = TCut(particleCut.GetTitle()+' && '+volumeCut.GetTitle())
+                                        
                     ### special case for H3
-                    if info['chst'] == 'H3':
+                    #exceptions = ['H3', 'Na22', 'Te121m', 'Te127m', 'Cd109', 'Sn113']
+                    exceptions = ['H3']
+                    if info['chst'] in exceptions:
                         generatedCuts = TCut('('+evType+' > 10)'+' && '+volumeCut.GetTitle())
                     
+                    ### special case for external Tl208 gammas from "*-gamma-CuShield-SET1-Tl208-*"
+                    if info['loca'] == 'gamma':
+                        eventTypeCut  = TCut('(1)')
+                        generatedCuts = TCut('(1)')
                     
+                        
                     ### create a hist of the generated events
                     #---------------------------------------------------------------------
                     key2 = key+'_generated'
@@ -659,9 +741,9 @@ def buildMC300(info, mc):
                     generated = temp2.GetEntries()
                     if generated <= 0:
                         if int(info['xstl']) == int(info['from']):
-                            print 'ERROR: no events generated for -->', info['floca'], info['isof'],\
+                            print 'WARNING: no events generated for -->', info['floca'], info['isof'],\
                                 'xstl', info['xstl'], 'from', info['from']
-                            sys.exit()
+                            #sys.exit() # don't exit - 2019-05-15
                         else:
                             print 'WARNING: no events generated for -->', info['floca'], info['isof'],\
                                 'xstl', info['xstl'], 'from', info['from']
@@ -671,7 +753,7 @@ def buildMC300(info, mc):
 
                     ### separate real crystals from lsveto
                     #=====================================================================
-                    if i >= 0 and i <=7:
+                    if i >= 0 and i <= 7:
                         # using Box-Muller for resolution smearing method
                         # setting "rng" as the smearing alias
                         chain.SetAlias('rng','sin(2.*pi*rndm)*sqrt(-2.*log(rndm))')
@@ -705,16 +787,22 @@ def buildMC300(info, mc):
                                     eventTypeCut.GetTitle()+' && '+
                                     brokenChainCut.GetTitle()+' && '+
                                     chanCut.GetTitle()+' && '+
+                                    #particleCut.GetTitle()+' && '+
                                     volumeCut.GetTitle()
                                          +')')
                         
-                        #masterCut = TCut('1')
                         
-                        # XXX : I think the resolution function is smearing too much?
+                        ### Use default resolution smeared MC
                         selection = '(edepResol[8] * 1000.)'
+
+                        ### Or no resolution smearing...
                         #selection = '(edep[8] * 1000.)'
-                        #selection = '(0.95 * edepResol[8] * 1000.)'
-                        #selection = '(0.90 * edepResol[8] * 1000.)'
+                        
+                        ### Or define your own smearing function...
+                        #chain.SetAlias('rng','sin(2.*pi*rndm)*sqrt(-2.*log(rndm))')
+                        # testing 4.0
+                        #chain.SetAlias('sigma', '(( 4.0 /sqrt(edep[8]*1000.)) + 0.0)')
+                        #selection = '((edep[8]*1000.) + (sigma*edep[8]*1000.*rng))'
                         
                         
                     #=====================================================================
@@ -743,17 +831,76 @@ def calib300(i, E):
     if i==8: # C9 - lsveto
         edep = '(BLSVeto.Charge)'
         selection = '('+edep+' / 143.8)'
-        return edep, selection
-    
+        #return edep, selection
+        
+        ### from my line fit and some tweaking
+        #return edep, '(1.15*'+selection+')'
+        
+        ### try a 2nd order poly fit again - starting to look more promissing
+        ###----------------------------------------------------------
+        ### force a 0 point - "poly1_data"
+        #A = 6.76183307e-05
+        #B = 9.18732788e-01
+        #C = 2.65151485e+01
+        
+        ### no 0 point - "poly2_data"
+        #A = 9.9173553719e-05
+        #B = 0.781818181818
+        #C = 140.0
+        
+        ### no 0 point - little tweak - "poly3_data"
+        #A = 5.71428571429e-05
+        #B = 0.98
+        #C = 43.7142857143
+        
+        #return edep, '(('+str(A)+'*'+selection+'**2) + ('+str(B)+'*'+selection+') + '+str(C)+')'
+        
+        ### try a 3rd order poly fit just to see...
+        ###----------------------------------------------------------
+        ### force a 0 point - "poly4_data"
+        #A = 6.01051840721e-08
+        #B = -0.000187327823691
+        #C = 1.17575757576
+        #D = -1.95618797396e-28
+        
+        ### tweak the data points and force a 0 point - "poly5_data"
+        #A = 1.36717005791e-08
+        #B = -1.42724884995e-05
+        #C = 1.03372204054
+        #D = 7.01845066262
+        
+        ### push the last 2 MC points out a little bit more - "poly6_data"
+        #A = 4.61895420918e-10
+        #B = 7.49137762259e-05
+        #C = 0.927133764862
+        #D = 18.1545308099
+
+        ### try again based off the poly4 data points - "poly41_data"
+        A = 6.14216259037e-08
+        B = -0.000190223995721
+        C = 1.17695224672
+        D = 7.44693291248e-28
+        
+        ### try again and force a 1460 point - "poly42_data"
+        #A = 8.81422486824e-08
+        #B = -0.000277066019752
+        #C = 1.21663237155
+        #D = 2.41933873005e-20
+        
+        return edep, '(('+str(A)+'*'+selection+'**3) + ('+str(B)+'*'+selection+'**2) + ('+str(C)+'*'+selection+') + '+str(D)+')'
+
+
+
+        
     ### use Govindha's fits (does not have C5 or C8)
-    hiE = [[1813, 316],
-           [1485, 315],
-           [1370, 323],
-           [1213, 294],
-           [1, 1],
-           [1479, 286],
-           [1069, 295],
-           [1, 1]]
+    hiE = [[1813.0, 316.0],
+           [1485.0, 315.0],
+           [1370.0, 323.0],
+           [1213.0, 294.0],
+           [   0.0,   1.0],
+           [1479.0, 286.0],
+           [1069.0, 295.0],
+           [   0.0,   1.0]]
     """
     loE = [[1,1],
            [1,1],
@@ -765,12 +912,16 @@ def calib300(i, E):
            [1,1]]
     """
     if E:
+        ### default but wrong in V00-04-12
+        #edep = '(crystal'+str(i+1)+'.energyD)'
+        #selection = '('+edep+')'
+
+        ### Govinda's calibrations
         edep = '(crystal'+str(i+1)+'.rqcD1_5)'
         selection = '('+edep+'-'+str(hiE[i][0])+')/('+str(hiE[i][1])+')'
-        if i==4 or i==7: # C5 and C8 high energy
-            edep = '(crystal'+str(i+1)+'.energyD)'
-            selection = '('+edep+')'
+        
     else:
+        ### default
         edep = '(crystal'+str(i+1)+'.energy)'
         selection = edep
         """
@@ -781,7 +932,39 @@ def calib300(i, E):
     return edep, selection
 
 
+def calib301(i, E):
+    """
+    Really just a test between run 1544 04-04 and 04-14 productions
+    Still using my lsveto tweaked calibration
+    But comparing default production calibrations
+    """
+    
+    if i==8: # C9 - lsveto
+        edep = '(BLSVeto.Charge)'
+        selection = '('+edep+' / 143.8)'
+        ### try again based off the poly4 data points - "poly41_data"
+        A = 6.14216259037e-08
+        B = -0.000190223995721
+        C = 1.17695224672
+        D = 7.44693291248e-28
+        return edep, '(('+str(A)+'*'+selection+'**3) + ('+str(B)+'*'+selection+'**2) + ('+str(C)+'*'+selection+') + '+str(D)+')'
+
+    if E:
+        ### default production calibration
+        edep = '(crystal'+str(i+1)+'.energyD)'
+        selection = '('+edep+')'
+    else:
+        ### default production calibration
+        edep = '(crystal'+str(i+1)+'.energy)'
+        selection = edep
+
+    return edep, selection
+
+
 def mcPath101(info):
+    """
+    For the old v3.1.1 G4.9 simulations
+    """
     
     ### either use full location-names 'floca'
     ### OR use the hyphen removed locationnames 'loca'
@@ -831,7 +1014,8 @@ def mcPath101(info):
 
     if info['isof'] == 'Co60' and location == 'copper':
         path1 = '/data/MC/COSINE/V3.1.1/reprocessed/Co60'
-        path2 = '*-Copper-'+info['isof']+'*.root'
+        #path2 = '*-Copper-'+info['isof']+'*.root'
+        path2 = '*-Copper-'+info['isof']+'-??.root'
 
     if info['isof'] == 'Sn113' and location == 'internal':
         path1 = '/data/MC/COSINE/V3.1.1/reprocessed'
@@ -848,11 +1032,21 @@ def mcPath101(info):
     pushpasMC = 0
     #if location in pushpas: pushpasMC = 1
     if info['floca'] in pushpas: pushpasMC = 1
+
+    ### special case for the U235
+    if info['isof'] == 'U235':
+        path1 = '/data/MC/COSINE/V4.0.1/reprocessed_SET1'
+        if location == 'internal': path2 = '*-internal-'+iso+'-*root'
+        if location == 'pmt':      path2 = '*-pmt-'+iso+'-*root'
+        if location == 'plastic':  path2 = '*-Acrylic-'+iso+'-*root'
     
     return path1, path2, pushpasMC
 
 
 def mcPath300(info):
+    """
+    For v4.0.1 G4.10 SET1 simulations
+    """
     
     ### use the full location-names 'floca'
     loc = info['floca']
@@ -861,27 +1055,24 @@ def mcPath300(info):
     Cx = 'C*'
     
     name = 'none'
-    if loc == 'nai-surf-10um':
+    if loc == 'reflector':
+        path1 = '/data/MC/COSINE/V4.0.1/reprocessed_SET1'
+        path2 = '*-surfaceNaI-'+Cx+'-10um-'+iso+'-*root'
+        
+    elif loc == 'nai-surf-10um':
         path1 = '/data/MC/COSINE/V4.0.1/reprocessed_SET1'
         path2 = '*-surfaceNaI-'+Cx+'-10um-'+iso+'-*root'
         
     elif loc == 'teflon-bulk':
         path1 = '/data/MC/COSINE/V4.0.1/reprocessed_SET1'
-        #path2 = '*-bulkTeflon-'+iso+'-*root'
         path2 = '*-bulkTeflon-'+Cx+'-'+iso+'-*root'
         
     elif loc == 'teflon-surf':
         path1 = '/data/MC/COSINE/V4.0.1/reprocessed_SET1'
-        #path2 = '*-surfaceTeflon-'+iso+'-*root'
         path2 = '*-surfaceTeflon-'+Cx+'-'+iso+'-*root'
         
-    #elif loc == 'copper':
-    #    path1 = '/data/MC/COSINE/V4.0.1/reprocessed_SET1'
-    #    path2 = '*-bulkCu-'+iso+'-*root'
-    
     elif loc == 'coppercase':
         path1 = '/data/MC/COSINE/V4.0.1/reprocessed_SET1'
-        #path2 = '*-bulkCu-'+iso+'-*root'
         path2 = '*-bulkcuCase-'+Cx+'-'+iso+'-*root'
         
     elif loc == 'internal':
@@ -904,7 +1095,86 @@ def mcPath300(info):
     return path1, path2, pushpasMC
 
 
-def updateBkgsFile300(xstals, bkgsfile, resultsfile, BF='BR'):
+def mcPath301(info):
+    """
+    For v4.0.1 G4.10 SET2 simulations but using alias v4.0.2
+    """
+    
+    ### use the full location-names 'floca'
+    loc = info['floca']
+    iso = info['isof']
+    #Cx = 'C'+str(info['xstl'])
+    Cx = 'C*'
+    
+    name = 'none'
+    if loc == 'reflector':
+        path1 = '/data/MC/COSINE/V4.0.1/reprocessed_SET1'
+        path2 = '*-surfaceNaI-'+Cx+'-10um-'+iso+'-*root'
+        
+    elif loc == 'nai-surf-10um':
+        path1 = '/data/MC/COSINE/V4.0.1/reprocessed_SET1'
+        path2 = '*-surfaceNaI-'+Cx+'-10um-'+iso+'-*root'
+        
+    elif loc == 'nai-surf-1um':
+        path1 = '/data/MC/COSINE/V4.0.1/reprocessed_SET2'
+        path2 = '*-surfaceNaI-'+Cx+'-1um-'+iso+'-*root'
+        
+    elif loc == 'nai-surf-0.1um':
+        path1 = '/data/MC/COSINE/V4.0.1/reprocessed_SET2'
+        path2 = '*-surfaceNaI-'+Cx+'-0.1um-'+iso+'-*root'
+        
+    elif loc == 'nai-surf-0.01um':
+        path1 = '/data/MC/COSINE/V4.0.1/reprocessed_SET2'
+        path2 = '*-surfaceNaI-'+Cx+'-0.01um-'+iso+'-*root'
+        
+    elif loc == 'teflon-bulk':
+        path1 = '/data/MC/COSINE/V4.0.1/reprocessed_SET2'
+        path2 = '*-bulkTeflon-'+Cx+'-'+iso+'-*root'
+    
+    elif loc == 'teflon-surf-10um':
+        path1 = '/data/MC/COSINE/V4.0.1/reprocessed_SET1'
+        path2 = '*-surfaceTeflon-'+Cx+'-'+iso+'-*root'
+    
+    elif loc == 'teflon-surf-1um':
+        path1 = '/data/MC/COSINE/V4.0.1/reprocessed_SET2'
+        path2 = '*-surfaceTeflon-'+Cx+'-1um-'+iso+'-*root'
+    
+    elif loc == 'teflon-surf-0.1um':
+        path1 = '/data/MC/COSINE/V4.0.1/reprocessed_SET2'
+        path2 = '*-surfaceTeflon-'+Cx+'-0.1um-'+iso+'-*root'
+    
+    elif loc == 'coppercase':
+        path1 = '/data/MC/COSINE/V4.0.1/reprocessed_SET2'
+        path2 = '*-bulkcuCase-'+Cx+'-'+iso+'-*root'
+        
+    elif loc == 'internal':
+        path1 = '/data/MC/COSINE/V4.0.1/reprocessed_SET2'
+        path2 = '*-internal-'+iso+'-*root'
+        
+    elif loc == 'pmt':
+        path1 = '/data/MC/COSINE/V4.0.1/reprocessed_SET2'
+        path2 = '*-pmt-'+iso+'-*root'
+        
+    elif loc == 'plastic':
+        path1 = '/data/MC/COSINE/V4.0.1/reprocessed_SET2'
+        path2 = '*-Acrylic-'+iso+'-*root'
+        
+    elif loc == 'gamma':
+        path1 = '/data/MC/COSINE/V4.0.1/reprocessed_SET2'
+        path2 = '*-gamma-CuShield-SET1-Tl208-*' # govinda said to use this one - also looks the best
+        #path2 = '*-gamma-CuShield-SET2-Tl208-*'
+        #path2 = '*-gamma-CuShield-Tl208-*'
+        #path2 = '*-gamma-Tl208-*root'
+        
+    else:
+        print 'ERROR: no location identified for -->',loc
+        sys.exit()
+        
+    pushpasMC = 0
+    return path1, path2, pushpasMC
+
+
+def updateBkgsFile300(xstals, bkgsfile, resultsfile, newdir, BF='BR'):
     """
     Only print out to file what was actually used in the fit
     """
@@ -922,13 +1192,13 @@ def updateBkgsFile300(xstals, bkgsfile, resultsfile, BF='BR'):
         fitlines = ffits.read().splitlines()
     ffits.close()
     
-    newbkgs = './plots/'+bkgsfile[:-4]+'_update.txt'
+    newbkgs = os.path.join(newdir, bkgsfile.split('/')[-1][:-4]+'_update.txt')
     output = open(newbkgs, 'w')
     output.write('# -*- sh -*-\n')
     
     print ''
-    print 'INFO: Updating bkgsfile -->',bkgsfile
-    print '      To a new bkgsfile -->',newbkgs
+    print 'INFO: Updating bkgsfile -->', bkgsfile
+    print '      To a new bkgsfile -->', newbkgs
     print ''
 
     skip = 0
@@ -1016,3 +1286,227 @@ def updateBkgsFile300(xstals, bkgsfile, resultsfile, BF='BR'):
             
     output.close()
     return
+
+
+def cutsBDT300(i, C, E, edep, selection):
+    """
+    https://cupwiki.ibs.re.kr/Kims/SET1EventSelection
+    https://cupwiki.ibs.re.kr/Kims/EventSelection
+    """
+    
+    ### special cuts for the LS veto
+    ### i = 0-7 is crystals
+    ### i =  8  is lsveto
+    if i == 8:
+        ### skip single-hit and low-energy for lsveto
+        if C == 'S' or E == 0:
+            #coinc  = '(BLSVeto.isCoincident == 0)'
+            #lsveto = '(BLSVeto.Charge/143.8 > 0)'
+            #return TCut(coinc+' && '+lsveto)
+            return TCut('0')
+        elif C == 'M' and E == 1:
+            coinc  = '(BLSVeto.isCoincident == 1)'
+            #lsveto = '(BLSVeto.Charge/143.8 > 0.0)'
+            lsveto = '('+selection+' > 0.0)'
+            return TCut(coinc+' && '+lsveto)
+        else:
+            print 'ERROR: I do not know what to do with channel -->', C
+            print 'Available channels are [S]Single-hits, [M]Multi-hits'
+            sys.exit()
+
+    ### values for the alpha cut
+    alpha = [2.660,
+             2.640,
+             2.660,
+             2.680,
+             2.650,
+             2.655,
+             2.630,
+             2.660]
+
+    ### same as Pushpa since 2017-12-19
+    alphaCut = '( ! ((crystal'+str(i+1)+'.energyD > 1000.) && ((pmt'+str(i+1)+'1.rqtD1_5+pmt'+str(i+1)+'2.rqtD1_5)/2. < '+str(alpha[i])+')) )'
+
+    ### new BDT cuts from https://cupwiki.ibs.re.kr/Kims/EventSelection
+    newBDT = ['((bdt[1]>-0.1 && (crystal1.energy + 20*bdt[1])>0) && ((crystal1.energy>=10 && bdtA[1]>-0.08) || (crystal1.energy>=8 && crystal1.energy<10 && bdtA[1]>-0.065) || (crystal1.energy>=7 && crystal1.energy<8 && bdtA[1]>0.005) || (crystal1.energy>=6 && crystal1.energy<7 && bdtA[1]>0.015) || (crystal1.energy>=5 && crystal1.energy<6 && bdtA[1]>0.01) || (crystal1.energy>=4 && crystal1.energy<5 && bdtA[1]>0.03) || (crystal1.energy>=3 && crystal1.energy<4 && bdtA[1]>0.035) || (crystal1.energy>=2 && crystal1.energy<3 && bdtA[1]>0.02) || (crystal1.energy<2 && bdtA[1]>0.02)))',
+        '(bdt[2]>0.0 && bdtA[2]>-0.05)',
+        '(bdt[3]>0.0 && bdtA[3]>-0.07)',
+        '(bdt[4]>-0.05 && (crystal4.energy + 40*bdt[4])>0 && bdtA[4]>-0.07)',
+        '(bdt[5]>-0.2 && bdtA[5]>-0.07)',
+        '(bdt[6]>0.0 && (crystal6.energy + 20*bdt[6])>2.0 && bdtA[6]>-0.07)',
+        '(bdt[7]>0.0 && (crystal7.energy + 20*bdt[7])>2.0 && bdtA[7]>-0.07)',
+        '(bdt[8]>-0.2 && bdtA[8]>-0.07)']
+
+    bdtCut = newBDT[i]
+
+    ### global noise cuts
+    coinc  = '(BLSVeto.isCoincident == 1)'
+    muons  = '(BMuon.totalDeltaT0/1.e6 > 30)'
+    charge = '(crystal'+str(i+1)+'.rqcn > -1)'
+    nc     = '(pmt'+str(i+1)+'1.nc > 1 && pmt'+str(i+1)+'2.nc > 1)'
+    t1     = '(pmt'+str(i+1)+'1.t1 > 2 && pmt'+str(i+1)+'2.t1 > 2)'
+        
+    noiseCut = '('+coinc+' && '+muons+' && '+charge+' && '+nc+' && '+t1+')'
+    
+    if C == 'S':
+        #lsveto = '(BLSVeto.Charge/143.8 < 20)'
+        lsveto = '(BLSVeto.Charge/143.8 < 80)'
+        hits   = '('
+        for j in range(8):
+            if j != i:
+                hits += '(crystal'+str(j+1)+'.nc < 4) && '
+        ### remove extra '&&' or '||'
+        hits = hits[:-4]+')'
+
+        # BDT cuts ONLY for low energy spectrum!!
+        masterCut = TCut(bdtCut+' && '+noiseCut+' && '+'('+lsveto+' && '+hits+')'+' && '+alphaCut)
+        if E: masterCut = TCut(noiseCut+' && '+'('+lsveto+' && '+hits+')'+' && '+alphaCut)
+        return masterCut
+    
+    elif C == 'M':
+        #lsveto = '(BLSVeto.Charge/143.8 > 20)'
+        lsveto = '(BLSVeto.Charge/143.8 > 80)'
+        hits   = '('
+        for j in range(8):
+            if j != i:
+                hits += '(crystal'+str(j+1)+'.nc > 4) || '
+        ### remove extra '&&' or '||'
+        hits = hits[:-4]+')'
+
+        # BDT cuts ONLY for low energy spectrum!!
+        masterCut = TCut(bdtCut+' && '+noiseCut+' && '+'('+lsveto+' || '+hits+')'+' && '+alphaCut)
+        if E: masterCut = TCut(noiseCut+' && '+'('+lsveto+' || '+hits+')'+' && '+alphaCut)
+        return masterCut
+
+    else:
+        print 'ERROR: I do not know what to do with channel -->', C
+        print 'Available channels are [S]Single-hits, [M]Multi-hits'
+        sys.exit()
+
+
+def cutsBDT301(i, C, E, edep, selection):
+    """
+    https://cupwiki.ibs.re.kr/Kims/SET1EventSelection
+    https://cupwiki.ibs.re.kr/Kims/EventSelection
+    """
+    #-------------------------------------------------------
+    # This is for the V00-04-14 data with new BDT values!!!
+    #-------------------------------------------------------
+    
+    ### special cuts for the LS veto
+    ### i = 0-7 is crystals
+    ### i =  8  is lsveto
+    if i == 8:
+        ### skip single-hit and low-energy for lsveto
+        if C == 'S' or E == 0:
+            #coinc  = '(BLSVeto.isCoincident == 0)'
+            #lsveto = '(BLSVeto.Charge/143.8 > 0)'
+            #return TCut(coinc+' && '+lsveto)
+            return TCut('0')
+        elif C == 'M' and E == 1:
+            coinc  = '(BLSVeto.isCoincident == 1)'
+            #lsveto = '(BLSVeto.Charge/143.8 > 0.0)'
+            lsveto = '('+selection+' > 0.0)'
+            return TCut(coinc+' && '+lsveto)
+        else:
+            print 'ERROR: I do not know what to do with channel -->', C
+            print 'Available channels are [S]Single-hits, [M]Multi-hits'
+            sys.exit()
+
+    ### values for the alpha cut
+    alpha = [2.660,
+             2.640,
+             2.660,
+             2.680,
+             2.650,
+             2.655,
+             2.630,
+             2.660]
+
+    ### same as Pushpa since 2017-12-19
+    alphaCut = '( ! ((crystal'+str(i+1)+'.energyD > 1000.) && ((pmt'+str(i+1)+'1.rqtD1_5+pmt'+str(i+1)+'2.rqtD1_5)/2. < '+str(alpha[i])+')) )'
+
+    ### new BDT cuts for V00-04-12 from https://cupwiki.ibs.re.kr/Kims/EventSelection
+    newBDT = [
+        '((bdt[1]>-0.1 && (crystal1.energy + 20*bdt[1])>0) && ((crystal1.energy>=10 && bdtA[1]>-0.08) || (crystal1.energy>=8 && crystal1.energy<10 && bdtA[1]>-0.065) || (crystal1.energy>=7 && crystal1.energy<8 && bdtA[1]>0.005) || (crystal1.energy>=6 && crystal1.energy<7 && bdtA[1]>0.015) || (crystal1.energy>=5 && crystal1.energy<6 && bdtA[1]>0.01) || (crystal1.energy>=4 && crystal1.energy<5 && bdtA[1]>0.03) || (crystal1.energy>=3 && crystal1.energy<4 && bdtA[1]>0.035) || (crystal1.energy>=2 && crystal1.energy<3 && bdtA[1]>0.02) || (crystal1.energy<2 && bdtA[1]>0.02)))',
+              
+        #'(bdt[2]>0.0 && bdtA[2]>-0.05)',
+        # new bdt cut for V00-04-14
+        '(((9.20842e-07*TMath::Exp(-104.504*bdt[2])+0.170872)-(9.70874*bdt[2])) < crystal2.energy)',
+              
+        #'(bdt[3]>0.0 && bdtA[3]>-0.07)',
+        # new bdt cut for V00-04-14
+        '(((6.81804e-08*TMath::Exp(-101.856*bdt[3])+0.148344)-(4.04826*bdt[3])) < crystal3.energy)',
+
+        #'(bdt[4]>-0.05 && (crystal4.energy + 40*bdt[4])>0 && bdtA[4]>-0.07)',
+        # new bdt cut for V00-04-14
+        '(((1.37726e-07*TMath::Exp(-111.842*bdt[4])+0.446818)-(2.13498*bdt[4])) < crystal4.energy)',
+              
+        '(bdt[5]>-0.2 && bdtA[5]>-0.07)',
+              
+        #'(bdt[6]>0.0 && (crystal6.energy + 20*bdt[6])>2.0 && bdtA[6]>-0.07)',
+        # new bdt cut for V00-04-14
+        '(((0.000315623*TMath::Exp(-75.3998*bdt[6])-0.313482)-(13.6302*bdt[6])) < crystal6.energy)',
+              
+        #'(bdt[7]>0.0 && (crystal7.energy + 20*bdt[7])>2.0 && bdtA[7]>-0.07)',
+        # new bdt cut for V00-04-14
+        '(((1.45552e-05*TMath::Exp(-88.7196*bdt[7])+0.566336)-(7.57773*bdt[7])) < crystal7.energy)',
+        
+        '(bdt[8]>-0.2 && bdtA[8]>-0.07)']
+
+    bdtCut = newBDT[i]
+
+    ### global noise cuts
+    #===========================================================================
+    coinc  = '(BLSVeto.isCoincident == 1)'
+    muons  = '(BMuon.totalDeltaT0/1.e6 > 30)'
+    charge = '(crystal'+str(i+1)+'.rqcn > -1)'
+    
+    ### old cut
+    #nc     = '(pmt'+str(i+1)+'1.nc > 1 && pmt'+str(i+1)+'2.nc > 1)'
+    ### new cut for v00-04-14 from Govinda
+    nc     = '(pmt'+str(i+1)+'1.nc > 0 && pmt'+str(i+1)+'2.nc > 0)'
+    
+    ### old cut
+    #t1     = '(pmt'+str(i+1)+'1.t1 > 2 && pmt'+str(i+1)+'2.t1 > 2)'
+    ### new cut for v00-04-14 from Govinda
+    t1     = '(pmt'+str(i+1)+'1.t1 > 0 && pmt'+str(i+1)+'2.t1 > 0)'
+    
+    noiseCut = '('+coinc+' && '+muons+' && '+charge+' && '+nc+' && '+t1+')'
+    #===========================================================================
+    
+    if C == 'S':
+        #lsveto = '(BLSVeto.Charge/143.8 < 20)'
+        lsveto = '(BLSVeto.Charge/143.8 < 80)'
+        hits   = '('
+        for j in range(8):
+            if j != i:
+                hits += '(crystal'+str(j+1)+'.nc < 4) && '
+        ### remove extra '&&' or '||'
+        hits = hits[:-4]+')'
+
+        # BDT cuts ONLY for low energy spectrum!!
+        masterCut = TCut(bdtCut+' && '+noiseCut+' && '+'('+lsveto+' && '+hits+')'+' && '+alphaCut)
+        if E: masterCut = TCut(noiseCut+' && '+'('+lsveto+' && '+hits+')'+' && '+alphaCut)
+        return masterCut
+    
+    elif C == 'M':
+        #lsveto = '(BLSVeto.Charge/143.8 > 20)'
+        lsveto = '(BLSVeto.Charge/143.8 > 80)'
+        hits   = '('
+        for j in range(8):
+            if j != i:
+                hits += '(crystal'+str(j+1)+'.nc > 4) || '
+        ### remove extra '&&' or '||'
+        hits = hits[:-4]+')'
+
+        # BDT cuts ONLY for low energy spectrum!!
+        masterCut = TCut(bdtCut+' && '+noiseCut+' && '+'('+lsveto+' || '+hits+')'+' && '+alphaCut)
+        if E: masterCut = TCut(noiseCut+' && '+'('+lsveto+' || '+hits+')'+' && '+alphaCut)
+        return masterCut
+
+    else:
+        print 'ERROR: I do not know what to do with channel -->', C
+        print 'Available channels are [S]Single-hits, [M]Multi-hits'
+        sys.exit()
+

@@ -4,10 +4,11 @@
 # 
 # Get all the default functions in here
 # 
-# version: 2019-01-09
+# version: 2019-04-03
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# ~ add a few more checks to the hostname
 # + add numX()
 # + add I129 to setGroup()
 # + add plastic to setGroup()
@@ -49,21 +50,24 @@ def numX():
 
 
 def amLocal():
-    if 'cunpa' in str(socket.gethostname()):
+    host = socket.gethostname()
+    if 'cunpa' in host or 'node' in host or 'ibs' in host:
         return 0
     else:
         return 1
 
 
 def onCup():
-    if 'cunpa' in str(socket.gethostname()):
+    host = socket.gethostname()
+    if 'cunpa' in host or 'node' in host or 'ibs' in host:
         return 1
     else:
         return 0
 
 
 def baseDir():
-    if 'cunpa' in socket.gethostname():
+    host = socket.gethostname()
+    if 'cunpa' in host or 'node' in host or 'ibs' in host:
         return '/home/mkauer/mc-fitting/'
     else:
         return '/home/mkauer/COSINE/CUP/mc-fitting/'

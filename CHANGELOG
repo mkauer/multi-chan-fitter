@@ -12,6 +12,73 @@
 # ====================================================================
 
 
+# 2019-06-24
+#---------------------------------------------------------------------
+# + adding Govindas external Tl208 gamma MC with the following additions...
+# + add "gamma" to globalmc in main fitting script 300-g410-set12.py
+# + add "gamma" to makePlots93() exceptions in funcs93.py
+# + add "gamma" as an MC location option in bkg/sig scalings in funcs101.py
+# + add location 'gamma' to build300() global excludes in funcs300.py
+# + add location 'gamma' to buildMC300() volumeCut in funcs300.py
+# + add external 'gamma' file locations to mcPath301() in funcs300.py
+# + added special case for external Tl208 gammas to groupNum93() in funcs93.py
+# + added special event type cut for "*-gamma-CuShield-SET1-Tl208-*" in funcs300.py
+
+
+# 2019-05-15
+#---------------------------------------------------------------------
+# ~ do not sys.exit() if there are no generated events in buildMC300()
+
+
+# 2019-05-06
+#---------------------------------------------------------------------
+# + add mcPath301() to use SET2 simulations
+# ~ lsveto cut on MC now 80keV
+# ~ lsveto cut on data now 80keV
+
+
+# 2019-04-24
+#---------------------------------------------------------------------
+# + now plot the 0-20 keV region
+# ~ tweaked the fit bounds and changed the rebinning a bit
+# ~ started testing with SET2 data
+# ~ tweaked the plotting labels and offsets
+# + added new cutsBDT300()
+# ~ now using lsveto calib poly41
+
+
+# 2019-04-15
+#---------------------------------------------------------------------
+# + added print out to show the rebinning of the various spectra fits
+# ~ tested a few new fit bounds to optimize for the new lsveto calib
+# ~ tested many lsveto data calibrations
+# ~ tested many lsveto MC resolutions
+# ~ tested many fits on the cup cluster
+
+
+# 2019-04-02
+#---------------------------------------------------------------------
+# ~ now have a cup-cluster script working to crank out fits
+# ~ tweaked many other paths to be absolute for cup cluster jobs
+# ~ make rootfile path absolute in getInfo300()
+# ~ make all paths absolute in main script so you can send to cluster
+# ~ tweaked updateBkgsFile300() to accept a path for the new file
+# ~ tweaked the way the crystal numbers are parsed in the main script
+
+
+# 2019-04-01
+#---------------------------------------------------------------------
+# ~ testing fits with new cosmo MC and adding back innersteel U238
+#   for some reason the innersteel U238 is touchy to get fit convergence
+
+
+# 2019-03-26
+#---------------------------------------------------------------------
+# ~ regenerated the MC for Na22, Te121m, Te127m
+# ~ changed the generated event type cut to > 10 for Na22, Te121m, Te127m
+# ~ did a lot of fitting tests in the meantime since 2019-01-30
+
+
 # 2019-01-30
 #---------------------------------------------------------------------
 # ~ fit to C679 now looks really good with SET v00-04-12
