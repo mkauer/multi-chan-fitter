@@ -61,8 +61,12 @@ note = 0
 #mcfile = 'backgrounds_311.txt' # G4.10 SET2 - new SET2 MC
 #mcfile = 'backgrounds_311_update.txt' # G4.10 SET2 - new SET2 MC
 
+#mcfile = 'backgrounds_312.txt' # testing Tl208 gamma MC
 
-mcfile = 'testing-gamma.txt'
+mcfile = 'backgrounds_313.txt' # testing more internal Ra228-->Th228
+
+
+#mcfile = 'testing-gamma.txt'
 
 #mcfile = 'testing-data.txt'
 #mcfile = 'testing-data-2.txt'
@@ -113,11 +117,11 @@ for i in range(numx):
     #fitranges[i]['M0'] = [2,  2,  102]  # multi-hit low-energy
     #fitranges[i]['M1'] = [6, 60, 2860]  # multi-hit high-energy
     
-    ### testing
-    fitranges[i]['S0'] = [1,  5,  100]  # single-hit low-energy
-    fitranges[i]['S1'] = [6, 60, 2260]  # single-hit high-energy
-    fitranges[i]['M0'] = [1,  3,   70]  # multi-hit  low-energy
-    fitranges[i]['M1'] = [6, 60, 2860]  # multi-hit  high-energy
+    ### testing new Tl208 gamma MC with V00-04-14 -- 2019-06-24
+    fitranges[i]['S0'] = [1,  6,  100]  # single-hit low-energy
+    fitranges[i]['S1'] = [6, 60, 3000]  # single-hit high-energy
+    fitranges[i]['M0'] = [1,  2,  100]  # multi-hit  low-energy
+    fitranges[i]['M1'] = [6, 60, 3000]  # multi-hit  high-energy
     
     
     ### defaults for lsveto
@@ -128,7 +132,10 @@ for i in range(numx):
     fitranges[c9]['M0'] = [0,0,0]
     #fitranges[c9]['M1'] = [4, 200, 3900] # for G4.9 SET1
     #fitranges[c9]['M1'] = [6, 150, 3950] # for G4.10 SET1
-    fitranges[c9]['M1'] = [8, 200, 3600] # for G4.10 SET2
+    #fitranges[c9]['M1'] = [8, 200, 3600] # for G4.10 SET2
+    
+    ### testing new Tl208 gamma MC with V00-04-14 -- 2019-06-24
+    fitranges[c9]['M1'] = [1, 100, 4000]
 
     
     ### set bounds separately for some crystals
@@ -428,15 +435,20 @@ def main(argv):
         uniqColor[key] = cis[i]
     
     ### colors for the groups
-    gis = {'steel':    kYellow,
-           'cosmo':    kMagenta+1,
-           'lsveto':   kOrange+1,
-           'surface':  kCyan+1,
-           'internal': kBlue,
-           'pmts':     kGreen+1,
-           'copper':   kYellow+1,
-           'plastic':  kOrange+2,
-           'none':     kRed-1}
+    
+    gis = {
+        'internal':  kBlue,
+        'cosmo':     kMagenta+1,
+        'surface':   kCyan+1,
+        'copper':    kYellow+1,
+        'pmts':      kGreen+1,
+        'plastic':   kOrange,
+        'lsveto':    kOrange+1,
+        'steel':     kYellow,
+        'ext-gamma': kOrange+4,
+        'none':      kBlack
+    }
+
     
     ### colors for multiple data sets
     dcs = [kBlack, kBlue, kGreen, kOrange]

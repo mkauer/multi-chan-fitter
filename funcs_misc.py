@@ -4,10 +4,12 @@
 # 
 # Get all the default functions in here
 # 
-# version: 2019-04-03
+# version: 2019-06-24
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# + add "gamma" to setGroup() in funcs_misc.py
+
 # ~ add a few more checks to the hostname
 # + add numX()
 # + add I129 to setGroup()
@@ -419,15 +421,17 @@ def setGroup(info):
                             'Te123m', 'Te125m', 'Te127m']:
             return 'cosmo'
         else: return 'internal'
-    if 'pmt'     in info['loca']: return 'pmts'
-    if 'surf'    in info['loca']: return 'surface'
-    if 'cucase'  in info['loca']: return 'copper'
-    if 'copper'  in info['loca']: return 'copper'
-    if 'steel'   in info['loca']: return 'steel'
-    if 'teflon'  in info['loca']: return 'surface'
-    if 'veto'    in info['loca']: return 'lsveto'
-    if 'plastic' in info['loca']: return 'plastic'
-    return 'none'
+    elif 'pmt'     in info['loca']: return 'pmts'
+    elif 'surf'    in info['loca']: return 'surface'
+    elif 'cucase'  in info['loca']: return 'copper'
+    elif 'copper'  in info['loca']: return 'copper'
+    elif 'steel'   in info['loca']: return 'steel'
+    elif 'teflon'  in info['loca']: return 'surface'
+    elif 'veto'    in info['loca']: return 'lsveto'
+    elif 'plastic' in info['loca']: return 'plastic'
+    elif 'gamma'   in info['loca']: return 'ext-gamma'
+    else:
+        return 'none'
 
 
 def histparam64(E):

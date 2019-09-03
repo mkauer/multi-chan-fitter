@@ -15,7 +15,7 @@
 # 2019-06-24
 #---------------------------------------------------------------------
 # + adding Govindas external Tl208 gamma MC with the following additions...
-# + add "gamma" to globalmc in main fitting script 300-g410-set12.py
+# + add "gamma" to globalmc in main script 300-g410-set12.py
 # + add "gamma" to makePlots93() exceptions in funcs93.py
 # + add "gamma" as an MC location option in bkg/sig scalings in funcs101.py
 # + add location 'gamma' to build300() global excludes in funcs300.py
@@ -23,6 +23,8 @@
 # + add external 'gamma' file locations to mcPath301() in funcs300.py
 # + added special case for external Tl208 gammas to groupNum93() in funcs93.py
 # + added special event type cut for "*-gamma-CuShield-SET1-Tl208-*" in funcs300.py
+# + add "gamma" to setGroup() in funcs_misc.py
+# ~ update group colors in main scriipt 300-g410-set12.py
 
 
 # 2019-05-15

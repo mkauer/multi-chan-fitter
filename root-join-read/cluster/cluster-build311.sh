@@ -37,7 +37,7 @@ export workdir=$clustdir
 $joinscript $configdir/$mcfile > $clustdir/log-$build-$mcfile.log 2>&1
 EOF
     
-    qsub -q "short" $file
+    qsub -q "medium" $file
     
 done
 

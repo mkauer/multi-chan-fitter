@@ -130,7 +130,7 @@ DR	7	SET2	V00-04-12	./SET2_V00-04-12.dat	./root-join-read/build300/build300-c7-d
 #DR	9	SET2	V00-04-12	./SET2_V00-04-12.dat	./root-join-read/build300/build300-c9-data-SET2-V00-04-12.root
 DR	9	SET2	V00-04-12	./SET2_V00-04-12.dat	./root-join-read/build305/poly41_build305-c9-data-SET2-V00-04-12.root
 #DR	9	SET2	V00-04-12	./SET2_V00-04-12.dat	./root-join-read/build305/poly42_build305-c9-data-SET2-V00-04-12.root
-"""
+
 ### build310 - new bdt cuts - T1 cuts - lsveto 80 keV cuts - c9 is using poly41 calib
 DR	1	SET2	V00-04-12	./SET2_V00-04-12.dat	./root-join-read/build310/build310-c1-data-SET2-V00-04-12.root
 DR	2	SET2	V00-04-12	./SET2_V00-04-12.dat	./root-join-read/build310/build310-c2-data-SET2-V00-04-12.root
@@ -145,12 +145,12 @@ DR  1  1544  V00-04-14  ./1544_V00-04-14.dat  ./root-join-read/build312/build312
 DR  2  1544  V00-04-14  ./1544_V00-04-14.dat  ./root-join-read/build312/build312-c2-data-1544-V00-04-14.root
 DR  3  1544  V00-04-14  ./1544_V00-04-14.dat  ./root-join-read/build312/build312-c3-data-1544-V00-04-14.root
 DR  4  1544  V00-04-14  ./1544_V00-04-14.dat  ./root-join-read/build312/build312-c4-data-1544-V00-04-14.root
-DR  5  1544  V00-04-14  ./1544_V00-04-14.dat  ./root-join-read/build312/build312-c5-data-1544-V00-04-14.root
+#DR  5  1544  V00-04-14  ./1544_V00-04-14.dat  ./root-join-read/build312/build312-c5-data-1544-V00-04-14.root
 DR  6  1544  V00-04-14  ./1544_V00-04-14.dat  ./root-join-read/build312/build312-c6-data-1544-V00-04-14.root
 DR  7  1544  V00-04-14  ./1544_V00-04-14.dat  ./root-join-read/build312/build312-c7-data-1544-V00-04-14.root
-DR  8  1544  V00-04-14  ./1544_V00-04-14.dat  ./root-join-read/build312/build312-c8-data-1544-V00-04-14.root
+#DR  8  1544  V00-04-14  ./1544_V00-04-14.dat  ./root-join-read/build312/build312-c8-data-1544-V00-04-14.root
 DR  9  1544  V00-04-14  ./1544_V00-04-14.dat  ./root-join-read/build312/build312-c9-data-1544-V00-04-14.root
-"""
+
 
 #==========================================================================================================================================
 #                  Crystal  1
