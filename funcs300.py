@@ -10,7 +10,6 @@
 # + add location 'gamma' to build300() global excludes in funcs300.py
 # + add location 'gamma' to buildMC300() volumeCut in funcs300.py
 # + add external 'gamma' file location(s) to mcPath301() in funcs300.py
-
 # + added cutsBDT301() for new V00-04-14 BDT cuts
 # + added calib301() to test differences between 04-04 and 04-14
 #   while using the production calibration
