@@ -12,11 +12,22 @@
 # ====================================================================
 
 
+# 2019-11-27
+#---------------------------------------------------------------------
+# + add merge-histos.py to merge NaI surface with exponential weights
+# ~ fixed the fit result plotting in the multi-crystal plot
+# ~ fixed xstalbins to start at 0
+
+
 # 2019-09-03
 #---------------------------------------------------------------------
-
-# V switch to funcs400.py
-# V switch to 400-new-data-format.py
+# + add join400.py and build400 files for new data format
+# + use good runs db to generate a list of good runs for each crystal
+# ~ replace runtime with runtimes[] list for each crystal
+# + now separate run/subrun list for each crystal
+# ~ change data format in backgrounds file(s)
+# V switch to main functions module "funcs400.py"
+# V switch to main script "400-new-data-format.py"
 # + cut release v11.0
 
 

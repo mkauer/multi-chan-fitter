@@ -713,7 +713,7 @@ def scaleBkgs101(bkgs, runtime=0):
         generated  = float(bkgs[key]['generated'])
         
         if generated < 1:
-            print "WARNING: 0 events generated for -->", key
+            #print "WARNING: 0 events generated for -->", key
             continue
         
         norm = 0
@@ -754,7 +754,7 @@ def scaleSigs101(sigkeys, sigs, runtime=0):
         try:
             test = sigs[key]['fitscale']
         except:
-            print 'WARNING: no fitscale for', key
+            #print 'WARNING: no fitscale for', key
             sigs[key]['info']['fitacti'] = 0
             sigs[key]['info']['fiterro'] = 0
             continue
@@ -798,7 +798,7 @@ def scaleSigs101(sigkeys, sigs, runtime=0):
         generated  = float(sigs[key]['generated'])
 
         if generated < 1:
-            print "WARNING: 0 events generated for -->", key
+            #print "WARNING: 0 events generated for -->", key
             continue
         
         norm = 0

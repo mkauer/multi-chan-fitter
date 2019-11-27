@@ -225,7 +225,6 @@ def build300(infile='backgrounds300.txt', others=1, freuse=0, fchans='SM', fxsta
             infos.append(info)
         else:
             print 'WARNING:',info['key'],'does not fit any known criteria'
-            print '         Please check out build101() '
             infos.append(info)
         #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -889,7 +888,6 @@ def calib300(i, E):
         return edep, '(('+str(A)+'*'+selection+'**3) + ('+str(B)+'*'+selection+'**2) + ('+str(C)+'*'+selection+') + '+str(D)+')'
 
 
-
         
     ### use Govindha's fits (does not have C5 or C8)
     hiE = [[1813.0, 316.0],
@@ -933,21 +931,79 @@ def calib300(i, E):
 
 def calib301(i, E):
     """
-    Really just a test between run 1544 04-04 and 04-14 productions
-    Still using my lsveto tweaked calibration
-    But comparing default production calibrations
+    Using the standard SET3 calibrations for the crystals
+    Tweaking the lsveto calibration...
     """
     
     if i==8: # C9 - lsveto
+        
         edep = '(BLSVeto.Charge)'
         selection = '('+edep+' / 143.8)'
+        return edep, selection
+    
         ### try again based off the poly4 data points - "poly41_data"
-        A = 6.14216259037e-08
-        B = -0.000190223995721
-        C = 1.17695224672
-        D = 7.44693291248e-28
-        return edep, '(('+str(A)+'*'+selection+'**3) + ('+str(B)+'*'+selection+'**2) + ('+str(C)+'*'+selection+') + '+str(D)+')'
+        #A = 6.14216259037e-08
+        #B = -0.000190223995721
+        #C = 1.17695224672
+        #D = 7.44693291248e-28
+        
+        ### try again and force a 1460 point - "poly42_data"
+        #A = 8.81422486824e-08
+        #B = -0.000277066019752
+        #C = 1.21663237155
+        #D = 2.41933873005e-20
 
+        ### try un-saturating the high energy a little bit = "poly43"
+        ### this is still a little too much
+        #A = 4.0381226152e-08
+        #B = -0.000143935116267
+        #C = 1.15785808395
+        #D = 8.83648917811e-29
+
+        ### try un-saturating the high energy a little more = "poly44"
+        ### this was too much!
+        #A = 2.48681708029e-08
+        #B = -0.000109806394499
+        #C = 1.14377998622
+        #D = -6.09628447918e-27
+        
+        ### try un-saturating the high energy just a tiny = "poly45"
+        #A = 4.22053979702e-08
+        #B = -0.000147948294267
+        #C = 1.15951351987
+        #D = -5.7576250417e-22
+        
+        ### try un-saturating the high energy just a tiny = "poly46"
+        #A = 4.80251584646e-08
+        #B = -0.000160751767355
+        #C = 1.16479495252
+        #D = 4.5440374256e-28
+        
+        ### try un-saturating the high energy just a tiny = "poly47"
+        #A = 5.22150630743e-08
+        #B = -0.000169969557496
+        #C = 1.16859729095
+        #D = -1.00574241496e-21
+        
+        ### try tweaking the low energy part of the fit a litle = "poly50"
+        # that went the wrong direction, oops...
+        #A = 4.02698077117e-08
+        #B = -9.26205577368e-05
+        #C = 1.04107520387
+        #D = -6.35274464267e-22
+        
+        ### try tweaking the low energy part of the fit a litle = "poly51"
+        A = 5.7582815735e-08
+        B = -0.000245923913043
+        C = 1.30856625259
+        D = 1.37579420822e-27
+
+        
+        return edep, '(('+str(A)+'*'+selection+'**3) '\
+                    '+ ('+str(B)+'*'+selection+'**2) '\
+                    '+ ('+str(C)+'*'+selection+') + '+str(D)+')'
+    
+    
     if E:
         ### default production calibration
         edep = '(crystal'+str(i+1)+'.energyD)'

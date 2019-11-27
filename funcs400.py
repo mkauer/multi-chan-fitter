@@ -6,7 +6,8 @@
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
-# + add getInfo400(), build400(), and buildData400()
+# - remove returning the "runtime" for data - get it in main script
+# + add new getInfo400(), build400(), and buildData400()
 # 
 # email: mkauer@physics.wisc.edu
 ######################################################################
@@ -289,7 +290,9 @@ def buildData400(info, data):
                 fpath = '/home/mkauer/COSINE/CUP/mc-fitting/data/COSINE/MRGD/phys/'+build_filename
             else:
                 fpath = '/data/COSINE/MRGD/phys/'+build_filename
+
             #print 'INFO: looking for data file -->', fpath
+            
             if not os.path.exists(fpath):
                 #print 'WARNING: data file not found for -->', fpath
                 continue

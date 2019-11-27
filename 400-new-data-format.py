@@ -50,39 +50,17 @@ debug = 0
 note = 0
 #note = ''
 
-#mcfile = 'backgrounds_303.txt' # G4.10 v00-04-12
-#mcfile = 'backgrounds_304.txt' # G4.9  v00-04-04
-#mcfile = 'backgrounds_304_update.txt'
-
-#mcfile = 'backgrounds_305.txt' # G4.10 SET1
-#mcfile = 'backgrounds_305_update.txt'
-#mcfile = 'backgrounds_306.txt' # G4.10 SET2
-
-#mcfile = 'backgrounds_311.txt' # G4.10 SET2 - new SET2 MC
-#mcfile = 'backgrounds_311_update.txt' # G4.10 SET2 - new SET2 MC
-
-#mcfile = 'backgrounds_312.txt' # testing Tl208 gamma MC
-
-#mcfile = 'backgrounds_313.txt' # testing more internal Ra228-->Th228
-
-mcfile = 'testing-data-400.txt'
+#mcfile = 'backgrounds_401.txt'
+#mcfile = 'backgrounds_402.txt'
+mcfile = 'backgrounds_403.txt'
 
 
-#mcfile = 'testing-gamma.txt'
-
-#mcfile = 'testing-data.txt'
-#mcfile = 'testing-data-2.txt'
-#mcfile = 'testing-data-3.txt' # testing v00-04-14
-
-#mcfile = 'testing-lsveto-1.txt'
-#mcfile = 'testing-lsveto-2.txt'
-
-#mcfile = 'testing-sim.txt'
-#mcfile = 'testing-u235.txt'
-#mcfile = 'testing-te121.txt'
-#mcfile = 'testing-surf.txt'
-#mcfile = 'testing-cosmo.txt'
-#mcfile = 'testing-paths.txt'
+#mcfile = 'testing-c1-surface.txt'
+#mcfile = 'testing-c2-surface.txt'
+#mcfile = 'testing-c3-surface.txt'
+#mcfile = 'testing-c4-surface.txt'
+#mcfile = 'testing-c6-surface.txt'
+#mcfile = 'testing-c7-surface.txt'
 
 
 print 'INFO: using backgrounds config file -->', mcfile
@@ -127,54 +105,22 @@ for i in range(numx):
     
     
     ### defaults for lsveto
-    # =============================================================
-    c9 = 8
-    fitranges[c9]['S0'] = [0,0,0]
-    fitranges[c9]['S1'] = [0,0,0]
-    fitranges[c9]['M0'] = [0,0,0]
-    #fitranges[c9]['M1'] = [4, 200, 3900] # for G4.9 SET1
-    #fitranges[c9]['M1'] = [6, 150, 3950] # for G4.10 SET1
-    #fitranges[c9]['M1'] = [8, 200, 3600] # for G4.10 SET2
-    
-    ### testing new Tl208 gamma MC with V00-04-14 -- 2019-06-24
-    fitranges[c9]['M1'] = [1, 100, 4000]
+    # --------------------------------------------------------------
+    fitranges[8]['S0'] = [0,0,0]
+    fitranges[8]['S1'] = [0,0,0]
+    fitranges[8]['M0'] = [0,0,0]
+    #fitranges[8]['M1'] = [4, 200, 3900] # for G4.9 SET1
+    #fitranges[8]['M1'] = [6, 150, 3950] # for G4.10 SET1
+    #fitranges[8]['M1'] = [8, 200, 3600] # for G4.10 SET2
+    fitranges[8]['M1'] = [1, 100, 4000] # ext gamma testing
+    # --------------------------------------------------------------
 
     
     ### set bounds separately for some crystals
-    # =============================================================
-    """
-    c1 = 0
-    fitranges[c1]['S0'] = [1,  5,  100]  # single-hit low-energy
-    fitranges[c1]['S1'] = [6, 60, 2260]  # single-hit high-energy
-    fitranges[c1]['M0'] = [1,  3,   70]  # multi-hit  low-energy
-    fitranges[c1]['M1'] = [6, 60, 2860]  # multi-hit  high-energy
-    
-    c2 = 1
-    fitranges[c2]['S0'] = [1,  5,  100]  # single-hit low-energy
-    fitranges[c2]['S1'] = [6, 60, 2260]  # single-hit high-energy
-    fitranges[c2]['M0'] = [1,  3,   70]  # multi-hit  low-energy
-    fitranges[c2]['M1'] = [6, 60, 2860]  # multi-hit  high-energy
-    
-    c3 = 2
-    fitranges[c3]['S0'] = [1,  5,  100]  # single-hit low-energy
-    fitranges[c3]['S1'] = [6, 60, 2260]  # single-hit high-energy
-    fitranges[c3]['M0'] = [1,  3,   70]  # multi-hit  low-energy
-    fitranges[c3]['M1'] = [6, 60, 2860]  # multi-hit  high-energy
-    
-    c4 = 3
-    fitranges[c4]['S0'] = [1,  5,  100]  # single-hit low-energy
-    fitranges[c4]['S1'] = [6, 60, 2260]  # single-hit high-energy
-    fitranges[c4]['M0'] = [1,  3,   70]  # multi-hit  low-energy
-    fitranges[c4]['M1'] = [6, 60, 2860]  # multi-hit  high-energy
-    
-    c7 = 6
-    fitranges[c7]['S0'] = [1,  5,  100]  # single-hit low-energy
-    fitranges[c7]['S1'] = [6, 60, 2260]  # single-hit high-energy
-    fitranges[c7]['M0'] = [1,  3,   70]  # multi-hit  low-energy
-    fitranges[c7]['M1'] = [6, 60, 2860]  # multi-hit  high-energy
-    """
-    # =============================================================
-
+    # --------------------------------------------------------------
+    # c1 low-energy is messed up below 9 keV
+    #fitranges[0]['S0'] = [1, 9, 100]
+    # --------------------------------------------------------------
 
 
 ### ==========  EXTRA MC OPTIONS  ====================================

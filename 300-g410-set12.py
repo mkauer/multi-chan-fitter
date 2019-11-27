@@ -62,8 +62,11 @@ note = 0
 #mcfile = 'backgrounds_311_update.txt' # G4.10 SET2 - new SET2 MC
 
 #mcfile = 'backgrounds_312.txt' # testing Tl208 gamma MC
+#mcfile = 'backgrounds_312_update.txt' # testing Tl208 gamma MC
 
-mcfile = 'backgrounds_313.txt' # testing more internal Ra228-->Th228
+#mcfile = 'backgrounds_313.txt' # testing more internal Ra228-->Th228
+
+mcfile = 'backgrounds_314.txt' # add lsveto Tl208 back in?
 
 
 #mcfile = 'testing-gamma.txt'
