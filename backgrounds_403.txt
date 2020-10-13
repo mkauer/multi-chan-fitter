@@ -3,7 +3,15 @@
 # 2019-11-26
 # removed some old commented out crap
 # trying exponentially weighted nai-surf [0.01, 1, 10]um sim
-# still need teflon-bulk for the ~13keV peak... make it work!
+# still need teflon-bulk for the ~13keV peak!
+# fits with expo weighted NaI-surf looks like crap
+
+# 2019-12-02
+# trying just teflon-bulk and teflon-surf
+# set tighter limits around Cd109
+# try using nai-surf-0.01 and teflon-bulk at 4-80 keV
+# try using nai-surf-0.01 and teflon-bulk and teflon-surf-0.1um at 4-80 keV
+
 
 
 DR  1  SET3  V00-04-14  ./C1_SET3_V00-04-14.dat  ./root-join-read/build400/build400-c1-data-SET3-V00-04-14.root
@@ -20,15 +28,15 @@ DR  9  SET3  V00-04-14  ./C9_SET3_V00-04-14.dat  ./root-join-read/build400/build
 #FR	1	nai-surf-10um		Pb210	Pb210	GRND	1	0	10	v4.0.2	./root-join-read/build311/build311-c1-nai-surf-10umPb210_GRND.root
 #FR	1	nai-surf-1um		Pb210	Pb210	GRND	1	0	10	v4.0.2	./root-join-read/build311/build311-c1-nai-surf-1umPb210_GRND.root
 #FR	1	nai-surf-0.01um		Pb210	Pb210	GRND	1	0	10	v4.0.2	./root-join-read/build311/build311-c1-nai-surf-0.01umPb210_GRND.root
-FR	1	nai-surf-expo		Pb210	Pb210	GRND	1	0	10	v4.0.2	./root-join-read/build311/build311-c1-nai-surf-expoPb210_GRND.root
+#FR	1	nai-surf-expo		Pb210	Pb210	GRND	1	0	10	v4.0.2	./root-join-read/build311/build311-c1-nai-surf-expoPb210_GRND.root
 FR	1	teflon-bulk		Pb210	Pb210	GRND    1	0	10	v4.0.2	./root-join-read/build311/build311-c1-teflon-bulkPb210_GRND.root
-#FR	1	teflon-surf-10um	Pb210	Pb210	GRND    1	0	10	v4.0.2	./root-join-read/build311/build311-c1-teflon-surf-10umPb210_GRND.root
+FR	1	teflon-surf-10um	Pb210	Pb210	GRND    1	0	10	v4.0.2	./root-join-read/build311/build311-c1-teflon-surf-10umPb210_GRND.root
 #FR	1	teflon-surf-0.1um	Pb210	Pb210	GRND    1	0	10	v4.0.2	./root-join-read/build311/build311-c1-teflon-surf-0.1umPb210_GRND.root
 
 FR	1	coppercase		Co60	Co60	GRND	0.5	0.1	3	v4.0.2	./root-join-read/build311/build311-c1-coppercaseCo60_GRND.root
 
 #FR	1	internal	Sn113	Sn113	GRND	0.1	0	2	v4.0.2	./root-join-read/build311/build311-internalSn113_GRND.root
-FR	1	internal	Cd109	Cd109	GRND	0.1	0	2	v4.0.2	./root-join-read/build311/build311-internalCd109_GRND.root
+FR	1	internal	Cd109	Cd109	GRND	0.1	0.1	2	v4.0.2	./root-join-read/build311/build311-internalCd109_GRND.root
 FR	1	internal	H3	H3	GRND	0.3	0.4	1.2	v4.0.2	./root-join-read/build311/build311-internalH3_GRND.root
 FR	1	internal	Na22	Na22	GRND	0.6	0.4	1.1	v4.0.2	./root-join-read/build311/build311-internalNa22_GRND.root
 #FR	1	internal	I125	I125	GRND	0.2	0	3	v4.0.2	./root-join-read/build311/build311-internalI125_GRND.root
@@ -82,15 +90,15 @@ FR	1	gamma		Tl208	Tl208	GRND	3.00e+00	0.01	1.1	v4.0.2	./root-join-read/build311/
 #FR	2	nai-surf-10um		Pb210	Pb210	GRND	1	0	10	v4.0.2	./root-join-read/build311/build311-c2-nai-surf-10umPb210_GRND.root
 #FR	2	nai-surf-1um		Pb210	Pb210	GRND	1	0	10	v4.0.2	./root-join-read/build311/build311-c2-nai-surf-1umPb210_GRND.root
 #FR	2	nai-surf-0.01um		Pb210	Pb210	GRND	1	0	10	v4.0.2	./root-join-read/build311/build311-c2-nai-surf-0.01umPb210_GRND.root
-FR	2	nai-surf-expo		Pb210	Pb210	GRND	1	0	10	v4.0.2	./root-join-read/build311/build311-c2-nai-surf-expoPb210_GRND.root
+#FR	2	nai-surf-expo		Pb210	Pb210	GRND	1	0	10	v4.0.2	./root-join-read/build311/build311-c2-nai-surf-expoPb210_GRND.root
 FR	2	teflon-bulk		Pb210	Pb210	GRND    1	0	10	v4.0.2	./root-join-read/build311/build311-c2-teflon-bulkPb210_GRND.root
-#FR	2	teflon-surf-10um	Pb210	Pb210	GRND    1	0	10	v4.0.2	./root-join-read/build311/build311-c2-teflon-surf-10umPb210_GRND.root
+FR	2	teflon-surf-10um	Pb210	Pb210	GRND    1	0	10	v4.0.2	./root-join-read/build311/build311-c2-teflon-surf-10umPb210_GRND.root
 #FR	2	teflon-surf-0.1um	Pb210	Pb210	GRND    1	0	10	v4.0.2	./root-join-read/build311/build311-c2-teflon-surf-0.1umPb210_GRND.root
 
 FR	2	coppercase		Co60	Co60	GRND	0.5	0.1	3	v4.0.2	./root-join-read/build311/build311-c2-coppercaseCo60_GRND.root
 
 #FR	2	internal	Sn113	Sn113	GRND	0.1	0	2	v4.0.2	./root-join-read/build311/build311-internalSn113_GRND.root
-FR	2	internal	Cd109	Cd109	GRND	0.1	0	2	v4.0.2	./root-join-read/build311/build311-internalCd109_GRND.root
+FR	2	internal	Cd109	Cd109	GRND	0.1	0.1	2	v4.0.2	./root-join-read/build311/build311-internalCd109_GRND.root
 FR	2	internal	H3	H3	GRND	0.2	0.4	1.2	v4.0.2	./root-join-read/build311/build311-internalH3_GRND.root
 FR	2	internal	Na22	Na22	GRND	0.6	0.4	1.1	v4.0.2	./root-join-read/build311/build311-internalNa22_GRND.root
 #FR	2	internal	I125	I125	GRND	0.2	0	3	v4.0.2	./root-join-read/build311/build311-internalI125_GRND.root
@@ -144,15 +152,15 @@ FR	2	gamma		Tl208	Tl208	GRND	3.00e+00	0.01	1.1	v4.0.2	./root-join-read/build311/
 #FR	3	nai-surf-10um		Pb210	Pb210	GRND	1	0	10	v4.0.2	./root-join-read/build311/build311-c3-nai-surf-10umPb210_GRND.root
 #FR	3	nai-surf-1um		Pb210	Pb210	GRND	1	0	10	v4.0.2	./root-join-read/build311/build311-c3-nai-surf-1umPb210_GRND.root
 #FR	3	nai-surf-0.01um		Pb210	Pb210	GRND	1	0	10	v4.0.2	./root-join-read/build311/build311-c3-nai-surf-0.01umPb210_GRND.root
-FR	3	nai-surf-expo		Pb210	Pb210	GRND	1	0	10	v4.0.2	./root-join-read/build311/build311-c3-nai-surf-expoPb210_GRND.root
+#FR	3	nai-surf-expo		Pb210	Pb210	GRND	1	0	10	v4.0.2	./root-join-read/build311/build311-c3-nai-surf-expoPb210_GRND.root
 FR	3	teflon-bulk		Pb210	Pb210	GRND    1	0	10	v4.0.2	./root-join-read/build311/build311-c3-teflon-bulkPb210_GRND.root
-#FR	3	teflon-surf-10um	Pb210	Pb210	GRND    1	0	10	v4.0.2	./root-join-read/build311/build311-c3-teflon-surf-10umPb210_GRND.root
+FR	3	teflon-surf-10um	Pb210	Pb210	GRND    1	0	10	v4.0.2	./root-join-read/build311/build311-c3-teflon-surf-10umPb210_GRND.root
 #FR	3	teflon-surf-0.1um	Pb210	Pb210	GRND    1	0	10	v4.0.2	./root-join-read/build311/build311-c3-teflon-surf-0.1umPb210_GRND.root
 
 FR	3	coppercase		Co60	Co60	GRND	0.5	0.1	3	v4.0.2	./root-join-read/build311/build311-c3-coppercaseCo60_GRND.root
 
 #FR	3	internal	Sn113	Sn113	GRND	0.1	0	2	v4.0.2	./root-join-read/build311/build311-internalSn113_GRND.root
-FR	3	internal	Cd109	Cd109	GRND	0.1	0	2	v4.0.2	./root-join-read/build311/build311-internalCd109_GRND.root
+FR	3	internal	Cd109	Cd109	GRND	0.1	0.1	2	v4.0.2	./root-join-read/build311/build311-internalCd109_GRND.root
 FR	3	internal	H3	H3	GRND	0.2	0.4	1.8	v4.0.2	./root-join-read/build311/build311-internalH3_GRND.root
 FR	3	internal	Na22	Na22	GRND	0.6	0.4	1.1	v4.0.2	./root-join-read/build311/build311-internalNa22_GRND.root
 FR	3	internal	I125	I125	GRND	0.2	0	3	v4.0.2	./root-join-read/build311/build311-internalI125_GRND.root
@@ -206,15 +214,15 @@ FR	3	gamma		Tl208	Tl208	GRND	3.00e+00	0.01	1.1	v4.0.2	./root-join-read/build311/
 #FR	4	nai-surf-10um		Pb210	Pb210	GRND	1	0	10	v4.0.2	./root-join-read/build311/build311-c4-nai-surf-10umPb210_GRND.root
 #FR	4	nai-surf-1um		Pb210	Pb210	GRND	1	0	10	v4.0.2	./root-join-read/build311/build311-c4-nai-surf-1umPb210_GRND.root
 #FR	4	nai-surf-0.01um		Pb210	Pb210	GRND	1	0	10	v4.0.2	./root-join-read/build311/build311-c4-nai-surf-0.01umPb210_GRND.root
-FR	4	nai-surf-expo		Pb210	Pb210	GRND	1	0	10	v4.0.2	./root-join-read/build311/build311-c4-nai-surf-expoPb210_GRND.root
+#FR	4	nai-surf-expo		Pb210	Pb210	GRND	1	0	10	v4.0.2	./root-join-read/build311/build311-c4-nai-surf-expoPb210_GRND.root
 FR	4	teflon-bulk		Pb210	Pb210	GRND    1	0	10	v4.0.2	./root-join-read/build311/build311-c4-teflon-bulkPb210_GRND.root
-#FR	4	teflon-surf-10um	Pb210	Pb210	GRND    1	0	10	v4.0.2	./root-join-read/build311/build311-c4-teflon-surf-10umPb210_GRND.root
+FR	4	teflon-surf-10um	Pb210	Pb210	GRND    1	0	10	v4.0.2	./root-join-read/build311/build311-c4-teflon-surf-10umPb210_GRND.root
 #FR	4	teflon-surf-0.1um	Pb210	Pb210	GRND    1	0	10	v4.0.2	./root-join-read/build311/build311-c4-teflon-surf-0.1umPb210_GRND.root
 
 FR	4	coppercase		Co60	Co60	GRND	0.5	0.1	3	v4.0.2	./root-join-read/build311/build311-c4-coppercaseCo60_GRND.root
 
 #FR	4	internal	Sn113	Sn113	GRND	0.1	0	1	v4.0.2	./root-join-read/build311/build311-internalSn113_GRND.root
-FR	4	internal	Cd109	Cd109	GRND	0.1	0	1	v4.0.2	./root-join-read/build311/build311-internalCd109_GRND.root
+FR	4	internal	Cd109	Cd109	GRND	0.1	0.1	2	v4.0.2	./root-join-read/build311/build311-internalCd109_GRND.root
 FR	4	internal	H3	H3	GRND	0.2	0.4	1.8	v4.0.2	./root-join-read/build311/build311-internalH3_GRND.root
 FR	4	internal	Na22	Na22	GRND	0.6	0.4	1.1	v4.0.2	./root-join-read/build311/build311-internalNa22_GRND.root
 FR	4	internal	I125	I125	GRND	0.2	0	3	v4.0.2	./root-join-read/build311/build311-internalI125_GRND.root
@@ -268,15 +276,15 @@ FR	4	gamma		Tl208	Tl208	GRND	3.00e+00	0.01	1.1	v4.0.2	./root-join-read/build311/
 #FR	6	nai-surf-10um		Pb210	Pb210	GRND	1	0	10	v4.0.2	./root-join-read/build311/build311-c6-nai-surf-10umPb210_GRND.root
 #FR	6	nai-surf-1um		Pb210	Pb210	GRND	1	0	10	v4.0.2	./root-join-read/build311/build311-c6-nai-surf-1umPb210_GRND.root
 #FR	6	nai-surf-0.01um		Pb210	Pb210	GRND	1	0	10	v4.0.2	./root-join-read/build311/build311-c6-nai-surf-0.01umPb210_GRND.root
-FR	6	nai-surf-expo		Pb210	Pb210	GRND	1	0	10	v4.0.2	./root-join-read/build311/build311-c6-nai-surf-expoPb210_GRND.root
+#FR	6	nai-surf-expo		Pb210	Pb210	GRND	1	0	10	v4.0.2	./root-join-read/build311/build311-c6-nai-surf-expoPb210_GRND.root
 FR	6	teflon-bulk		Pb210	Pb210	GRND    1	0	10	v4.0.2	./root-join-read/build311/build311-c6-teflon-bulkPb210_GRND.root
-#FR	6	teflon-surf-10um	Pb210	Pb210	GRND    1	0	10	v4.0.2	./root-join-read/build311/build311-c6-teflon-surf-10umPb210_GRND.root
+FR	6	teflon-surf-10um	Pb210	Pb210	GRND    1	0	10	v4.0.2	./root-join-read/build311/build311-c6-teflon-surf-10umPb210_GRND.root
 #FR	6	teflon-surf-0.1um	Pb210	Pb210	GRND    1	0	10	v4.0.2	./root-join-read/build311/build311-c6-teflon-surf-0.1umPb210_GRND.root
 
 FR	6	coppercase		Co60	Co60	GRND	0.5	0.1	3	v4.0.2	./root-join-read/build311/build311-c6-coppercaseCo60_GRND.root
 
 #FR	6	internal	Sn113	Sn113	GRND	0.1	0.1	1	v4.0.2	./root-join-read/build311/build311-internalSn113_GRND.root
-FR	6	internal	Cd109	Cd109	GRND	0.1	0.1	1	v4.0.2	./root-join-read/build311/build311-internalCd109_GRND.root
+FR	6	internal	Cd109	Cd109	GRND	0.1	0.1	2	v4.0.2	./root-join-read/build311/build311-internalCd109_GRND.root
 FR	6	internal	H3	H3	GRND	0.1	0.1	2.0	v4.0.2	./root-join-read/build311/build311-internalH3_GRND.root
 FR	6	internal	Na22	Na22	GRND	0.4	0.5	1.3	v4.0.2	./root-join-read/build311/build311-internalNa22_GRND.root
 FR	6	internal	I125	I125	GRND	0.2	0	3	v4.0.2	./root-join-read/build311/build311-internalI125_GRND.root
@@ -330,15 +338,15 @@ FR	6	gamma		Tl208	Tl208	GRND	3.00e+00	0.01	1.1	v4.0.2	./root-join-read/build311/
 #FR	7	nai-surf-10um		Pb210	Pb210	GRND	1	0	10	v4.0.2	./root-join-read/build311/build311-c7-nai-surf-10umPb210_GRND.root
 #FR	7	nai-surf-1um		Pb210	Pb210	GRND	1	0	10	v4.0.2	./root-join-read/build311/build311-c7-nai-surf-1umPb210_GRND.root
 #FR	7	nai-surf-0.01um		Pb210	Pb210	GRND	1	0	10	v4.0.2	./root-join-read/build311/build311-c7-nai-surf-0.01umPb210_GRND.root
-FR	7	nai-surf-expo		Pb210	Pb210	GRND	1	0	10	v4.0.2	./root-join-read/build311/build311-c7-nai-surf-expoPb210_GRND.root
+#FR	7	nai-surf-expo		Pb210	Pb210	GRND	1	0	10	v4.0.2	./root-join-read/build311/build311-c7-nai-surf-expoPb210_GRND.root
 FR	7	teflon-bulk		Pb210	Pb210	GRND    1	0	10	v4.0.2	./root-join-read/build311/build311-c7-teflon-bulkPb210_GRND.root
-#FR	7	teflon-surf-10um	Pb210	Pb210	GRND    1	0	10	v4.0.2	./root-join-read/build311/build311-c7-teflon-surf-10umPb210_GRND.root
+FR	7	teflon-surf-10um	Pb210	Pb210	GRND    1	0	10	v4.0.2	./root-join-read/build311/build311-c7-teflon-surf-10umPb210_GRND.root
 #FR	7	teflon-surf-0.1um	Pb210	Pb210	GRND    1	0	10	v4.0.2	./root-join-read/build311/build311-c7-teflon-surf-0.1umPb210_GRND.root
 
 FR	7	coppercase		Co60	Co60	GRND	0.5	0.1	3	v4.0.2	./root-join-read/build311/build311-c7-coppercaseCo60_GRND.root
 
 #FR	7	internal	Sn113	Sn113	GRND	0.1	0.1	1	v4.0.2	./root-join-read/build311/build311-internalSn113_GRND.root
-FR	7	internal	Cd109	Cd109	GRND	0.1	0.1	1	v4.0.2	./root-join-read/build311/build311-internalCd109_GRND.root
+FR	7	internal	Cd109	Cd109	GRND	0.1	0.1	2	v4.0.2	./root-join-read/build311/build311-internalCd109_GRND.root
 FR	7	internal	H3	H3	GRND	0.1	0.1	2.0	v4.0.2	./root-join-read/build311/build311-internalH3_GRND.root
 FR	7	internal	Na22	Na22	GRND	0.4	0.5	1.3	v4.0.2	./root-join-read/build311/build311-internalNa22_GRND.root
 FR	7	internal	I125	I125	GRND	0.2	0	3	v4.0.2	./root-join-read/build311/build311-internalI125_GRND.root

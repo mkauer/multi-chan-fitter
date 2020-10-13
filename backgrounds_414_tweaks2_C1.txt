@@ -1,0 +1,40 @@
+# -*- sh -*-
+
+# 2020-08-18
+# how does C1 look?
+# should be similar to C2
+
+DR  1  SET3  V00-04-15  ./C1_SET3_V00-04-15.dat  ./root-join-read/build401/build401-c1-data-SET3-V00-04-15.root
+
+#FR	1	nai-surf-10um	Pb210	Pb210	GRND	4.44e-01	0.1	10	v4.0.2	./root-join-read/build311/build311-c1-nai-surf-10umPb210_GRND.root
+#FR	1	nai-surf-1um	Pb210	Pb210	GRND	4.69e-01	0.1	10	v4.0.2	./root-join-read/build311/build311-c1-nai-surf-1umPb210_GRND.root
+#FR	1	teflon-surf-10um	Pb210	Pb210	GRND	5.52e-01	0.1	10	v4.0.2	./root-join-read/build311/build311-c1-teflon-surf-10umPb210_GRND.root
+FR	1	teflon-bulk	Pb210	Pb210	GRND	4.19e-01	0.1	10	v4.0.2	./root-join-read/build311/build311-c1-teflon-bulkPb210_GRND.root
+
+FR	1	internal	Sn113	Sn113	GRND	8.93e-03	0.1	10	v4.0.2	./root-join-read/build410/build410-internalSn113_GRND.root
+FR	1	internal	Cd109	Cd109	GRND	4.85e-03	0.1	10	v4.0.2	./root-join-read/build410/build410-internalCd109_GRND.root
+BR	1	internal	H3	H3	GRND	9.75e-02	0.1	10	v4.0.2	./root-join-read/build410/build410-internalH3_GRND.root
+BR	1	internal	Te121m	Te121m	GRND	.03	0.1	10	v4.0.2	./root-join-read/build410/build410-internalTe121m_GRND.root
+BR	1	internal	Na22	Na22	GRND	.25	0.1	10	v4.0.2	./root-join-read/build410/build410-internalNa22_GRND.root
+FR	1	internal	Th232	Ra228	Th228	7.30e-02	0.1	10	v4.0.2	./root-join-read/build410/build410-internalRa228_Th228.root
+#BR	1	coppercase	Co60	Co60	GRND	0.6	0.1	10	v4.0.2	./root-join-read/build500/build500-coppercaseCo60_GRND.root
+BR	1	coppercase	Co60	Co60	GRND	.7	0.1	10	v4.0.2	./root-join-read/build311/build311-c1-coppercaseCo60_GRND.root
+BR	1	internal	I125	I125	GRND	1.08e-07	0.1	10	v4.0.2	./root-join-read/build410/build410-internalI125_GRND.root
+FR	1	internal	I129	I129	GRND	1.16e+00	0.1	10	v4.0.2	./root-join-read/build410/build410-internalI129_GRND.root
+BR	1	internal	Te123m	Te123m	GRND	.04	0.1	10	v4.0.2	./root-join-read/build410/build410-internalTe123m_GRND.root
+BR	1	internal	Te127m	Te127m	GRND	5.96e-02	0.1	10	v4.0.2	./root-join-read/build410/build410-internalTe127m_GRND.root
+#BR	1	internal	K40	K40	GRND	1.8	0.1	10	v4.0.2	./root-join-read/build410/build410-internalK40_GRND.root
+BR	1	internal	K40	K40	GRND	1.0	0.1	10	v4.0.2	./root-join-read/build410/build410-internalK40_GRND.root
+BR	1	internal	U238	U238	Th230	7.30e-04	0.1	10	v4.0.2	./root-join-read/build410/build410-internalU238_Th230.root
+FR	1	internal	Pb210	Pb210	GRND	1.85e+00	0.1	10	v4.0.2	./root-join-read/build410/build410-internalPb210_GRND.root
+
+BR	1	pmt	K40	K40	GRND	260	0.1	10	v4.0.2	./root-join-read/build410/build410-pmtK40_GRND.root
+BR	1	pmt	U235	U235	Pa231	18.0	0.1	10	v4.0.2	./root-join-read/build410/build410-pmtU235_Pa231.root
+BR	1	pmt	U238	Rn222	Pb210	1.05e+02	0.1	10	v4.0.2	./root-join-read/build410/build410-pmtRn222_Pb210.root
+BR	1	pmt	Th232	Ra228	Th228	38.0	0.1	10	v4.0.2	./root-join-read/build410/build410-pmtRa228_Th228.root
+BR	1	pmt	Th232	Th228	GRND	36.0	0.1	10	v4.0.2	./root-join-read/build410/build410-pmtTh228_GRND.root
+BR	1	plastic	U238	Rn222	Pb210	0.25	0.1	10	v4.0.2	./root-join-read/build410/build410-plasticRn222_Pb210.root
+BR	1	plastic	Th232	Th228	GRND	0.04	0.1	10	v4.0.2	./root-join-read/build410/build410-plasticTh228_GRND.root
+BR	1	lsveto	U238	Rn222	Pb210	0.50	0.1	10	v4.0.2	./root-join-read/build410/build410-lsvetoRn222_Pb210.root
+BR	1	lsveto	Th232	Ra228	Th228	0.9	0.1	10	v4.0.2	./root-join-read/build410/build410-lsvetoRa228_Th228.root
+BR	1	gamma	Tl208	Tl208	GRND	5.5	0.1	10	v4.0.2	./root-join-read/build500/build500-gammaTl208_GRND.root
