@@ -2,10 +2,21 @@
 ######################################################################
 # funcs400.py
 # 
-# version: 2019-09-03
+# version: 2020-05-18
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# + ScaleEnergy400() and MCBinShift400()
+
+# + add alpha cut to surface teflon
+# + add exceptions for nai-surf, teflon, and reflector in build400()
+# + create an exception for nai-surf-expo in build400()
+# ~ changed C4 Z length
+# ~ made the expo surface depth profile function dynamic
+# ~ tweak volume cuts for positional degeneracy in buildMCSurf400()
+# ~ fixed a from-crystal bug in buildMCSurf400()
+# ~ build400() has option to use new buildMCSurf400()
+# + added the buildMCSurf400() for special case expo profile
 # - remove returning the "runtime" for data - get it in main script
 # + add new getInfo400(), build400(), and buildData400()
 # 
@@ -141,8 +152,20 @@ def build400(infile='backgrounds400.txt', others=1, freuse=0, fchans='SM', fxsta
     
     for line in readFile(infile):
         info = getInfo400(line, freuse, fchans, fxstals)
+        #print info
+        
         if len(info) == 0:
             continue
+        
+        #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # Do not include "others" in processing [1] - Default [0]
+        exception = 0
+        # turn these off after testing
+        if 'naisurf' in info['key']: exception = 1
+        if 'teflon' in info['key']: exception = 1
+        if 'teflonsurf' in info['key']: exception = 1
+        if 'reflector' in info['key']: exception = 1
+        #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         
         #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         # These are mandatory excludes because they are always global
@@ -154,7 +177,7 @@ def build400(infile='backgrounds400.txt', others=1, freuse=0, fchans='SM', fxsta
         #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         
         infos = []
-        exception = 0
+        
         if 'data' in info['key']:
             if debug: print 'DEBUG: if data in info[key]: -->', info['key']
             infos.append(info)
@@ -194,27 +217,41 @@ def build400(infile='backgrounds400.txt', others=1, freuse=0, fchans='SM', fxsta
             if debug: print 'DEBUG: elif exclude: -->', info['key']
             infos.append(info)
         else:
-            print 'WARNING:',info['key'],'does not fit any known criteria'
-            print '         Please check out build101() '
+            print 'WARNING:', info['key'], 'does not fit any known criteria'
+            print '         Please check out build400() '
             infos.append(info)
+            
         #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        
         for info in infos:
             #print info['key']
             if 'D' in info['type']:
                 data = buildData400(info, data)
                 
             elif 'B' in info['type']:
-                bkgs = buildMC300(info, bkgs)
+                #if info['loca'] == 'naisurf10umexpo':
+                #if 'naisurf10umexpo' in info['loca']:
+                if 'naisurfexpo' in info['loca'] \
+                   or 'teflonsurfexpo' in info['loca']:
+                    #print "!!!   SPECIAL PB210 PROFILE WORKING   !!!"
+                    bkgs = buildMCSurf400(info, bkgs)
+                else:
+                    bkgs = buildMC300(info, bkgs)
             
             elif 'F' in info['type']:
-                sigs = buildMC300(info, sigs)
-            
+                #if info['loca'] == 'naisurf10umexpo':
+                #if 'naisurf10umexpo' in info['loca']:
+                if 'naisurfexpo' in info['loca'] \
+                   or 'teflonsurfexpo' in info['loca']:
+                    #print "!!!   SPECIAL PB210 PROFILE WORKING   !!!"
+                    sigs = buildMCSurf400(info, sigs)
+                else:
+                    sigs = buildMC300(info, sigs)
             else:
                 print 'WARNING: I do not know type',info['type'],'in line:'
                 print info['line']
                 continue
-        #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            
         #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         
     return data, bkgs, sigs
@@ -300,8 +337,10 @@ def buildData400(info, data):
                 #print 'INFO: adding file -->', fpath
                 tmpruntime = -1
                 tmpruntime = getDuration(fpath)
+                #print tmpruntime, fpath
                 if tmpruntime > 0:
                     runtime += tmpruntime
+                    #print runtime
                     nfiles += chain.Add(fpath)
                 else:
                     print 'WARNING: no run duration found for -->', fpath
@@ -354,6 +393,11 @@ def buildData400(info, data):
                         ### testing differences between 04-04, 04-12, and 04-14
                         edep, selection = calib301(i, E)
                         
+                    elif info['build'] == 'V00-04-15':
+                        ### calib301 uses the standard production calibrations
+                        ### and uses the lsveto poly43 calibration
+                        edep, selection = calib301(i, E)
+                    
                     else:
                         print "ERROR: no info['build'] for the data calibration"
                         sys.exit()
@@ -369,6 +413,9 @@ def buildData400(info, data):
                         masterCut = cutsBDT300(i, C, E, edep, selection)
                     ### new BDT cuts for V00-04-14
                     elif info['build'] == 'V00-04-14':
+                        masterCut = cutsBDT301(i, C, E, edep, selection)
+                    ### same cuts for v00-04-15 so I'm told...
+                    elif info['build'] == 'V00-04-15':
                         masterCut = cutsBDT301(i, C, E, edep, selection)
                     else:
                         print "ERROR: no info['build'] for the data cuts"
@@ -417,4 +464,345 @@ def buildData400(info, data):
 
     return data
 
+
+def buildMCSurf400(info, mc):
+    
+    #============================================================================
+    #  super special case function to deal with NaI surface depth profiling...
+    #  and now also teflon surface depth profiling... 2020-04-29
+    #============================================================================
+        
+    if info['reuse']:
+        for c in info['chans']:
+            info['chan'] = c
+            
+            if not info['rootfile']:
+                print 'ERROR: no rootfile specified in backgrounds file'
+                sys.exit()
+            
+            rootfile = info['rootfile']
+            if not os.path.exists(rootfile):
+                print 'ERROR: rootfile not found -->', rootfile
+                sys.exit()
+            
+            rfile = TFile(rootfile, "READ")
+
+            for e in range(2):
+                key  = info['key']
+                key += '-c'+info['chan']
+                key += '-e'+str(e)
+
+                # exclude lsveto low energy
+                #if 'x9' in key and e == 0:
+                #    continue
+                
+                try:
+                    mc[key] = {}
+                    mc[key]['info'] = info
+                    mc[key]['hist'] = deepcopy(TH1F(rfile.Get(key)))
+                    mc[key]['pars'] = getPars(mc[key]['hist'])
+                    #mc[key]['hist'].Sumw2()
+                except:
+                    print "ERROR: could not find hist -->",key
+                    sys.exit()
+                    
+                try:
+                    mc[key]['generated_hist'] = deepcopy(TH1F(rfile.Get(key+'_generated')))
+                    #mc[key]['generated'] = mc[key]['generated_hist'].GetBinContent(1)
+                    mc[key]['generated'] = mc[key]['generated_hist'].GetEntries()
+                except:
+                    print "ERROR: could not find generated_hist -->",key+'_generated'
+                    sys.exit()
+        
+    else:
+        
+        ### select correct paths for simulation files
+        if   info['sim'] == 'v3.1.1': path1, path2, pushpasMC = mcPath101(info) # G4.9
+        elif info['sim'] == 'v4.0.1': path1, path2, pushpasMC = mcPath300(info) # G4.10 SET1
+        elif info['sim'] == 'v4.0.2': path1, path2, pushpasMC = mcPath301(info) # G4.10 SET2
+        else:
+            print 'ERROR: simulation version not valid -->',info['sim']
+            sys.exit()
+            
+        ### append the path if running locally 
+        if amLocal():
+            path1 = os.path.join('/home/mkauer/COSINE/CUP/mc-fitting','.'+path1)
+        
+        print 'INFO: looking for files with -->', os.path.join(path1, path2)
+        
+        chain  = TChain("MC","")
+        nfiles = 0
+        nfiles = chain.Add(os.path.join(path1, path2))
+        
+        if nfiles > 0:
+            
+            print 'INFO:',nfiles,'files found for', info['loca'], info['isof']
+            
+            for c in info['chans']:
+                info['chan'] = c
+                
+                for e in range(2):
+                    
+                    # DEFINE HIST AND KEY
+                    #-----------------------------------------------------------------------
+                    xstal = int(info['xstl']) - 1
+                    fromx = int(info['from']) - 1
+                    
+                    key  = info['key']
+                    key += '-c'+info['chan']
+                    key += '-e'+str(e)
+                    
+                    mc[key] = {}
+                    mc[key]['info'] = info
+                    
+                    pars = histparam64(e)
+                    mc[key]['pars'] = pars
+                    histo = TH1F(key, longNames(xstal), pars[0], pars[1], pars[2])
+
+                    # 2020-03-19 - add this here
+                    key2 = key+'_generated'
+                    temp2 = TH1F(key2, 'generated', 1, 1, 2)
+                    #-----------------------------------------------------------------------
+
+                    
+                    ###  2020-03-19
+                    ###  adding in the event-by-event selction criteria
+                    #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+                    ### try getting the expo depth from file name?
+                    ### fix the depth as par[0]
+                    depth = float(info['floca'].split('-')[3])
+                    func = TF1('func', surfProfile, 0, 10, 1)
+                    func.SetParameter(0, depth/100.)
+                    #print 'using depth', depth
+                    
+                                        
+                    entries = chain.GetEntries()
+                    #print entries
+                    
+                    for jentry in range(entries):
+                        
+                        chain.GetEntry(jentry)
+
+                        ### pull entry data our of leaf
+                        #--------------------------------------------------
+                        xx = chain.GetLeaf('primX0').GetValue()
+                        yy = chain.GetLeaf('primY0').GetValue()
+                        zz = chain.GetLeaf('primZ0').GetValue()
+                        
+                        #elow = chain.GetLeaf('edepResA').GetValue(xstal)
+                        #ehi = chain.GetLeaf('edepResD').GetValue(xstal)
+                        ### these branch names changed in gyunho's sim
+                        elow = chain.GetLeaf('edepResolA').GetValue(xstal)
+                        ehi = chain.GetLeaf('edepResolD').GetValue(xstal)
+                        
+                        shit = chain.GetLeaf('singleHitTag').GetValue(xstal)
+                        mhit = chain.GetLeaf('multipleHitTag').GetValue(xstal)
+                        evType = chain.GetLeaf('evt_Type').GetValue()
+                        group = chain.GetLeaf('groupNo').GetValue()
+                        decayType = chain.GetLeaf('primDecayType').GetValue()
+                        
+                        
+                        ### alpha cuts?
+                        #--------------------------------------------------
+                        # 97 == alpha
+                        # 98 == beta
+                        if decayType == 97: continue
+                        
+                        
+                        
+                        ### volume cuts
+                        #--------------------------------------------------
+                        X0, Y0, Z0, rad, height, dep = mcDimensions(fromx)
+                        dist = sqrt((X0-xx)**2 + (Y0-yy)**2)
+                        zdist = abs(Z0-zz)
+
+                        # teflon thickness (mm) - 2020-04-29
+                        #teflon = 1.015
+                        # i think this changed in gyunho's new sim
+                        teflon = 1.016
+
+                        ### kinda cryptic...
+                        # /100 to conver to um
+                        # /1000 to convert to mm
+                        # *10 to go 10 expo depths in
+                        #tdep = (((depth/100.)/1000.) * 10)
+                        # use dep = 0.01 = 10um because that's all that was simulated
+                        # actually set dep to 100um = 0.1
+                        dep = 0.1
+                        tdep = dep
+                        
+                        # for NaI surf side
+                        if info['loca'].endswith('side') or info['loca'].endswith('expo'):
+                            if dist > rad or dist < rad-dep: continue
+                            if zdist > height: continue
+
+                        # for NaI surf face
+                        elif info['loca'].endswith('face'):
+                            if zdist > height or zdist < height-dep: continue
+                            if dist > rad: continue
+                        
+                        # teflon in-side or out-side - 2020-04-29
+                        #elif info['loca'].endswith('in') or info['loca'].endswith('out'):
+                        #    if dist < rad or dist > rad+teflon: continue
+                        #    if zdist > height: continue
+                        
+                        # teflon in-side - 2020-05-01
+                        elif info['loca'].endswith('in'):
+                            if dist < rad or dist > rad+tdep: continue
+                            if zdist > height: continue
+
+                        # teflon out-side - 2020-05-01
+                        elif info['loca'].endswith('out'):
+                            if dist < rad+teflon-tdep or dist > rad+teflon: continue
+                            if zdist > height: continue
+
+                        else:
+                            print 'ERROR: I do not know what to do with', info['loca']
+                            sys.exit()
+
+                        
+                        ### get the expo weighting
+                        #--------------------------------------------------
+                        # for NaI surf side
+                        if info['loca'].endswith('side') or info['loca'].endswith('expo'):
+                            wtf  = func.Eval(1000.*(rad-dist))
+                        
+                        # for NaI surf face
+                        elif info['loca'].endswith('face'):
+                            wtf  = func.Eval(1000.*(height-zdist))
+                        
+                        # teflon in-side - 2020-04-29
+                        elif info['loca'].endswith('in'):
+                            wtf  = func.Eval(1000.*(dist-rad))
+                        
+                        # teflon out-side - 2020-04-29
+                        elif info['loca'].endswith('out'):
+                            wtf  = func.Eval(1000.*(rad+teflon-dist))
+                        
+                        else:
+                            print 'ERROR: I do not know what to do with', info['loca']
+                            sys.exit()
+                        
+                        #wtf = 1
+
+                        
+                        ### generated events - I might need to reposition this code
+                        #--------------------------------------------------
+                        # to stay consisent I just need volume and event type cuts?
+                        # err, I think I need to add the exp weighting...
+                        if evType <= 10:
+                            #wtf=1 # testing
+                            temp2.Fill(1, wtf)
+                        
+                        
+                        ### energy cut
+                        #--------------------------------------------------
+                        # do I need separate cuts for low and high energy
+                        if e==0:
+                            if elow*1000. < 0.1: continue
+                        if e==1:
+                            if ehi*1000. < 0.1: continue
+                        
+                        
+                        ### single/multi hit cut
+                        #--------------------------------------------------
+                        if c == 'S':
+                            if shit != 1 or mhit != -1: continue
+                        if c == 'M':
+                            if shit != -1 or mhit != 1: continue
+                        
+                        
+                        ### do I need an lsveto cut?
+                        #--------------------------------------------------
+                        # -- insert here...
+                        # probably not, minimal impact if any.
+                        # single/multi hit cut will take care of this.
+                        
+                        
+                        ### do I need a groupNo cut?
+                        #--------------------------------------------------
+                        # -- insert here...
+                        # not needed here for Pb210.
+                        # groups 14-15 are included by default anyway.
+
+                        
+                        ### event type cut
+                        #--------------------------------------------------
+                        if evType <= 10: continue
+                        
+                        
+                        ### fill the weighted histograms
+                        #--------------------------------------------------
+                        if e==0:
+                            histo.Fill(1000.*elow, wtf)
+                        if e==1:
+                            histo.Fill(1000.*ehi, wtf)
+                        
+                        
+
+                    #---------------------------------------------------------------------
+                    mc[key]['generated_hist'] = temp2
+                    generated = temp2.GetEntries()
+                    if generated <= 0:
+                        if int(info['xstl']) == int(info['from']):
+                            print 'WARNING: no events generated for -->', info['floca'], info['isof'],\
+                                  'xstl', info['xstl'], 'from', info['from']
+                        else:
+                            print 'WARNING: no events generated for -->', info['floca'], info['isof'],\
+                                  'xstl', info['xstl'], 'from', info['from']
+                    mc[key]['generated'] = generated
+
+                    #---------------------------------------------------------------------
+                    
+                    detected = histo.GetEntries()
+                    mc[key]['hist'] = histo
+                    
+                    if (c=='S' and e==0) or (c=='M' and e==1):
+                        print 'DEBUG:', key, 'generated events =', generated
+                        print 'DEBUG:', key, 'detected events =', detected
+                        try: effic = round(100*detected/generated, 2)
+                        except: effic = 0.0
+                        print 'DEBUG:', key, 'efficiency =', effic, '%'
+
+                    #---------------------------------------------------------------------
+                       
+        else:
+            print 'ERROR: no MC files found for -->', \
+                'x'+str(info['xstl']), info['floca'], info['isof']
+            sys.exit()
+    
+    return mc
+
+
+def ScaleEnergy400(bkgs, binShift):
+
+    for key in bkgs:
+        if 'cS' in key and 'e0' in key:
+            if 'teflon' in key:
+                xstal = int(key.split('-')[0][1]) - 1
+                if binShift[xstal] > 0:
+                    bkgs[key]['hist'] = MCBinShift400(bkgs[key]['hist'], binShift[xstal])
+
+    return bkgs
+
+
+def MCBinShift400(histo, binShift):
+
+    ### this currently only works with shifting hists to lower energy
+    
+    """
+    name = hist.GetName()
+    title = hist.GetTitle()
+    
+    newhist = TH1F(key, longNames(i), par[0], par[1], par[2])
+    pars = getPars(hist)
+    bins = pars[0]
+    """
+    
+    for n in range(histo.GetNbinsX()+1):
+        histo.SetBinContent(n, histo.GetBinContent(n+binShift))
+
+    return histo
 

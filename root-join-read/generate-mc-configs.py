@@ -14,14 +14,14 @@
 import os
 
 allTheThings = [
-    ['nai-surf-10um','Pb210','Pb210','GRND'],
-    ['nai-surf-1um','Pb210','Pb210','GRND'],
-    ['nai-surf-0.01um','Pb210','Pb210','GRND'],
-    ['teflon-bulk','Pb210','Pb210','GRND'],
-    ['teflon-surf-10um','Pb210','Pb210','GRND'],
-    ['teflon-surf-0.1um','Pb210','Pb210','GRND'],
-    ['reflector','Pb210','Pb210','GRND'],
-    ['coppercase','Co60','Co60','GRND'],
+    #['nai-surf-10um','Pb210','Pb210','GRND'],
+    #['nai-surf-1um','Pb210','Pb210','GRND'],
+    #['nai-surf-0.01um','Pb210','Pb210','GRND'],
+    #['teflon-bulk','Pb210','Pb210','GRND'],
+    #['teflon-surf-10um','Pb210','Pb210','GRND'],
+    #['teflon-surf-0.1um','Pb210','Pb210','GRND'],
+    #['reflector','Pb210','Pb210','GRND'],
+    #['coppercase','Co60','Co60','GRND'],
     ['internal','Sn113','Sn113','GRND'],
     ['internal','Cd109','Cd109','GRND'],
     ['internal','H3','H3','GRND'],
@@ -35,9 +35,9 @@ allTheThings = [
     ['internal','Te125m','Te125m','GRND'],
     ['internal','Te127m','Te127m','GRND'],
     ['internal','K40','K40','GRND'],
-    ['internal','U235','U235','GRND'],
-    ['internal','U235','U235','Pa231'],
-    ['internal','U235','Pa231','GRND'],
+    #['internal','U235','U235','GRND'],
+    #['internal','U235','U235','Pa231'],
+    #['internal','U235','Pa231','GRND'],
     ['internal','U238','U238','GRND'],
     ['internal','U238','U238','Pb210'],
     ['internal','U238','U238','Th230'],
@@ -89,30 +89,46 @@ allTheThings = [
     ['lsveto','Th232','Th232','Ra228'],
     ['lsveto','Th232','Ra228','Th228'],
     ['lsveto','Th232','Th228','GRND'],
-    ['innersteel','U238','U238','GRND'],
-    ['innersteel','U238','U238','Pb210'],
-    ['innersteel','U238','U238','Th230'],
-    ['innersteel','U238','Th230','Ra226'],
-    ['innersteel','U238','Ra226','Rn222'],
-    ['innersteel','U238','Rn222','Pb210'],
-    ['innersteel','U238','Pb210','GRND'],
-    ['innersteel','Th232','Th232','GRND'],
-    ['innersteel','Th232','Th232','Ra228'],
-    ['innersteel','Th232','Ra228','Th228'],
-    ['innersteel','Th232','Th228','GRND'],
-    ['steel','U238','U238','GRND'],
-    ['steel','U238','U238','Pb210'],
-    ['steel','U238','U238','Th230'],
-    ['steel','U238','Th230','Ra226'],
-    ['steel','U238','Ra226','Rn222'],
-    ['steel','U238','Rn222','Pb210'],
-    ['steel','U238','Pb210','GRND'],
-    ['steel','Th232','Th232','GRND'],
-    ['steel','Th232','Th232','Ra228'],
-    ['steel','Th232','Ra228','Th228'],
-    ['steel','Th232','Th228','GRND']
+    ['cushield','U238','U238','GRND'],
+    ['cushield','U238','U238','Pb210'],
+    ['cushield','U238','U238','Th230'],
+    ['cushield','U238','Th230','Ra226'],
+    ['cushield','U238','Ra226','Rn222'],
+    ['cushield','U238','Rn222','Pb210'],
+    ['cushield','U238','Pb210','GRND'],
+    ['cushield','Th232','Th232','GRND'],
+    ['cushield','Th232','Th232','Ra228'],
+    ['cushield','Th232','Ra228','Th228'],
+    ['cushield','Th232','Th228','GRND'],
+    #['innersteel','U238','U238','GRND'],
+    #['innersteel','U238','U238','Pb210'],
+    #['innersteel','U238','U238','Th230'],
+    #['innersteel','U238','Th230','Ra226'],
+    #['innersteel','U238','Ra226','Rn222'],
+    #['innersteel','U238','Rn222','Pb210'],
+    #['innersteel','U238','Pb210','GRND'],
+    #['innersteel','Th232','Th232','GRND'],
+    #['innersteel','Th232','Th232','Ra228'],
+    #['innersteel','Th232','Ra228','Th228'],
+    #['innersteel','Th232','Th228','GRND'],
+    #['steel','U238','U238','GRND'],
+    #['steel','U238','U238','Pb210'],
+    #['steel','U238','U238','Th230'],
+    #['steel','U238','Th230','Ra226'],
+    #['steel','U238','Ra226','Rn222'],
+    #['steel','U238','Rn222','Pb210'],
+    #['steel','U238','Pb210','GRND'],
+    #['steel','Th232','Th232','GRND'],
+    #['steel','Th232','Th232','Ra228'],
+    #['steel','Th232','Ra228','Th228'],
+    #['steel','Th232','Th228','GRND'],
+    #['gamma','Tl208','Tl208','GRND'],
 ]
 
+allTheThings = [
+    ['internal','Na24','Na24','GRND'],
+    ['internal','I128','I128','GRND'],
+]
 
 for thing in allTheThings:
     
@@ -131,11 +147,9 @@ for thing in allTheThings:
         output += '1'+ws
         output += '0.1'+ws
         output += '10'+ws
-        if thing[0] == 'lsveto' or 'steel' in thing[0]: output += 'v3.1.1'+ws
+        # steel and innersteel have old locations
+        if 'steel' in thing[0]: output += 'v3.1.1'+ws
         else: output += 'v4.0.2'+ws
-        ### pmt U235 still needs to be v4.0.1
-        #if thing[1] == 'U235': output += 'v4.0.1'+ws
-        #else: output += 'v3.1.1'+ws
         output += './dummy.root\n'
         
     with open(os.path.join('./temp', filename), 'w') as fconf:

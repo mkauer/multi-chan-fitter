@@ -6,13 +6,14 @@
 # 
 # Works with v93 and later versions
 # 
-# version: 2019-06-24
+# version: 2020-03-30
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# ~ changed high energy bin range in makePlots93() to 4000
+
 # + added special case for external Tl208 gammas to groupNum93() in funcs93.py
 # + add gamma to makePlots93() exceptions in funcs93.py
-
 # + add plastic to makePlots93() exceptions
 # + add U235 groupNo 41,42 to groupNum93()
 # + add U235 to groupNum93()
@@ -757,7 +758,7 @@ def makePlots93(bkgs, combine, others, vcut=0):
                     temp[i-1].SetLineColor(kBlack)
                     if E:
                         temp[i-1].Rebin(int(10/kvpb))
-                        temp[i-1].SetAxisRange(0, 3000, 'x')
+                        temp[i-1].SetAxisRange(0, 4000, 'x')
                         #temp[i-1].SetAxisRange(1e-3, 1, 'y')
                     else:
                         temp[i-1].Rebin(int(1/kvpb))
@@ -790,7 +791,7 @@ def makePlots93(bkgs, combine, others, vcut=0):
 
 
 def groupNum93(info):
-
+    
     # U238 group numbers
     # ------------------------
     # 11: U238  -> Th230
@@ -804,7 +805,7 @@ def groupNum93(info):
     # 21: Th232 -> Ra228
     # 22: Ra228 -> Th228
     # 23: Th228 -> ground
-
+    
     # U235 group numbers
     # ------------------------
     #  0: U235 -> ground? (doesn't look like it gets splip up?)
@@ -1202,17 +1203,18 @@ def scaleData70(data, dru=0):
             days = float((data[key]['runtime'])/86400.)
         xkgs = float(cmass(i))
         if i==8:
-            #xkgs = 1800.
-            xkgs = 1900. # 2019-04-16 increased mass a little 
+            xkgs = 1800.
+            # NO! Why did I do that?
+            #xkgs = 1900. # 2019-04-16 increased mass a little 
         keVperBin = 1./float(data[key]['pars'][3])
-        """
-        print 'DEBUG: data key =', key
-        print 'DEBUG: time in days =', days
-        print 'DEBUG: mass in kg =', xkgs
-        print 'DEBUG: keV/bin =', keVperBin
-        print 'DEBUG: total events =', data[key]['hist'].GetEntries()
-        print ''
-        """
+        
+        #print 'DEBUG: data key =', key
+        #print 'DEBUG: time in days =', days
+        #print 'DEBUG: mass in kg =', xkgs
+        #print 'DEBUG: keV/bin =', keVperBin
+        #print 'DEBUG: total events =', data[key]['hist'].GetEntries()
+        #print ''
+        
         scale = float(1./(days*xkgs*keVperBin))
         data[key]['hist'].Scale(scale)
         data[key]['druScale'] = scale

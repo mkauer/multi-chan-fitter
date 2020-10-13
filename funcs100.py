@@ -4,10 +4,12 @@
 # 
 # Adding LS-veto functionality!
 # 
-# version: 2019-01-09
+# version: 2020-04-09
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# ~ fixed a bug in makeTotal() and makeResid() where key should be i+1
+
 # - remove numX()
 # + add plastic to the bkg and sig scaling
 # ~ fix scalings for lsveto, steel, pmts in the lsveto
@@ -530,7 +532,7 @@ def makeTotal100(chan, E, par):
     total = []
     #par = histparam(E)
     for i in range(numX()):
-        key  = 'x'+str(i)
+        key  = 'x'+str(i+1)
         key += '-c'+chan
         key += '-e'+str(E)
         key += '-total'
@@ -546,7 +548,7 @@ def makeResid100(chan, E, par):
     resid = []
     #par = histparam(E)
     for i in range(numX()):
-        key  = 'x'+str(i)
+        key  = 'x'+str(i+1)
         key += '-c'+chan
         key += '-e'+str(E)
         key += '-resid'

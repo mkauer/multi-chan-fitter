@@ -2,10 +2,18 @@
 ######################################################################
 # funcs300.py
 # 
-# version: 2019-06-24
+# version: 2020-05-12
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# ~ new paths for Gyunho's NaI and Teflon surface Pb210 in mcPath301()
+
+# + added lsveto mc locations to mcPath300() and mcPath301()
+# + added "alpha" cut on nai-surf, reflector, teflon-bulk, and teflon-surf
+# ~ sticking with poly43 lsveto calibration for V00-04-15 data
+# + added cases for V00-04-15 data in buildData400()
+# + special case for surf-expo-side and surf-expo-face in mcPath301()
+# + special case for surf-expo in mcPath301()
 # + added special event type cut for "*-gamma-CuShield-SET1-Tl208-*"
 # + add location 'gamma' to build300() global excludes in funcs300.py
 # + add location 'gamma' to buildMC300() volumeCut in funcs300.py
@@ -617,31 +625,52 @@ def buildMC300(info, mc):
                     
                     if info['loca'] == 'internal':
                         volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['from'])+'Crystal")')
+                        ### testing alpha cut
+                        #volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['from'])+'Crystal" && primDecayType != "alpha")')
+                        ### test cutting on primParticleName
+                        #volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['from'])+'Crystal" && primParticleName == "Pb208")')
                         
                     elif info['loca'] == 'reflector':
-                        volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['from'])+'Reflector")')
-                        
+                        #volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['from'])+'Reflector")')
+                        print '!!! NEW ALPHA CUT - reflector !!!'
+                        volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['from'])+'Reflector" && primDecayType != "alpha")')
+                                                
                     elif 'internalsurf' in info['loca']:
                         # Estellas MC
                         volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['from'])+'Crystal")')
                         
                     elif 'naisurf' in info['loca']:
                         # Govindas MC
-                        volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['from'])+'Crystal")')
-                        if pushpasMC: volumeCut = TCut('(primVolumeName == "NaIDet07Crystal")')
+                        #volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['from'])+'Crystal")')
+                        print '!!! NEW ALPHA CUT - nai-surf !!!'
+                        volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['from'])+'Crystal" && primDecayType != "alpha")')
+                                                
+                        if pushpasMC:
+                            print '!!! SHOULD NOT SEE THIS ANYMORE - for nai-surf mc !!!'
+                            volumeCut = TCut('(primVolumeName == "NaIDet07Crystal")')
                         
                     elif info['loca'] == 'teflon':
                         volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['from'])+'Teflon")')
                         
                     elif info['loca'] == 'teflonbulk':
                         # Govindas MC
-                        volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['from'])+'Teflon")')
-                        if pushpasMC: volumeCut = TCut('(primVolumeName == "NaIDet07Teflon")')
+                        #volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['from'])+'Teflon")')
+                        print '!!! NEW ALPHA CUT - teflon-bulk !!!'
+                        volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['from'])+'Teflon" && primDecayType != "alpha")')
+                        
+                        if pushpasMC:
+                            print '!!! SHOULD NOT SEE THIS ANYMORE - for teflon-bulk mc !!!'
+                            volumeCut = TCut('(primVolumeName == "NaIDet07Teflon")')
                         
                     elif 'teflonsurf' in info['loca']:
                         # Estellas MC
-                        volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['from'])+'Teflon")')
-                        if pushpasMC: volumeCut = TCut('(primVolumeName == "NaIDet07Teflon")')
+                        #volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['from'])+'Teflon")')
+                        print '!!! NEW ALPHA CUT - teflon-surf !!!'
+                        volumeCut = TCut('(primVolumeName == "NaIDet0'+str(info['from'])+'Teflon" && primDecayType != "alpha")')
+                        
+                        if pushpasMC:
+                            print '!!! SHOULD NOT SEE THIS ANYMORE - for teflon-surf mc !!!'
+                            volumeCut = TCut('(primVolumeName == "NaIDet07Teflon")')
                         
                     elif 'cusurf' in info['loca']:
                         # Estellas MC
@@ -671,7 +700,8 @@ def buildMC300(info, mc):
                         
                     elif info['loca'] == 'lsveto':
                         volumeCut = TCut('(primVolumeName == "lsveto")')
-                    
+                        #volumeCut = TCut('(primVolumeName == "lsveto" && primDecayType != "alpha")')
+                        
                     elif info['loca'] == 'lsvetoair':
                         volumeCut = TCut('((primVolumeName == "DetPMTCover")'
                                          +' || (primVolumeName == "DetPMTEnvelope"))')
@@ -712,9 +742,12 @@ def buildMC300(info, mc):
                     #evType = 'event_info.Type'  # new processing
                     
                     eventTypeCut = TCut('('+evType+' > 10)')
-
+                    ### for testing for primParticleName cut
+                    #eventTypeCut = TCut('(1)')
+                    
                     generatedCuts = TCut('('+evType+' < 10)'+' && '+volumeCut.GetTitle())
-                    #generatedCuts = TCut(particleCut.GetTitle()+' && '+volumeCut.GetTitle())
+                    ### for testing for primParticleName cut
+                    #generatedCuts = TCut(volumeCut.GetTitle())
                                         
                     ### special case for H3
                     #exceptions = ['H3', 'Na22', 'Te121m', 'Te127m', 'Cd109', 'Sn113']
@@ -939,7 +972,7 @@ def calib301(i, E):
         
         edep = '(BLSVeto.Charge)'
         selection = '('+edep+' / 143.8)'
-        return edep, selection
+        #return edep, selection
     
         ### try again based off the poly4 data points - "poly41_data"
         #A = 6.14216259037e-08
@@ -954,11 +987,11 @@ def calib301(i, E):
         #D = 2.41933873005e-20
 
         ### try un-saturating the high energy a little bit = "poly43"
-        ### this is still a little too much
-        #A = 4.0381226152e-08
-        #B = -0.000143935116267
-        #C = 1.15785808395
-        #D = 8.83648917811e-29
+        ### but this still seems to give the best multi-crystal fits
+        A = 4.0381226152e-08
+        B = -0.000143935116267
+        C = 1.15785808395
+        D = 8.83648917811e-29
 
         ### try un-saturating the high energy a little more = "poly44"
         ### this was too much!
@@ -993,10 +1026,10 @@ def calib301(i, E):
         #D = -6.35274464267e-22
         
         ### try tweaking the low energy part of the fit a litle = "poly51"
-        A = 5.7582815735e-08
-        B = -0.000245923913043
-        C = 1.30856625259
-        D = 1.37579420822e-27
+        #A = 5.7582815735e-08
+        #B = -0.000245923913043
+        #C = 1.30856625259
+        #D = 1.37579420822e-27
 
         
         return edep, '(('+str(A)+'*'+selection+'**3) '\
@@ -1142,6 +1175,10 @@ def mcPath300(info):
         path1 = '/data/MC/COSINE/V4.0.1/reprocessed_SET1'
         path2 = '*-Acrylic-'+iso+'-*root'
         
+    elif loc == 'lsveto':
+        path1 = '/data/MC/KIMS-NaI/user-scratch/sim/processed/newGeometry/'
+        path2 = info['isof']+'/set2/'+'*lsveto'+info['isof']+'*root'
+        
     else:
         print 'ERROR: no location identified for -->',loc
         sys.exit()
@@ -1165,10 +1202,35 @@ def mcPath301(info):
     if loc == 'reflector':
         path1 = '/data/MC/COSINE/V4.0.1/reprocessed_SET1'
         path2 = '*-surfaceNaI-'+Cx+'-10um-'+iso+'-*root'
-        
+
+    # 2020-03-23
+    # changed to set2 for equal comparison to below expo
     elif loc == 'nai-surf-10um':
-        path1 = '/data/MC/COSINE/V4.0.1/reprocessed_SET1'
+        #path1 = '/data/MC/COSINE/V4.0.1/reprocessed_SET1'
+        path1 = '/data/MC/COSINE/V4.0.1/reprocessed_SET2'
         path2 = '*-surfaceNaI-'+Cx+'-10um-'+iso+'-*root'
+
+    # 2020-05-12
+    # special case for expo weighting NaI surface Pb210
+    elif 'nai-surf-expo' in loc:
+        # just for testing
+        Cx = 'C'+str(info['xstl'])
+        #path1 = '/data/MC/COSINE/V4.0.1/reprocessed_SET2'
+        #path2 = '*-surfaceNaI-'+Cx+'-10um-'+iso+'-*root'
+        # new paths to mc from gyunho
+        path1 = '/data/COSINE/WORK/gyunho/BkgModel/SET2_reprocessed/surf_NaI'
+        path2 = 'reprocessed-surface-'+Cx+'-Pb210-*.root'
+        
+    # 2020-05-12
+    # special case for expo weighting teflon surface Pb210
+    elif 'teflon-surf-expo' in loc:
+        # just for testing
+        Cx = 'C'+str(info['xstl'])
+        #path1 = '/data/MC/COSINE/V4.0.1/reprocessed_SET2'
+        #path2 = '*-bulkTeflon-'+Cx+'-'+iso+'-*root'
+        # new paths to mc from gyunho
+        path1 = '/data/COSINE/WORK/gyunho/BkgModel/SET2_reprocessed/surf_Tef'
+        path2 = 'reprocessed-tef-surf-'+Cx+'-10um-Pb210-*.root'
         
     elif loc == 'nai-surf-1um':
         path1 = '/data/MC/COSINE/V4.0.1/reprocessed_SET2'
@@ -1200,26 +1262,42 @@ def mcPath301(info):
     
     elif loc == 'coppercase':
         path1 = '/data/MC/COSINE/V4.0.1/reprocessed_SET2'
-        path2 = '*-bulkcuCase-'+Cx+'-'+iso+'-*root'
+        path2 = '*bulkcuCase*'+Cx+'*'+iso+'*root'
         
     elif loc == 'internal':
-        path1 = '/data/MC/COSINE/V4.0.1/reprocessed_SET2'
-        path2 = '*-internal-'+iso+'-*root'
+        if iso == 'I128' or iso == 'Na24':
+            path1 = '/data/COSINE/WORK/gyunho/BkgModel/SET2_reprocessed/internal'
+        else:
+            path1 = '/data/MC/COSINE/V4.0.1/reprocessed_SET2'
+        path2 = '*internal*'+iso+'*root'
         
     elif loc == 'pmt':
+        #path1 = '/data/MC/COSINE/V4.0.1/reprocessed_SET2'
+        #path2 = '*-pmt-'+iso+'-*root'
         path1 = '/data/MC/COSINE/V4.0.1/reprocessed_SET2'
-        path2 = '*-pmt-'+iso+'-*root'
+        path2 = '*pmt*'+iso+'*root'
         
     elif loc == 'plastic':
         path1 = '/data/MC/COSINE/V4.0.1/reprocessed_SET2'
-        path2 = '*-Acrylic-'+iso+'-*root'
+        path2 = '*Acrylic*'+iso+'*root'
+        
+    elif loc == 'lsveto':
+        #path1 = '/data/MC/KIMS-NaI/user-scratch/sim/processed/newGeometry/'
+        #path2 = info['isof']+'/set2/'+'*lsveto'+info['isof']+'*root'
+        path1 = '/data/MC/COSINE/V4.0.1/reprocessed_SET2'
+        path2 = '*lsveto*'+iso+'*root'
         
     elif loc == 'gamma':
         path1 = '/data/MC/COSINE/V4.0.1/reprocessed_SET2'
-        path2 = '*-gamma-CuShield-SET1-Tl208-*' # govinda said to use this one - also looks the best
+        path2 = '*single-gamma*'+iso+'*root' # this one now looks more recent so I'll try
+        #path2 = '*-gamma-CuShield-SET1-Tl208-*' # govinda said to use this one - also looks the best
         #path2 = '*-gamma-CuShield-SET2-Tl208-*'
         #path2 = '*-gamma-CuShield-Tl208-*'
         #path2 = '*-gamma-Tl208-*root'
+
+    elif loc == 'cushield':
+        path1 = '/data/MC/COSINE/V4.0.1/reprocessed_SET2'
+        path2 = '*cuShield*'+iso+'*root'
         
     else:
         print 'ERROR: no location identified for -->',loc
@@ -1234,19 +1312,19 @@ def updateBkgsFile300(xstals, bkgsfile, resultsfile, newdir, BF='BR'):
     Only print out to file what was actually used in the fit
     """
     
-    for thisfile in [bkgsfile, resultsfile]:
-        if not os.path.exists(thisfile):
-            print 'WARNING: file not found -->', thisfile
-            return
+    if os.path.exists(bkgsfile):
+        with open(bkgsfile) as fbkgs:
+            bkgslines = fbkgs.read().splitlines()
+    else:
+        print 'WARNING: file not found -->', bkgsfile
+        return
     
-    with open(bkgsfile) as fbkgs:
-        bkgslines = fbkgs.read().splitlines()
-    fbkgs.close()
-
-    with open(resultsfile) as ffits:
-        fitlines = ffits.read().splitlines()
-    ffits.close()
-    
+    if os.path.exists(resultsfile):
+        with open(resultsfile) as ffits:
+            fitlines = ffits.read().splitlines()
+    else:
+        fitlines = ''
+        
     newbkgs = os.path.join(newdir, bkgsfile.split('/')[-1][:-4]+'_update.txt')
     output = open(newbkgs, 'w')
     output.write('# -*- sh -*-\n')
@@ -1260,26 +1338,14 @@ def updateBkgsFile300(xstals, bkgsfile, resultsfile, newdir, BF='BR'):
     for bline in bkgslines:
 
         if not bline:
-            #output.write('\n')
             continue
-        
         if bline.startswith('\"\"\"'):
             if skip == 0: skip = 1
             else: skip = 0
-            #output.write(bline+'\n')
             continue
         if skip:
-            #output.write(bline+'\n')
             continue
-        
         if bline.startswith('#'):
-            """
-            if 'version' in bline:
-                output.write('# NEW GENERATED backgrounds file from fit!\n\n')
-                output.write(bline+'\n')
-            else:
-                output.write(bline+'\n')
-            """
             continue
         
         bbits = filter(None, re.split("[ \s\t\n\r,:]+", bline.strip()))
@@ -1288,10 +1354,9 @@ def updateBkgsFile300(xstals, bkgsfile, resultsfile, newdir, BF='BR'):
             continue
         
         if 'F' not in bbits[0]:
-            #for bits in bbits:
-            #    output.write(bits+'\t')
-            #output.write('\n')
-            output.write(bline+'\n')
+            for j in range(len(bbits)-1):
+                output.write(bbits[j]+'\t')
+            output.write(bbits[-1]+'\n')
             continue
         
         replaced = 0
@@ -1447,26 +1512,6 @@ def cutsBDT301(i, C, E, edep, selection):
     #-------------------------------------------------------
     # This is for the V00-04-14 data with new BDT values!!!
     #-------------------------------------------------------
-    
-    ### special cuts for the LS veto
-    ### i = 0-7 is crystals
-    ### i =  8  is lsveto
-    if i == 8:
-        ### skip single-hit and low-energy for lsveto
-        if C == 'S' or E == 0:
-            #coinc  = '(BLSVeto.isCoincident == 0)'
-            #lsveto = '(BLSVeto.Charge/143.8 > 0)'
-            #return TCut(coinc+' && '+lsveto)
-            return TCut('0')
-        elif C == 'M' and E == 1:
-            coinc  = '(BLSVeto.isCoincident == 1)'
-            #lsveto = '(BLSVeto.Charge/143.8 > 0.0)'
-            lsveto = '('+selection+' > 0.0)'
-            return TCut(coinc+' && '+lsveto)
-        else:
-            print 'ERROR: I do not know what to do with channel -->', C
-            print 'Available channels are [S]Single-hits, [M]Multi-hits'
-            sys.exit()
 
     ### values for the alpha cut
     alpha = [2.660,
@@ -1477,6 +1522,49 @@ def cutsBDT301(i, C, E, edep, selection):
              2.655,
              2.630,
              2.660]
+
+    ### special cuts for the LS veto
+    ### i = 0-7 is crystals
+    ### i =  8  is lsveto
+    if i == 8:
+        ### skip single-hit and low-energy for lsveto
+        if C == 'S' or E == 0:
+            return TCut('0')
+        
+        elif C == 'M' and E == 1:
+            coinc  = '(BLSVeto.isCoincident == 1)'
+            lsveto = '('+selection+' > 0.0)'
+            return TCut(coinc+' && '+lsveto)
+            
+            ### 2020-08-11
+            ### test adding standard crystal cuts to lsveto data
+            ### short story - this doesn't really change anything
+            """
+            muons  = '(BMuon.totalDeltaT0/1.e6 > 30)'
+            alphaCut = '('
+            nc = '('
+            t1 = '('
+            hits = '('
+            charge = '('
+            for j in range(8):
+                alphaCut += '( ! ((crystal'+str(j+1)+'.energyD > 1000.) && ((pmt'+str(j+1)+'1.rqtD1_5 + pmt'+str(j+1)+'2.rqtD1_5)/2. < '+str(alpha[j])+')) ) && '
+                nc += '(pmt'+str(j+1)+'1.nc > 0 && pmt'+str(j+1)+'2.nc > 0) || '
+                t1 += '(pmt'+str(j+1)+'1.t1 > 0 && pmt'+str(j+1)+'2.t1 > 0) || '
+                hits += '(crystal'+str(j+1)+'.nc > 4) || '
+                charge += '(crystal'+str(j+1)+'.rqcn > -1) || '
+            # remove trailing && or ||
+            alphaCut = alphaCut[:-4]+')'
+            nc = nc[:-4]+')'
+            t1 = t1[:-4]+')'
+            hits = hits[:-4]+')'
+            charge = charge[:-4]+')'
+            return TCut(coinc+' && '+lsveto+' && '+muons+' && '+alphaCut+' && '+nc+' && '+t1+' && '+hits+' && '+charge)
+            """
+        else:
+            print 'ERROR: I do not know what to do with channel -->', C
+            print 'Available channels are [S]Single-hits, [M]Multi-hits'
+            sys.exit()
+
 
     ### same as Pushpa since 2017-12-19
     alphaCut = '( ! ((crystal'+str(i+1)+'.energyD > 1000.) && ((pmt'+str(i+1)+'1.rqtD1_5+pmt'+str(i+1)+'2.rqtD1_5)/2. < '+str(alpha[i])+')) )'

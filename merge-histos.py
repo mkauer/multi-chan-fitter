@@ -23,6 +23,9 @@ def main():
     base  = './root-join-read/'
     build = 'build311'
 
+    # scaling version (see below)
+    V = 0
+    
     allhistos = []
     
     for x in ['1','2','3','4','6','7']:
@@ -37,10 +40,10 @@ def main():
         rfile1  = TFile(rootfile1,  "READ")
         rfile10 = TFile(rootfile10, "READ")
 
-        if WRITE: newrootfile = base+build+'/'+build+X+'nai-surf-expoPb210_GRND.root'
+        if WRITE: newrootfile = base+build+'/'+build+X+'nai-surf-expoPb210_GRND_v'+str(V)+'.root'
         if WRITE: newrfile = TFile(newrootfile, 'RECREATE')
         allhistos = []
-        
+
         for e in ['0','1']:
             for c in ['S','M']:
                 for f in ['1','2','3','4','5','6','7','8']:
@@ -62,24 +65,38 @@ def main():
                     gen1  = TH1F(rfile1.Get(key1+'_generated')).GetEntries()
                     gen10 = TH1F(rfile10.Get(key10+'_generated')).GetEntries()
 
-                    #print gen01, gen1, gen10
-                    #print gen01/gen1
-                    #print gen01/gen10
                     
-                    # normalize the counts to per 1um and scale by expo weight
-                    # except: pass - for divide by zero errors of empty histos
-                    expo01 = 0.28
-                    expo1  = 0.16
-                    expo10 = 0.005
-                    #try: hist01.Scale((gen1/gen01) * expo01)
-                    try: hist01.Scale((gen1/gen01) * expo01 * 0.01)
-                    except: pass
-                    #try: hist1.Scale((gen1/gen1) * expo1)
-                    try: hist1.Scale((gen1/gen1) * expo1 * 1.0)
-                    except: pass
-                    #try: hist10.Scale((gen1/gen10) * expo10)
-                    try: hist10.Scale((gen1/gen10) * expo10 * 10.0)
-                    except: pass
+                    ###  Version: 1  ###########################################
+                    if V == 1:
+                        # normalize the counts to per 1um and scale by expo weight
+                        # except: pass - for divide by zero errors of empty histos
+                        expo01 = 0.28
+                        expo1  = 0.16
+                        expo10 = 0.005
+                        try: hist01.Scale((gen1/gen01) * expo01 * 0.01)
+                        except: pass
+                        try: hist1.Scale((gen1/gen1) * expo1 * 1.0)
+                        except: pass
+                        try: hist10.Scale((gen1/gen10) * expo10 * 10.0)
+                        except: pass
+                    ############################################################
+                        
+                    ###  Version: 2  ###########################################
+                    # this seems completely wrong! 
+                    elif V == 2:
+                        # just expo scale with 1.9 tau
+                        try: hist01.Scale((gen1/gen01) * math.exp(1.9/0.01))
+                        except: pass
+                        try: hist1.Scale((gen1/gen1) * math.exp(1.9/1.0))
+                        except: pass
+                        try: hist10.Scale((gen1/gen10) * math.exp(1.9/10.0))
+                        except: pass
+                    ############################################################
+                        
+                    else:
+                        print 'select a scaling version...'
+                        sys.exit()
+                    
                     
                     newkey = 'x'+x+'-naisurfexpo-Pb210_GRND-f'+f+'-c'+c+'-e'+e
                     nbins = int(hist01.GetNbinsX())

@@ -12,6 +12,81 @@
 # ====================================================================
 
 
+# 2020-05-18
+#---------------------------------------------------------------------
+# + ScaleEnergy400() and MCBinShift400()
+
+
+# 2020-05-12
+#---------------------------------------------------------------------
+# ~ updated "X" with Gyunho's new geometry in mcDimensions()
+# ~ new paths for Gyunho's NaI and Teflon surface Pb210 in mcPath301()
+
+
+# 2020-05-04
+#---------------------------------------------------------------------
+# + add alpha cut to surface teflon
+
+
+# 2020-04-27
+#---------------------------------------------------------------------
+# + added residuals to the zoomed low-energy multi-hit
+
+
+# 2020-04-23
+#---------------------------------------------------------------------
+# + added lsveto mc locations to mcPath300() and mcPath301()
+# ~ tested alpha cut on internal MC - no effect
+# ~ tested alpha cut on lsveto MC - no effect
+
+
+# 2020-04-13
+#---------------------------------------------------------------------
+# + added "alpha" cut on nai-surf, reflector, teflon-bulk, and teflon-surf
+# + add exceptions for nai-surf, teflon, and reflector in build400()
+#   but this is just for quick testing - shouldn't be there for the real thing
+
+
+# 2020-04-09
+#---------------------------------------------------------------------
+# V 402-plot-tweaks.py
+# + add residual plot to the low energy zoom-in histogram
+# ~ fixed a bug in makeTotal() and makeResid() where the key name
+#   key should be str(i+1) in funcs100.py
+# + add option for zoom resid to be dat/mc or dat-mc
+
+
+# 2020-04-06
+#---------------------------------------------------------------------
+# + create and exception for nai-surf-expo in build400()
+# ~ changed C4 Z length
+# ~ made the expo surface depth profile function dynamic
+
+
+# 2020-04-02
+#---------------------------------------------------------------------
+# + a few cosmetic changes and additions to allow for new deep and
+#   shallow Pb210 surface profiles
+# ~ tweaked the main script to copy backgrounds file and itself
+#   before starting the fit just to have them on hand
+
+
+# 2020-03-30
+#---------------------------------------------------------------------
+# ~ plot out to 4000 keV just to see - it's key for surface components
+# ~ changed the background model to fit with Govinda and Gyunho
+# ~ changed the fitting ranges
+# ~ changed high energy bin range in makePlots93() to 4000 keV
+# ~ sticking with poly43 lsveto calibration for V00-04-15 data
+# + added cases for V00-04-15 data in buildData400()
+# + special case for surf-expo-side and surf-expo-face in mcPath301()
+# + special case for surf-expo in mcPath301()
+# ~ tweak volume cuts for positional degeneracy in buildMCSurf400()
+# ~ fixed a from-crystal bug in buildMCSurf400()
+# ~ build400() has option to use new buildMCSurf400()
+# + added the buildMCSurf400() for special case expo profile
+
+
 # 2019-11-27
 #---------------------------------------------------------------------
 # + add merge-histos.py to merge NaI surface with exponential weights

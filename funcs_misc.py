@@ -4,12 +4,18 @@
 # 
 # Get all the default functions in here
 # 
-# version: 2019-06-24
+# version: 2020-07-15
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
-# + add "gamma" to setGroup() in funcs_misc.py
+# + added rainbowSix() for new root-6 color scheme
 
+# ~ tweaked crystal geometry from Gyunho's overlap fix
+# ~ changed C4 Z length
+# ~ made the expo surface depth profile function dynamic
+# + added the surfProfile(x) equation
+# + added mcDimensions() for doing surface depth profiles
+# + add "gamma" to setGroup() in funcs_misc.py
 # ~ add a few more checks to the hostname
 # + add numX()
 # + add I129 to setGroup()
@@ -176,6 +182,106 @@ def surfArea(i):
     else:
         return 3.1416 * (diameter[i]*length[i]) * 0.00064516
 
+    
+def mcDimensions(i):
+
+    ### needed for NaI and Teflon surface depth profiling
+    ### 2020-05-12 - updated "X" with Gyunho's new geometry
+    
+    if i==0: # C1
+        #x = -207.4
+        x = -217.4
+        y = -20.7
+        z = 0.
+        rad = 63.500
+        height = 177.800/2.0
+        dep = 0.01
+
+    if i==1: # C2
+        #x = -62.2
+        x = -67.2
+        y = -26.1
+        z = 0.
+        rad = 53.340
+        height = 279.400/2.0
+        dep = 0.01
+        
+    if i==2: # C3
+        #x = 62.2
+        x = 67.2
+        y = -30.9
+        z = 0.
+        rad = 53.340
+        height = 279.400/2.0
+        dep = 0.01
+        
+    if i==3: # C4
+        #x = 191.7
+        x = 201.7
+        y = -38.6
+        z = 0.
+        rad = 63.500
+        #height = 378.350/2.0  ## this one is wrong
+        height = 387.350/2.0
+        dep = 0.01
+    
+    if i==4: # C5
+        #x = -201.7
+        x = -211.7
+        y = -283.4
+        z = 0.
+        rad = 63.500
+        height = 393.700/2.0
+        dep = 0.01
+        
+    if i==5: # C6
+        #x = -67.8
+        x = -72.8
+        y = -281.7
+        z = 0.
+        rad = 60.325
+        height = 298.450/2.0
+        dep = 0.01
+
+    if i==6: # C7
+        #x = 67.8
+        x = 72.8
+        y = -281.7
+        z = 0.
+        rad = 60.325
+        height = 298.450/2.0
+        dep = 0.01
+    
+    if i==7: # C8
+        #x = 201.8
+        x = 211.8
+        y = -281.7
+        z = 0.
+        rad = 63.500
+        height = 393.700/2.0
+        dep = 0.01
+    
+    return x, y, z, rad, height, dep
+
+
+def surfProfile(x, pars):
+    #A0 = 1.0
+    p0 = pars[0]
+    A0 = 1./p0
+    return A0*np.exp(-x[0]/p0)
+
+
+def surfProfile88(x):
+    A0 = 1.0
+    p0 = 0.88
+    return A0*np.exp(-x[0]/p0)
+
+
+def surfProfile13(x):
+    A0 = 1.0
+    p0 = 0.13
+    return A0*np.exp(-x[0]/p0)
+
 
 def energyNames(E=0):
     name = ''
@@ -272,6 +378,48 @@ def rainbow(N):
         # must keep the color and the ci in memory
         colors.append(color)
         cis.append(ci)
+        
+    return colors, cis
+
+
+def rainbowSix(keynames):
+    """
+    Generate an array of colors for MC plotting
+    Tweaked for ROOT6
+    """
+    
+    colors = {}
+    cis = {}
+    for h, key in enumerate(keynames):
+        H = float(h)/float(len(keynames)+1)
+        if H < 1/5. :
+            R=1.
+            G=1.*5*H
+            B=0.
+        elif H >= 1/5. and H < 2/5. :
+            R=1.-(1*5*(H-1/5.))
+            G=1.
+            B=0.
+        elif H >= 2/5. and H < 3/5. :
+            R=0.
+            G=1.
+            B=1.*5*(H-2/5.)
+        elif H >= 3/5. and H < 4/5. :
+            R=0.
+            G=1.-(1*5*(H-3/5.))
+            B=1.
+        elif H >= 4/5. and H < 1. :
+            R=1.*5*(H-4/5.)
+            G=0.
+            B=1.
+        elif H >= 1. :
+            R=1.
+            G=1.
+            B=1.
+
+        #print R, G, B
+        cis[key] = TColor.GetFreeColorIndex()
+        colors[key] = TColor(cis[key], R, G, B, key)
         
     return colors, cis
 
@@ -416,6 +564,7 @@ def setGroup(info):
     if info['loca'] == 'internal':
         if info['isof'] in ['Cd109',  'Sn113',
                             'H3',     'Na22',
+                            'I128',   'Na24',
                             'I125',   'I126',   'I129',
                             'Te121',  'Te121m',
                             'Te123m', 'Te125m', 'Te127m']:
@@ -427,11 +576,95 @@ def setGroup(info):
     elif 'copper'  in info['loca']: return 'copper'
     elif 'steel'   in info['loca']: return 'steel'
     elif 'teflon'  in info['loca']: return 'surface'
+    elif 'reflec'  in info['loca']: return 'surface'
     elif 'veto'    in info['loca']: return 'lsveto'
     elif 'plastic' in info['loca']: return 'plastic'
     elif 'gamma'   in info['loca']: return 'ext-gamma'
     else:
         return 'none'
+
+
+def groupNum(info):
+    
+    # U238 group numbers
+    # ------------------------
+    # 11: U238  -> Th230
+    # 12: Th230 -> Ra226
+    # 13: Ra226 -> Rn222
+    # 14: Rn222 -> Pb210
+    # 15: Pb210 -> ground
+    
+    # Th232 group numbers
+    # ------------------------
+    # 21: Th232 -> Ra228
+    # 22: Ra228 -> Th228
+    # 23: Th228 -> ground
+    
+    # U235 group numbers
+    # ------------------------
+    #  0: U235 -> ground? (doesn't look like it gets splip up?)
+    # 41: U235 -> Pa231
+    # 42: Pa231 -> ground
+    
+    # others
+    # ------------------------
+    # 31: K40
+
+    
+    if info['chst'] in ['Te121',  'Te121m',
+                        'Te123m', 'Te125m', 'Te127m',
+                        'I125',   'I126',   'I129',
+                        'Na22',   'H3',
+                        'I128',   'Na24',
+                        'Cd109',  'Sn113',
+                        'Co60']:
+        return TCut('(groupNo == 0)')
+    
+    if info['chst'] == 'K40':
+        return TCut('(groupNo == 31)')
+    
+    if   info['chst'] == 'U238':  start = 11
+    elif info['chst'] == 'Th230': start = 12
+    elif info['chst'] == 'Ra226': start = 13
+    elif info['chst'] == 'Rn222': start = 14
+    elif info['chst'] == 'Pb210': start = 15
+    elif info['chst'] == 'Th232': start = 21
+    elif info['chst'] == 'Ra228': start = 22
+    elif info['chst'] == 'Th228': start = 23
+    elif info['chst'] == 'U235':  start = 41
+    elif info['chst'] == 'Pa231': start = 42
+    ### special case for external Tl208 gammas
+    elif info['chst'] == 'Tl208': start = 0
+    else: start = -1
+    
+    #if   info['chsp'] == 'U238':  stop = 11 # should not be a stop group
+    if   info['chsp'] == 'Th230': stop = 12
+    elif info['chsp'] == 'Ra226': stop = 13
+    elif info['chsp'] == 'Rn222': stop = 14
+    elif info['chsp'] == 'Pb210': stop = 15
+    #elif info['chsp'] == 'Th232': stop = 21 # should not be a stop group
+    elif info['chsp'] == 'Ra228': stop = 22
+    elif info['chsp'] == 'Th228': stop = 23
+    #elif info['chsp'] == 'U235':  stop = 41 # should not be a stop group
+    elif info['chsp'] == 'Pa231': stop = 42
+    ### handle the GRND group number better...
+    #elif info['chsp'] == 'GRND':  stop = 16
+    #elif info['chsp'] == 'GRND':  stop = 24
+    #elif info['chsp'] == 'GRND':  stop = 43
+    elif info['chsp'] == 'GRND':
+        if   start in [11,12,13,14,15]: stop = 16
+        elif start in [21,22,23]:       stop = 24
+        elif start in [41,42]:          stop = 43
+        ### special case for external Tl208 gammas
+        elif start in [0]:              stop = 43
+        else: stop = -1
+    else: stop = -1
+
+    if start != -1 and stop != -1:
+        return TCut('((groupNo >= '+str(start)+') && (groupNo < '+str(stop)+'))')
+    else:
+        print 'ERROR: groupNo not found for -->', info['chst']
+        sys.exit()
 
 
 def histparam64(E):
@@ -454,109 +687,101 @@ def histparam64(E):
     return pars
 
 
-def triangleSmoothing(hists, s=0):
+def triangleSmoothing(bkgs, key, s=0):
 
-    if s <= 0:
-        print 'WARNING: not smoothing!'
-        return hists
+    print 'DEBUG: triangle smoothing', key
 
-    print 'INFO: triangle smoothing...'
-    for key in hists:
+    ### get the number of bins
+    bins = bkgs[key]['hist'].GetNbinsX()
 
-        ### get the number of bins
-        bins = hists[key]['hist'].GetNbinsX()
+    ### create a different hist to save the smoothed data to
+    newhist = deepcopy(bkgs[key]['hist'])
 
-        ### create a different hist to save the smoothed data to
-        newhist = deepcopy(hists[key]['hist'])
-        
-        for i in range(s, bins-s):
-            ### "i" is the bin you are smoothing
-            ### "s" is the +/- bin range you are smoothing over
-            smoothed = 0
+    for i in range(s, bins-s):
+        ### "i" is the bin you are smoothing
+        ### "s" is the +/- bin range you are smoothing over
+        smoothed = 0
 
-            ### grab previous (s) bins
-            for j, k in enumerate(range(-s, 0)):
-                smoothed += hists[key]['hist'].GetBinContent(i+k)*(j+1)
+        ### grab previous (s) bins
+        for j, k in enumerate(range(-s, 0)):
+            smoothed += bkgs[key]['hist'].GetBinContent(i+k)*(j+1)
 
-            ### grab current bin
-            smoothed += hists[key]['hist'].GetBinContent(i)*(s+1)
+        ### grab current bin
+        smoothed += bkgs[key]['hist'].GetBinContent(i)*(s+1)
 
-            ### grab following (s) bins
-            for j, k in enumerate(range(1, s+1)):
-                smoothed += hists[key]['hist'].GetBinContent(i+k)*(s-j)
+        ### grab following (s) bins
+        for j, k in enumerate(range(1, s+1)):
+            smoothed += bkgs[key]['hist'].GetBinContent(i+k)*(s-j)
 
-            ### normalize
-            newhist.SetBinContent(i, smoothed/float((s+1.)**2.))
+        ### normalize
+        newhist.SetBinContent(i, smoothed/float((s+1.)**2.))
 
-        ### save the new hist back into the dictionary
-        hists[key]['hist'] = deepcopy(newhist)
-        del newhist
+    ### save the new hist back into the dictionary
+    bkgs[key]['hist'] = deepcopy(newhist)
+    del newhist
     
-    return hists
+    return bkgs
 
 
-def averageSmoothing(hists, s=0):
+def averageSmoothing(bkgs, key, s=0):
 
-    if s <= 0:
-        print 'WARNING: not smoothing!'
-        return hists
+    print 'DEBUG: average smoothing', key
     
-    print 'INFO: average smoothing...'
-    for key in hists:
+    ### get the number of bins
+    bins = bkgs[key]['hist'].GetNbinsX()
 
-        ### get the number of bins
-        bins = hists[key]['hist'].GetNbinsX()
+    ### create a different hist to save the smoothed data to
+    newhist = deepcopy(bkgs[key]['hist'])
 
-        ### create a different hist to save the smoothed data to
-        newhist = deepcopy(hists[key]['hist'])
-        
-        for i in range(s, bins-s):
-            ### "i" is the bin you are smoothing
-            ### "s" is the +/- bin range you are smoothing over
-            smoothed = 0
+    for i in range(s, bins-s):
+        ### "i" is the bin you are smoothing
+        ### "s" is the +/- bin range you are smoothing over
+        smoothed = 0
 
-            ### grab previous (s) bins
-            for j, k in enumerate(range(-s, 0)):
-                smoothed += hists[key]['hist'].GetBinContent(i+k)
+        ### grab previous (s) bins
+        for j, k in enumerate(range(-s, 0)):
+            smoothed += bkgs[key]['hist'].GetBinContent(i+k)
 
-            ### grab current bin
-            smoothed += hists[key]['hist'].GetBinContent(i)
+        ### grab current bin
+        smoothed += bkgs[key]['hist'].GetBinContent(i)
 
-            ### grab following (s) bins
-            for j, k in enumerate(range(1, s+1)):
-                smoothed += hists[key]['hist'].GetBinContent(i+k)
+        ### grab following (s) bins
+        for j, k in enumerate(range(1, s+1)):
+            smoothed += bkgs[key]['hist'].GetBinContent(i+k)
 
-            ### normalize
-            newhist.SetBinContent(i, smoothed/float(2.*s+1.))
+        ### normalize
+        newhist.SetBinContent(i, smoothed/float(2.*s+1.))
 
-        ### save the new hist back into the dictionary
-        hists[key]['hist'] = deepcopy(newhist)
-        del newhist
+    ### save the new hist back into the dictionary
+    bkgs[key]['hist'] = deepcopy(newhist)
+    del newhist
     
-    return hists
+    return bkgs
 
 
-def rootSmoothing(hists, s=0):
+def rootSmoothing(bkgs, key, s=0):
     
-    if s <= 0:
-        print 'WARNING: not smoothing!'
-        return hists
-    
-    print 'INFO: root TH1 smoothing...'
-    for key in hists:
-        ### smooth the hist s times
-        hists[key]['hist'].Smooth(s)
-        
-    return hists
+    print 'DEBUG: root TH1 smoothing', key
+    bkgs[key]['hist'].Smooth(s)
+
+    return bkgs
 
 
-def smooth(hists, s=0):
+def smooth(bkgs, smoothwhat, s=0):
+
+    if int(s) <= 0:
+        return bkgs
     
-    hists = averageSmoothing(hists, s)
-    #hists = rootSmoothing(hists, s)
-    #hists = triangleSmoothing(hists, s)
+    smoothed = []
+    for key in bkgs:
+        for this in smoothwhat:
+            if this in key and key not in smoothed:
+                #bkgs = rootSmoothing(bkgs, key, s)
+                #bkgs = averageSmoothing(bkgs, key, s)
+                bkgs = triangleSmoothing(bkgs, key, s)
+                smoothed.append(key)
     
-    return hists
+    return bkgs
 
 
 def extendHist(hist1, hist2):

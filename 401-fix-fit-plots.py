@@ -1,18 +1,12 @@
 #!/usr/bin/env python
 
-######################################################################
-# Matt Kauer - mkauer@physics.wisc.edu
-######################################################################
-# 401-fix-fit-plots.py
-
-V = 'v401'
-
+############################################################
+# Matt Kauer - mkauer@icecube.wisc.edu
+#-----------------------------------------------------------
 # Fix the fit plotting...
-# 
-# version: 2019-11-26
-# 
-# see CHANGELOG for changes
-######################################################################
+# see CHANGELOG
+# version: 2020-04-06
+############################################################
 
 import os,sys,re
 import shutil
@@ -21,6 +15,10 @@ import copy
 import math
 import numpy as np
 import datetime
+
+script = os.path.basename(__file__)
+V = 'v'+(script.split('-')[0])
+print 'INFO: running script -->', script, '('+V+')'
 
 import ROOT
 from ROOT import *
@@ -50,17 +48,23 @@ debug = 0
 note = 0
 #note = ''
 
-#mcfile = 'backgrounds_401.txt'
-#mcfile = 'backgrounds_402.txt'
-mcfile = 'backgrounds_403.txt'
+#mcfile = 'backgrounds_404.txt' # pretty solid baseline file
+#mcfile = 'backgrounds_405.txt' # changed things to govindas numbers
+#mcfile = 'backgrounds_406.txt' # going back to 404 and modifying
+#mcfile = 'backgrounds_407.txt' # new expo file format
+#mcfile = 'backgrounds_408.txt' # add back other Te cosmogenics
+#mcfile = 'backgrounds_407b.txt' # testing new surface depths
+#mcfile = 'backgrounds_409.txt' # can only use "side" components
 
 
-#mcfile = 'testing-c1-surface.txt'
-#mcfile = 'testing-c2-surface.txt'
-#mcfile = 'testing-c3-surface.txt'
-#mcfile = 'testing-c4-surface.txt'
-#mcfile = 'testing-c6-surface.txt'
-#mcfile = 'testing-c7-surface.txt'
+mcfile = 'backgrounds_408_update.txt' # can only use "side" components
+#mcfile = 'backgrounds_409_update.txt' # testing plots
+
+
+#mcfile = 'testing-all-bkgs-for-plotting.txt'
+#mcfile = 'testing-expo-pb210.txt' # 2020-03-24
+#mcfile = 'testing-data-400.txt' # 2020-03-26
+#mcfile = 'testing-expo-surf.txt' # 2020-04-01
 
 
 print 'INFO: using backgrounds config file -->', mcfile
@@ -79,48 +83,27 @@ fitchans = 'SM'
 fitranges = [{} for x in range(numx)]
 for i in range(numx):
     
-    ### default for G4.9 SET1
-    #fitranges[i]['S0'] = [3,  6,  106]  # single-hit low-energy
-    #fitranges[i]['S1'] = [4, 70, 2770]  # single-hit high-energy
-    #fitranges[i]['M0'] = [3,  2,   72]  # multi-hit low-energy
-    #fitranges[i]['M1'] = [4, 70, 2770]  # multi-hit high-energy
-    
-    ### default for G4.10 SET1
-    #fitranges[i]['S0'] = [2,  6,   96]  # single-hit low-energy
-    #fitranges[i]['S1'] = [6, 60, 2260]  # single-hit high-energy
-    #fitranges[i]['M0'] = [3,  2,   92]  # multi-hit low-energy
-    #fitranges[i]['M1'] = [6, 60, 2860]  # multi-hit high-energy
-    
-    ### default for G4.10 SET2
-    #fitranges[i]['S0'] = [2,  2,  122]  # single-hit low-energy
-    #fitranges[i]['S1'] = [6, 60, 2260]  # single-hit high-energy
-    #fitranges[i]['M0'] = [2,  2,  102]  # multi-hit low-energy
-    #fitranges[i]['M1'] = [6, 60, 2860]  # multi-hit high-energy
-    
-    ### testing new Tl208 gamma MC with V00-04-14 -- 2019-06-24
-    fitranges[i]['S0'] = [1,  6,  100]  # single-hit low-energy
-    fitranges[i]['S1'] = [6, 60, 3000]  # single-hit high-energy
-    fitranges[i]['M0'] = [1,  2,  100]  # multi-hit  low-energy
-    fitranges[i]['M1'] = [6, 60, 3000]  # multi-hit  high-energy
-    
-    
-    ### defaults for lsveto
+    ### defaults for crystals
     # --------------------------------------------------------------
-    fitranges[8]['S0'] = [0,0,0]
-    fitranges[8]['S1'] = [0,0,0]
-    fitranges[8]['M0'] = [0,0,0]
-    #fitranges[8]['M1'] = [4, 200, 3900] # for G4.9 SET1
-    #fitranges[8]['M1'] = [6, 150, 3950] # for G4.10 SET1
-    #fitranges[8]['M1'] = [8, 200, 3600] # for G4.10 SET2
-    fitranges[8]['M1'] = [1, 100, 4000] # ext gamma testing
-    # --------------------------------------------------------------
+    fitranges[i]['S0'] = [1,  2,  90]  # single-hit low-energy
+    fitranges[i]['S1'] = [6, 80, 4000]  # single-hit high-energy
+    fitranges[i]['M0'] = [1,  2,  90]  # multi-hit  low-energy
+    fitranges[i]['M1'] = [6, 80, 4000]  # multi-hit  high-energy
 
     
-    ### set bounds separately for some crystals
-    # --------------------------------------------------------------
-    # c1 low-energy is messed up below 9 keV
-    #fitranges[0]['S0'] = [1, 9, 100]
-    # --------------------------------------------------------------
+### defaults for lsveto
+# --------------------------------------------------------------
+fitranges[8]['S0'] = [0,0,0]
+fitranges[8]['S1'] = [0,0,0]
+fitranges[8]['M0'] = [0,0,0]
+fitranges[8]['M1'] = [1, 100, 4000] # ext gamma testing
+
+
+### set bounds separately for some crystals
+# --------------------------------------------------------------
+# c1 low-energy is messed up below 9 keV
+#fitranges[0]['S0'] = [1, 9, 100]
+
 
 
 ### ==========  EXTRA MC OPTIONS  ====================================
@@ -139,7 +122,7 @@ showTotal = 1
 ### show the legends? [0,1]
 showlegs = 1
 
-### plot the total in red? [0,1]
+### plot the total in gray==0, red==1? [0,1]
 redtotal = 1
 
 ### combine 'others' into the makePlots() plots?
@@ -179,8 +162,10 @@ indi = 1
 pltchans = 'SM'
 
 ### plotting ranges
-loer = [0, 120]
-hier = [0, 3000]
+loer = [0, 100]
+hier = [0, 4000]
+#hiYlo = 1e-3 # for 3000 X range
+hiYlo = 1e-5 # for 4000 X range
 eran = [loer, hier]
 
 ### special energy range for lsveto
@@ -330,7 +315,7 @@ def main(argv):
     #-----------------------------------------------------------------
     #-----------------------------------------------------------------
     
-    ### plot all crystals that have data
+    ### only plot crystals that have data
     justthese = []
     for i in range(1, numx+1):
         for key in datkeys:
@@ -342,12 +327,19 @@ def main(argv):
         sys.exit()
     print 'INFO: plotting crystals -->', justthese
     
-    ### for saving the plots...
+    ### create dir for saving the plots...
     plotdir = here+'/plots/c'
     for x in justthese:
         plotdir += str(x)
     if not os.path.exists(plotdir): 
         os.makedirs(plotdir)
+
+    ### copy the backgrounds file before fitting so it isn't overwritten later - 2020-04-02
+    shutil.copyfile(os.path.join(here, mcfile), os.path.join(plotdir, mcfile))
+
+    ### copy the actual script as well just to have it on hand - 2020-04-02
+    shutil.copyfile(os.path.join(here, script), os.path.join(plotdir, script))
+
     
     ### assume all data is using same runs and hist params
     try:    runtag = data[datkeys[0]]['info']['tag']
@@ -950,8 +942,8 @@ def main(argv):
             if fitdata.GetBinContent(n) > 0:
                 NDF+=1
         
-        print 'DEBUG: fit chi2/ndf =',chi2,ndf
-        print 'DEBUG: new ndf =',NDF
+        #print 'DEBUG: fit chi2/ndf =',chi2,ndf
+        #print 'DEBUG: new ndf =',NDF
         ndf=NDF
         
         fitchi2ndf = (chi2/ndf)
@@ -1078,12 +1070,24 @@ def main(argv):
                                     limit = '[UPPER LIMIT]'
                                 if limit:
                                     fitresults[str(i)].append(
-                                        '%35s = %.2e +/- %.2e mBq  (%.2e, %.2e) %s'
+                                        # show the actual error
+                                        '%42s = %.2e +/- %.2e mBq  (%.2e, %.2e) %s'
                                         %('fit '+fskey, fitacti, fiterro, lobnd, hibnd, limit))
+                                        # show error as %
+                                        # oh this messes up my pretty plotting of fit activities
+                                        #'%42s = %.2e mBq (%.1f%%) %s'
+                                        #%('fit '+fskey, fitacti, 100*fiterro/fitacti, limit))
+                                
                                 else:
                                     fitresults[str(i)].append(
-                                        '%35s = %.2e +/- %.2e mBq  (%.2e, %.2e)'
+                                        # show the actual error
+                                        '%42s = %.2e +/- %.2e mBq  (%.2e, %.2e)'
                                         %('fit '+fskey, fitacti, fiterro, lobnd, hibnd))
+                                        # show error as %
+                                        # oh this messes up my pretty plotting of fit activities
+                                        #'%42s = %.2e mBq (%.1f%%)'
+                                        #%('fit '+fskey, fitacti, 100*fiterro/fitacti))
+                                
                                 finit = 0
 
         ### do the same for the globals
@@ -1130,12 +1134,24 @@ def main(argv):
                                     limit = '[UPPER LIMIT]'
                                 if limit:
                                     fitresults[str(i)].append(
-                                        '%35s = %.2e +/- %.2e mBq  (%.2e, %.2e) %s'
+                                        # show the actual error
+                                        '%42s = %.2e +/- %.2e mBq  (%.2e, %.2e) %s'
                                         %('fit '+'x'+X+'-'+fgkey, fitacti, fiterro, lobnd, hibnd, limit))
+                                        # show error as %
+                                        # oh this messes up my pretty plotting of fit activities
+                                        #'%42s = %.2e mBq (%.1f%%) %s'
+                                        #%('fit '+'x'+X+'-'+fgkey, fitacti, 100*fiterro/fitacti, limit))
+                                
                                 else:
                                     fitresults[str(i)].append(
-                                        '%35s = %.2e +/- %.2e mBq  (%.2e, %.2e)'
+                                        # show the actual error
+                                        '%42s = %.2e +/- %.2e mBq  (%.2e, %.2e)'
                                         %('fit '+'x'+X+'-'+fgkey, fitacti, fiterro, lobnd, hibnd))
+                                        # show error as %
+                                        # oh this messes up my pretty plotting of fit activities
+                                        #'%42s = %.2e mBq (%.1f%%)'
+                                        #%('fit '+'x'+X+'-'+fgkey, fitacti, 100*fiterro/fitacti))
+                                
                                 ### turn off
                                 finit = 0
             
@@ -1194,7 +1210,9 @@ def main(argv):
             #shutil.copyfile(mcfile, plotdir+'/'+mcfile)
             if updateMCfile:
                 #newbkgs = plotdir+'/'+mcfile[:-4]+'_update.txt'
-                updateBkgsFile300(xstals, os.path.join(here, mcfile), resultsfile, plotdir)
+                #updateBkgsFile300(xstals, os.path.join(here, mcfile), resultsfile, plotdir)
+                # use the copied backgrounds file - 2020-04-02
+                updateBkgsFile300(xstals, os.path.join(plotdir, mcfile), resultsfile, plotdir)
             
             ### save histograms to a rootfile
             rootoutfile = TFile(plotdir+"/histograms.root", "RECREATE")
@@ -1733,7 +1751,8 @@ def main(argv):
 
     
     ### copy the backgrounds file
-    shutil.copyfile(os.path.join(here, mcfile), os.path.join(plotdir, mcfile))
+    ### moved this to before when fitting starts so bkgs isn't overwritten
+    #shutil.copyfile(os.path.join(here, mcfile), os.path.join(plotdir, mcfile))
     
     
     # plot the lo and hi energy histograms for all channels
@@ -1945,7 +1964,8 @@ def main(argv):
 
                         if dru and i!=8:
                             #data[dkey]['hist'].SetAxisRange(2e-3, 2e1, 'y')
-                            if E: data[dkey]['hist'].SetAxisRange(2e-3, 2e1, 'y')
+                            #if E: data[dkey]['hist'].SetAxisRange(2e-3, 2e1, 'y')
+                            if E: data[dkey]['hist'].SetAxisRange(hiYlo, 2e1, 'y')
                             else: data[dkey]['hist'].SetAxisRange(2e-3, 3e2, 'y')
 
                         ### LSveto plotting
