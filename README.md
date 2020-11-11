@@ -23,3 +23,9 @@ The main script to execute is the "multi-chan-fit.py". There are some global var
 
 
 
+## General Note
+
+Everything is a bit messy right now but I plan to clean this up.
+
+
+
