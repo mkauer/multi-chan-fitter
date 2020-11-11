@@ -2,7 +2,7 @@
 
 # 2020-08-18
 # try fitting high energy externals to C1
-
+"""
 DR  1  SET3  V00-04-15  ./C1_SET3_V00-04-15.dat  ./root-join-read/build401/build401-c1-data-SET3-V00-04-15.root
 DR  2  SET3  V00-04-15  ./C2_SET3_V00-04-15.dat  ./root-join-read/build401/build401-c2-data-SET3-V00-04-15.root
 DR  3  SET3  V00-04-15  ./C3_SET3_V00-04-15.dat  ./root-join-read/build401/build401-c3-data-SET3-V00-04-15.root
@@ -10,6 +10,16 @@ DR  4  SET3  V00-04-15  ./C4_SET3_V00-04-15.dat  ./root-join-read/build401/build
 DR  6  SET3  V00-04-15  ./C6_SET3_V00-04-15.dat  ./root-join-read/build401/build401-c6-data-SET3-V00-04-15.root
 DR  7  SET3  V00-04-15  ./C7_SET3_V00-04-15.dat  ./root-join-read/build401/build401-c7-data-SET3-V00-04-15.root
 DR  9  SET3  V00-04-15  ./C9_SET3_V00-04-15.dat  ./root-join-read/build401/build401-c9-data-SET3-V00-04-15.root
+"""
+# 2020-10-16
+# try with new data high energy calibration
+DR	1	SET3	V00-04-15	./C1_SET3_V00-04-15.dat	./root-join-read/build500/build500-c1-data-SET3-V00-04-15.root
+DR	2	SET3	V00-04-15	./C2_SET3_V00-04-15.dat	./root-join-read/build401/build401-c2-data-SET3-V00-04-15.root
+DR	3	SET3	V00-04-15	./C3_SET3_V00-04-15.dat	./root-join-read/build500/build500-c3-data-SET3-V00-04-15.root
+DR	4	SET3	V00-04-15	./C4_SET3_V00-04-15.dat	./root-join-read/build500/build500-c4-data-SET3-V00-04-15.root
+DR	6	SET3	V00-04-15	./C6_SET3_V00-04-15.dat	./root-join-read/build500/build500-c6-data-SET3-V00-04-15.root
+DR	7	SET3	V00-04-15	./C7_SET3_V00-04-15.dat	./root-join-read/build500/build500-c7-data-SET3-V00-04-15.root
+DR	9	SET3	V00-04-15	./C9_SET3_V00-04-15.dat	./root-join-read/build401/build401-c9-data-SET3-V00-04-15.root
 
 
 # this teflon still has alpha tail - need to remove for high energy fit

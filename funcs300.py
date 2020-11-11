@@ -2,12 +2,13 @@
 ######################################################################
 # funcs300.py
 # 
-# version: 2020-05-12
+# version: 2020-10-15
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
+# + recalibrate high energy region from my notebook fits
+# ~ add paths to Gyunho's Na24 and I128
 # ~ new paths for Gyunho's NaI and Teflon surface Pb210 in mcPath301()
-
 # + added lsveto mc locations to mcPath300() and mcPath301()
 # + added "alpha" cut on nai-surf, reflector, teflon-bulk, and teflon-surf
 # ~ sticking with poly43 lsveto calibration for V00-04-15 data
@@ -1038,13 +1039,57 @@ def calib301(i, E):
     
     
     if E:
-        ### default production calibration
+        ### default high energy production calibration
         edep = '(crystal'+str(i+1)+'.energyD)'
         selection = '('+edep+')'
+
+        if i==0: # C1
+            A = -9.20702415903431e-09
+            B = 3.1582891760183624e-05
+            C = 0.9731283907370495
+            D = 3.492470586962138
+            
+        if i==1: # C2
+            return edep, selection
+        
+        if i==2: # C3
+            A = -4.668682649387045e-09
+            B = 1.5052344932980456e-05
+            C = 0.9874023184977824
+            D = 1.6686064222603654
+            
+        if i==3: # C4
+            A = -7.966374771112426e-09
+            B = 2.544049246165629e-05
+            C = 0.9801665355547313
+            D = 2.2024520321640186
+            
+        if i==4: # C5
+            return edep, selection
+        
+        if i==5: # C6
+            A = -4.623190276816897e-09
+            B = 1.6693196676849473e-05
+            C = 0.9855987614226132
+            D = 1.789741155036786
+            
+        if i==6: # C7
+            A = -6.584663125047853e-09
+            B = 2.4904010290725124e-05
+            C = 0.9765006123749262
+            D = 3.45348577054466
+            
+        if i==7: # C8
+            return edep, selection
+            
+        selection = '(('+str(A)+'*'+edep+'**3) '\
+                   '+ ('+str(B)+'*'+edep+'**2) '\
+                   '+ ('+str(C)+'*'+edep+') + '+str(D)+')'
+            
     else:
-        ### default production calibration
+        ### default low energy production calibration
         edep = '(crystal'+str(i+1)+'.energy)'
-        selection = edep
+        selection = '('+edep+')'
 
     return edep, selection
 

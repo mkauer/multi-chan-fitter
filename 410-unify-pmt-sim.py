@@ -75,11 +75,11 @@ note = 0
 #mcfile = 'backgrounds_414_tweaks2_C1.txt' # try C1
 #mcfile = 'backgrounds_414_tweaks2_C5.txt' # try C5
 #mcfile = 'backgrounds_414_tweaks2_C8.txt' # try C8
-#mcfile = 'backgrounds_414_tweaks3.txt' # fit externals with C1
+mcfile = 'backgrounds_414_tweaks3.txt' # fit externals with C1
 
 #mcfile = 'backgrounds_414_tweaks2_update.txt' # manually tweaked things
 #mcfile = 'backgrounds_414_tweaks3_update.txt' # fit externals with C1
-mcfile = 'backgrounds_414_I128.txt' # try fit with I128
+#mcfile = 'backgrounds_414_I128.txt' # try fit with I128
 
 
 #mcfile = 'backgrounds_415.txt' # try removing plastic mc
@@ -98,6 +98,7 @@ mcfile = 'backgrounds_414_I128.txt' # try fit with I128
 #mcfile = 'testing-steel.txt' # 2020-08-13
 #mcfile = 'testing-u238-th232.txt' # 2020-08-13
 #mcfile = 'testing-na24.txt' # 2020-10-12
+#mcfile = 'testing-calibs.txt' # 2020-10-13
 
 
 print 'INFO: using backgrounds config file -->', mcfile
@@ -127,8 +128,8 @@ smoothWhat = ['cushield','steel']
 
 ### ==========  FITTING OPTIONS  =====================================
 ### select channels to fit
-#fitchans = 'SM'
-fitchans = 'S'  # testing low E fit
+fitchans = 'SM'
+#fitchans = 'S'  # testing low E fit
 
 ### Let's finally try different fit ranges!!
 fitranges = [{} for x in range(numx)]
@@ -141,18 +142,18 @@ for i in range(numx):
     fitranges[i]['M0'] = [1,  2,   90]  # multi-hit low-energy
     fitranges[i]['M1'] = [6, 80, 4000]  # multi-hit high-energy
     
-    # testing low E fit
-    fitranges[i]['S0'] = [1, 4, 40]
-    fitranges[i]['S1'] = [1, 0,  0]
-    fitranges[i]['M0'] = [1, 2, 40]
+    # for just low E fit
+    #fitranges[i]['S0'] = [1, 4, 40]
+    #fitranges[i]['S1'] = [1, 0,  0]
+    #fitranges[i]['M0'] = [1, 2, 40]
     #fitranges[i]['M0'] = [1, 20, 40]
-    fitranges[i]['M1'] = [1, 0,  0]
+    #fitranges[i]['M1'] = [1, 0,  0]
     
-    # testing high E fit
-    #fitranges[i]['S0'] = [1, 0, 0]
-    #fitranges[i]['S1'] = [4, 100, 2800]
-    #fitranges[i]['M0'] = [1, 40, 100]
-    #fitranges[i]['M1'] = [4, 100, 2800]
+    # for just high E fit
+    fitranges[i]['S0'] = [1, 0, 0]
+    fitranges[i]['S1'] = [4, 100, 2800]
+    fitranges[i]['M0'] = [1, 40, 100]
+    fitranges[i]['M1'] = [4, 100, 2800]
 
 # special case for C1, C5, C8
 #for i in [0, 4, 7]:
