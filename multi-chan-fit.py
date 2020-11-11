@@ -1,18 +1,14 @@
 #!/usr/bin/env python
 
-######################################################################
-# Matt Kauer - mkauer@physics.wisc.edu
-######################################################################
-# 401-fix-fit-plots.py
+############################################################
+# Matt Kauer - mkauer@icecube.wisc.edu
+#-----------------------------------------------------------
+# Make PMT sim truely global and
+# and not a collection of pmt pairs
 
-V = 'v401'
-
-# Fix the fit plotting...
-# 
-# version: 2019-11-26
-# 
-# see CHANGELOG for changes
-######################################################################
+# see CHANGELOG
+# version: 2020-08-18
+############################################################
 
 import os,sys,re
 import shutil
@@ -22,15 +18,24 @@ import math
 import numpy as np
 import datetime
 
+# ROOT6 FIX
+import ctypes
+from ctypes import *
+
+script = os.path.basename(__file__)
+V = 'v'+(script.split('-')[0])
+print 'INFO: running script -->', script, '('+V+')'
+
 import ROOT
 from ROOT import *
-#ROOT.gROOT.Reset()
 #ROOT.gErrorIgnoreLevel = kWarning
 ROOT.gErrorIgnoreLevel = kError
+vroot = ROOT.__version__
+print 'INFO: using root -->', vroot
 
 sys.path.append("/home/mkauer/COSINE/CUP/mc-fitting/")
 sys.path.append("/home/mkauer/mc-fitting/")
-from funcs400 import *
+from funcs410 import *
 
 
 ### batch job?
@@ -38,112 +43,162 @@ from funcs400 import *
 batch = onCup()
 #batch = 1
 
-### get the number of crystals
+### get the total number of possible crystals (including lsveto)
 numx = numX()
 
 ### print debug info
 debug = 0
 
+# draw options
+dopt='hist same'
 
 ### ==========  GENERAL INPUTS  ======================================
 ### note to add to saved plot names?
 note = 0
 #note = ''
 
-#mcfile = 'backgrounds_401.txt'
-#mcfile = 'backgrounds_402.txt'
-mcfile = 'backgrounds_403.txt'
+#mcfile = 'backgrounds_404.txt' # pretty solid baseline file
+#mcfile = 'backgrounds_405.txt' # changed things to govindas numbers
+#mcfile = 'backgrounds_406.txt' # going back to 404 and modifying
+#mcfile = 'backgrounds_407.txt' # new expo file format
+#mcfile = 'backgrounds_408.txt' # add back other Te cosmogenics
+#mcfile = 'backgrounds_409.txt' # can only use "side" components
+#mcfile = 'backgrounds_410.txt' # try fixing pmt activities
+#mcfile = 'backgrounds_411.txt' # play with teflon surface
+#mcfile = 'backgrounds_412.txt' # surface tweaks for root-6
+
+#mcfile = 'backgrounds_413.txt' # new build410 MC
+
+#mcfile = 'backgrounds_414.txt' # try removing lsveto mc
+#mcfile = 'backgrounds_414_tweaks.txt' # tweak some activities
+#mcfile = 'backgrounds_414_tweaks2.txt' # tweak some activities
+#mcfile = 'backgrounds_414_tweaks2_C1.txt' # try C1
+#mcfile = 'backgrounds_414_tweaks2_C5.txt' # try C5
+#mcfile = 'backgrounds_414_tweaks2_C8.txt' # try C8
+mcfile = 'backgrounds_414_tweaks3.txt' # fit externals with C1
+
+#mcfile = 'backgrounds_414_tweaks2_update.txt' # manually tweaked things
+#mcfile = 'backgrounds_414_tweaks3_update.txt' # fit externals with C1
+#mcfile = 'backgrounds_414_I128.txt' # try fit with I128
 
 
-#mcfile = 'testing-c1-surface.txt'
-#mcfile = 'testing-c2-surface.txt'
-#mcfile = 'testing-c3-surface.txt'
-#mcfile = 'testing-c4-surface.txt'
-#mcfile = 'testing-c6-surface.txt'
-#mcfile = 'testing-c7-surface.txt'
+#mcfile = 'backgrounds_415.txt' # try removing plastic mc
+#mcfile = 'backgrounds_415_tweaks.txt' # tweak some activities
+#mcfile = 'backgrounds_415_tweaks2.txt' # tweak some activities
+
+
+#mcfile = 'testing-expo-surf.txt' # 2020-05-12
+#mcfile = 'testing-all-bkgs-for-plotting.txt'
+#mcfile = 'testing-expo-pb210.txt' # 2020-03-24
+#mcfile = 'testing-data-400.txt' # 2020-03-26
+#mcfile = 'testing-alpha-cuts.txt' # 2020-04-13
+#mcfile = 'testing-unified-pmt.txt' # 2020-08-07
+#mcfile = 'testing-copper-shield.txt' # 2020-08-08
+#mcfile = 'testing-lsveto-resolution.txt' # 2020-08-11
+#mcfile = 'testing-steel.txt' # 2020-08-13
+#mcfile = 'testing-u238-th232.txt' # 2020-08-13
+#mcfile = 'testing-na24.txt' # 2020-10-12
+#mcfile = 'testing-calibs.txt' # 2020-10-13
 
 
 print 'INFO: using backgrounds config file -->', mcfile
 
+
 ### ==========  OPTIMIZATION OPTIONS  ================================
-### MC smoothing? Specify a smoothing window in +/- number of bins
-#smoothing = 5
+### test MC energy shift in bins (12bins = 1keV)
+### currently just shifting teflon
+### might need different shifting for different xstals
+# for xstals 1   2   3   4   5   6   7   8   9
+binShift =  [4,  4,  6,  8, -1,  8,  6, -1, -1]
+#binShift =  [-1, 0, 11, 11, -1, 11, 11, -1, -1]
+shiftWhat = ['teflonbulk','teflonsurf']
+#shiftWhat = ['teflon']
+
+### set the fitter step size
+### can help to go smaller than default 1e-2
+stepSize = 0
+stepSize = 1e-4
+
+### test MC smoothing?
+### smoothing window in +/- number of bins
 smoothing = 0
+#smoothing = 5
+smoothWhat = ['cushield','steel']
 
 
 ### ==========  FITTING OPTIONS  =====================================
 ### select channels to fit
 fitchans = 'SM'
+#fitchans = 'S'  # testing low E fit
 
 ### Let's finally try different fit ranges!!
 fitranges = [{} for x in range(numx)]
 for i in range(numx):
-    
-    ### default for G4.9 SET1
-    #fitranges[i]['S0'] = [3,  6,  106]  # single-hit low-energy
-    #fitranges[i]['S1'] = [4, 70, 2770]  # single-hit high-energy
-    #fitranges[i]['M0'] = [3,  2,   72]  # multi-hit low-energy
-    #fitranges[i]['M1'] = [4, 70, 2770]  # multi-hit high-energy
-    
-    ### default for G4.10 SET1
-    #fitranges[i]['S0'] = [2,  6,   96]  # single-hit low-energy
-    #fitranges[i]['S1'] = [6, 60, 2260]  # single-hit high-energy
-    #fitranges[i]['M0'] = [3,  2,   92]  # multi-hit low-energy
-    #fitranges[i]['M1'] = [6, 60, 2860]  # multi-hit high-energy
-    
-    ### default for G4.10 SET2
-    #fitranges[i]['S0'] = [2,  2,  122]  # single-hit low-energy
-    #fitranges[i]['S1'] = [6, 60, 2260]  # single-hit high-energy
-    #fitranges[i]['M0'] = [2,  2,  102]  # multi-hit low-energy
-    #fitranges[i]['M1'] = [6, 60, 2860]  # multi-hit high-energy
-    
-    ### testing new Tl208 gamma MC with V00-04-14 -- 2019-06-24
-    fitranges[i]['S0'] = [1,  6,  100]  # single-hit low-energy
-    fitranges[i]['S1'] = [6, 60, 3000]  # single-hit high-energy
-    fitranges[i]['M0'] = [1,  2,  100]  # multi-hit  low-energy
-    fitranges[i]['M1'] = [6, 60, 3000]  # multi-hit  high-energy
-    
-    
-    ### defaults for lsveto
-    # --------------------------------------------------------------
-    fitranges[8]['S0'] = [0,0,0]
-    fitranges[8]['S1'] = [0,0,0]
-    fitranges[8]['M0'] = [0,0,0]
-    #fitranges[8]['M1'] = [4, 200, 3900] # for G4.9 SET1
-    #fitranges[8]['M1'] = [6, 150, 3950] # for G4.10 SET1
-    #fitranges[8]['M1'] = [8, 200, 3600] # for G4.10 SET2
-    fitranges[8]['M1'] = [1, 100, 4000] # ext gamma testing
-    # --------------------------------------------------------------
 
+    ### defaults for crystals
+    # --------------------------------------------------------------
+    fitranges[i]['S0'] = [1,  2,   90]  # singl-hit low-energy
+    fitranges[i]['S1'] = [6, 80, 4000]  # singl-hit high-energy
+    fitranges[i]['M0'] = [1,  2,   90]  # multi-hit low-energy
+    fitranges[i]['M1'] = [6, 80, 4000]  # multi-hit high-energy
     
-    ### set bounds separately for some crystals
-    # --------------------------------------------------------------
-    # c1 low-energy is messed up below 9 keV
-    #fitranges[0]['S0'] = [1, 9, 100]
-    # --------------------------------------------------------------
+    # for just low E fit
+    #fitranges[i]['S0'] = [1, 4, 40]
+    #fitranges[i]['S1'] = [1, 0,  0]
+    #fitranges[i]['M0'] = [1, 2, 40]
+    #fitranges[i]['M0'] = [1, 20, 40]
+    #fitranges[i]['M1'] = [1, 0,  0]
+    
+    # for just high E fit
+    fitranges[i]['S0'] = [1, 0, 0]
+    fitranges[i]['S1'] = [4, 100, 2800]
+    fitranges[i]['M0'] = [1, 40, 100]
+    fitranges[i]['M1'] = [4, 100, 2800]
+
+# special case for C1, C5, C8
+#for i in [0, 4, 7]:
+#    fitranges[i]['S0'] = [1, 10, 60]
+#    fitranges[i]['S1'] = [6, 0, 0]
+#    fitranges[i]['M0'] = [1, 10, 90]
+#    fitranges[i]['M1'] = [6, 80, 4000]
+        
+    
+### defaults for lsveto
+# --------------------------------------------------------------
+fitranges[8]['S0'] = [0,0,0]
+fitranges[8]['S1'] = [0,0,0]
+fitranges[8]['M0'] = [0,0,0]
+fitranges[8]['M1'] = [1, 100, 4000] # ext gamma testing
+
+
+### set bounds separately for some crystals
+# --------------------------------------------------------------
+# c1 low-energy is messed up below 9 keV
+#fitranges[0]['S0'] = [1, 9, 100]
+
 
 
 ### ==========  EXTRA MC OPTIONS  ====================================
 ### which MC to fit globally (to all crystals simultaneously)?
-globalmc = ['pmt', 'plastic', 'lsveto', 'innersteel', 'steel', 'gamma']
+globalmc = ['pmt','plastic','lsveto','cushield','innersteel','steel','gamma']
 
 ### include bkgs from 'other' pmts and internals?
-others = 1
+others    = 1
 
 ### plot components in groups? [0,1]
-ingroups = 1
+ingroups  = 1
 
 ### show the total? [0,1]
 showTotal = 1
 
 ### show the legends? [0,1]
-showlegs = 1
+showlegs  = 1
 
-### plot the total in red? [0,1]
-redtotal = 1
+### plot the total in gray==0, red==1? [0,1]
+redtotal  = 1
 
 ### combine 'others' into the makePlots() plots?
-combine = 1
+combine   = 1
 
 ### force the reuse of all joined rootfiles in mcfile? [0,1,2]
 ### very nice for debugging
@@ -151,9 +206,6 @@ combine = 1
 ### [1] forces reusing of all data/bkgs/sigs
 ### [2] forces NOT reusing any data/bkgs/sigs
 reuse = 0
-
-### update and save new backgrounds file with fit results
-updateMCfile = 1
 
 
 ### ==========  OTHER FITTING OPTIONS  ===============================
@@ -179,8 +231,10 @@ indi = 1
 pltchans = 'SM'
 
 ### plotting ranges
-loer = [0, 120]
-hier = [0, 3000]
+loer = [0, 100]
+hier = [0, 4000]
+#hiYlo = 1e-3 # for 3000 X range
+hiYlo = 1e-5 # for 4000 X range
 eran = [loer, hier]
 
 ### special energy range for lsveto
@@ -188,6 +242,9 @@ lsHiE = 4000
 
 ### special range for zoomed in plot
 zmaxE = 40
+
+### zoomed in residual as dat-mc [0] or dat/mc [1]
+zdr = 0
 
 ### rebin the final plots [1,inf]
 loEplotRebin = 3
@@ -212,7 +269,7 @@ dru = 1
 mcsumw2 = 0
 
 ### set data sumw2()? [0,1]
-datsumw2 = 1
+datsumw2 = 0
 
 ### set error on the total? [0,1]
 toterr = 0
@@ -274,17 +331,19 @@ def main(argv):
     #-----------------------------------------------------------------
     #-----------------------------------------------------------------
     allchans = uniqString(fitchans+pltchans)
-    data, bkgs, sigs = build400(os.path.join(here, mcfile), others, reuse, allchans, xstals)
-
+    data, bkgs, sigs = build410(os.path.join(here, mcfile), others, reuse, allchans, xstals)
+    
     ### make of list of crystal runtimes
     runtimes = [0 for x in range(numx)]
     usedkeys = []
     for i in range(numx):
         for key in data:
+            #print key
             if 'x'+str(i+1) in key and 'x'+str(i+1) not in usedkeys:
                 runtimes[i] = data[key]['runtime']
                 usedkeys.append('x'+str(i+1))
                 print 'INFO: c'+str(i+1)+' runtime =', round(runtimes[i],1), '(seconds)'
+    #print runtimes
     
     datkeys = sortDataKeys92(data)
     if datsumw2:
@@ -294,14 +353,31 @@ def main(argv):
     ### scale into dru units
     if dru:
         data = scaleData70(data, 1)
-        bkgs = scaleBkgs101(bkgs)
-        sigs = scaleBkgs101(sigs)
+        bkgs = scaleBkgs410(bkgs)
+        sigs = scaleBkgs410(sigs)
     else:
         data = scaleData70(data, 0)
         ### FIX ME - need to fix scaleBkgs to use runtimes[]
-        bkgs = scaleBkgs101(bkgs, runtimes)
-        sigs = scaleBkgs101(sigs, runtimes)
+        bkgs = scaleBkgs410(bkgs, runtimes)
+        sigs = scaleBkgs410(sigs, runtimes)
+    
+    
+    
+    #=======================================================================
+    ### testing MC energy scaling
+    #=======================================================================
 
+    if binShift != 0:
+        #print 'energy shifting...'
+        sigs = ScaleEnergy410(sigs, binShift, shiftWhat)
+        bkgs = ScaleEnergy410(bkgs, binShift, shiftWhat)
+    #sys.exit()
+    
+    #=======================================================================
+    #=======================================================================
+    
+    
+    
     ### make plots before combining?
     #makePlots93(bkgs, combine, others)
     #makePlots93(sigs, combine, others)
@@ -315,7 +391,7 @@ def main(argv):
     ### now sort and remove empty histos
     bkgs, bakkeys = sortSimKeys92(bkgs)
     sigs, sigkeys = sortSimKeys92(sigs)
-
+    
     ### make plots after combining?
     #makePlots93(bkgs, combine, others)
     #makePlots93(sigs, combine, others)
@@ -323,14 +399,14 @@ def main(argv):
     
     ### do histogram smoothing?
     if smoothing:
-        bkgs = smooth(bkgs, smoothing)
-        sigs = smooth(sigs, smoothing)
+        bkgs = smooth(bkgs, smoothWhat, smoothing)
+        sigs = smooth(sigs, smoothWhat, smoothing)
         print 'INFO: done smoothing histograms'
     
     #-----------------------------------------------------------------
     #-----------------------------------------------------------------
     
-    ### plot all crystals that have data
+    ### only plot crystals that have data
     justthese = []
     for i in range(1, numx+1):
         for key in datkeys:
@@ -342,12 +418,19 @@ def main(argv):
         sys.exit()
     print 'INFO: plotting crystals -->', justthese
     
-    ### for saving the plots...
+    ### create dir for saving the plots...
     plotdir = here+'/plots/c'
     for x in justthese:
         plotdir += str(x)
     if not os.path.exists(plotdir): 
         os.makedirs(plotdir)
+
+    ### copy the backgrounds file before fitting so it isn't overwritten later - 2020-04-02
+    shutil.copyfile(os.path.join(here, mcfile), os.path.join(plotdir, mcfile))
+
+    ### copy the actual script as well just to have it on hand - 2020-04-02
+    shutil.copyfile(os.path.join(here, script), os.path.join(plotdir, script))
+
     
     ### assume all data is using same runs and hist params
     try:    runtag = data[datkeys[0]]['info']['tag']
@@ -383,20 +466,16 @@ def main(argv):
             globstr += txt+'-'
         globstr = globstr[:-1]
     #print 'INFO: global fits to -->', globstr
-    
-    ### Number of colors
-    Nc = len(uniqAll)
-    #print 'INFO: Total number of unique bkgs and sigs =',Nc
-    colors, cis = rainbow(Nc)
 
-    ### Create color dict for unique simulations
-    uniqColor = {}
-    for i, key in enumerate(uniqAll):
-        #print key
-        uniqColor[key] = cis[i]
+    
+    ### create unique colors for fit sim
+    Nc = len(uniqAll)
+    print 'INFO: Total number of unique bkgs and sigs =', Nc
+    # ROOT6 FIX
+    colors, cis = rainbowSix(uniqAll)
+    uniqColor = cis
     
     ### colors for the groups
-    
     gis = {
         'internal':  kBlue,
         'cosmo':     kMagenta+1,
@@ -706,15 +785,15 @@ def main(argv):
         
         ### data integral to normalize signal to
         dat_int = fitdata.Integral()
-        
+                
         ### set up the fitting object for TFractionFitter
         for i in range(numx):
             fitresults[str(i)] = []
             for fskey in fsigkeys:
                 if 'x'+str(i+1) in fskey:
-                                            
+
                     mc_int = fitsigs[fskey]['hist'].Integral()
-                    
+                                        
                     ### to weight or not to weight...
                     if mcsumw2:
                         fitsigs[fskey]['hist'].Sumw2() # set stat weights
@@ -723,12 +802,12 @@ def main(argv):
                     ### needed for TFractionFitter to work right
                     ### still don't fully understand why
                     try:
-                        fitsigs[fskey]['hist'].Scale(dat_int/mc_int) # scale to data integral
+                        fitsigs[fskey]['hist'].Scale(dat_int/mc_int)
                     except:
                         print '\nERROR: No events for --> ',fskey
                         print   '       Remove it from the fit? \n'
                         sys.exit()
-
+                    
                     for C in allchans:
                         for E in range(2):
                             E=str(E)
@@ -763,7 +842,7 @@ def main(argv):
                                 sigs[newkey]['info']['newfbnd'] = [0,0]
                                 for k in range(2):
                                     renorm = sigs[newkey]['scale'] / float(sigs[newkey]['fitscale'])
-
+                                                                        
                                     if useBounds == 0:
                                         these = [0.00, 1.00]
                                         sigs[newkey]['info']['fbnd'][k] = 1./renorm * these[k]
@@ -781,8 +860,8 @@ def main(argv):
                                     else:
                                         print 'ERROR: do not know what to do with useBounds =',useBounds
                                         sys.exit()
-
-                    bounds.append(sigs[newkey]['info']['newfbnd'])
+                    
+                    bounds.append(sigs[newkeys[0]]['info']['newfbnd'])
                     #---------------------------------------------------------------------
                     
                     ### set errors to zero?
@@ -792,12 +871,16 @@ def main(argv):
             fitresults[str(i)].append('Crystal-'+str(i+1)+' fit results')
             fitresults[str(i)].append('runtime = '+str(round(runtimes[i]/60./60./24., 2))+' days')
             if note: fitresults[str(i)].append('note = '+note)
-            fitresults[str(i)].append('version = '+V)
+            fitresults[str(i)].append('script = '+script)
+            fitresults[str(i)].append('root = '+vroot)
             fitresults[str(i)].append('channels fit = '+fitchans)
-            fitresults[str(i)].append('global fits = '+globstr)
-            fitresults[str(i)].append('other pmts = '+str(others))
+            fitresults[str(i)].append('globals = '+str(globalmc))
+            fitresults[str(i)].append('use others = '+str(others))
             #fitresults[str(i)].append('hist extend = '+str(extend))
             fitresults[str(i)].append('norm to dru = '+str(dru))
+            fitresults[str(i)].append('energy shift in bins = '+str(binShift[i]))
+            fitresults[str(i)].append('shifting these = '+str(shiftWhat))
+            fitresults[str(i)].append('fitter step size = '+str(stepSize))
             for key in ['S0', 'S1', 'M0', 'M1']:
                 fitresults[str(i)].append(key+' fit range = '\
                                           +str(fitranges[i][key][1])\
@@ -821,7 +904,7 @@ def main(argv):
             ### needed for TFractionFitter to work right
             ### still don't fully understand why
             try:
-                fitglobsigs[fgkey]['hist'].Scale(dat_int/mc_int) # scale to data integral
+                fitglobsigs[fgkey]['hist'].Scale(dat_int/mc_int)
             except:
                 print '\nERROR: No events for --> ',fgkey
                 print   '       Remove it from the fit!\n'
@@ -853,14 +936,14 @@ def main(argv):
                                 
                                 sigs[newkey]['hist'].Scale(dat_int/mc_int)
                                 sigs[newkey]['fitscale'] = sigs[newkey]['scale'] * dat_int/mc_int
-
+                                                                
                                 ### rescale the bounds to the normalized fraction
                                 ### and save new values to the sigs info
                                 #---------------------------------------------------------------------
                                 sigs[newkey]['info']['newfbnd'] = [0,0]
                                 for k in range(2):
                                     renorm = sigs[newkey]['scale'] / float(sigs[newkey]['fitscale'])
-
+                                    
                                     if useBounds == 0:
                                         these = [0.00, 1.00]
                                         sigs[newkey]['info']['fbnd'][k] = 1./renorm * these[k]
@@ -885,7 +968,7 @@ def main(argv):
                             if newkeys[0] and fgkey not in boundskeys:
                                 #print 'bounds for', fgkey, sigs[newkey]['info']['newfbnd']
                                 boundskeys.append(fgkey)
-                                bounds.append(sigs[newkey]['info']['newfbnd'])
+                                bounds.append(sigs[newkeys[0]]['info']['newfbnd'])
             
             
             ### set errors to zero?
@@ -913,64 +996,91 @@ def main(argv):
             sigObj.append(fitglobsigs[fgkey]['hist'])
         
         fit = TFractionFitter(fitdata, sigObj)
+
+        fitter = fit.GetFitter()
         
         ### set fit bounds!!!
-        ### l=0 sets all params to the same constrain
-        ### set all bounds by default
-        #fit.Constrain(0, 0.0, 1.0)
         for l in range(len(bounds)):
-            fit.Constrain(l+1, bounds[l][0], bounds[l][1])
-        
+            #fit.Constrain(l+1, bounds[l][0], bounds[l][1])
+            # ROOT6 FIX
+            fit.Constrain(l, bounds[l][0], bounds[l][1])
+            if stepSize != 0:
+                fitter.Config().ParSettings(l).SetStepSize(stepSize)
+            
         ### set the fit range
         #fit.SetRangeX(0, fmax*numx)
         fit.SetRangeX(0, fitbins)
+
+        ### if you want to get initial fit values from fitter...
+        #fitter = fit.GetFitter()
+        #fit_values = fitter.Config().ParamsValues()
+        #fit_values = np.asarray(fit_values)
+        #print fit_values
+
         
         #=======================================================================
         #        MACHEN SIE DAS FIT!!!
         #=======================================================================
         fitStartTime = datetime.datetime.now()
         status = fit.Fit()
+        #status = 0  # force the plotting for testing
+        status = int(status)  # because 6.14.00 returns <ROOT.TFitResultPtr object>
         fitStopTime = datetime.datetime.now()
         fitTime = int((fitStopTime-fitStartTime).total_seconds())
         #=======================================================================
-        
+
         if status != 0:
             print '\n\n*******************  FIT FAILURE  *******************\n\n'
+            print 'Time to fail = '+str(fitTime)+' sec \n'
             sys.exit()
         
         print '\n\n*******************  SUCCESSFUL FIT  *******************\n\n'
         
+        
         chi2 = fit.GetChisquare()
         ndf  = fit.GetNDF()
         pval = fit.GetProb()
-                
+
+        #print 'chi2 =', chi2
+        #print 'ndf =', ndf
+        #print 'pval =', pval
+        
         ### get non-zero ndf
         NDF=0
         for n in range(fitbins):
             if fitdata.GetBinContent(n) > 0:
                 NDF+=1
         
-        print 'DEBUG: fit chi2/ndf =',chi2,ndf
-        print 'DEBUG: new ndf =',NDF
+        #print 'DEBUG: fit chi2/ndf =',chi2,ndf
+        #print 'DEBUG: new ndf =',NDF
         ndf=NDF
         
         fitchi2ndf = (chi2/ndf)
         
         count = 0
+        
         for i in range(numx):
             
             fitresults[str(i)].append('total number of hists being fit = '+str(totalNumFits))
-            fitresults[str(i)].append('returned fit status = '+str(status))
+            #fitresults[str(i)].append('returned fit status = '+str(status))
             fitresults[str(i)].append('chi2/ndf = %.3g/%s = %.3g'%(chi2, ndf, chi2/ndf))
-            fitresults[str(i)].append('time to complete the fit = '+str(fitTime)+' seconds')
+            fitresults[str(i)].append('time to fit = '+str(fitTime)+' seconds')
             
             for fskey in fsigkeys:
                 if 'x'+str(i+1) in fskey:
                     
-                    fscale = ROOT.Double(0.0)
-                    ferror = ROOT.Double(0.0)
+                    #fscale = ROOT.Double(0.0)
+                    #ferror = ROOT.Double(0.0)
+                    # ROOT6 FIX
+                    fscale = ctypes.c_double(0.0)
+                    ferror = ctypes.c_double(0.0)
+                    
                     #print 'count',count
                     fit.GetResult(count, fscale, ferror)
+                    # ROOT6 FIX
+                    fscale = float(fscale.value)
+                    ferror = float(ferror.value)
+                    
                     count += 1
                     
                     fitsigs[fskey]['hist'].Scale(fscale)
@@ -999,10 +1109,18 @@ def main(argv):
         ### do the same for the globals lsveto
         for fgkey in fglobsigkeys:
 
-            fscale = ROOT.Double(0.0)
-            ferror = ROOT.Double(0.0)
+            #fscale = ROOT.Double(0.0)
+            #ferror = ROOT.Double(0.0)
+            # ROOT6 FIX
+            fscale = ctypes.c_double(0.0)
+            ferror = ctypes.c_double(0.0)
+
             #print 'count',count
             fit.GetResult(count, fscale, ferror)
+            # ROOT6 FIX
+            fscale = float(fscale.value)
+            ferror = float(ferror.value)
+            
             count += 1
             
             fitglobsigs[fgkey]['hist'].Scale(fscale)
@@ -1046,8 +1164,8 @@ def main(argv):
 
         
         ### scale the signals to mBq/kg
-        if dru: sigs = scaleSigs101(sigkeys, sigs)
-        else:   sigs = scaleSigs101(sigkeys, sigs, runtimes)
+        if dru: sigs = scaleSigs410(sigkeys, sigs)
+        else:   sigs = scaleSigs410(sigkeys, sigs, runtimes)
         
         ### print the fit activities
         for i in range(numx):
@@ -1078,12 +1196,24 @@ def main(argv):
                                     limit = '[UPPER LIMIT]'
                                 if limit:
                                     fitresults[str(i)].append(
-                                        '%35s = %.2e +/- %.2e mBq  (%.2e, %.2e) %s'
+                                        # show the actual error
+                                        '%42s = %.2e +/- %.2e mBq  (%.2e, %.2e) %s'
                                         %('fit '+fskey, fitacti, fiterro, lobnd, hibnd, limit))
+                                        # show error as %
+                                        # oh this messes up my pretty plotting of fit activities
+                                        #'%42s = %.2e mBq (%.1f%%) %s'
+                                        #%('fit '+fskey, fitacti, 100*fiterro/fitacti, limit))
+                                
                                 else:
                                     fitresults[str(i)].append(
-                                        '%35s = %.2e +/- %.2e mBq  (%.2e, %.2e)'
+                                        # show the actual error
+                                        '%42s = %.2e +/- %.2e mBq  (%.2e, %.2e)'
                                         %('fit '+fskey, fitacti, fiterro, lobnd, hibnd))
+                                        # show error as %
+                                        # oh this messes up my pretty plotting of fit activities
+                                        #'%42s = %.2e mBq (%.1f%%)'
+                                        #%('fit '+fskey, fitacti, 100*fiterro/fitacti))
+                                
                                 finit = 0
 
         ### do the same for the globals
@@ -1130,12 +1260,24 @@ def main(argv):
                                     limit = '[UPPER LIMIT]'
                                 if limit:
                                     fitresults[str(i)].append(
-                                        '%35s = %.2e +/- %.2e mBq  (%.2e, %.2e) %s'
+                                        # show the actual error
+                                        '%42s = %.2e +/- %.2e mBq  (%.2e, %.2e) %s'
                                         %('fit '+'x'+X+'-'+fgkey, fitacti, fiterro, lobnd, hibnd, limit))
+                                        # show error as %
+                                        # oh this messes up my pretty plotting of fit activities
+                                        #'%42s = %.2e mBq (%.1f%%) %s'
+                                        #%('fit '+'x'+X+'-'+fgkey, fitacti, 100*fiterro/fitacti, limit))
+                                
                                 else:
                                     fitresults[str(i)].append(
-                                        '%35s = %.2e +/- %.2e mBq  (%.2e, %.2e)'
+                                        # show the actual error
+                                        '%42s = %.2e +/- %.2e mBq  (%.2e, %.2e)'
                                         %('fit '+'x'+X+'-'+fgkey, fitacti, fiterro, lobnd, hibnd))
+                                        # show error as %
+                                        # oh this messes up my pretty plotting of fit activities
+                                        #'%42s = %.2e mBq (%.1f%%)'
+                                        #%('fit '+'x'+X+'-'+fgkey, fitacti, 100*fiterro/fitacti))
+                                
                                 ### turn off
                                 finit = 0
             
@@ -1170,6 +1312,7 @@ def main(argv):
         ### make sure the plotdir still exists
         if not os.path.exists(plotdir): 
             os.makedirs(plotdir)
+
         
         ### only write out files if fit is successful
         #-------------------------------------------------------------
@@ -1190,12 +1333,6 @@ def main(argv):
                         outfile.write(line+'\n')
             outfile.close()
             
-            ### create the updated backgrounds file
-            #shutil.copyfile(mcfile, plotdir+'/'+mcfile)
-            if updateMCfile:
-                #newbkgs = plotdir+'/'+mcfile[:-4]+'_update.txt'
-                updateBkgsFile300(xstals, os.path.join(here, mcfile), resultsfile, plotdir)
-            
             ### save histograms to a rootfile
             rootoutfile = TFile(plotdir+"/histograms.root", "RECREATE")
             for key in sigkeys:
@@ -1206,10 +1343,6 @@ def main(argv):
                 data[key]['hist'].Write(key)
             rootoutfile.Write()
             rootoutfile.Close()
-            
-            ### create the background model table
-            #outtable = newbkgs[:-4]+'-table.txt'
-            #outputModelTable61(newbkgs, outtable)
         #-------------------------------------------------------------
         
         
@@ -1327,10 +1460,10 @@ def main(argv):
                     cname = fskey.split('-')[1]+'-'+fskey.split('-')[2]
                     sepfitsigs[i][fskey]['hist'].SetMarkerColor(uniqColor[cname])
                     sepfitsigs[i][fskey]['hist'].SetLineColor(uniqColor[cname])
-                    
+                                        
                     ### draw the sigs
                     if i+1 in justthese:
-                        sepfitsigs[i][fskey]['hist'].Draw('same')
+                        sepfitsigs[i][fskey]['hist'].Draw(dopt)
 
                     ### add MC to total MC hist
                     #print '-3-', ftotal.GetNbinsX(), sepfitsigs[i][fskey]['hist'].GetNbinsX(), fskey
@@ -1346,7 +1479,7 @@ def main(argv):
                 
                 ### draw the sigs
                 if i+1 in justthese:
-                    sepfitglobsigs[i][fgkey]['hist'].Draw('same')
+                    sepfitglobsigs[i][fgkey]['hist'].Draw(dopt)
 
                 ### add MC to total MC hist
                 #print '-4-', sepfittotal[i].GetNbinsX(), sepfitglobsigs[i][fgkey]['hist'].GetNbinsX(), fgkey
@@ -1393,7 +1526,7 @@ def main(argv):
             
             ### draw to total and legend
             if i+1 in justthese:
-                sepfittotal[i].Draw('same')
+                sepfittotal[i].Draw(dopt)
                 flegs[i].AddEntry(sepfittotal[i],
                                   'Fit Total (chi2/ndf = '+str(round(fitchi2ndf,2))+')',
                                   legopt)
@@ -1568,7 +1701,11 @@ def main(argv):
         
         fitdata.Draw()
         #flegs[i].AddEntry(fitdata, 'data - bkgs', legopt)
-        if dru: fitdata.SetAxisRange(2e-3, 2e3, 'y')
+        if dru:
+            fitdata.SetAxisRange(2e-3, 2e3, 'y')
+            #if i == 8:
+            #    fitdata.SetAxisRange(2e-5, 2e1, 'y')
+        
         fitdata.SetAxisRange(0, fitbins, 'x')
         
         
@@ -1585,7 +1722,7 @@ def main(argv):
             fitsigs[fskey]['hist'].SetLineColor(uniqColor[cname])
 
             ### draw the sigs
-            fitsigs[fskey]['hist'].Draw('same')
+            fitsigs[fskey]['hist'].Draw(dopt)
 
             ### add MC to total MC hist
             ftotal.Add(fitsigs[fskey]['hist'])
@@ -1601,7 +1738,7 @@ def main(argv):
             fitglobsigs[fgkey]['hist'].SetLineColor(uniqColor[cname])
 
             ### draw the sigs
-            fitglobsigs[fgkey]['hist'].Draw('same')
+            fitglobsigs[fgkey]['hist'].Draw(dopt)
 
             # FIX-ME
             # why if i==0???
@@ -1612,7 +1749,7 @@ def main(argv):
                 
         ### select the right range
         ftotal.SetAxisRange(0, fitbins, 'x')
-        ftotal.Draw('same')
+        ftotal.Draw(dopt)
         
         ### build legend after getting the numbers of signals
         Nfs = Nfsigs+2
@@ -1732,8 +1869,8 @@ def main(argv):
     ### end of fitting bit if you have signals
 
     
-    ### copy the backgrounds file
-    shutil.copyfile(os.path.join(here, mcfile), os.path.join(plotdir, mcfile))
+    ### create the updated backgrounds file
+    updateBkgsFile300(justthese, os.path.join(plotdir, mcfile), resultsfile, plotdir)
     
     
     # plot the lo and hi energy histograms for all channels
@@ -1945,7 +2082,8 @@ def main(argv):
 
                         if dru and i!=8:
                             #data[dkey]['hist'].SetAxisRange(2e-3, 2e1, 'y')
-                            if E: data[dkey]['hist'].SetAxisRange(2e-3, 2e1, 'y')
+                            #if E: data[dkey]['hist'].SetAxisRange(2e-3, 2e1, 'y')
+                            if E: data[dkey]['hist'].SetAxisRange(hiYlo, 2e1, 'y')
                             else: data[dkey]['hist'].SetAxisRange(2e-3, 3e2, 'y')
 
                         ### LSveto plotting
@@ -1998,7 +2136,7 @@ def main(argv):
                                 except:
                                     gbkgs[C][E][i][bkgs[key]['info']['group']] = bkgs[key]['hist']
                         else:
-                            bkgs[key]['hist'].Draw('same')
+                            bkgs[key]['hist'].Draw(dopt)
 
                         ### add MC to total MC hist
                         total[C][E][i].Add(bkgs[key]['hist'])
@@ -2040,7 +2178,7 @@ def main(argv):
                                 except:
                                     gbkgs[C][E][i][sigs[key]['info']['group']] = sigs[key]['hist']
                         else:
-                            sigs[key]['hist'].Draw('same')
+                            sigs[key]['hist'].Draw(dopt)
 
                         ### add MC to total MC hist
                         total[C][E][i].Add(sigs[key]['hist'])
@@ -2059,13 +2197,13 @@ def main(argv):
                         if group != 'none':
                             gbkgs[C][E][i][group].SetMarkerColor(gis[group])
                             gbkgs[C][E][i][group].SetLineColor(gis[group])
-                            gbkgs[C][E][i][group].Draw('same')
+                            gbkgs[C][E][i][group].Draw(dopt)
                             legs[C][E][i].AddEntry(gbkgs[C][E][i][group], group, legopt)
                     if 'none' in groupSort:
                         for key in gbkgs[C][E][i]['none']:
                             gbkgs[C][E][i]['none'][key].SetMarkerColor(gis['none'])
                             gbkgs[C][E][i]['none'][key].SetLineColor(gis['none'])
-                            gbkgs[C][E][i]['none'][key].Draw('same')
+                            gbkgs[C][E][i]['none'][key].Draw(dopt)
                             legs[C][E][i].AddEntry(gbkgs[C][E][i]['none'][key], key, legopt)
                 else:
                     # add legend entries in order
@@ -2102,9 +2240,14 @@ def main(argv):
                 ### get the chi2 of the total mc compared to data
                 #=============================================================================
                 #-----------------------------------------------------------------------------
-                chi2  = ROOT.Double(-1)
-                ndf   = ROOT.Long(1)
-                igood = ROOT.Long(0)
+                #chi2  = ROOT.Double(-1)
+                #ndf   = ROOT.Long(1)
+                #igood = ROOT.Long(0)
+                # ROOT6 FIX
+                chi2  = ctypes.c_double(0.0)
+                ndf   = ctypes.c_int(0)
+                igood = ctypes.c_int(0)
+
                 #print 'THIS ONE???'
                 #print dkey, data[dkey]['hist'].GetNbinsX()
                 #print total[C][E][i].GetNbinsX()
@@ -2113,7 +2256,14 @@ def main(argv):
                     if data[dkey]['hist'].GetEntries() > 0:
                         pval  = data[dkey]['hist'].Chi2TestX(total[C][E][i], chi2, ndf, igood, chiopt)
                         #print 'INFO:',dkey,'pval =',pval,'chi2 =',chi2,'ndf =',ndf,'igood =',igood
-                        print 'INFO:',dkey,'total MC chi2/ndf =',round(chi2/data[dkey]['druScale']/ndf,2)
+
+                        # ROOT6 FIX
+                        chi2  = float(chi2.value)
+                        ndf   = int(ndf.value)
+                        igood = int(igood.value)
+                        
+                        #print 'INFO:',dkey,'total MC chi2/ndf =',round(chi2/data[dkey]['druScale']/ndf,2)
+                        print 'INFO:',dkey,'total MC chi2/ndf =',round(chi2/ndf,2)
                 #-----------------------------------------------------------------------------
                 #=============================================================================
 
@@ -2122,14 +2272,16 @@ def main(argv):
                 #-----------------------------------------------------------------------------
                 # still draw total even if nothing so hist box is created
                 if showTotal:
-                    total[C][E][i].Draw('same')
+                    total[C][E][i].Draw(dopt)
                     if tcount:
                         total[C][E][i].SetLineWidth(1)
                         if ingroups:
                             legs[C][E][i].AddEntry(total[C][E][i], 'Total', legopt)
                         else:
-                            legs[C][E][i].AddEntry(total[C][E][i],
-                                'Total MC (chi2/ndf = '+str(round(chi2/ndf,2))+')', legopt)
+                            total[C][E][i].SetLineColor(kGray+1)
+                            legs[C][E][i].AddEntry(total[C][E][i], 'Total', legopt)
+                            #legs[C][E][i].AddEntry(total[C][E][i],
+                            #    'Total MC (chi2/ndf = '+str(round(chi2/ndf,2))+')', legopt)
                 else:
                     # draw an empty total hist to preserve plot box layout?
                     if not tcount and not dkey: total[C][E][i].Draw()
@@ -2347,31 +2499,75 @@ def main(argv):
     if indi:
         zscanv = [0 for x in range(numx)]
         zshist = [0 for x in range(numx)]
+        zsdata = [0 for x in range(numx)]
+        zstotal = [0 for x in range(numx)]
+        #zsresid = [0 for x in range(numx)]
+        zsresid = makeResid100('S', 0, params[0])
+        zsline = [0 for x in range(numx)]
+        zstop = [0 for x in range(numx)]
+        zsbot = [0 for x in range(numx)]
+        
+        font = 43
+        size = 24
+        loff = 0.005
+        xoff = 3.6
+        yoff = 1.1
+        
         for i in range(numx):
             if i+1 in justthese and i+1 != 9:
-                
-                gStyle.SetPadLeftMargin(0.09)
-                
-                font = 43
-                size = 28
-                loff = 0.005
-                xoff = 1.1
-                yoff = 1.0
-                
+
                 zscanv[i] = TCanvas('zscanv-'+str(i+1),'zscanv-'+str(i+1),
                                 0, 0, 1200, 700)
+
+                fraction = 0.3
+                pad1 = TPad('pad1_'+str(i),'pad1_'+str(i),0,fraction,1,1)
+                #zstop[i].append(pad1)
+                zstop[i] = (pad1)
+                pad2 = TPad('pad2_'+str(i),'pad2_'+str(i),0,0,1,fraction)
+                #zsbot[i].append(pad2)
+                zsbot[i] = (pad2)
                 
+                zstop[i].SetBottomMargin(0.01)
+                zstop[i].SetBorderMode(0)
+                
+                #zsbot[i].SetLogy(1)
+                zstop[i].SetLogy(0)
+                
+                zsbot[i].SetTopMargin(0.05)
+                zsbot[i].SetBottomMargin(0.3)
+                zsbot[i].SetBorderMode(0)
+                
+                #zsbot[i].SetLogy(1)
+                zsbot[i].SetLogy(0)
+                
+                zstop[i].Draw()
+                zsbot[i].Draw()
+
+                zstop[i].cd()
+
+                #gStyle.SetPadLeftMargin(0.09)
+
+                ### just checking residual plot names
+                #prim_list = botpad[0][0][i].GetListOfPrimitives()
+                #for bla in prim_list:
+                #    print bla.GetName(), bla
+
                 prim_list = toppad[0][0][i].GetListOfPrimitives()
                 for bla in prim_list:
                     #print bla.GetName(), bla
+
+                    if 'data' in bla.GetName():
+                        zsdata[i] = (toppad[0][0][i].GetPrimitive(bla.GetName()))
+                    if 'total' in bla.GetName():
+                        zstotal[i] = (toppad[0][0][i].GetPrimitive(bla.GetName()))
+                    
                     try:
                         zshist[i] = (toppad[0][0][i].GetPrimitive(bla.GetName()))
-
+                        
                         zshist[i].SetXTitle('energy (keV)')
                         zshist[i].GetXaxis().SetTitleFont(font)
                         zshist[i].GetXaxis().SetTitleSize(size)
                         zshist[i].GetXaxis().SetTitleOffset(xoff)
-                        
                         zshist[i].GetXaxis().SetLabelFont(font)
                         zshist[i].GetXaxis().SetLabelSize(size)
                         zshist[i].GetXaxis().SetLabelOffset(loff)
@@ -2380,24 +2576,27 @@ def main(argv):
                         zshist[i].GetYaxis().SetTitleFont(font)
                         zshist[i].GetYaxis().SetTitleSize(size)
                         zshist[i].GetYaxis().SetTitleOffset(yoff)
-                        
                         zshist[i].GetYaxis().SetLabelFont(font)
                         zshist[i].GetYaxis().SetLabelSize(size)
                         zshist[i].GetYaxis().SetLabelOffset(loff)
                         
                         zshist[i].SetAxisRange(0, zmaxE, 'x')
-                        if   i+1 == 1: zshist[i].SetAxisRange(0, 8.0, 'y')
-                        elif i+1 == 2: zshist[i].SetAxisRange(0, 4.0, 'y')
-                        elif i+1 == 3: zshist[i].SetAxisRange(0, 5.0, 'y')
-                        elif i+1 == 4: zshist[i].SetAxisRange(0, 5.0, 'y')
-                        elif i+1 == 5: zshist[i].SetAxisRange(0, 10,  'y')
-                        elif i+1 == 6: zshist[i].SetAxisRange(0, 3.5, 'y')
-                        elif i+1 == 7: zshist[i].SetAxisRange(0, 3.5, 'y')
-                        elif i+1 == 8: zshist[i].SetAxisRange(0, 10,  'y')
-                        else:          zshist[i].SetAxisRange(0, 5.0, 'y')
-                        
-                        zshist[i].Draw("same")
 
+                        if   i+1 == 1: zshist[i].SetAxisRange(0,  8.0, 'y')
+                        elif i+1 == 2: zshist[i].SetAxisRange(0,  4.0, 'y')
+                        elif i+1 == 3: zshist[i].SetAxisRange(0,  4.0, 'y')
+                        elif i+1 == 4: zshist[i].SetAxisRange(0,  4.0, 'y')
+                        elif i+1 == 5: zshist[i].SetAxisRange(0, 10.0, 'y')
+                        elif i+1 == 6: zshist[i].SetAxisRange(0,  3.5, 'y')
+                        elif i+1 == 7: zshist[i].SetAxisRange(0,  3.5, 'y')
+                        elif i+1 == 8: zshist[i].SetAxisRange(0, 10.0, 'y')
+                        else:          zshist[i].SetAxisRange(0,  5.0, 'y')
+                                                
+                        if 'data' in bla.GetName():
+                            zshist[i].Draw('same')
+                        else:
+                            zshist[i].Draw(dopt)
+                            
                     except: continue
                 
                 try:
@@ -2406,6 +2605,83 @@ def main(argv):
                     legs[0][0][i].Draw('same')
                 except: continue
 
+                zsbot[i].cd()
+                
+                #databins = zsdata[i].GetNbinsX()
+                #totalbins = zstotal[i].GetNbinsX()
+                #residbins = zsresid[i].GetNbinsX()
+                #print databins, totalbins, residbins
+                #zsresid[i].Rebin(residbins/databins)
+                zsresid[i].Rebin(loEplotRebin)
+                
+                #zsresid[i] = zsdata[i]/zstotal[i]
+                #zsresid[i] = zsdata[i] - zstotal[i]
+                
+                ### in some cases I may not be plotting the total
+                ### so do a 'try'
+                try:
+                    if zdr:
+                        zsresid[i].Divide(zsdata[i], zstotal[i])
+                    else:
+                        zsresid[i] = zsdata[i] - zstotal[i]
+                except:
+                    #zsresid[i] = zsdata[i]
+                    pass
+                
+                ### tweak the errors on the residual
+                for n in range(zsresid[i].GetNbinsX()+1):
+                    R  = zsresid[i].GetBinContent(n)
+                    D  = zsdata[i].GetBinContent(n)
+                    sD = zsdata[i].GetBinError(n)
+
+                    if zdr: zsresid[i].SetBinError(n, R*(sD/D))
+                    else:   zsresid[i].SetBinError(n, sD)
+                    
+                    #try:
+                    #    zsresid[i].SetBinError(n, R*(sD/D))
+                    #except:
+                    #    zsresid[i].SetBinError(n, 0)
+                
+
+                ### now just formatting stuff
+                zsresid[i].SetTitle('')
+
+                zsresid[i].SetAxisRange(0, zmaxE, 'x')
+                if zdr: zsresid[i].SetAxisRange(0.8, 1.2, 'y')
+                else:   zsresid[i].SetAxisRange(-0.4, 0.4, 'y')
+                
+                zsresid[i].SetXTitle('energy (keV)')
+                zsresid[i].GetXaxis().SetTitleFont(font)
+                zsresid[i].GetXaxis().SetTitleSize(size)
+                zsresid[i].GetXaxis().SetTitleOffset(xoff)
+                zsresid[i].GetXaxis().SetLabelFont(font)
+                zsresid[i].GetXaxis().SetLabelSize(size)
+                zsresid[i].GetXaxis().SetLabelOffset(loff)
+                
+                if zdr: zsresid[i].SetYTitle('data/mc')
+                else:   zsresid[i].SetYTitle('data-mc (dru)')
+                zsresid[i].GetYaxis().SetTitleFont(font)
+                zsresid[i].GetYaxis().SetTitleSize(size)
+                zsresid[i].GetYaxis().SetTitleOffset(yoff)
+                zsresid[i].GetYaxis().SetLabelFont(font)
+                zsresid[i].GetYaxis().SetLabelSize(size)
+                zsresid[i].GetYaxis().SetLabelOffset(loff)
+                
+                # '5' secondary and '05' primary
+                # means 5 divisions will be shown
+                zsresid[i].GetYaxis().SetNdivisions(505)
+
+                
+                ### make a line at '1' or '0'
+                if zdr: zero = TLine(0, 1, zmaxE, 1)
+                else:   zero = TLine(0, 0, zmaxE, 0)
+                zsline[i] = zero
+                zsline[i].SetLineColor(kRed)
+                zsline[i].SetLineWidth(1)
+
+                zsresid[i].Draw()
+                zsline[i].Draw('same')
+                
                 zscanv[i].Update()
                 zscanv[i].Print(plotdir+'/a_zoomSingleHit_c'+str(i+1)+'.png')
 
@@ -2415,23 +2691,62 @@ def main(argv):
     if indi:
         zmcanv = [0 for x in range(numx)]
         zmhist = [0 for x in range(numx)]
+        zmdata = [0 for x in range(numx)]
+        zmtotal = [0 for x in range(numx)]
+        zmresid = makeResid100('M', 0, params[0])
+        zmline = [0 for x in range(numx)]
+        zmtop = [0 for x in range(numx)]
+        zmbot = [0 for x in range(numx)]
+        
+        font = 43
+        size = 24
+        loff = 0.005
+        xoff = 3.6
+        yoff = 1.1
+        
         for i in range(numx):
             if i+1 in justthese and i+1 != 9:
                 
-                gStyle.SetPadLeftMargin(0.09)
-                
-                font = 43
-                size = 28
-                loff = 0.005
-                xoff = 1.1
-                yoff = 1.0
-                
                 zmcanv[i] = TCanvas('zmcanv-'+str(i+1),'zmcanv-'+str(i+1),
                                 0, 0, 1200, 700)
+
+                fraction = 0.3
+                pad1 = TPad('pad1_'+str(i),'pad1_'+str(i),0,fraction,1,1)
+                #zmtop[i].append(pad1)
+                zmtop[i] = (pad1)
+                pad2 = TPad('pad2_'+str(i),'pad2_'+str(i),0,0,1,fraction)
+                #zmbot[i].append(pad2)
+                zmbot[i] = (pad2)
+                
+                zmtop[i].SetBottomMargin(0.01)
+                zmtop[i].SetBorderMode(0)
+                
+                #zmbot[i].SetLogy(1)
+                zmtop[i].SetLogy(0)
+                
+                zmbot[i].SetTopMargin(0.05)
+                zmbot[i].SetBottomMargin(0.3)
+                zmbot[i].SetBorderMode(0)
+                
+                #zmbot[i].SetLogy(1)
+                zmbot[i].SetLogy(0)
+                
+                zmtop[i].Draw()
+                zmbot[i].Draw()
+
+                zmtop[i].cd()
+
                 
                 prim_list = toppad[1][0][i].GetListOfPrimitives()
                 for bla in prim_list:
                     #print bla.GetName(), bla
+
+                    if 'data' in bla.GetName():
+                        zmdata[i] = (toppad[1][0][i].GetPrimitive(bla.GetName()))
+                    if 'total' in bla.GetName():
+                        zmtotal[i] = (toppad[1][0][i].GetPrimitive(bla.GetName()))
+                    
+                    
                     try:
                         zmhist[i] = (toppad[1][0][i].GetPrimitive(bla.GetName()))
 
@@ -2439,7 +2754,6 @@ def main(argv):
                         zmhist[i].GetXaxis().SetTitleFont(font)
                         zmhist[i].GetXaxis().SetTitleSize(size)
                         zmhist[i].GetXaxis().SetTitleOffset(xoff)
-                        
                         zmhist[i].GetXaxis().SetLabelFont(font)
                         zmhist[i].GetXaxis().SetLabelSize(size)
                         zmhist[i].GetXaxis().SetLabelOffset(loff)
@@ -2448,24 +2762,27 @@ def main(argv):
                         zmhist[i].GetYaxis().SetTitleFont(font)
                         zmhist[i].GetYaxis().SetTitleSize(size)
                         zmhist[i].GetYaxis().SetTitleOffset(yoff)
-                        
                         zmhist[i].GetYaxis().SetLabelFont(font)
                         zmhist[i].GetYaxis().SetLabelSize(size)
                         zmhist[i].GetYaxis().SetLabelOffset(loff)
                         
                         zmhist[i].SetAxisRange(0, zmaxE, 'x')
+
                         if   i+1 == 1: zmhist[i].SetAxisRange(0, 1.6, 'y')
-                        elif i+1 == 2: zmhist[i].SetAxisRange(0, 5.0, 'y')
-                        elif i+1 == 3: zmhist[i].SetAxisRange(0, 2.0, 'y')
+                        elif i+1 == 2: zmhist[i].SetAxisRange(0, 4.5, 'y')
+                        elif i+1 == 3: zmhist[i].SetAxisRange(0, 2.5, 'y')
                         elif i+1 == 4: zmhist[i].SetAxisRange(0, 2.0, 'y')
                         elif i+1 == 5: zmhist[i].SetAxisRange(0, 2.0, 'y')
-                        elif i+1 == 6: zmhist[i].SetAxisRange(0, 1.4, 'y')
+                        elif i+1 == 6: zmhist[i].SetAxisRange(0, 1.2, 'y')
                         elif i+1 == 7: zmhist[i].SetAxisRange(0, 1.2, 'y')
                         elif i+1 == 8: zmhist[i].SetAxisRange(0, 0.8, 'y')
                         else:          zmhist[i].SetAxisRange(0, 5.0, 'y')
-                        
-                        zmhist[i].Draw("same")
 
+                        if 'data' in bla.GetName():
+                            zmhist[i].Draw('same')
+                        else:
+                            zmhist[i].Draw(dopt)
+                        
                     except: continue
                 
                 try:
@@ -2474,6 +2791,83 @@ def main(argv):
                     legs[1][0][i].Draw('same')
                 except: continue
 
+                zmbot[i].cd()
+                
+                #databins = zmdata[i].GetNbinsX()
+                #totalbins = zmtotal[i].GetNbinsX()
+                #residbins = zmresid[i].GetNbinsX()
+                #print databins, totalbins, residbins
+                #zmresid[i].Rebin(residbins/databins)
+                zmresid[i].Rebin(loEplotRebin)
+                
+                #zmresid[i] = zmdata[i]/zmtotal[i]
+                #zmresid[i] = zmdata[i] - zmtotal[i]
+                
+                ### in some cases I may not be plotting the total
+                ### so do a 'try'
+                try:
+                    if zdr:
+                        zmresid[i].Divide(zmdata[i], zmtotal[i])
+                    else:
+                        zmresid[i] = zmdata[i] - zmtotal[i]
+                except:
+                    #zmresid[i] = zmdata[i]
+                    pass
+                
+                ### tweak the errors on the residual
+                for n in range(zmresid[i].GetNbinsX()+1):
+                    R  = zmresid[i].GetBinContent(n)
+                    D  = zmdata[i].GetBinContent(n)
+                    sD = zmdata[i].GetBinError(n)
+
+                    if zdr: zmresid[i].SetBinError(n, R*(sD/D))
+                    else:   zmresid[i].SetBinError(n, sD)
+                    
+                    #try:
+                    #    zmresid[i].SetBinError(n, R*(sD/D))
+                    #except:
+                    #    zmresid[i].SetBinError(n, 0)
+                
+
+                ### now just formatting stuff
+                zmresid[i].SetTitle('')
+
+                zmresid[i].SetAxisRange(0, zmaxE, 'x')
+                if zdr: zmresid[i].SetAxisRange(0.8, 1.2, 'y')
+                else:   zmresid[i].SetAxisRange(-0.4, 0.4, 'y')
+                
+                zmresid[i].SetXTitle('energy (keV)')
+                zmresid[i].GetXaxis().SetTitleFont(font)
+                zmresid[i].GetXaxis().SetTitleSize(size)
+                zmresid[i].GetXaxis().SetTitleOffset(xoff)
+                zmresid[i].GetXaxis().SetLabelFont(font)
+                zmresid[i].GetXaxis().SetLabelSize(size)
+                zmresid[i].GetXaxis().SetLabelOffset(loff)
+                
+                if zdr: zmresid[i].SetYTitle('data/mc')
+                else:   zmresid[i].SetYTitle('data-mc (dru)')
+                zmresid[i].GetYaxis().SetTitleFont(font)
+                zmresid[i].GetYaxis().SetTitleSize(size)
+                zmresid[i].GetYaxis().SetTitleOffset(yoff)
+                zmresid[i].GetYaxis().SetLabelFont(font)
+                zmresid[i].GetYaxis().SetLabelSize(size)
+                zmresid[i].GetYaxis().SetLabelOffset(loff)
+                
+                # '5' secondary and '05' primary
+                # means 5 divisions will be shown
+                zmresid[i].GetYaxis().SetNdivisions(505)
+
+                
+                ### make a line at '1' or '0'
+                if zdr: zero = TLine(0, 1, zmaxE, 1)
+                else:   zero = TLine(0, 0, zmaxE, 0)
+                zmline[i] = zero
+                zmline[i].SetLineColor(kRed)
+                zmline[i].SetLineWidth(1)
+
+                zmresid[i].Draw()
+                zmline[i].Draw('same')
+                
                 zmcanv[i].Update()
                 zmcanv[i].Print(plotdir+'/a_zoomMultiHit_c'+str(i+1)+'.png')
 
@@ -2505,8 +2899,8 @@ def main(argv):
     #try: del combPlots
     #except: pass
 
-    try: del zscanv
-    except: pass
+    #try: del zscanv
+    #except: pass
     
     try: del zmcanv
     except: pass
