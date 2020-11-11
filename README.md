@@ -17,3 +17,9 @@ Data selection is done by using the offline good runs list and only selecting ru
 
 
 
+## Usage
+
+The main script to execute is the "multi-chan-fit.py". There are some global variables within the script that the user can modify. This includes selecting which crystals, channels, or energy ranges to fit. The simulation files to use are specified in the "backgrounds_???.txt". There are many different backgrounds files because of the numerous iterations of the background model, eg the background isotopes and sources used to describe the data. 
+
+
+
