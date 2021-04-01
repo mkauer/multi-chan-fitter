@@ -5,7 +5,6 @@
 #-----------------------------------------------------------
 # Revamp the MC format and hist generation
 # 
-# see CHANGELOG
 # version: 2021-01-12
 ############################################################
 
@@ -40,11 +39,8 @@ except: vroot = '5'
 print('INFO: using root --> {0}'.format(vroot))
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-#sys.path.append("/home/mkauer/COSINE/CUP/mc-fitting/")
-#sys.path.append("/home/mkauer/mc-fitting/")
 sys.path.append(HERE)
 from funcs500 import *
-
 
 ### batch job?
 #print 'HOSTNAME:', socket.gethostname()
@@ -157,10 +153,10 @@ fitranges[8]['M0'] = [1, 0, 0]
 fitranges[8]['M1'] = [4, 200, 4000]
 
 # not lsveto
-fitranges[8]['S0'] = [1, 0, 0]
-fitranges[8]['S1'] = [1, 0, 0]
-fitranges[8]['M0'] = [1, 0, 0]
-fitranges[8]['M1'] = [1, 0, 0]
+#fitranges[8]['S0'] = [1, 0, 0]
+#fitranges[8]['S1'] = [1, 0, 0]
+#fitranges[8]['M0'] = [1, 0, 0]
+#fitranges[8]['M1'] = [1, 0, 0]
 
 
 
