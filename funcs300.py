@@ -56,8 +56,8 @@ import numpy as np
 from ROOT import *
 import ROOT
 
-sys.path.append("/home/mkauer/COSINE/CUP/mc-fitting/")
-sys.path.append("/home/mkauer/mc-fitting/")
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(HERE)
 from funcs101 import *
 from funcs_misc import *
 
@@ -1043,55 +1043,197 @@ def calib301(i, E):
         edep = '(crystal'+str(i+1)+'.energyD)'
         selection = '('+edep+')'
 
-        if i==0: # C1
-            A = -9.20702415903431e-09
-            B = 3.1582891760183624e-05
-            C = 0.9731283907370495
-            D = 3.492470586962138
-            
-        if i==1: # C2
-            return edep, selection
-        
-        if i==2: # C3
-            A = -4.668682649387045e-09
-            B = 1.5052344932980456e-05
-            C = 0.9874023184977824
-            D = 1.6686064222603654
-            
-        if i==3: # C4
-            A = -7.966374771112426e-09
-            B = 2.544049246165629e-05
-            C = 0.9801665355547313
-            D = 2.2024520321640186
-            
-        if i==4: # C5
-            return edep, selection
-        
-        if i==5: # C6
-            A = -4.623190276816897e-09
-            B = 1.6693196676849473e-05
-            C = 0.9855987614226132
-            D = 1.789741155036786
-            
-        if i==6: # C7
-            A = -6.584663125047853e-09
-            B = 2.4904010290725124e-05
-            C = 0.9765006123749262
-            D = 3.45348577054466
-            
-        if i==7: # C8
-            return edep, selection
-            
-        selection = '(('+str(A)+'*'+edep+'**3) '\
-                   '+ ('+str(B)+'*'+edep+'**2) '\
-                   '+ ('+str(C)+'*'+edep+') + '+str(D)+')'
-            
     else:
         ### default low energy production calibration
         edep = '(crystal'+str(i+1)+'.energy)'
         selection = '('+edep+')'
 
     return edep, selection
+
+
+def calib302(i, Engy, Chan):
+    """
+    Tweaked high energy crystal calibrations
+    Tweaked the lsveto calibration
+    Now adjust for different lsveto data sources
+    """
+
+    Cx = i+1
+    
+    if Cx == 9: # C9 / lsveto
+        # return same calib for all Engy
+        # return same calib for all Chan
+        
+        edep = '(BLSVeto.Charge)'
+        selection = '('+edep+' / 143.8)'
+        #return edep, selection
+    
+        ### try again based off the poly4 data points - "poly41_data"
+        #A = 6.14216259037e-08
+        #B = -0.000190223995721
+        #C = 1.17695224672
+        #D = 7.44693291248e-28
+        
+        ### try again and force a 1460 point - "poly42_data"
+        #A = 8.81422486824e-08
+        #B = -0.000277066019752
+        #C = 1.21663237155
+        #D = 2.41933873005e-20
+
+        ### try un-saturating the high energy a little bit = "poly43"
+        ### but this still seems to give the best multi-crystal fits
+        A = 4.0381226152e-08
+        B = -0.000143935116267
+        C = 1.15785808395
+        D = 8.83648917811e-29
+
+        ### try un-saturating the high energy a little more = "poly44"
+        ### this was too much!
+        #A = 2.48681708029e-08
+        #B = -0.000109806394499
+        #C = 1.14377998622
+        #D = -6.09628447918e-27
+        
+        ### try un-saturating the high energy just a tiny = "poly45"
+        #A = 4.22053979702e-08
+        #B = -0.000147948294267
+        #C = 1.15951351987
+        #D = -5.7576250417e-22
+        
+        ### try un-saturating the high energy just a tiny = "poly46"
+        #A = 4.80251584646e-08
+        #B = -0.000160751767355
+        #C = 1.16479495252
+        #D = 4.5440374256e-28
+        
+        ### try un-saturating the high energy just a tiny = "poly47"
+        #A = 5.22150630743e-08
+        #B = -0.000169969557496
+        #C = 1.16859729095
+        #D = -1.00574241496e-21
+        
+        ### try tweaking the low energy part of the fit a litle = "poly50"
+        # that went the wrong direction, oops...
+        #A = 4.02698077117e-08
+        #B = -9.26205577368e-05
+        #C = 1.04107520387
+        #D = -6.35274464267e-22
+        
+        ### try tweaking the low energy part of the fit a litle = "poly51"
+        #A = 5.7582815735e-08
+        #B = -0.000245923913043
+        #C = 1.30856625259
+        #D = 1.37579420822e-27
+
+        # return same calib for all E
+        selection = '(('+str(A)+'*'+selection+'**3) '\
+                    '+ ('+str(B)+'*'+selection+'**2) '\
+                    '+ ('+str(C)+'*'+selection+') + '+str(D)+')'
+        
+        return edep, selection
+
+    if Engy == 0:
+        # default low energy production calibration
+        edep = '(crystal{0}.energy)'.format(Cx)
+        selection = '('+edep+')'
+
+        return edep, selection
+        
+    elif Engy == 1:
+        # default high energy production calibration
+        edep = '(crystal{0}.energyD)'.format(Cx)
+        selection = '('+edep+')'
+
+        # tweaks per crystal
+        if Cx == 1: # C1
+            A = -9.20702415903431e-09
+            B = 3.1582891760183624e-05
+            C = 0.9731283907370495
+            D = 3.492470586962138
+            
+        if Cx == 2: # C2
+            return edep, selection
+        
+        if Cx == 3: # C3
+            A = -4.668682649387045e-09
+            B = 1.5052344932980456e-05
+            C = 0.9874023184977824
+            D = 1.6686064222603654
+            
+        if Cx == 4: # C4
+            A = -7.966374771112426e-09
+            B = 2.544049246165629e-05
+            C = 0.9801665355547313
+            D = 2.2024520321640186
+            
+        if Cx == 5: # C5
+            A = 0.813447107922342
+            B = 13.863912116535856
+            selection = '({0}*{1} + {2})'.format(edep, A, B)
+            return edep, selection
+        
+        if Cx == 6: # C6
+            A = -4.623190276816897e-09
+            B = 1.6693196676849473e-05
+            C = 0.9855987614226132
+            D = 1.789741155036786
+        
+        if Cx == 7: # C7
+            #A = -6.584663125047853e-09
+            #B = 2.4904010290725124e-05
+            #C = 0.9765006123749262
+            #D = 3.45348577054466
+            # first try to fix
+            #A = -3.5286801110126694e-09
+            #B = 6.692048421004304e-06
+            #C = 1.0004270013767433
+            #D = -1.3444385176574656
+            # second try to fix
+            #A = -9.787584607766034e-09
+            #B = 3.3865923406543445e-05
+            #C = 0.971206025113478
+            #D = 3.6683048699245857
+            # third try
+            A = -9.93101832337613e-09
+            B = 3.6976416493554536e-05
+            C = 0.9661209376849521
+            D = 4.747875210154714
+            
+        if Cx == 8: # C8
+            A = 0.8011463218736552
+            B = -21.712318299469676
+            selection = '({0}*{1} + {2})'.format(edep, A, B)
+            return edep, selection
+
+        
+        selection = '(('+str(A)+'*'+edep+'**3) '\
+                   '+ ('+str(B)+'*'+edep+'**2) '\
+                   '+ ('+str(C)+'*'+edep+') + '+str(D)+')'
+
+        return edep, selection    
+
+    elif Engy == 2:
+        ### use default high energy calib for alphas
+        edep = '(crystal{0}.energyD)'.format(Cx)
+        selection = '('+edep+')'
+
+        # except for C5 and C8
+        if Cx == 5:
+            A = 0.813447107922342
+            B = 13.863912116535856
+            selection = '({0}*{1} + {2})'.format(edep, A, B)
+            return edep, selection
+        if Cx == 8:
+            A = 0.8011463218736552
+            B = -21.712318299469676
+            selection = '({0}*{1} + {2})'.format(edep, A, B)
+            return edep, selection
+        
+        return edep, selection
+
+    else:
+        print('WARNING: no calibration for x{0} c{1} e{2}'.format(Cx, Chan, Engy))
+        sys.exit()
 
 
 def mcPath101(info):
@@ -1394,8 +1536,11 @@ def updateBkgsFile300(xstals, bkgsfile, resultsfile, newdir, BF='BR'):
             continue
         
         bbits = filter(None, re.split("[ \s\t\n\r,:]+", bline.strip()))
-        
-        if int(bbits[1]) not in xstals:
+
+        # add [0] to xstals for v500 global mc
+        # this should still work with older versions
+        #if int(bbits[1]) not in xstals:
+        if int(bbits[1]) not in xstals+[0]:
             continue
         
         if 'F' not in bbits[0]:
@@ -1691,6 +1836,167 @@ def cutsBDT301(i, C, E, edep, selection):
         # BDT cuts ONLY for low energy spectrum!!
         masterCut = TCut(bdtCut+' && '+noiseCut+' && '+'('+lsveto+' || '+hits+')'+' && '+alphaCut)
         if E: masterCut = TCut(noiseCut+' && '+'('+lsveto+' || '+hits+')'+' && '+alphaCut)
+        return masterCut
+
+    else:
+        print 'ERROR: I do not know what to do with channel -->', C
+        print 'Available channels are [S]Single-hits, [M]Multi-hits'
+        sys.exit()
+
+
+def cutsBDT302(i, C, E, edep, selection):
+    """
+    https://cupwiki.ibs.re.kr/Kims/SET1EventSelection
+    https://cupwiki.ibs.re.kr/Kims/EventSelection
+    """
+    #-------------------------------------------------------
+    # This is for the V00-04-15 data
+    # New lsveto single-hit data
+    #-------------------------------------------------------
+
+    ### values for the alpha cut
+    alpha = [
+        2.660,
+        2.640,
+        2.660,
+        2.680,
+        2.650,
+        2.655,
+        2.630,
+        2.660
+    ]
+
+    ### special cuts for the LS veto
+    ### i = 0-7 is crystals
+    ### i =  8  is lsveto
+    if i == 8:
+        ### skip low energy and alpha energy for lsveto
+        #if E in [0, 2]:
+        #    return TCut('0')
+        
+        if C == 'S':
+            coinc  = '(1)'
+            energy = '('+selection+' > 0.0)'
+            #muons  = '(BMuon.totalDeltaT0/1.e6 > 30)'
+            muons  = '(1)'
+            # time cut doesn't make much difference...
+            time   = '(BLSVeto.Time > 2300 && BLSVeto.Time < 2600)'
+            #time   = '(1)'
+            return TCut('({0} && {1} && {2} && {3})'.format(coinc, energy, muons, time))
+            
+        elif C == 'M':
+            coinc  = '(BLSVeto.isCoincident == 1)'
+            energy = '('+selection+' > 0.0)'
+            muons  = '(BMuon.totalDeltaT0/1.e6 > 30)'
+            #time   = '(BLSVeto.Time >= 2800 && BLSVeto.Time <= 2950)'
+            time   = '(1)'
+            return TCut('({0} && {1} && {2} && {3})'.format(coinc, energy, muons, time))
+            
+        else:
+            print 'ERROR: I do not know what to do with channel -->', C
+            print 'Available channels are [S]Single-hits, [M]Multi-hits'
+            sys.exit()
+
+
+    ### same as Pushpa since 2017-12-19
+    # only alphas for E=2
+    if E == 2:
+        alphaCut = '((crystal'+str(i+1)+'.energyD > 1000.) && ((pmt'+str(i+1)+'1.rqtD1_5+pmt'+str(i+1)+'2.rqtD1_5)/2. < '+str(alpha[i])+'))'
+    else:
+        alphaCut = '( ! ((crystal'+str(i+1)+'.energyD > 1000.) && ((pmt'+str(i+1)+'1.rqtD1_5+pmt'+str(i+1)+'2.rqtD1_5)/2. < '+str(alpha[i])+')) )'
+
+        
+    ### new BDT cuts for V00-04-12 from https://cupwiki.ibs.re.kr/Kims/EventSelection
+    newBDT = [
+        '((bdt[1]>-0.1 && (crystal1.energy + 20*bdt[1])>0) && ((crystal1.energy>=10 && bdtA[1]>-0.08) || (crystal1.energy>=8 && crystal1.energy<10 && bdtA[1]>-0.065) || (crystal1.energy>=7 && crystal1.energy<8 && bdtA[1]>0.005) || (crystal1.energy>=6 && crystal1.energy<7 && bdtA[1]>0.015) || (crystal1.energy>=5 && crystal1.energy<6 && bdtA[1]>0.01) || (crystal1.energy>=4 && crystal1.energy<5 && bdtA[1]>0.03) || (crystal1.energy>=3 && crystal1.energy<4 && bdtA[1]>0.035) || (crystal1.energy>=2 && crystal1.energy<3 && bdtA[1]>0.02) || (crystal1.energy<2 && bdtA[1]>0.02)))',
+              
+        #'(bdt[2]>0.0 && bdtA[2]>-0.05)',
+        # new bdt cut for V00-04-14
+        '(((9.20842e-07*TMath::Exp(-104.504*bdt[2])+0.170872)-(9.70874*bdt[2])) < crystal2.energy)',
+              
+        #'(bdt[3]>0.0 && bdtA[3]>-0.07)',
+        # new bdt cut for V00-04-14
+        '(((6.81804e-08*TMath::Exp(-101.856*bdt[3])+0.148344)-(4.04826*bdt[3])) < crystal3.energy)',
+
+        #'(bdt[4]>-0.05 && (crystal4.energy + 40*bdt[4])>0 && bdtA[4]>-0.07)',
+        # new bdt cut for V00-04-14
+        '(((1.37726e-07*TMath::Exp(-111.842*bdt[4])+0.446818)-(2.13498*bdt[4])) < crystal4.energy)',
+              
+        '(bdt[5]>-0.2 && bdtA[5]>-0.07)',
+              
+        #'(bdt[6]>0.0 && (crystal6.energy + 20*bdt[6])>2.0 && bdtA[6]>-0.07)',
+        # new bdt cut for V00-04-14
+        '(((0.000315623*TMath::Exp(-75.3998*bdt[6])-0.313482)-(13.6302*bdt[6])) < crystal6.energy)',
+              
+        #'(bdt[7]>0.0 && (crystal7.energy + 20*bdt[7])>2.0 && bdtA[7]>-0.07)',
+        # new bdt cut for V00-04-14
+        '(((1.45552e-05*TMath::Exp(-88.7196*bdt[7])+0.566336)-(7.57773*bdt[7])) < crystal7.energy)',
+        
+        '(bdt[8]>-0.2 && bdtA[8]>-0.07)']
+
+    bdtCut = newBDT[i]
+
+    ### global noise cuts
+    #===========================================================================
+    coinc  = '(BLSVeto.isCoincident == 1)'
+    muons  = '(BMuon.totalDeltaT0/1.e6 > 30)'
+    charge = '(crystal'+str(i+1)+'.rqcn > -1)'
+    
+    ### old cut
+    #nc     = '(pmt'+str(i+1)+'1.nc > 1 && pmt'+str(i+1)+'2.nc > 1)'
+    ### new cut for v00-04-14 from Govinda
+    nc     = '(pmt'+str(i+1)+'1.nc > 0 && pmt'+str(i+1)+'2.nc > 0)'
+    
+    ### old cut
+    #t1     = '(pmt'+str(i+1)+'1.t1 > 2 && pmt'+str(i+1)+'2.t1 > 2)'
+    ### new cut for v00-04-14 from Govinda
+    t1     = '(pmt'+str(i+1)+'1.t1 > 0 && pmt'+str(i+1)+'2.t1 > 0)'
+    
+    noiseCut = '('+coinc+' && '+muons+' && '+charge+' && '+nc+' && '+t1+')'
+    #===========================================================================
+    
+    if C == 'S':
+        #lsveto = '(BLSVeto.Charge/143.8 < 20)'
+        lsveto = '(BLSVeto.Charge/143.8 < 80)'
+        hits   = '('
+        for j in range(8):
+            if j != i:
+                hits += '(crystal'+str(j+1)+'.nc < 4) && '
+        ### remove extra '&&'
+        hits = hits[:-4]+')'
+
+        # BDT cuts ONLY for low energy spectrum!!
+        if E == 0:
+            masterCut = TCut(bdtCut+' && '+noiseCut+' && '+'('+lsveto+' && '+hits+')'+' && '+alphaCut)
+        else:
+            masterCut = TCut(noiseCut+' && '+'('+lsveto+' && '+hits+')'+' && '+alphaCut)
+
+        # lose cuts for C5 and C8
+        if int(i) in [4, 7]:
+            masterCut = TCut('('+lsveto+' && '+hits+')'+' && '+alphaCut)
+        
+        return masterCut
+    
+    elif C == 'M':
+        #lsveto = '(BLSVeto.Charge/143.8 > 20)'
+        lsveto = '(BLSVeto.Charge/143.8 > 80)'
+        hits   = '('
+        for j in range(8):
+            if j != i:
+                hits += '(crystal'+str(j+1)+'.nc > 4) || '
+        ### remove extra '||'
+        hits = hits[:-4]+')'
+
+        # BDT cuts ONLY for low energy spectrum!!
+        if E == 0:
+            masterCut = TCut(bdtCut+' && '+noiseCut+' && '+'('+lsveto+' || '+hits+')'+' && '+alphaCut)
+        else:
+            masterCut = TCut(noiseCut+' && '+'('+lsveto+' || '+hits+')'+' && '+alphaCut)
+
+        # lose cuts for C5 and C8
+        if int(i) in [4, 7]:
+            masterCut = TCut('('+lsveto+' || '+hits+')'+' && '+alphaCut)
+
         return masterCut
 
     else:

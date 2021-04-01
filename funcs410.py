@@ -18,8 +18,8 @@ import numpy as np
 from ROOT import *
 import ROOT
 
-sys.path.append("/home/mkauer/COSINE/CUP/mc-fitting/")
-sys.path.append("/home/mkauer/mc-fitting/")
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(HERE)
 from funcs400 import *
 
 
@@ -546,7 +546,7 @@ def buildMC410(info, mc):
     return mc
 
 
-def scaleBkgs410(bkgs, runtime=0):
+def scaleBkgs410(bkgs, runtimes=None):
     
     for key in bkgs:
         
@@ -564,8 +564,8 @@ def scaleBkgs410(bkgs, runtime=0):
         
         # conversion factors for things
         keVperBin  = 1./float(bkgs[key]['pars'][3])
-        if runtime:
-            day    = float(runtime)
+        if runtimes is not None:
+            day    = runtimes[x-1]
         else:
             day    = 86400.
         
@@ -623,7 +623,7 @@ def scaleBkgs410(bkgs, runtime=0):
     return bkgs
 
 
-def scaleSigs410(sigkeys, sigs, runtime=0):
+def scaleSigs410(sigkeys, sigs, runtimes=None):
 
     for key in sigkeys:
         
@@ -649,8 +649,8 @@ def scaleSigs410(sigkeys, sigs, runtime=0):
         
         # conversion factors for things
         keVperBin  = 1./float(sigs[key]['pars'][3])
-        if runtime:
-            day    = float(runtime)
+        if runtimes is not None:
+            day    = runtimes[x-1]
         else:
             day    = 86400.
         
@@ -722,3 +722,4 @@ def ScaleEnergy410(bkgs, binShift, shiftwhat):
                     shifted.append(key)
     
     return bkgs
+

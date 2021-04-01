@@ -38,8 +38,8 @@ import numpy as np
 from ROOT import *
 import ROOT
 
-sys.path.append("/home/mkauer/COSINE/CUP/mc-fitting/")
-sys.path.append("/home/mkauer/mc-fitting/")
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(HERE)
 from funcs93 import *
 from funcs_misc import *
 
@@ -1092,7 +1092,7 @@ def combineOthers100(sigs, globalMC):
     delete = []
     temps = {}
     
-    for key in sigs:
+    for key in sorted(sigs):
 
         if key in donekeys:
             continue
@@ -1135,7 +1135,7 @@ def combineOthers100(sigs, globalMC):
         sigs[key] = deepcopy(temps[key])
         
     # delete the other histograms
-    for key in delete:
+    for key in sorted(delete):
         if debug: print 'DEBUG: deleting -fx key', key
         del sigs[key]
     

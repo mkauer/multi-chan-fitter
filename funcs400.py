@@ -30,8 +30,8 @@ import numpy as np
 from ROOT import *
 import ROOT
 
-sys.path.append("/home/mkauer/COSINE/CUP/mc-fitting/")
-sys.path.append("/home/mkauer/mc-fitting/")
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(HERE)
 from funcs300 import *
 
 
@@ -615,7 +615,7 @@ def buildMCSurf400(info, mc):
                         ### volume cuts
                         #--------------------------------------------------
                         X0, Y0, Z0, rad, height, dep = mcDimensions(fromx)
-                        dist = sqrt((X0-xx)**2 + (Y0-yy)**2)
+                        dist = np.sqrt((X0-xx)**2 + (Y0-yy)**2)
                         zdist = abs(Z0-zz)
 
                         # teflon thickness (mm) - 2020-04-29

@@ -3,11 +3,10 @@
 ############################################################
 # Matt Kauer - mkauer@icecube.wisc.edu
 #-----------------------------------------------------------
-# Make PMT sim truely global and
-# and not a collection of pmt pairs
-
+# Revamp the MC format and hist generation
+# 
 # see CHANGELOG
-# version: 2020-08-18
+# version: 2021-01-12
 ############################################################
 
 import os,sys,re
@@ -18,24 +17,33 @@ import math
 import numpy as np
 import datetime
 
+# py2-3 compat
+try:
+    input = raw_input
+except NameError:
+    pass
+
 # ROOT6 FIX
 import ctypes
 from ctypes import *
 
 script = os.path.basename(__file__)
-V = 'v'+(script.split('-')[0])
-print 'INFO: running script -->', script, '('+V+')'
+V = 'v1'
+print('INFO: running script --> {0}'.format(script))
 
 import ROOT
 from ROOT import *
 #ROOT.gErrorIgnoreLevel = kWarning
 ROOT.gErrorIgnoreLevel = kError
-vroot = ROOT.__version__
-print 'INFO: using root -->', vroot
+try: vroot = ROOT.__version__
+except: vroot = '5'
+print('INFO: using root --> {0}'.format(vroot))
 
-sys.path.append("/home/mkauer/COSINE/CUP/mc-fitting/")
-sys.path.append("/home/mkauer/mc-fitting/")
-from funcs410 import *
+HERE = os.path.dirname(os.path.abspath(__file__))
+#sys.path.append("/home/mkauer/COSINE/CUP/mc-fitting/")
+#sys.path.append("/home/mkauer/mc-fitting/")
+sys.path.append(HERE)
+from funcs500 import *
 
 
 ### batch job?
@@ -57,51 +65,12 @@ dopt='hist same'
 note = 0
 #note = ''
 
-#mcfile = 'backgrounds_404.txt' # pretty solid baseline file
-#mcfile = 'backgrounds_405.txt' # changed things to govindas numbers
-#mcfile = 'backgrounds_406.txt' # going back to 404 and modifying
-#mcfile = 'backgrounds_407.txt' # new expo file format
-#mcfile = 'backgrounds_408.txt' # add back other Te cosmogenics
-#mcfile = 'backgrounds_409.txt' # can only use "side" components
-#mcfile = 'backgrounds_410.txt' # try fixing pmt activities
-#mcfile = 'backgrounds_411.txt' # play with teflon surface
-#mcfile = 'backgrounds_412.txt' # surface tweaks for root-6
 
-#mcfile = 'backgrounds_413.txt' # new build410 MC
-
-#mcfile = 'backgrounds_414.txt' # try removing lsveto mc
-#mcfile = 'backgrounds_414_tweaks.txt' # tweak some activities
-#mcfile = 'backgrounds_414_tweaks2.txt' # tweak some activities
-#mcfile = 'backgrounds_414_tweaks2_C1.txt' # try C1
-#mcfile = 'backgrounds_414_tweaks2_C5.txt' # try C5
-#mcfile = 'backgrounds_414_tweaks2_C8.txt' # try C8
-mcfile = 'backgrounds_414_tweaks3.txt' # fit externals with C1
-
-#mcfile = 'backgrounds_414_tweaks2_update.txt' # manually tweaked things
-#mcfile = 'backgrounds_414_tweaks3_update.txt' # fit externals with C1
-#mcfile = 'backgrounds_414_I128.txt' # try fit with I128
+mcfile = 'backgrounds.txt'
 
 
-#mcfile = 'backgrounds_415.txt' # try removing plastic mc
-#mcfile = 'backgrounds_415_tweaks.txt' # tweak some activities
-#mcfile = 'backgrounds_415_tweaks2.txt' # tweak some activities
 
-
-#mcfile = 'testing-expo-surf.txt' # 2020-05-12
-#mcfile = 'testing-all-bkgs-for-plotting.txt'
-#mcfile = 'testing-expo-pb210.txt' # 2020-03-24
-#mcfile = 'testing-data-400.txt' # 2020-03-26
-#mcfile = 'testing-alpha-cuts.txt' # 2020-04-13
-#mcfile = 'testing-unified-pmt.txt' # 2020-08-07
-#mcfile = 'testing-copper-shield.txt' # 2020-08-08
-#mcfile = 'testing-lsveto-resolution.txt' # 2020-08-11
-#mcfile = 'testing-steel.txt' # 2020-08-13
-#mcfile = 'testing-u238-th232.txt' # 2020-08-13
-#mcfile = 'testing-na24.txt' # 2020-10-12
-#mcfile = 'testing-calibs.txt' # 2020-10-13
-
-
-print 'INFO: using backgrounds config file -->', mcfile
+print('INFO: using backgrounds config file --> {0}'.format(mcfile))
 
 
 ### ==========  OPTIMIZATION OPTIONS  ================================
@@ -111,94 +80,128 @@ print 'INFO: using backgrounds config file -->', mcfile
 # for xstals 1   2   3   4   5   6   7   8   9
 binShift =  [4,  4,  6,  8, -1,  8,  6, -1, -1]
 #binShift =  [-1, 0, 11, 11, -1, 11, 11, -1, -1]
-shiftWhat = ['teflonbulk','teflonsurf']
-#shiftWhat = ['teflon']
+#shiftWhat = ['teflonbulk','teflonsurf']
+shiftWhat = ['teflon']
 
 ### set the fitter step size
 ### can help to go smaller than default 1e-2
 stepSize = 0
+#stepSize = 1e-3
 stepSize = 1e-4
 
 ### test MC smoothing?
 ### smoothing window in +/- number of bins
 smoothing = 0
 #smoothing = 5
-smoothWhat = ['cushield','steel']
+smoothWhat = ['cushield', 'steel']
 
 
 ### ==========  FITTING OPTIONS  =====================================
 ### select channels to fit
-fitchans = 'SM'
-#fitchans = 'S'  # testing low E fit
+fitchans = ['S', 'M']
+#fitchans = ['S']  # testing low E fit
 
 ### Let's finally try different fit ranges!!
 fitranges = [{} for x in range(numx)]
 for i in range(numx):
 
-    ### defaults for crystals
+    ### all channels default except alphas
     # --------------------------------------------------------------
-    fitranges[i]['S0'] = [1,  2,   90]  # singl-hit low-energy
-    fitranges[i]['S1'] = [6, 80, 4000]  # singl-hit high-energy
-    fitranges[i]['M0'] = [1,  2,   90]  # multi-hit low-energy
-    fitranges[i]['M1'] = [6, 80, 4000]  # multi-hit high-energy
+    fitranges[i]['S0'] = [1,   2,   90]  # single-hit low-energy
+    fitranges[i]['S1'] = [6,  80, 4000]  # single-hit high-energy
+    fitranges[i]['S2'] = [1,   0,    0]  # single-hit alphas
+    fitranges[i]['M0'] = [1,   2,   90]  # multi-hit low-energy
+    fitranges[i]['M1'] = [6,  80, 4000]  # multi-hit high-energy
+    fitranges[i]['M2'] = [1,   0,    0]  # multi-hit alphas
     
-    # for just low E fit
+    ### for just low E fit
     #fitranges[i]['S0'] = [1, 4, 40]
     #fitranges[i]['S1'] = [1, 0,  0]
     #fitranges[i]['M0'] = [1, 2, 40]
     #fitranges[i]['M0'] = [1, 20, 40]
     #fitranges[i]['M1'] = [1, 0,  0]
     
-    # for just high E fit
+    ### for just high E fit
     fitranges[i]['S0'] = [1, 0, 0]
-    fitranges[i]['S1'] = [4, 100, 2800]
+    fitranges[i]['S1'] = [2, 80, 3500]
     fitranges[i]['M0'] = [1, 40, 100]
-    fitranges[i]['M1'] = [4, 100, 2800]
+    #fitranges[i]['M0'] = [1, 0, 0]
+    fitranges[i]['M1'] = [2, 80, 3200]
 
-# special case for C1, C5, C8
+    ### for just alpha fit
+    #fitranges[i]['S0'] = [1, 0, 0]
+    #fitranges[i]['S1'] = [1, 0, 0]
+    #fitranges[i]['M0'] = [1, 0, 0]
+    #fitranges[i]['M1'] = [1, 0, 0]
+    #fitranges[i]['S2'] = [1, 2000, 3200]
+
+    ### for just lsveto fit
+    #fitranges[i]['S0'] = [1, 0, 0]
+    #fitranges[i]['S1'] = [1, 0, 0]
+    #fitranges[i]['M0'] = [1, 0, 0]
+    #fitranges[i]['M1'] = [1, 0, 0]
+    
+### special case for C1, C5, C8
 #for i in [0, 4, 7]:
 #    fitranges[i]['S0'] = [1, 10, 60]
 #    fitranges[i]['S1'] = [6, 0, 0]
 #    fitranges[i]['M0'] = [1, 10, 90]
 #    fitranges[i]['M1'] = [6, 80, 4000]
-        
-    
+
+
 ### defaults for lsveto
 # --------------------------------------------------------------
-fitranges[8]['S0'] = [0,0,0]
-fitranges[8]['S1'] = [0,0,0]
-fitranges[8]['M0'] = [0,0,0]
-fitranges[8]['M1'] = [1, 100, 4000] # ext gamma testing
+fitranges[8]['S0'] = [1, 0, 0]
+fitranges[8]['S1'] = [4, 400, 4000]
+fitranges[8]['M0'] = [1, 0, 0]
+fitranges[8]['M1'] = [4, 200, 4000]
 
-
-### set bounds separately for some crystals
-# --------------------------------------------------------------
-# c1 low-energy is messed up below 9 keV
-#fitranges[0]['S0'] = [1, 9, 100]
+# not lsveto
+fitranges[8]['S0'] = [1, 0, 0]
+fitranges[8]['S1'] = [1, 0, 0]
+fitranges[8]['M0'] = [1, 0, 0]
+fitranges[8]['M1'] = [1, 0, 0]
 
 
 
 ### ==========  EXTRA MC OPTIONS  ====================================
 ### which MC to fit globally (to all crystals simultaneously)?
-globalmc = ['pmt','plastic','lsveto','cushield','innersteel','steel','gamma']
+globalmc = [
+    'pmt',
+    'plastic',
+    'lsveto',
+    'cushield',
+    'innersteel',
+    'steel',
+    'gamma',
+]
 
-### include bkgs from 'other' pmts and internals?
-others    = 1
+### include bkgs from 'other' internals? [0,1]
+others = 1
 
 ### plot components in groups? [0,1]
-ingroups  = 1
+ingroups = 1
 
 ### show the total? [0,1]
 showTotal = 1
 
-### show the legends? [0,1]
-showlegs  = 1
-
 ### plot the total in gray==0, red==1? [0,1]
-redtotal  = 1
+redtotal = 1
 
-### combine 'others' into the makePlots() plots?
-combine   = 1
+### plot alpha channels? [0,1]
+showAlphas = 1
+
+### only show q1 quenched peaks? [0,1]
+justQ1 = 0
+
+### show the legends? [0,1]
+showlegs = 1
+
+### combine 'others' into the makePlots() plots? [0,1]
+combine = 1
+
+### print out chi2 of data to total? [0,1]
+printChi2 = 0
 
 ### force the reuse of all joined rootfiles in mcfile? [0,1,2]
 ### very nice for debugging
@@ -228,17 +231,22 @@ otherBnds = [1e-6, 0.9]
 indi = 1
 
 ### select channels to plot
-pltchans = 'SM'
+pltchans = ['S','M']
 
-### plotting ranges
+### crystal plotting ranges
 loer = [0, 100]
 hier = [0, 4000]
+aler = [0, 6000]
 #hiYlo = 1e-3 # for 3000 X range
 hiYlo = 1e-5 # for 4000 X range
-eran = [loer, hier]
+eran = [loer, hier, aler]
 
-### special energy range for lsveto
-lsHiE = 4000
+### lsveto plotting ranges
+lsHiE = 8000
+lsLoSY = 1e-6
+lsHiSY = 10
+lsLoMY = 1e-8
+lsHiMY = 1
 
 ### special range for zoomed in plot
 zmaxE = 40
@@ -249,6 +257,7 @@ zdr = 0
 ### rebin the final plots [1,inf]
 loEplotRebin = 3
 hiEplotRebin = 4
+alphaPlotRebin = 4
 
 ### use linear residual scale? [0,1]
 linres = 1
@@ -311,8 +320,8 @@ def main(argv):
     gStyle.SetOptFit(0)
 
     ### where am I running?
-    if onCup(): here = '/home/mkauer/mc-fitting'
-    else: here = '/home/mkauer/COSINE/CUP/mc-fitting'
+    #if onCup(): here = '/home/mkauer/mc-fitting'
+    #else: here = '/home/mkauer/COSINE/CUP/mc-fitting'
     """
     ### for saving the plots...
     plotdir = here+'/plots/c'
@@ -322,71 +331,85 @@ def main(argv):
         os.makedirs(plotdir)
     """
     #mcfile = os.path.join(here, mcfile)
-    if not os.path.exists(os.path.join(here, mcfile)):
-        print '\nERROR: could not find backgrounds file -->', os.path.join(here, mcfile)
+    if not os.path.exists(os.path.join(HERE, mcfile)):
+        print('ERROR: could not find backgrounds file --> {0}'.format(os.path.join(HERE, mcfile)))
         sys.exit()
     
     
     ### where everything gets loaded into dictionary
     #-----------------------------------------------------------------
     #-----------------------------------------------------------------
-    allchans = uniqString(fitchans+pltchans)
-    data, bkgs, sigs = build410(os.path.join(here, mcfile), others, reuse, allchans, xstals)
-    
-    ### make of list of crystal runtimes
-    runtimes = [0 for x in range(numx)]
-    usedkeys = []
-    for i in range(numx):
+    #allchans = uniqString(fitchans+pltchans)
+    allchans = list(set(fitchans+pltchans))
+    print('INFO: loading/building all the histograms...')
+    data, bkgs, sigs = build500(os.path.join(HERE, mcfile), others, reuse, allchans, xstals)
+
+    ### only plot/fit crystals that have data
+    justthese = []
+    for i in range(1, numx+1):
         for key in data:
-            #print key
-            if 'x'+str(i+1) in key and 'x'+str(i+1) not in usedkeys:
-                runtimes[i] = data[key]['runtime']
-                usedkeys.append('x'+str(i+1))
-                print 'INFO: c'+str(i+1)+' runtime =', round(runtimes[i],1), '(seconds)'
-    #print runtimes
+            if 'x'+str(i) in key and i not in justthese:
+                justthese.append(i)
+    justthese.sort()
+    if len(justthese) == 0:
+        print('ERROR: nothing to plot, quitting...')
+        sys.exit()
+    print('INFO: plotting/fitting crystals --> {0}'.format(justthese))
     
+    ### create dir for saving the plots...
+    plotdir = HERE+'/plots/c'
+    for x in justthese:
+        plotdir += str(x)
+    if not os.path.exists(plotdir): 
+        os.makedirs(plotdir)
+
+    ### copy the backgrounds file before fitting so it isn't overwritten later
+    shutil.copyfile(os.path.join(HERE, mcfile), os.path.join(plotdir, mcfile))
+
+    ### copy the actual script as well just to have it on hand
+    shutil.copyfile(os.path.join(HERE, script), os.path.join(plotdir, script))
+
+    ### save all raw histograms to a rootfile so it can be re-used
+    rootoutfile = TFile(plotdir+"/histograms-raw.root", "RECREATE")
+    for hist_dict in [data, bkgs, sigs]:
+        writeHists500(hist_dict)
+    rootoutfile.Write()
+    rootoutfile.Close()
+
+    
+    ### make of list runtimes per crystal, channel, energy
+    runtimes = getRuntimes(data)
+
+    ### sort keys for convenience
     datkeys = sortDataKeys92(data)
     if datsumw2:
         for key in datkeys:
             data[key]['hist'].Sumw2()
     
-    ### scale into dru units
+    ### scale into dru or not
+    data = scaleData411(data, dru)
     if dru:
-        data = scaleData70(data, 1)
-        bkgs = scaleBkgs410(bkgs)
-        sigs = scaleBkgs410(sigs)
+        bkgs = scaleBkgs411(bkgs)
+        sigs = scaleBkgs411(sigs)
     else:
-        data = scaleData70(data, 0)
-        ### FIX ME - need to fix scaleBkgs to use runtimes[]
-        bkgs = scaleBkgs410(bkgs, runtimes)
-        sigs = scaleBkgs410(sigs, runtimes)
+        bkgs = scaleBkgs411(bkgs, runtimes)
+        sigs = scaleBkgs411(sigs, runtimes)
     
-    
-    
-    #=======================================================================
     ### testing MC energy scaling
-    #=======================================================================
-
     if binShift != 0:
         #print 'energy shifting...'
         sigs = ScaleEnergy410(sigs, binShift, shiftWhat)
         bkgs = ScaleEnergy410(bkgs, binShift, shiftWhat)
-    #sys.exit()
-    
-    #=======================================================================
-    #=======================================================================
-    
-    
     
     ### make plots before combining?
     #makePlots93(bkgs, combine, others)
     #makePlots93(sigs, combine, others)
     #sys.exit()
     
-    ### combine after scaling?
-    ### FIX ME - combine but don't delete others?
-    sigs = combineOthers100(sigs, globalmc)
-    bkgs = combineOthers100(bkgs, globalmc)
+    ### combine after scaling
+    ### FIXME - combine but don't delete others?
+    sigs = combineOthers500(sigs, globalmc)
+    bkgs = combineOthers500(bkgs, globalmc)
     
     ### now sort and remove empty histos
     bkgs, bakkeys = sortSimKeys92(bkgs)
@@ -401,35 +424,11 @@ def main(argv):
     if smoothing:
         bkgs = smooth(bkgs, smoothWhat, smoothing)
         sigs = smooth(sigs, smoothWhat, smoothing)
-        print 'INFO: done smoothing histograms'
-    
+        print('INFO: done smoothing histograms')
+
+        
     #-----------------------------------------------------------------
     #-----------------------------------------------------------------
-    
-    ### only plot crystals that have data
-    justthese = []
-    for i in range(1, numx+1):
-        for key in datkeys:
-            if 'x'+str(i) in key and i not in justthese:
-                justthese.append(i)
-    justthese.sort()
-    if len(justthese) == 0:
-        print 'ERROR: nothing to plot, quitting...'
-        sys.exit()
-    print 'INFO: plotting crystals -->', justthese
-    
-    ### create dir for saving the plots...
-    plotdir = here+'/plots/c'
-    for x in justthese:
-        plotdir += str(x)
-    if not os.path.exists(plotdir): 
-        os.makedirs(plotdir)
-
-    ### copy the backgrounds file before fitting so it isn't overwritten later - 2020-04-02
-    shutil.copyfile(os.path.join(here, mcfile), os.path.join(plotdir, mcfile))
-
-    ### copy the actual script as well just to have it on hand - 2020-04-02
-    shutil.copyfile(os.path.join(here, script), os.path.join(plotdir, script))
 
     
     ### assume all data is using same runs and hist params
@@ -470,7 +469,7 @@ def main(argv):
     
     ### create unique colors for fit sim
     Nc = len(uniqAll)
-    print 'INFO: Total number of unique bkgs and sigs =', Nc
+    print('INFO: Total number of unique bkgs and sigs = {0}'.format(Nc))
     # ROOT6 FIX
     colors, cis = rainbowSix(uniqAll)
     uniqColor = cis
@@ -480,12 +479,14 @@ def main(argv):
         'internal':  kBlue,
         'cosmo':     kMagenta+1,
         'surface':   kCyan+1,
-        'copper':    kYellow+1,
+        'cucase':    kYellow+1,
+        'xpmts':     kGreen,
         'pmts':      kGreen+1,
         'plastic':   kOrange,
         'lsveto':    kOrange+1,
+        'cushield':  kOrange+2,
         'steel':     kYellow,
-        'ext-gamma': kOrange+4,
+        'gamma':     kOrange+4,
         'none':      kBlack
     }
 
@@ -521,9 +522,9 @@ def main(argv):
     
     if len(sigs) > 0:
         
-        print 'INFO: global fits to -->', globstr
+        print('INFO: global fits to --> {0}'.format(globstr))
     
-        print 'INFO: building histograms for fit...'
+        print('INFO: building histograms for fit...')
 
         fitting = 1
         
@@ -542,23 +543,33 @@ def main(argv):
         ### I think I need to build the fitdata histogram first
         ### store start/stop bins for each crystal
         xstalbins = [[0,0] for x in range(numx)]
-        for i in range(numx):
+        #for i in range(numx):
+        for i in [j-1 for j in justthese]:
             startbin = fitdata.GetXaxis().GetNbins()
+            #print 'startbin', startbin
+            if startbin == 1:
+                startbin = 0
             for C in fitchans:
                 for dkey in datkeys:
                     # low Energy
                     if 'x'+str(i+1) in dkey and '-c'+C in dkey and '-e0' in dkey:
                         fitdata = extendHist(fitdata,
-                                    fitPrep(data, dkey, fitranges[i][C+'0']))
+                                        fitPrep(data, dkey, fitranges[i][C+'0']))
                     # high Energy
                     if 'x'+str(i+1) in dkey and '-c'+C in dkey and '-e1' in dkey:
                         fitdata = extendHist(fitdata,
-                                    fitPrep(data, dkey, fitranges[i][C+'1']))
+                                        fitPrep(data, dkey, fitranges[i][C+'1']))
+                    # alpha Energy
+                    if 'x'+str(i+1) in dkey and '-c'+C in dkey and '-e2' in dkey:
+                        fitdata = extendHist(fitdata,
+                                        fitPrep(data, dkey, fitranges[i][C+'2']))
+            
             stopbin = fitdata.GetXaxis().GetNbins()
             ### this start/stop binning stuff might still be a little wonky
-            xstalbins[i] = [startbin-1, stopbin-1]
-            if debug: print 'DEBUG: bin range for C'+str(i+1)+' =', xstalbins[i]
-        
+            xstalbins[i] = [startbin, stopbin-1]
+            if debug: print('DEBUG: bin range for C{0} = {1}'.format(i+1, xstalbins[i]))
+            #print fitdata.GetXaxis().GetNbins()
+            
         ### the number of bins in fitdata should be used...
         fitbins = fitdata.GetNbinsX()
 
@@ -573,7 +584,8 @@ def main(argv):
         fresid.SetLineWidth(1)
         
         ### now build the fitsigs and fitbkgs histograms
-        for i in range(numx):
+        #for i in range(numx):
+        for i in [j-1 for j in justthese]:
             for nc, C in enumerate(fitchans):
                 
                 # signals
@@ -581,17 +593,19 @@ def main(argv):
                 for skey in sigkeys:
                     
                     ### init histograms for global signals (pmt, lsveto, steel, etc.)
-                    for gmckey in globalmc:
-                        if gmckey in skey:
-                            bits = skey.split('-')
-                            fgkey = bits[1]+'-'+bits[2]
-                            if fgkey not in fglobsigkeys:
-                                fglobsigkeys.append(fgkey)
-                                fitglobsigs[fgkey] = {}
-                                fglob = TH1F(fgkey, fgkey, fitbins, 0, fitbins)
-                                fitglobsigs[fgkey]['hist'] = fglob
+                    bits = skey.split('-')
+                    if bits[1] in globalmc:
+                    #for gmckey in globalmc:
+                    #    if gmckey in skey:
+                    #        bits = skey.split('-')
+                        fgkey = bits[1]+'-'+bits[2]
+                        if fgkey not in fglobsigkeys:
+                            fglobsigkeys.append(fgkey)
+                            fitglobsigs[fgkey] = {}
+                            fglob = TH1F(fgkey, fgkey, fitbins, 0, fitbins)
+                            fitglobsigs[fgkey]['hist'] = fglob
                     
-                    # pad out the blank extra crystals
+                    # pad out the empty histograms
                     if i+1 in justthese and 'x'+str(i+1) not in skey:
                         if '-c'+C in skey and '-e0' in skey:
                             fskey = skey.split('-c'+C+'-e0')[0]
@@ -603,38 +617,55 @@ def main(argv):
                             fitsigs = addHistKey(fitsigs, fskey)
                             fitsigs[fskey]['hist'] = extendHist(fitsigs[fskey]['hist'],
                                                 fitPrep(sigs, skey, fitranges[i][C+'1'], 1))
+                        if '-c'+C in skey and '-e2' in skey:
+                            fskey = skey.split('-c'+C+'-e2')[0]
+                            fitsigs = addHistKey(fitsigs, fskey)
+                            fitsigs[fskey]['hist'] = extendHist(fitsigs[fskey]['hist'],
+                                                fitPrep(sigs, skey, fitranges[i][C+'2'], 1))
                     
                     # low Energy
                     if 'x'+str(i+1) in skey and '-c'+C in skey and '-e0' in skey:
                         fskey = skey.split('-c'+C+'-e0')[0]
                         fitsigs = addHistKey(fitsigs, fskey)
                         fitsigs[fskey]['hist'] = extendHist(fitsigs[fskey]['hist'],
-                                                fitPrep(sigs, skey, fitranges[i][C+'0']))
+                                                    fitPrep(sigs, skey, fitranges[i][C+'0']))
                     
                     # high Energy
                     if 'x'+str(i+1) in skey and '-c'+C in skey and '-e1' in skey:
                         fskey = skey.split('-c'+C+'-e1')[0]
                         fitsigs = addHistKey(fitsigs, fskey)
                         fitsigs[fskey]['hist'] = extendHist(fitsigs[fskey]['hist'],
-                                                fitPrep(sigs, skey, fitranges[i][C+'1']))
+                                                    fitPrep(sigs, skey, fitranges[i][C+'1']))
 
+                    # alpha Energy
+                    if 'x'+str(i+1) in skey and '-c'+C in skey and '-e2' in skey:
+                        bits = skey.split('-c'+C+'-e2')
+                        fskey = bits[0]
+                        fitsigs = addHistKey(fitsigs, fskey)
+                        fitsigs[fskey]['hist'] = extendHist(fitsigs[fskey]['hist'],
+                                                    fitPrep(sigs, skey, fitranges[i][C+'2']))
+
+                        #fitsigs[fskey]['hist'].Draw()
+                        #input('enter to continue')
                         
                 # backgrounds
                 #---------------------------------------------------------------
                 for bkey in bakkeys:
                     
                     ### init histograms for global backgrounds (pmt, lsveto, steel, etc.)
-                    for gmckey in globalmc:
-                        if gmckey in bkey:
-                            bits = bkey.split('-')
-                            fgbkey = bits[1]+'-'+bits[2]
-                            if fgbkey not in fglobbkgkeys:
-                                fglobbkgkeys.append(fgbkey)
-                                fitglobbkgs[fgbkey] = {}
-                                fglob = TH1F(fgbkey, fgbkey, fitbins, 0, fitbins)
-                                fitglobbkgs[fgbkey]['hist'] = fglob
+                    bits = bkey.split('-')
+                    if bits[1] in globalmc:
+                    #for gmckey in globalmc:
+                    #    if gmckey in bkey:
+                    #        bits = bkey.split('-')
+                        fgbkey = bits[1]+'-'+bits[2]
+                        if fgbkey not in fglobbkgkeys:
+                            fglobbkgkeys.append(fgbkey)
+                            fitglobbkgs[fgbkey] = {}
+                            fglob = TH1F(fgbkey, fgbkey, fitbins, 0, fitbins)
+                            fitglobbkgs[fgbkey]['hist'] = fglob
                     
-                    # pad out the blank extra crystals
+                    # pad out the empty histograms
                     if i+1 in justthese and 'x'+str(i+1) not in bkey:
                         if '-c'+C in bkey and '-e0' in bkey:
                             fbkey = bkey.split('-c'+C+'-e0')[0]
@@ -646,19 +677,31 @@ def main(argv):
                             fitbkgs = addHistKey(fitbkgs, fbkey)
                             fitbkgs[fbkey]['hist'] = extendHist(fitbkgs[fbkey]['hist'],
                                                     fitPrep(bkgs, bkey, fitranges[i][C+'1'], 1))
-                    
+                        if '-c'+C in bkey and '-e2' in bkey:
+                            fbkey = bkey.split('-c'+C+'-e2')[0]
+                            fitbkgs = addHistKey(fitbkgs, fbkey)
+                            fitbkgs[fbkey]['hist'] = extendHist(fitbkgs[fbkey]['hist'],
+                                                    fitPrep(bkgs, bkey, fitranges[i][C+'2'], 1))
+                        
                     # low Energy
                     if 'x'+str(i+1) in bkey and '-c'+C in bkey and '-e0' in bkey:
                         fbkey = bkey.split('-c'+C+'-e0')[0]
                         fitbkgs = addHistKey(fitbkgs, fbkey)
                         fitbkgs[fbkey]['hist'] = extendHist(fitbkgs[fbkey]['hist'],
-                                                fitPrep(bkgs, bkey, fitranges[i][C+'0']))
+                                                    fitPrep(bkgs, bkey, fitranges[i][C+'0']))
                     # high Energy
                     if 'x'+str(i+1) in bkey and '-c'+C in bkey and '-e1' in bkey:
                         fbkey = bkey.split('-c'+C+'-e1')[0]
                         fitbkgs = addHistKey(fitbkgs, fbkey)
                         fitbkgs[fbkey]['hist'] = extendHist(fitbkgs[fbkey]['hist'],
-                                                fitPrep(bkgs, bkey, fitranges[i][C+'1']))
+                                                    fitPrep(bkgs, bkey, fitranges[i][C+'1']))
+                    # alpha Energy
+                    if 'x'+str(i+1) in bkey and '-c'+C in bkey and '-e2' in bkey:
+                        bits = bkey.split('-c'+C+'-e2')
+                        fbkey = bits[0]
+                        fitbkgs = addHistKey(fitbkgs, fbkey)
+                        fitbkgs[fbkey]['hist'] = extendHist(fitbkgs[fbkey]['hist'],
+                                                    fitPrep(bkgs, bkey, fitranges[i][C+'2']))
             
 
         ### ====================================================================
@@ -677,7 +720,7 @@ def main(argv):
                 fsigkeys.append(fskey)
             else: delete.append(fskey)
         for key in delete:
-            if debug: print 'DEBUG: zero events so deleting sig key', key
+            if debug: print('DEBUG: zero events so deleting sig key [{0}]'.format(key))
             del fitsigs[key]
         fsigkeys.sort()
 
@@ -697,7 +740,7 @@ def main(argv):
                 ### make gmckey unique (steel vs innersteel) 2018-10-23
                 gmckey = '-'+gmckey+'-'
                 if gmckey in fskey:
-                    if debug: print 'DEBUG: remove global key from fit sigs', fsigkeys[L-k]
+                    if debug: print('DEBUG: remove global key from fit sigs [{0}]'.format(fsigkeys[L-k]))
                     del fsigkeys[L-k]
 
         # (5) now delete the empty sig histos
@@ -708,7 +751,7 @@ def main(argv):
                 fglobsigkeys.append(fgskey)
             else: delete.append(fgskey)
         for key in delete:
-            if debug: print 'DEBUG: zero events so deleting global sigs key', key
+            if debug: print('DEBUG: zero events so deleting global sigs key [{0}]'.format(key))
             del fitglobsigs[key]
         fglobsigkeys.sort()
 
@@ -724,7 +767,7 @@ def main(argv):
                 fbkgkeys.append(fbkey)
             else: delete.append(fbkey)
         for key in delete:
-            if debug: print 'DEBUG: zero events so deleting bkg key', key
+            if debug: print('DEBUG: zero events so deleting bkg key [{0}]'.format(key))
             del fitbkgs[key]
         fbkgkeys.sort()
 
@@ -744,7 +787,7 @@ def main(argv):
                 ### make gmckey unique (steel vs innersteel) 2018-10-23
                 gmckey = '-'+gmckey+'-'
                 if gmckey in fbkey:
-                    if debug: print 'DEBUG: remove global key from fit bkgs', fbkgkeys[L-k]
+                    if debug: print('DEBUG: remove global key from fit bkgs [{0}]'.format(fbkgkeys[L-k]))
                     del fbkgkeys[L-k]
 
         # (5) now delete the empty bkg histos
@@ -755,7 +798,7 @@ def main(argv):
                 fglobbkgkeys.append(fgbkey)
             else: delete.append(fgbkey)
         for key in delete:
-            if debug: print 'DEBUG: zero events so deleting global bkgs key', key
+            if debug: print('DEBUG: zero events so deleting global bkgs key [{0}]'.format(key))
             del fitglobbkgs[key]
         fglobbkgkeys.sort()
 
@@ -765,10 +808,12 @@ def main(argv):
 
         # (1) subtract normal backgrounds
         for key in fbkgkeys:
+            if debug: print('DEBUG: adding hist --> {0}'.format(key))
             fitdata.Add(fitbkgs[key]['hist'], -1)
 
         # (2) subtract global backgrounds
         for key in fglobbkgkeys:
+            if debug: print('DEBUG: adding hist --> {0}'.format(key))
             fitdata.Add(fitglobbkgs[key]['hist'], -1)
         
         ### ====================================================================
@@ -787,7 +832,8 @@ def main(argv):
         dat_int = fitdata.Integral()
                 
         ### set up the fitting object for TFractionFitter
-        for i in range(numx):
+        #for i in range(numx):
+        for i in [j-1 for j in justthese]:
             fitresults[str(i)] = []
             for fskey in fsigkeys:
                 if 'x'+str(i+1) in fskey:
@@ -804,17 +850,37 @@ def main(argv):
                     try:
                         fitsigs[fskey]['hist'].Scale(dat_int/mc_int)
                     except:
-                        print '\nERROR: No events for --> ',fskey
-                        print   '       Remove it from the fit? \n'
+                        print('\nERROR: No events for --> {0}'.format(fskey))
+                        print('       Remove it from the fit? \n')
                         sys.exit()
                     
                     for C in allchans:
-                        for E in range(2):
-                            E=str(E)
+                        for E in range(3):
+                            E = str(E)
                             
                             #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                             
                             newkeys = []
+                            tmpkey = fskey+'-c'+C+'-e'+E
+                            if tmpkey in sigs:
+                                newkeys.append(tmpkey)
+                            for Q in range(1, 3):
+                                Q = str(Q)
+                                tmpkey = fskey+'-q'+Q+'-c'+C+'-e'+E
+                                if tmpkey in sigs:
+                                    print tmpkey
+                                    newkeys.append(tmpkey)
+                            for F in range(numx):
+                                F = str(F+1)
+                                tmpkey = fskey+'-f'+F+'-c'+C+'-e'+E
+                                if tmpkey in sigs:
+                                    newkeys.append(tmpkey)
+                                for Q in range(1, 3):
+                                    Q = str(Q)
+                                    tmpkey = fskey+'-f'+F+'-q'+Q+'-c'+C+'-e'+E
+                                    if tmpkey in sigs:
+                                        newkeys.append(tmpkey)
+                            """
                             try:
                                 tmpkey = fskey+'-c'+C+'-e'+E
                                 test = sigs[tmpkey]['hist']
@@ -828,13 +894,14 @@ def main(argv):
                                         newkeys.append(tmpkey)
                                     except:
                                         continue
-
+                            """
                             #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                             
                             for newkey in newkeys:
-
+                                #print newkey
                                 sigs[newkey]['hist'].Scale(dat_int/mc_int)
                                 sigs[newkey]['fitscale'] = sigs[newkey]['scale'] * dat_int/mc_int
+                                #print sigs[newkey]['fitscale']
                                 
                                 ### rescale the bounds to the normalized fraction
                                 ### and save new values to the sigs info
@@ -842,7 +909,7 @@ def main(argv):
                                 sigs[newkey]['info']['newfbnd'] = [0,0]
                                 for k in range(2):
                                     renorm = sigs[newkey]['scale'] / float(sigs[newkey]['fitscale'])
-                                                                        
+                                    
                                     if useBounds == 0:
                                         these = [0.00, 1.00]
                                         sigs[newkey]['info']['fbnd'][k] = 1./renorm * these[k]
@@ -858,9 +925,9 @@ def main(argv):
                                         sigs[newkey]['info']['fbnd'][k] = 1./renorm * otherBnds[k]
                                         sigs[newkey]['info']['newfbnd'] = otherBnds
                                     else:
-                                        print 'ERROR: do not know what to do with useBounds =',useBounds
+                                        print('ERROR: do not know what to do with useBounds = {0}'.format(useBounds))
                                         sys.exit()
-                    
+                    #print '!!!', sigs[newkeys[0]]['info']['newfbnd']
                     bounds.append(sigs[newkeys[0]]['info']['newfbnd'])
                     #---------------------------------------------------------------------
                     
@@ -869,11 +936,12 @@ def main(argv):
 
             
             fitresults[str(i)].append('Crystal-'+str(i+1)+' fit results')
-            fitresults[str(i)].append('runtime = '+str(round(runtimes[i]/60./60./24., 2))+' days')
+            fitresults[str(i)].append('runtime = '+str(round(runtimes[i]['S'][0]/60./60./24., 2))+' days')
             if note: fitresults[str(i)].append('note = '+note)
             fitresults[str(i)].append('script = '+script)
             fitresults[str(i)].append('root = '+vroot)
-            fitresults[str(i)].append('channels fit = '+fitchans)
+            fitresults[str(i)].append('selected xstals = '+str(justthese))
+            fitresults[str(i)].append('channels fit = '+str(fitchans))
             fitresults[str(i)].append('globals = '+str(globalmc))
             fitresults[str(i)].append('use others = '+str(others))
             #fitresults[str(i)].append('hist extend = '+str(extend))
@@ -881,13 +949,12 @@ def main(argv):
             fitresults[str(i)].append('energy shift in bins = '+str(binShift[i]))
             fitresults[str(i)].append('shifting these = '+str(shiftWhat))
             fitresults[str(i)].append('fitter step size = '+str(stepSize))
-            for key in ['S0', 'S1', 'M0', 'M1']:
-                fitresults[str(i)].append(key+' fit range = '\
-                                          +str(fitranges[i][key][1])\
-                                          +' - '\
-                                          +str(fitranges[i][key][2])\
-                                          +' keV  -->  rebin = '\
-                                          +str(fitranges[i][key][0]))
+            for chan in ['S0', 'S1', 'S2', 'M0', 'M1', 'M2']:
+                fitresults[str(i)].append('{0} fit --> rebin = [{1}] --> range = [{2} - {3}] keV'
+                                          .format(chan,
+                                                  fitranges[i][chan][0],
+                                                  fitranges[i][chan][1],
+                                                  fitranges[i][chan][2]))
         
         
         ### do the same to the global lsveto
@@ -906,17 +973,27 @@ def main(argv):
             try:
                 fitglobsigs[fgkey]['hist'].Scale(dat_int/mc_int)
             except:
-                print '\nERROR: No events for --> ',fgkey
-                print   '       Remove it from the fit!\n'
+                print('\nERROR: No events for --> {0}'.format(fgkey))
+                print('       Remove it from the fit!\n')
                 sys.exit()
             
-            for i in range(numx):
+            #for i in range(numx):
+            for i in [j-1 for j in justthese]:
                 X = str(i+1)
                 for C in allchans:
-                    for E in range(2):
+                    for E in range(3):
                         E = str(E)
                         
                         newkeys=[]
+                        tmpkey = 'x'+X+'-'+fgkey+'-c'+C+'-e'+E
+                        if tmpkey in sigs:
+                            newkeys.append(tmpkey)
+                        for F in range(numx):
+                            F=str(F+1)
+                            tmpkey = 'x'+X+'-'+fgkey+'-f'+F+'-c'+C+'-e'+E
+                            if tmpkey in sigs:
+                                newkeys.append(tmpkey)
+                        """
                         try:
                             tmpkey = 'x'+X+'-'+fgkey+'-c'+C+'-e'+E
                             test = sigs[tmpkey]['hist']
@@ -930,6 +1007,7 @@ def main(argv):
                                     newkeys.append(tmpkey)
                                 except:
                                     continue
+                        """
                         
                         if len(newkeys) > 0:
                             for newkey in newkeys:
@@ -959,7 +1037,7 @@ def main(argv):
                                         sigs[newkey]['info']['fbnd'][k] = 1./renorm * otherBnds[k]
                                         sigs[newkey]['info']['newfbnd'] = otherBnds
                                     else:
-                                        print 'ERROR: do not know what to do with useBounds =',useBounds
+                                        print('ERROR: do not know what to do with useBounds = {0}'.format(useBounds))
                                         sys.exit()
                                 #---------------------------------------------------------------------
 
@@ -986,18 +1064,24 @@ def main(argv):
 
 
         totalNumFits = len(fsigkeys)+len(fglobsigkeys)
-        print 'INFO: total number of hists being fit =', totalNumFits,'\n\n'
+        print('INFO: total number of hists being fit = {0}'.format(totalNumFits))
         sigObj = TObjArray(totalNumFits)
         
         for fskey in fsigkeys:
+            #print 'loading signal to fit -->', fskey
+            #print fitsigs[fskey]['hist'].GetNbinsX()
             sigObj.append(fitsigs[fskey]['hist'])
 
         for fgkey in fglobsigkeys:
+            #print 'loading global to fit -->', fskey
             sigObj.append(fitglobsigs[fgkey]['hist'])
-        
-        fit = TFractionFitter(fitdata, sigObj)
 
+        #print 'data', fitdata.GetNbinsX()
+
+        # init the fitter class
+        fit = TFractionFitter(fitdata, sigObj)
         fitter = fit.GetFitter()
+        #sys.exit()
         
         ### set fit bounds!!!
         for l in range(len(bounds)):
@@ -1009,7 +1093,7 @@ def main(argv):
             
         ### set the fit range
         #fit.SetRangeX(0, fmax*numx)
-        fit.SetRangeX(0, fitbins)
+        fit.SetRangeX(0, fitbins-1)
 
         ### if you want to get initial fit values from fitter...
         #fitter = fit.GetFitter()
@@ -1030,11 +1114,11 @@ def main(argv):
         #=======================================================================
 
         if status != 0:
-            print '\n\n*******************  FIT FAILURE  *******************\n\n'
-            print 'Time to fail = '+str(fitTime)+' sec \n'
+            print('\n\n*******************  FIT FAILURE  *******************\n\n')
+            print('Time to fail = {} sec \n'.format(fitTime))
             sys.exit()
         
-        print '\n\n*******************  SUCCESSFUL FIT  *******************\n\n'
+        print('\n\n*******************  SUCCESSFUL FIT  *******************\n\n')
         
         
         chi2 = fit.GetChisquare()
@@ -1059,7 +1143,8 @@ def main(argv):
         
         count = 0
         
-        for i in range(numx):
+        #for i in range(numx):
+        for i in [j-1 for j in justthese]:
             
             fitresults[str(i)].append('total number of hists being fit = '+str(totalNumFits))
             #fitresults[str(i)].append('returned fit status = '+str(status))
@@ -1086,9 +1171,9 @@ def main(argv):
                     fitsigs[fskey]['hist'].Scale(fscale)
                     
                     for C in allchans:
-                        for E in range(2):
+                        for E in range(3):
                             E = str(E)
-                            
+                            #print fskey
                             newkey = fskey+'-c'+C+'-e'+E
                             try:
                                 ### save the raw scaling factor from the fit
@@ -1097,6 +1182,7 @@ def main(argv):
                                 ### save converted scaling factor
                                 sigs[newkey]['fitscale'] = sigs[newkey]['fitscale'] * fscale
                             except:
+                                #print '!!! could not find', newkey
                                 continue
 
                             try:
@@ -1126,10 +1212,11 @@ def main(argv):
             fitglobsigs[fgkey]['hist'].Scale(fscale)
             
             #newkey=0
-            for i in range(numx):
+            #for i in range(numx):
+            for i in [j-1 for j in justthese]:
                 X = str(i+1)
                 for C in allchans:
-                    for E in range(2):
+                    for E in range(3):
                         E = str(E)
                         
                         newkeys=[]
@@ -1164,21 +1251,33 @@ def main(argv):
 
         
         ### scale the signals to mBq/kg
-        if dru: sigs = scaleSigs410(sigkeys, sigs)
-        else:   sigs = scaleSigs410(sigkeys, sigs, runtimes)
+        if dru:
+            #print 'dru scaling'
+            sigs = scaleSigs411(sigkeys, sigs)
+        else:
+            #print 'runtime scaling'
+            sigs = scaleSigs411(sigkeys, sigs, runtimes)
+
+        #print sigs['x6-internal-Pb210_GRND-f6-q1-cS-e2']['info']
+        #print sigs['x6-internal-Pb210_GRND-f6-q2-cS-e2']['info']
         
         ### print the fit activities
-        for i in range(numx):
+        #for i in range(numx):
+        for i in [j-1 for j in justthese]:
             for fskey in fsigkeys:
+                #print 'fskey =', fskey
                 if 'x'+str(i+1) in fskey:
                     finit=1
                     for C in allchans:
-                        for E in range(2):
+                        for E in range(3):
                             if finit:
                                 E = str(E)
                                 newkey = fskey+'-c'+C+'-e'+E
                                 try: test = sigs[newkey]['hist']
                                 except: continue
+
+                                #print 'found', newkey
+                                #print newkey, sigs[newkey]['info']['fbnd']
                                 
                                 ### print out activity and error and bounds
                                 fitacti = sigs[newkey]['info']['fitacti']
@@ -1197,7 +1296,7 @@ def main(argv):
                                 if limit:
                                     fitresults[str(i)].append(
                                         # show the actual error
-                                        '%42s = %.2e +/- %.2e mBq  (%.2e, %.2e) %s'
+                                        '%43s = %.2e +/- %.2e mBq  (%.2e, %.2e) %s'
                                         %('fit '+fskey, fitacti, fiterro, lobnd, hibnd, limit))
                                         # show error as %
                                         # oh this messes up my pretty plotting of fit activities
@@ -1207,7 +1306,7 @@ def main(argv):
                                 else:
                                     fitresults[str(i)].append(
                                         # show the actual error
-                                        '%42s = %.2e +/- %.2e mBq  (%.2e, %.2e)'
+                                        '%43s = %.2e +/- %.2e mBq  (%.2e, %.2e)'
                                         %('fit '+fskey, fitacti, fiterro, lobnd, hibnd))
                                         # show error as %
                                         # oh this messes up my pretty plotting of fit activities
@@ -1217,12 +1316,13 @@ def main(argv):
                                 finit = 0
 
         ### do the same for the globals
-        for i in range(numx):
+        #for i in range(numx):
+        for i in [j-1 for j in justthese]:
             for fgkey in fglobsigkeys:
                 X=str(i+1)
                 finit=1
                 for C in allchans:
-                    for E in range(2):
+                    for E in range(3):
                         E=str(E)
                         if finit:
                             
@@ -1260,9 +1360,11 @@ def main(argv):
                                     limit = '[UPPER LIMIT]'
                                 if limit:
                                     fitresults[str(i)].append(
-                                        # show the actual error
-                                        '%42s = %.2e +/- %.2e mBq  (%.2e, %.2e) %s'
-                                        %('fit '+'x'+X+'-'+fgkey, fitacti, fiterro, lobnd, hibnd, limit))
+                                        # show error in mBq
+                                        '%43s = %.2e +/- %.2e mBq  (%.2e, %.2e) %s'
+                                        #%('fit '+'x'+X+'-'+fgkey, fitacti, fiterro, lobnd, hibnd, limit))
+                                        # print as 'x0'
+                                        %('fit '+'x'+'0'+'-'+fgkey, fitacti, fiterro, lobnd, hibnd, limit))
                                         # show error as %
                                         # oh this messes up my pretty plotting of fit activities
                                         #'%42s = %.2e mBq (%.1f%%) %s'
@@ -1270,9 +1372,11 @@ def main(argv):
                                 
                                 else:
                                     fitresults[str(i)].append(
-                                        # show the actual error
-                                        '%42s = %.2e +/- %.2e mBq  (%.2e, %.2e)'
-                                        %('fit '+'x'+X+'-'+fgkey, fitacti, fiterro, lobnd, hibnd))
+                                        # show error in mBq
+                                        '%43s = %.2e +/- %.2e mBq  (%.2e, %.2e)'
+                                        #%('fit '+'x'+X+'-'+fgkey, fitacti, fiterro, lobnd, hibnd))
+                                        # print as 'x0'
+                                        %('fit '+'x'+'0'+'-'+fgkey, fitacti, fiterro, lobnd, hibnd))
                                         # show error as %
                                         # oh this messes up my pretty plotting of fit activities
                                         #'%42s = %.2e mBq (%.1f%%)'
@@ -1282,14 +1386,14 @@ def main(argv):
                                 finit = 0
             
             fitresults[str(i)].append('\n')
-
+            
             
         save = ''
         #if local: save += 'local'
         #else:     save += 'on-cup'
         save += str(runtag)
         save += '_Nchan-fit'
-        save += '_globals-'+globstr
+        #save += '_globals-'+globstr
         #save += '_loEfit-'+str(int(fLoE[0]))+'-'+str(int(fLoE[1]))
         #save += '_hiEfit-'+str(int(fHiE[0]))+'-'+str(int(fHiE[1]))
         #save += '_loEfitRebin-'+str(loEfitRebin)
@@ -1306,6 +1410,7 @@ def main(argv):
         #save += '_chans'+str(fitchans)
         #save += '_extend'+str(extend)
         #save += '_others'+str(others)
+        save += '_fit-results'
         if note: save += '_'+note
         save += '_'+V
 
@@ -1325,16 +1430,16 @@ def main(argv):
             resultskeys.sort()
                     
             ### write results to file
-            resultsfile = os.path.join(plotdir, save+'_fit-results.txt')
+            resultsfile = os.path.join(plotdir, save+'.txt')
             outfile = open(resultsfile, 'w')
             for key in resultskeys:
                 if int(key)+1 in justthese:
                     for line in fitresults[key]:
                         outfile.write(line+'\n')
             outfile.close()
-            
-            ### save histograms to a rootfile
-            rootoutfile = TFile(plotdir+"/histograms.root", "RECREATE")
+
+            ### save scaled histograms to rootfile?
+            rootoutfile = TFile(plotdir+"/histograms-scaled.root", "RECREATE")
             for key in sigkeys:
                 sigs[key]['hist'].Write(key)
             for key in bakkeys:
@@ -1345,6 +1450,9 @@ def main(argv):
             rootoutfile.Close()
         #-------------------------------------------------------------
         
+        ### create the updated backgrounds file
+        updateBkgsFile300(justthese, os.path.join(plotdir, mcfile), resultsfile, plotdir)
+
         
         #=================================================================
         #=================================================================
@@ -1369,16 +1477,20 @@ def main(argv):
         ### there must be an easier way...
         sepfittotal = [0 for x in range(numx)]
         sepfitresid = [0 for x in range(numx)]
-        for x in range(numx):
-            sepfittotal[x] = TH1F('sepFitTotal', 'sepFitTotal', fitbins, 0, fitbins)
-            sepfittotal[x].SetLineColor(kGray+1)
-            sepfittotal[x].SetMarkerColor(kGray+1)
-            sepfittotal[x].SetLineWidth(1)
+        for j in range(numx):
+            sepfittotal[j] = TH1F('sepFitTotal-'+str(j+1), 'sepFitTotal-'+str(j+1), fitbins, 0, fitbins)
+            if redtotal:
+                sepfittotal[j].SetLineColor(kRed)
+                sepfittotal[j].SetMarkerColor(kRed)
+            #else:
+            #    sepfittotal[j].SetLineColor(kGray+1)
+            #    sepfittotal[j].SetMarkerColor(kGray+1)
+            sepfittotal[j].SetLineWidth(1)
             
-            sepfitresid[x] = TH1F('sepFitResid', 'sepFitResid', fitbins, 0, fitbins)
-            sepfitresid[x].SetLineColor(kBlack)
-            sepfitresid[x].SetMarkerColor(kBlack)
-            sepfitresid[x].SetLineWidth(1)
+            sepfitresid[j] = TH1F('sepFitResid-'+str(j+1), 'sepFitResid-'+str(j+1), fitbins, 0, fitbins)
+            sepfitresid[j].SetLineColor(kBlack)
+            sepfitresid[j].SetMarkerColor(kBlack)
+            sepfitresid[j].SetLineWidth(1)
             
         flegs  = [0 for x in range(numx)]
         flegs2 = [0 for x in range(numx)]
@@ -1420,7 +1532,7 @@ def main(argv):
             sepfitdata[i] = TH1F('sepFitData', 'sepFitData', fitbins, 0, fitbins)
             if i+1 in justthese:
                 sepfitdata[i] = deepcopy(fitdata)
-            newFitTitle = str('Crystal-'+str(i+1)+'   '+'Fit-chans-'+fitchans)
+            newFitTitle = str('Crystal-'+str(i+1)+'   '+'Fit-chans-'+str(fitchans))
             sepfitdata[i].SetTitle(newFitTitle)
             sepfitdata[i].SetLineColor(kBlack)
             sepfitdata[i].SetMarkerColor(kBlack)
@@ -1438,12 +1550,12 @@ def main(argv):
             #sepfitdata[i].GetXaxis().SetTitle('Energy (keV)')
             #sepfitdata[i].GetXaxis().SetLabelFont(font)
             #sepfitdata[i].GetXaxis().SetLabelSize(size)
-
+            """
             if dru:
                 sepfitdata[i].SetAxisRange(2e-3, 2e3, 'y')
                 if i == 8:
                     sepfitdata[i].SetAxisRange(2e-5, 2e1, 'y')
-
+            """
             sepfitdata[i].SetAxisRange(xstalbins[i][0], xstalbins[i][1], 'x')
             sepfitdata[i].Draw()
             
@@ -1460,7 +1572,10 @@ def main(argv):
                     cname = fskey.split('-')[1]+'-'+fskey.split('-')[2]
                     sepfitsigs[i][fskey]['hist'].SetMarkerColor(uniqColor[cname])
                     sepfitsigs[i][fskey]['hist'].SetLineColor(uniqColor[cname])
-                                        
+
+                    ### set errors to 0 for better viewing
+                    sepfitsigs[i][fskey]['hist'] = zeroBinError(sepfitsigs[i][fskey]['hist'])
+                    
                     ### draw the sigs
                     if i+1 in justthese:
                         sepfitsigs[i][fskey]['hist'].Draw(dopt)
@@ -1476,6 +1591,9 @@ def main(argv):
                 cname = fgkey
                 sepfitglobsigs[i][fgkey]['hist'].SetMarkerColor(uniqColor[cname])
                 sepfitglobsigs[i][fgkey]['hist'].SetLineColor(uniqColor[cname])
+
+                ### set errors to 0 for better viewing
+                sepfitglobsigs[i][fgkey]['hist'] = zeroBinError(sepfitglobsigs[i][fgkey]['hist'])
                 
                 ### draw the sigs
                 if i+1 in justthese:
@@ -1526,6 +1644,14 @@ def main(argv):
             
             ### draw to total and legend
             if i+1 in justthese:
+
+                if redtotal:
+                    sepfittotal[i].SetLineColor(kRed)
+                    sepfittotal[i].SetMarkerColor(kRed)
+
+                ### set errors to 0 for better viewing
+                sepfittotal[i] = zeroBinError(sepfittotal[i])
+
                 sepfittotal[i].Draw(dopt)
                 flegs[i].AddEntry(sepfittotal[i],
                                   'Fit Total (chi2/ndf = '+str(round(fitchi2ndf,2))+')',
@@ -1603,7 +1729,7 @@ def main(argv):
                     fisave  = ''
                     fisave += 'x'+str(i+1)
                     fisave += '_fit'
-                    fisave += '_globals-'+globstr
+                    #fisave += '_globals-'+globstr
                     #fisave += '_loEfRS'+str(loEfitRebinScale)
                     #fisave += '_hiEfRS'+str(hiEfitRebinScale)
                     fisave += '_dru'+str(dru)
@@ -1622,7 +1748,9 @@ def main(argv):
         
         msave  = ''
         msave += str(runtag)
-        msave += '_globals-'+globstr
+        msave += '_all-xstals'
+        msave += '_the-indi-fits'
+        #msave += '_globals-'+globstr
         #msave += '_loEfit-'+str(int(fLoE[0]))+'-'+str(int(fLoE[1]))
         #msave += '_hiEfit-'+str(int(fHiE[0]))+'-'+str(int(fHiE[1]))
         #msave += '_loEfitRebin-'+str(loEfitRebin)
@@ -1701,11 +1829,12 @@ def main(argv):
         
         fitdata.Draw()
         #flegs[i].AddEntry(fitdata, 'data - bkgs', legopt)
+        """
         if dru:
             fitdata.SetAxisRange(2e-3, 2e3, 'y')
             #if i == 8:
             #    fitdata.SetAxisRange(2e-5, 2e1, 'y')
-        
+        """
         fitdata.SetAxisRange(0, fitbins, 'x')
         
         
@@ -1740,7 +1869,7 @@ def main(argv):
             ### draw the sigs
             fitglobsigs[fgkey]['hist'].Draw(dopt)
 
-            # FIX-ME
+            # FIXME
             # why if i==0???
             #if i==0:
                 ### add MC to total MC hist
@@ -1749,6 +1878,9 @@ def main(argv):
                 
         ### select the right range
         ftotal.SetAxisRange(0, fitbins, 'x')
+        if redtotal:
+                ftotal.SetLineColor(kRed)
+                ftotal.SetMarkerColor(kRed)
         ftotal.Draw(dopt)
         
         ### build legend after getting the numbers of signals
@@ -1858,9 +1990,32 @@ def main(argv):
         
         mcanv.Update()
 
+        cfsave  = ''
+        cfsave += str(runtag)
+        cfsave += '_all-xstals'
+        cfsave += '_the-comb-fit'
+        #cfsave += '_globals-'+globstr
+        #cfsave += '_loEfit-'+str(int(fLoE[0]))+'-'+str(int(fLoE[1]))
+        #cfsave += '_hiEfit-'+str(int(fHiE[0]))+'-'+str(int(fHiE[1]))
+        #cfsave += '_loEfitRebin-'+str(loEfitRebin)
+        #cfsave += '_hiEfitRebin-'+str(hiEfitRebin)
+        #cfsave += '_loEfitRebinScale'+str(loEfitRebinScale)
+        #cfsave += '_hiEfitRebinScale'+str(hiEfitRebinScale)
+        #cfsave += '_useBounds'+str(useBounds)
+        #cfsave += '_mcsumw2'+str(mcsumw2)
+        #cfsave += '_datsumw2'+str(datsumw2)
+        #cfsave += '_dru'+str(dru)
+        #cfsave += '_loEplotRebin-'+str(loEplotRebin)
+        #cfsave += '_hiEplotRebin-'+str(hiEplotRebin)
+        #cfsave += '_reuse'+str(reuse)
+        #cfsave += '_chans'+str(fitchans)
+        #cfsave += '_extend'+str(extend)
+        #cfsave += '_others'+str(others)
+        if note: cfsave += '_'+note
+        cfsave += '_'+V
         
-        #mcanv.Print(plotdir+'/'+msave+'.png')
-        mcanv.Print(plotdir+'/'+save+'.png')
+        mcanv.Print(plotdir+'/'+cfsave+'.png')
+        
         #=============================================================
         #=============================================================
 
@@ -1869,35 +2024,38 @@ def main(argv):
     ### end of fitting bit if you have signals
 
     
-    ### create the updated backgrounds file
-    updateBkgsFile300(justthese, os.path.join(plotdir, mcfile), resultsfile, plotdir)
     
-    
-    # plot the lo and hi energy histograms for all channels
+    #=================================================================
+    #  plot histograms for all crystals + lsveto
     #=================================================================
     
-    # number of energy ranges (lo, hi)
-    numE = 2
+    # number of energy ranges (low, high, alpha)
+    if showAlphas:
+        numE = 3
+    else:
+        numE = 2
+        
     # number of channels (single and/or multi-hit)
-    numC = len(pltchans)
+    #numC = len(pltchans)
+    numC = 2
     
-    canvs  = [[0 for x in range(numE)] for x in range(numC)]
+    canvs  = [[0 for e in range(numE)] for c in range(numC)]
     
     ### for separate plots
-    sepPlots = [[[0 for x in range(numx)] for x in range(numE)] for x in range(numC)]
-    sepTopPad = [[[0 for x in range(numx)] for x in range(numE)] for x in range(numC)]
-    sepBotPad = [[[0 for x in range(numx)] for x in range(numE)] for x in range(numC)]
+    sepPlots = [[[0 for i in range(numx)] for e in range(numE)] for c in range(numC)]
+    sepTopPad = [[[0 for i in range(numx)] for e in range(numE)] for c in range(numC)]
+    sepBotPad = [[[0 for i in range(numx)] for e in range(numE)] for c in range(numC)]
     
     ### seperate memory space for the pads is key!!!!
-    toppad = [[0 for x in range(numE)] for x in range(numC)]
-    botpad = [[0 for x in range(numE)] for x in range(numC)]
+    toppad = [[[0 for i in range(numx)] for e in range(numE)] for c in range(numC)]
+    botpad = [[[0 for i in range(numx)] for e in range(numE)] for c in range(numC)]
     
-    legs   = [[0 for x in range(numE)] for x in range(numC)]
-    legs2  = [[0 for x in range(numE)] for x in range(numC)]
-    zeros  = [[0 for x in range(numE)] for x in range(numC)]
+    legs   = [[[0 for i in range(numx)] for e in range(numE)] for c in range(numC)]
+    legs2  = [[[0 for i in range(numx)] for e in range(numE)] for c in range(numC)]
+    zeros  = [[[0 for i in range(numx)] for e in range(numE)] for c in range(numC)]
     
-    total  = [[0 for x in range(numE)] for x in range(numC)]
-    resid  = [[0 for x in range(numE)] for x in range(numC)]
+    total  = [[0 for e in range(numE)] for c in range(numC)]
+    resid  = [[0 for e in range(numE)] for c in range(numC)]
     
     gbkgs  = [[[{} for x in range(numx)] for x in range(numE)] for x in range(numC)]
     gsigs  = [[[{} for x in range(numx)] for x in range(numE)] for x in range(numC)]
@@ -1906,8 +2064,9 @@ def main(argv):
     for C, chan in enumerate(pltchans): 
     
         for E in range(numE):
-
-            if E: plotRebin = hiEplotRebin
+            
+            if E == 2: plotRebin = alphaPlotRebin
+            elif E == 1: plotRebin = hiEplotRebin
             else: plotRebin = loEplotRebin
             
             # have the plotting be seperated out from the 8 crystal loop
@@ -1921,37 +2080,33 @@ def main(argv):
             gStyle.SetPadTopMargin    (0.07)
             gStyle.SetPadBottomMargin (0.11)
             gStyle.SetPadRightMargin  (0.02)
-            #gStyle.SetPadLeftMargin   (0.12)
-            #font = 63
-            #size = 13
-            #yoff = 4.2
-            #xoff = 8
+            gStyle.SetPadLeftMargin   (0.10)
             
-            gStyle.SetPadLeftMargin(0.10)
             font = 43
             size = 16
             yoff = 2.5
             xoff = 7
-            
+            """
             toppad[C][E] = []
             botpad[C][E] = []
 
             legs[C][E]   = []
             legs2[C][E]  = []
             zeros[C][E]  = []
-
-            total[C][E]  = makeTotal100(chan, E, params[E])
-            resid[C][E]  = makeResid100(chan, E, params[E])
+            """
+            total[C][E] = makeTotal100(chan, E, params[E])
+            resid[C][E] = makeResid100(chan, E, params[E])
             
             for i in range(numx):
+            #for i in [j-1 for j in justthese]:
                 
                 canvs[C][E].cd(i+1)
                 
                 fraction = 0.3
                 pad1 = TPad('pad1'+chan+str(E),'pad1'+chan+str(E),0,fraction,1,1)
-                toppad[C][E].append(pad1)
+                toppad[C][E][i] = (pad1)
                 pad2 = TPad('pad2'+chan+str(E),'pad2'+chan+str(E),0,0,1,fraction)
-                botpad[C][E].append(pad2)
+                botpad[C][E][i] = (pad2)
                 
                 toppad[C][E][i].SetBottomMargin(0.01)
                 toppad[C][E][i].SetBorderMode(0)
@@ -1975,7 +2130,8 @@ def main(argv):
                     lnc = 3
                 else:
                     leg = TLegend(xlegstart, ylegstart, xlegstop, ylegstop)
-                legs[C][E].append(leg)
+                    
+                legs[C][E][i] = (leg)
                 legs[C][E][i].SetFillColor(0)
                 legs[C][E][i].SetBorderSize(0)
                 legs[C][E][i].SetNColumns(lnc)
@@ -1990,10 +2146,10 @@ def main(argv):
                 total[C][E][i].Rebin(plotRebin)
                 #total[C][E][i].Scale(1./float(plotRebin))
                 #total[C][E][i].Sumw2()
-                if dru and i!=8:
+                #if dru and i!=8:
                     #total[C][E][i].GetYaxis().SetTitle('counts / day / kg / keV  (dru)')
-                    if E: total[C][E][i].SetAxisRange(2e-3, 2e1, 'y')
-                    else: total[C][E][i].SetAxisRange(2e-3, 3e2, 'y')
+                    #if E: total[C][E][i].SetAxisRange(2e-3, 2e1, 'y')
+                    #else: total[C][E][i].SetAxisRange(2e-3, 3e2, 'y')
                     #if i==8: total[C][E][i].SetAxisRange(2e-4, 2e0, 'y')
                 #else: total[C][E][i].GetYaxis().SetTitle('arb. counts')
 
@@ -2077,7 +2233,8 @@ def main(argv):
                         #data[dkey]['hist'].GetXaxis().SetLabelFont(font)
                         #data[dkey]['hist'].GetXaxis().SetLabelSize(size)
 
-                        if E: data[dkey]['hist'].SetAxisRange(hier[0], hier[1], 'x')
+                        if E == 2: data[dkey]['hist'].SetAxisRange(aler[0], aler[1], 'x')
+                        elif E == 1: data[dkey]['hist'].SetAxisRange(hier[0], hier[1], 'x')
                         else: data[dkey]['hist'].SetAxisRange(loer[0], loer[1], 'x')
 
                         if dru and i!=8:
@@ -2089,14 +2246,18 @@ def main(argv):
                         ### LSveto plotting
                         if E and i==8:
                             data[dkey]['hist'].SetAxisRange(0, lsHiE, 'x')
-                            data[dkey]['hist'].SetAxisRange(1e-5, 0.5, 'y')
+                            if dru:
+                                if chan == 'S':
+                                    data[dkey]['hist'].SetAxisRange(lsLoSY, lsHiSY, 'y')
+                                if chan == 'M':
+                                    data[dkey]['hist'].SetAxisRange(lsLoMY, lsHiMY, 'y')
+
                         
                         data[dkey]['hist'].Draw('same')
                         days = round(data[dkey]['runtime']/86400., 2)
-                        
-                        legs[C][E][i].AddEntry(data[dkey]['hist'],
-                                               data[dkey]['info']['tag']+'  '+data[dkey]['info']['build'],
-                                               legopt)
+                        dataLegName = data[dkey]['info']['tag']\
+                            +'  '+data[dkey]['info']['build']
+                        legs[C][E][i].AddEntry(data[dkey]['hist'], dataLegName, legopt)
                         
                         #if ingroups: legs[C][E][i].AddEntry(data[dkey]['hist'], 'Data', legopt)
                         #else: legs[C][E][i].AddEntry(data[dkey]['hist'], dkey+' ('+str(days)+' days)', legopt)
@@ -2118,23 +2279,23 @@ def main(argv):
                         bkgs[key]['hist'].Rebin(plotRebin)
                         bkgs[key]['hist'].Scale(1./float(plotRebin))
                         #bkgs[key]['hist'].Sumw2()
-                        
+                        """
                         if dru:
                             if E: bkgs[key]['hist'].SetAxisRange(2e-3, 2e1, 'y')
                             else: bkgs[key]['hist'].SetAxisRange(2e-3, 3e2, 'y')
-                        
+                        """
                         if ingroups:
                             if bkgs[key]['info']['group'] == 'none':
                                 try:
-                                    gbkgs[C][E][i]['none'][key] = bkgs[key]['hist']
+                                    gbkgs[C][E][i]['none'][key] = deepcopy(bkgs[key]['hist'])
                                 except:
                                     gbkgs[C][E][i]['none'] = {}
-                                    gbkgs[C][E][i]['none'][key] = bkgs[key]['hist']
+                                    gbkgs[C][E][i]['none'][key] = deepcopy(bkgs[key]['hist'])
                             else:
                                 try:
                                     gbkgs[C][E][i][bkgs[key]['info']['group']].Add(bkgs[key]['hist'])
                                 except:
-                                    gbkgs[C][E][i][bkgs[key]['info']['group']] = bkgs[key]['hist']
+                                    gbkgs[C][E][i][bkgs[key]['info']['group']] = deepcopy(bkgs[key]['hist'])
                         else:
                             bkgs[key]['hist'].Draw(dopt)
 
@@ -2168,15 +2329,15 @@ def main(argv):
                         if ingroups:
                             if sigs[key]['info']['group'] == 'none':
                                 try:
-                                    gbkgs[C][E][i]['none'][key] = sigs[key]['hist']
+                                    gbkgs[C][E][i]['none'][key] = deepcopy(sigs[key]['hist'])
                                 except:
                                     gbkgs[C][E][i]['none'] = {}
-                                    gbkgs[C][E][i]['none'][key] = sigs[key]['hist']
+                                    gbkgs[C][E][i]['none'][key] = deepcopy(sigs[key]['hist'])
                             else:
                                 try:
                                     gbkgs[C][E][i][sigs[key]['info']['group']].Add(sigs[key]['hist'])
                                 except:
-                                    gbkgs[C][E][i][sigs[key]['info']['group']] = sigs[key]['hist']
+                                    gbkgs[C][E][i][sigs[key]['info']['group']] = deepcopy(sigs[key]['hist'])
                         else:
                             sigs[key]['hist'].Draw(dopt)
 
@@ -2214,13 +2375,20 @@ def main(argv):
                             if bkey == 'x'+str(i+1)+'-'+name+'-c'+chan+'-e'+str(E) \
                                or bkey == 'x'+str(i+1)+'-'+name+'-f'+str(i+1)+'-c'+chan+'-e'+str(E):
                                 activ = '(%.2e) '%(bkgs[bkey]['info']['acti'])
-                                legs[C][E][i].AddEntry(bkgs[bkey]['hist'], activ+bkey, legopt)
+                                #legs[C][E][i].AddEntry(bkgs[bkey]['hist'], activ+bkey, legopt)
+                                # make legend names smaller
+                                bits = bkey.split('-')
+                                legname = bits[1]+' '+bits[2]
+                                legs[C][E][i].AddEntry(bkgs[bkey]['hist'], legname, legopt)
                         for skey in sigkeys:
                             if skey == 'x'+str(i+1)+'-'+name+'-c'+chan+'-e'+str(E) \
                                or skey == 'x'+str(i+1)+'-'+name+'-f'+str(i+1)+'-c'+chan+'-e'+str(E):
                                 activ = '(%.2e) '%(sigs[skey]['info']['fitacti'])
-                                legs[C][E][i].AddEntry(sigs[skey]['hist'], activ+skey, legopt)
-                
+                                #legs[C][E][i].AddEntry(sigs[skey]['hist'], activ+skey, legopt)
+                                # make legend names smaller
+                                bits = skey.split('-')
+                                legname = bits[1]+' '+bits[2]
+                                legs[C][E][i].AddEntry(sigs[skey]['hist'], legname, legopt)
                 
                 ### you need to scale the error by the dru scaling and/or the rebinning
                 #-----------------------------------------------------------------------------
@@ -2240,30 +2408,25 @@ def main(argv):
                 ### get the chi2 of the total mc compared to data
                 #=============================================================================
                 #-----------------------------------------------------------------------------
-                #chi2  = ROOT.Double(-1)
-                #ndf   = ROOT.Long(1)
-                #igood = ROOT.Long(0)
-                # ROOT6 FIX
-                chi2  = ctypes.c_double(0.0)
-                ndf   = ctypes.c_int(0)
-                igood = ctypes.c_int(0)
-
-                #print 'THIS ONE???'
-                #print dkey, data[dkey]['hist'].GetNbinsX()
-                #print total[C][E][i].GetNbinsX()
-                
-                if dkey and tcount:
-                    if data[dkey]['hist'].GetEntries() > 0:
-                        pval  = data[dkey]['hist'].Chi2TestX(total[C][E][i], chi2, ndf, igood, chiopt)
-                        #print 'INFO:',dkey,'pval =',pval,'chi2 =',chi2,'ndf =',ndf,'igood =',igood
-
-                        # ROOT6 FIX
-                        chi2  = float(chi2.value)
-                        ndf   = int(ndf.value)
-                        igood = int(igood.value)
-                        
-                        #print 'INFO:',dkey,'total MC chi2/ndf =',round(chi2/data[dkey]['druScale']/ndf,2)
-                        print 'INFO:',dkey,'total MC chi2/ndf =',round(chi2/ndf,2)
+                if printChi2:
+                    #chi2  = ROOT.Double(-1)
+                    #ndf   = ROOT.Long(1)
+                    #igood = ROOT.Long(0)
+                    # ROOT6 FIX
+                    chi2  = ctypes.c_double(0.0)
+                    ndf   = ctypes.c_int(0)
+                    igood = ctypes.c_int(0)
+                    if dkey and tcount:
+                        if data[dkey]['hist'].GetEntries() > 0 \
+                           and total[C][E][i].GetEntries() > 0:
+                            pval  = data[dkey]['hist'].Chi2TestX(
+                                total[C][E][i], chi2, ndf, igood, chiopt)
+                            # ROOT6 FIX
+                            chi2  = float(chi2.value)
+                            ndf   = int(ndf.value)
+                            igood = int(igood.value)
+                            print('INFO: {0} total MC chi2/ndf = {1}'
+                                  .format(dkey, round(chi2/ndf, 2)))
                 #-----------------------------------------------------------------------------
                 #=============================================================================
 
@@ -2278,7 +2441,7 @@ def main(argv):
                         if ingroups:
                             legs[C][E][i].AddEntry(total[C][E][i], 'Total', legopt)
                         else:
-                            total[C][E][i].SetLineColor(kGray+1)
+                            #total[C][E][i].SetLineColor(kGray+1)
                             legs[C][E][i].AddEntry(total[C][E][i], 'Total', legopt)
                             #legs[C][E][i].AddEntry(total[C][E][i],
                             #    'Total MC (chi2/ndf = '+str(round(chi2/ndf,2))+')', legopt)
@@ -2295,15 +2458,20 @@ def main(argv):
                 ### try to get the residuals in!
                 #---------------------------------------------------------
                 botpad[C][E][i].cd()
-                leg = TLegend(0.72, 0.78, 0.94, 0.94)
-                legs2[C][E].append(leg)
+                leg2 = TLegend(0.72, 0.78, 0.94, 0.94)
+                legs2[C][E][i] = (leg2)
                 legs2[C][E][i].SetFillColor(0)
                 legs2[C][E][i].SetBorderSize(0)
                 legopt = 'LPE'
 
                 if tcount and dkey:
-                    resid[C][E][i].Divide(data[dkey]['hist'], total[C][E][i])
-                
+                    total[C][E][i] = cleanSmallBins(total[C][E][i])
+                    try:
+                        resid[C][E][i].Divide(data[dkey]['hist'], total[C][E][i])
+                    except:
+                        print 'WARNING: could not divide', dkey, 'by total'
+                        pass
+                    
                 resid[C][E][i].SetTitle('')
                 resid[C][E][i].SetXTitle('Energy (keVee)')
                 resid[C][E][i].GetXaxis().SetTitleFont(font)
@@ -2324,20 +2492,21 @@ def main(argv):
                 # '5' secondary and '05' primary
                 resid[C][E][i].GetYaxis().SetNdivisions(505)
 
-                if E: resid[C][E][i].SetAxisRange(hier[0], hier[1], 'x')
-                else: resid[C][E][i].SetAxisRange(loer[0], loer[1], 'x')
+                if E == 2:   resid[C][E][i].SetAxisRange(aler[0], aler[1], 'x')
+                elif E == 1: resid[C][E][i].SetAxisRange(hier[0], hier[1], 'x')
+                else:        resid[C][E][i].SetAxisRange(loer[0], loer[1], 'x')
 
                 ### LSveto plotting
                 if E and i==8:
                     resid[C][E][i].SetAxisRange(0, lsHiE, 'x')
                 
-                resid[C][E][i].SetAxisRange(0.1,10,'y')
-                
-                
+                                
                 ###---------------------------------------------
                 if linres:
                     botpad[C][E][i].SetLogy(0)
                     resid[C][E][i].SetAxisRange(lrs[0], lrs[1], 'y')
+                else:
+                    resid[C][E][i].SetAxisRange(0.1,10,'y')
                 ###---------------------------------------------
 
                 
@@ -2356,7 +2525,7 @@ def main(argv):
                         try:
                             resid[C][E][i].SetBinError(n, R * (sD/D))
                         except:
-                            resid[C][E][i].SetBinError(n,0)
+                            resid[C][E][i].SetBinError(n, 0)
                         """
                         # assume sqrt(N) error on the total
                         T  = total[C][E][i].GetBinContent(n)
@@ -2383,7 +2552,7 @@ def main(argv):
                 zero = TLine(eran[E][0], 1, eran[E][1], 1)
                 if E and i==8:
                     zero = TLine(0, 1, lsHiE, 1)
-                zeros[C][E].append(zero)
+                zeros[C][E][i] = (zero)
                 zeros[C][E][i].SetLineColor(kRed)
                 zeros[C][E][i].SetLineWidth(1)
                 zeros[C][E][i].Draw()
@@ -2397,9 +2566,10 @@ def main(argv):
             #if local: save += 'local'
             #else: save += 'on-cup'
             save += str(runtag)
-            save += '_globals-'+globstr
-            save += '_chan'+chan
-            save += '_E'+str(E)
+            save += '_all-xstals'
+            #save += '_globals-'+globstr
+            save += '_c'+chan
+            save += '_e'+str(E)
             #save += '_loEfit-'+str(int(fLoE[0]))+'-'+str(int(fLoE[1]))
             #save += '_hiEfit-'+str(int(fHiE[0]))+'-'+str(int(fHiE[1]))
             #save += '_loEfitRebin-'+str(loEfitRebin)
@@ -2441,7 +2611,7 @@ def main(argv):
                             sepPlots[C][E][i].Update()
                             isave  = ''
                             isave += 'x'+str(i+1)
-                            isave += '-cs'+str(fitchans)
+                            #isave += '-cs'+str(fitchans)
                             isave += '-c'+str(chan)
                             isave += '-e'+str(E)
                             #isave += '-ext'+str(extend)
@@ -2452,60 +2622,76 @@ def main(argv):
                             sepPlots[C][E][i].Print(plotdir+'/'+isave+'.png')
 
                         except:
-                            print 'WARNING: could not make plot for xstal-'+str(i+1)
+                            print('WARNING: could not make plot for xstal-{0}'.format(i+1))
                             continue
 
     
-    ### Save 4 plots to one canvas
+    ### Save 4 (or 6) plots to one canvas
     #-------------------------------------------------------------
     if indi:
         combPlots = [0 for x in range(numx)]
-        tpad = [[0 for x in range(numx)] for x in range(4)]
-        bpad = [[0 for x in range(numx)] for x in range(4)]
+        #tpad = [[0 for x in range(numx)] for x in range(4)]
+        #bpad = [[0 for x in range(numx)] for x in range(4)]
+        # extend for alphas
+        tpad = [[0 for x in range(numx)] for x in range(6)]
+        bpad = [[0 for x in range(numx)] for x in range(6)]
         
-        for i in range(numx):
-            if i+1 in justthese:
-                try:
-                    combPlots[i] = TCanvas('ccan-'+str(i+1),'ccan-'+str(i+1),0,0,1400,900)
-                    combPlots[i].Divide(2,2)
-                    p=0
-                    for C, chan in enumerate(pltchans):
-                        for E in range(numE):
-                            tpad[p][i] = toppad[C][E][i].Clone()
-                            bpad[p][i] = botpad[C][E][i].Clone()
-                            combPlots[i].cd(p+1)
-                            tpad[p][i].Draw()
-                            bpad[p][i].Draw()
-                            combPlots[i].Update()
-                            p += 1
-                    csave  = ''
-                    csave += 'x'+str(i+1)
-                    csave += '_combined'
-                    csave += '_globals-'+globstr
-                    #csave += '_ext'+str(extend)
-                    csave += '_oth'+str(others)
-                    if note: csave += '_'+str(note)
-                    csave += '_'+str(V)
+        #for i in range(numx):
+        for i in [j-1 for j in justthese]:
+            #if i+1 in justthese:
+                #try:
+            combPlots[i] = TCanvas('ccan-'+str(i+1),'ccan-'+str(i+1),0,0,1400,900)
+            """
+            if showAlphas:
+                combPlots[i].Divide(3,2)
+                Es = 3
+            else:
+                combPlots[i].Divide(2,2)
+                Es = 2
+            """
+            combPlots[i].Divide(2,2)
+            Es = 2
+            
+            p=0
+            for C, chan in enumerate(pltchans):
+                #for E in range(numE):
+                # don't plot alphas
+                for E in range(Es):
+                    tpad[p][i] = toppad[C][E][i].Clone()
+                    bpad[p][i] = botpad[C][E][i].Clone()
+                    combPlots[i].cd(p+1)
+                    tpad[p][i].Draw()
+                    bpad[p][i].Draw()
+                    combPlots[i].Update()
+                    p += 1
+            csave  = ''
+            csave += 'x'+str(i+1)
+            csave += '_all-channels'
+            #csave += '_globals-'+globstr
+            #csave += '_ext'+str(extend)
+            csave += '_oth'+str(others)
+            if note: csave += '_'+str(note)
+            csave += '_'+str(V)
+
+            combPlots[i].Print(plotdir+'/'+csave+'.png')
                     
-                    combPlots[i].Print(plotdir+'/'+csave+'.png')
-                    
-                except:
-                    print 'WARNING: could not make plot for xstal-'+str(i+1)
-                    continue
+                #except:
+                #    print('WARNING: could not make plot for xstal-{0}'.format(i+1))
+                #    continue
 
 
     ### Plot the 0-40 keV region of single hit
     #-------------------------------------------------------------       
     if indi:
-        zscanv = [0 for x in range(numx)]
-        zshist = [0 for x in range(numx)]
-        zsdata = [0 for x in range(numx)]
-        zstotal = [0 for x in range(numx)]
-        #zsresid = [0 for x in range(numx)]
-        zsresid = makeResid100('S', 0, params[0])
-        zsline = [0 for x in range(numx)]
-        zstop = [0 for x in range(numx)]
-        zsbot = [0 for x in range(numx)]
+        zsh_canv = [0 for x in range(numx)]
+        zsh_hist = [0 for x in range(numx)]
+        zsh_data = [0 for x in range(numx)]
+        zsh_total = [0 for x in range(numx)]
+        #zsh_resid = [0 for x in range(numx)]
+        zsh_resid = makeResid100('S', 0, params[0])
+        zsh_line = [0 for x in range(numx)]
+        zsh_top = [0 for x in range(numx)]
+        zsh_bot = [0 for x in range(numx)]
         
         font = 43
         size = 24
@@ -2516,34 +2702,34 @@ def main(argv):
         for i in range(numx):
             if i+1 in justthese and i+1 != 9:
 
-                zscanv[i] = TCanvas('zscanv-'+str(i+1),'zscanv-'+str(i+1),
+                zsh_canv[i] = TCanvas('zsh_canv-'+str(i+1),'zsh_canv-'+str(i+1),
                                 0, 0, 1200, 700)
 
                 fraction = 0.3
                 pad1 = TPad('pad1_'+str(i),'pad1_'+str(i),0,fraction,1,1)
-                #zstop[i].append(pad1)
-                zstop[i] = (pad1)
+                #zsh_top[i].append(pad1)
+                zsh_top[i] = (pad1)
                 pad2 = TPad('pad2_'+str(i),'pad2_'+str(i),0,0,1,fraction)
-                #zsbot[i].append(pad2)
-                zsbot[i] = (pad2)
+                #zsh_bot[i].append(pad2)
+                zsh_bot[i] = (pad2)
                 
-                zstop[i].SetBottomMargin(0.01)
-                zstop[i].SetBorderMode(0)
+                zsh_top[i].SetBottomMargin(0.01)
+                zsh_top[i].SetBorderMode(0)
                 
-                #zsbot[i].SetLogy(1)
-                zstop[i].SetLogy(0)
+                #zsh_bot[i].SetLogy(1)
+                zsh_top[i].SetLogy(0)
                 
-                zsbot[i].SetTopMargin(0.05)
-                zsbot[i].SetBottomMargin(0.3)
-                zsbot[i].SetBorderMode(0)
+                zsh_bot[i].SetTopMargin(0.05)
+                zsh_bot[i].SetBottomMargin(0.3)
+                zsh_bot[i].SetBorderMode(0)
                 
-                #zsbot[i].SetLogy(1)
-                zsbot[i].SetLogy(0)
+                #zsh_bot[i].SetLogy(1)
+                zsh_bot[i].SetLogy(0)
                 
-                zstop[i].Draw()
-                zsbot[i].Draw()
+                zsh_top[i].Draw()
+                zsh_bot[i].Draw()
 
-                zstop[i].cd()
+                zsh_top[i].cd()
 
                 #gStyle.SetPadLeftMargin(0.09)
 
@@ -2557,45 +2743,45 @@ def main(argv):
                     #print bla.GetName(), bla
 
                     if 'data' in bla.GetName():
-                        zsdata[i] = (toppad[0][0][i].GetPrimitive(bla.GetName()))
+                        zsh_data[i] = (toppad[0][0][i].GetPrimitive(bla.GetName()))
                     if 'total' in bla.GetName():
-                        zstotal[i] = (toppad[0][0][i].GetPrimitive(bla.GetName()))
+                        zsh_total[i] = (toppad[0][0][i].GetPrimitive(bla.GetName()))
                     
                     try:
-                        zshist[i] = (toppad[0][0][i].GetPrimitive(bla.GetName()))
+                        zsh_hist[i] = (toppad[0][0][i].GetPrimitive(bla.GetName()))
                         
-                        zshist[i].SetXTitle('energy (keV)')
-                        zshist[i].GetXaxis().SetTitleFont(font)
-                        zshist[i].GetXaxis().SetTitleSize(size)
-                        zshist[i].GetXaxis().SetTitleOffset(xoff)
-                        zshist[i].GetXaxis().SetLabelFont(font)
-                        zshist[i].GetXaxis().SetLabelSize(size)
-                        zshist[i].GetXaxis().SetLabelOffset(loff)
+                        zsh_hist[i].SetXTitle('energy (keV)')
+                        zsh_hist[i].GetXaxis().SetTitleFont(font)
+                        zsh_hist[i].GetXaxis().SetTitleSize(size)
+                        zsh_hist[i].GetXaxis().SetTitleOffset(xoff)
+                        zsh_hist[i].GetXaxis().SetLabelFont(font)
+                        zsh_hist[i].GetXaxis().SetLabelSize(size)
+                        zsh_hist[i].GetXaxis().SetLabelOffset(loff)
                                                 
-                        zshist[i].SetYTitle('counts (dru)')
-                        zshist[i].GetYaxis().SetTitleFont(font)
-                        zshist[i].GetYaxis().SetTitleSize(size)
-                        zshist[i].GetYaxis().SetTitleOffset(yoff)
-                        zshist[i].GetYaxis().SetLabelFont(font)
-                        zshist[i].GetYaxis().SetLabelSize(size)
-                        zshist[i].GetYaxis().SetLabelOffset(loff)
+                        zsh_hist[i].SetYTitle('counts (dru)')
+                        zsh_hist[i].GetYaxis().SetTitleFont(font)
+                        zsh_hist[i].GetYaxis().SetTitleSize(size)
+                        zsh_hist[i].GetYaxis().SetTitleOffset(yoff)
+                        zsh_hist[i].GetYaxis().SetLabelFont(font)
+                        zsh_hist[i].GetYaxis().SetLabelSize(size)
+                        zsh_hist[i].GetYaxis().SetLabelOffset(loff)
                         
-                        zshist[i].SetAxisRange(0, zmaxE, 'x')
+                        zsh_hist[i].SetAxisRange(0, zmaxE, 'x')
 
-                        if   i+1 == 1: zshist[i].SetAxisRange(0,  8.0, 'y')
-                        elif i+1 == 2: zshist[i].SetAxisRange(0,  4.0, 'y')
-                        elif i+1 == 3: zshist[i].SetAxisRange(0,  4.0, 'y')
-                        elif i+1 == 4: zshist[i].SetAxisRange(0,  4.0, 'y')
-                        elif i+1 == 5: zshist[i].SetAxisRange(0, 10.0, 'y')
-                        elif i+1 == 6: zshist[i].SetAxisRange(0,  3.5, 'y')
-                        elif i+1 == 7: zshist[i].SetAxisRange(0,  3.5, 'y')
-                        elif i+1 == 8: zshist[i].SetAxisRange(0, 10.0, 'y')
-                        else:          zshist[i].SetAxisRange(0,  5.0, 'y')
+                        if   i+1 == 1: zsh_hist[i].SetAxisRange(0,  4.0, 'y')
+                        elif i+1 == 2: zsh_hist[i].SetAxisRange(0,  4.0, 'y')
+                        elif i+1 == 3: zsh_hist[i].SetAxisRange(0,  4.0, 'y')
+                        elif i+1 == 4: zsh_hist[i].SetAxisRange(0,  4.0, 'y')
+                        elif i+1 == 5: zsh_hist[i].SetAxisRange(0, 10.0, 'y')
+                        elif i+1 == 6: zsh_hist[i].SetAxisRange(0,  3.5, 'y')
+                        elif i+1 == 7: zsh_hist[i].SetAxisRange(0,  3.5, 'y')
+                        elif i+1 == 8: zsh_hist[i].SetAxisRange(0, 10.0, 'y')
+                        else:          zsh_hist[i].SetAxisRange(0, 10.0, 'y')
                                                 
                         if 'data' in bla.GetName():
-                            zshist[i].Draw('same')
+                            zsh_hist[i].Draw('same')
                         else:
-                            zshist[i].Draw(dopt)
+                            zsh_hist[i].Draw(dopt)
                             
                     except: continue
                 
@@ -2605,98 +2791,102 @@ def main(argv):
                     legs[0][0][i].Draw('same')
                 except: continue
 
-                zsbot[i].cd()
+                zsh_bot[i].cd()
                 
-                #databins = zsdata[i].GetNbinsX()
-                #totalbins = zstotal[i].GetNbinsX()
-                #residbins = zsresid[i].GetNbinsX()
+                #databins = zsh_data[i].GetNbinsX()
+                #totalbins = zsh_total[i].GetNbinsX()
+                #residbins = zsh_resid[i].GetNbinsX()
                 #print databins, totalbins, residbins
-                #zsresid[i].Rebin(residbins/databins)
-                zsresid[i].Rebin(loEplotRebin)
+                #zsh_resid[i].Rebin(residbins/databins)
+                zsh_resid[i].Rebin(loEplotRebin)
                 
-                #zsresid[i] = zsdata[i]/zstotal[i]
-                #zsresid[i] = zsdata[i] - zstotal[i]
+                #zsh_resid[i] = zsh_data[i]/zsh_total[i]
+                #zsh_resid[i] = zsh_data[i] - zsh_total[i]
                 
                 ### in some cases I may not be plotting the total
                 ### so do a 'try'
-                try:
-                    if zdr:
-                        zsresid[i].Divide(zsdata[i], zstotal[i])
-                    else:
-                        zsresid[i] = zsdata[i] - zstotal[i]
-                except:
-                    #zsresid[i] = zsdata[i]
-                    pass
-                
+                if zdr:
+                    try:
+                        zsh_resid[i].Divide(zsh_data[i], zsh_total[i])
+                    except:
+                        print 'WARNING: could not divide data by total'
+                        pass
+                else:
+                    try:
+                        zsh_resid[i] = zsh_data[i] - zsh_total[i]
+                    except:
+                        print 'WARNING: could not subtract data by total'
+                        pass
+                                
                 ### tweak the errors on the residual
-                for n in range(zsresid[i].GetNbinsX()+1):
-                    R  = zsresid[i].GetBinContent(n)
-                    D  = zsdata[i].GetBinContent(n)
-                    sD = zsdata[i].GetBinError(n)
+                for n in range(zsh_resid[i].GetNbinsX()+1):
+                    R  = zsh_resid[i].GetBinContent(n)
+                    D  = zsh_data[i].GetBinContent(n)
+                    sD = zsh_data[i].GetBinError(n)
 
-                    if zdr: zsresid[i].SetBinError(n, R*(sD/D))
-                    else:   zsresid[i].SetBinError(n, sD)
+                    if zdr: zsh_resid[i].SetBinError(n, R*(sD/D))
+                    else:   zsh_resid[i].SetBinError(n, sD)
                     
                     #try:
-                    #    zsresid[i].SetBinError(n, R*(sD/D))
+                    #    zsh_resid[i].SetBinError(n, R*(sD/D))
                     #except:
-                    #    zsresid[i].SetBinError(n, 0)
+                    #    zsh_resid[i].SetBinError(n, 0)
                 
 
                 ### now just formatting stuff
-                zsresid[i].SetTitle('')
+                zsh_resid[i].SetTitle('')
 
-                zsresid[i].SetAxisRange(0, zmaxE, 'x')
-                if zdr: zsresid[i].SetAxisRange(0.8, 1.2, 'y')
-                else:   zsresid[i].SetAxisRange(-0.4, 0.4, 'y')
+                zsh_resid[i].SetAxisRange(0, zmaxE, 'x')
+                if zdr: zsh_resid[i].SetAxisRange(0.8, 1.2, 'y')
+                else:   zsh_resid[i].SetAxisRange(-0.4, 0.4, 'y')
                 
-                zsresid[i].SetXTitle('energy (keV)')
-                zsresid[i].GetXaxis().SetTitleFont(font)
-                zsresid[i].GetXaxis().SetTitleSize(size)
-                zsresid[i].GetXaxis().SetTitleOffset(xoff)
-                zsresid[i].GetXaxis().SetLabelFont(font)
-                zsresid[i].GetXaxis().SetLabelSize(size)
-                zsresid[i].GetXaxis().SetLabelOffset(loff)
+                zsh_resid[i].SetXTitle('energy (keV)')
+                zsh_resid[i].GetXaxis().SetTitleFont(font)
+                zsh_resid[i].GetXaxis().SetTitleSize(size)
+                zsh_resid[i].GetXaxis().SetTitleOffset(xoff)
+                zsh_resid[i].GetXaxis().SetLabelFont(font)
+                zsh_resid[i].GetXaxis().SetLabelSize(size)
+                zsh_resid[i].GetXaxis().SetLabelOffset(loff)
                 
-                if zdr: zsresid[i].SetYTitle('data/mc')
-                else:   zsresid[i].SetYTitle('data-mc (dru)')
-                zsresid[i].GetYaxis().SetTitleFont(font)
-                zsresid[i].GetYaxis().SetTitleSize(size)
-                zsresid[i].GetYaxis().SetTitleOffset(yoff)
-                zsresid[i].GetYaxis().SetLabelFont(font)
-                zsresid[i].GetYaxis().SetLabelSize(size)
-                zsresid[i].GetYaxis().SetLabelOffset(loff)
+                if zdr: zsh_resid[i].SetYTitle('data/mc')
+                else:   zsh_resid[i].SetYTitle('data-mc (dru)')
+                zsh_resid[i].GetYaxis().SetTitleFont(font)
+                zsh_resid[i].GetYaxis().SetTitleSize(size)
+                zsh_resid[i].GetYaxis().SetTitleOffset(yoff)
+                zsh_resid[i].GetYaxis().SetLabelFont(font)
+                zsh_resid[i].GetYaxis().SetLabelSize(size)
+                zsh_resid[i].GetYaxis().SetLabelOffset(loff)
                 
                 # '5' secondary and '05' primary
                 # means 5 divisions will be shown
-                zsresid[i].GetYaxis().SetNdivisions(505)
+                zsh_resid[i].GetYaxis().SetNdivisions(505)
 
                 
                 ### make a line at '1' or '0'
                 if zdr: zero = TLine(0, 1, zmaxE, 1)
                 else:   zero = TLine(0, 0, zmaxE, 0)
-                zsline[i] = zero
-                zsline[i].SetLineColor(kRed)
-                zsline[i].SetLineWidth(1)
+                zsh_line[i] = zero
+                zsh_line[i].SetLineColor(kRed)
+                zsh_line[i].SetLineWidth(1)
 
-                zsresid[i].Draw()
-                zsline[i].Draw('same')
+                zsh_resid[i].Draw()
+                zsh_line[i].Draw('same')
                 
-                zscanv[i].Update()
-                zscanv[i].Print(plotdir+'/a_zoomSingleHit_c'+str(i+1)+'.png')
+                zsh_canv[i].Update()
+                zsh_canv[i].Print(plotdir+'/a_singleHitZoom_c'+str(i+1)+'.png')
 
     
     ### Plot the 0-40 keV region of multi hit
     #-------------------------------------------------------------       
     if indi:
-        zmcanv = [0 for x in range(numx)]
-        zmhist = [0 for x in range(numx)]
-        zmdata = [0 for x in range(numx)]
-        zmtotal = [0 for x in range(numx)]
-        zmresid = makeResid100('M', 0, params[0])
-        zmline = [0 for x in range(numx)]
-        zmtop = [0 for x in range(numx)]
-        zmbot = [0 for x in range(numx)]
+        zmh_canv = [0 for x in range(numx)]
+        zmh_hist = [0 for x in range(numx)]
+        zmh_data = [0 for x in range(numx)]
+        zmh_total = [0 for x in range(numx)]
+        zmh_resid = makeResid100('M', 0, params[0])
+        zmh_line = [0 for x in range(numx)]
+        zmh_top = [0 for x in range(numx)]
+        zmh_bot = [0 for x in range(numx)]
         
         font = 43
         size = 24
@@ -2707,34 +2897,34 @@ def main(argv):
         for i in range(numx):
             if i+1 in justthese and i+1 != 9:
                 
-                zmcanv[i] = TCanvas('zmcanv-'+str(i+1),'zmcanv-'+str(i+1),
+                zmh_canv[i] = TCanvas('zmh_canv-'+str(i+1),'zmh_canv-'+str(i+1),
                                 0, 0, 1200, 700)
 
                 fraction = 0.3
                 pad1 = TPad('pad1_'+str(i),'pad1_'+str(i),0,fraction,1,1)
-                #zmtop[i].append(pad1)
-                zmtop[i] = (pad1)
+                #zmh_top[i].append(pad1)
+                zmh_top[i] = (pad1)
                 pad2 = TPad('pad2_'+str(i),'pad2_'+str(i),0,0,1,fraction)
-                #zmbot[i].append(pad2)
-                zmbot[i] = (pad2)
+                #zmh_bot[i].append(pad2)
+                zmh_bot[i] = (pad2)
                 
-                zmtop[i].SetBottomMargin(0.01)
-                zmtop[i].SetBorderMode(0)
+                zmh_top[i].SetBottomMargin(0.01)
+                zmh_top[i].SetBorderMode(0)
                 
-                #zmbot[i].SetLogy(1)
-                zmtop[i].SetLogy(0)
+                #zmh_bot[i].SetLogy(1)
+                zmh_top[i].SetLogy(0)
                 
-                zmbot[i].SetTopMargin(0.05)
-                zmbot[i].SetBottomMargin(0.3)
-                zmbot[i].SetBorderMode(0)
+                zmh_bot[i].SetTopMargin(0.05)
+                zmh_bot[i].SetBottomMargin(0.3)
+                zmh_bot[i].SetBorderMode(0)
                 
-                #zmbot[i].SetLogy(1)
-                zmbot[i].SetLogy(0)
+                #zmh_bot[i].SetLogy(1)
+                zmh_bot[i].SetLogy(0)
                 
-                zmtop[i].Draw()
-                zmbot[i].Draw()
+                zmh_top[i].Draw()
+                zmh_bot[i].Draw()
 
-                zmtop[i].cd()
+                zmh_top[i].cd()
 
                 
                 prim_list = toppad[1][0][i].GetListOfPrimitives()
@@ -2742,46 +2932,46 @@ def main(argv):
                     #print bla.GetName(), bla
 
                     if 'data' in bla.GetName():
-                        zmdata[i] = (toppad[1][0][i].GetPrimitive(bla.GetName()))
+                        zmh_data[i] = (toppad[1][0][i].GetPrimitive(bla.GetName()))
                     if 'total' in bla.GetName():
-                        zmtotal[i] = (toppad[1][0][i].GetPrimitive(bla.GetName()))
+                        zmh_total[i] = (toppad[1][0][i].GetPrimitive(bla.GetName()))
                     
                     
                     try:
-                        zmhist[i] = (toppad[1][0][i].GetPrimitive(bla.GetName()))
+                        zmh_hist[i] = (toppad[1][0][i].GetPrimitive(bla.GetName()))
 
-                        zmhist[i].SetXTitle('energy (keV)')
-                        zmhist[i].GetXaxis().SetTitleFont(font)
-                        zmhist[i].GetXaxis().SetTitleSize(size)
-                        zmhist[i].GetXaxis().SetTitleOffset(xoff)
-                        zmhist[i].GetXaxis().SetLabelFont(font)
-                        zmhist[i].GetXaxis().SetLabelSize(size)
-                        zmhist[i].GetXaxis().SetLabelOffset(loff)
+                        zmh_hist[i].SetXTitle('energy (keV)')
+                        zmh_hist[i].GetXaxis().SetTitleFont(font)
+                        zmh_hist[i].GetXaxis().SetTitleSize(size)
+                        zmh_hist[i].GetXaxis().SetTitleOffset(xoff)
+                        zmh_hist[i].GetXaxis().SetLabelFont(font)
+                        zmh_hist[i].GetXaxis().SetLabelSize(size)
+                        zmh_hist[i].GetXaxis().SetLabelOffset(loff)
                                                 
-                        zmhist[i].SetYTitle('counts (dru)')
-                        zmhist[i].GetYaxis().SetTitleFont(font)
-                        zmhist[i].GetYaxis().SetTitleSize(size)
-                        zmhist[i].GetYaxis().SetTitleOffset(yoff)
-                        zmhist[i].GetYaxis().SetLabelFont(font)
-                        zmhist[i].GetYaxis().SetLabelSize(size)
-                        zmhist[i].GetYaxis().SetLabelOffset(loff)
+                        zmh_hist[i].SetYTitle('counts (dru)')
+                        zmh_hist[i].GetYaxis().SetTitleFont(font)
+                        zmh_hist[i].GetYaxis().SetTitleSize(size)
+                        zmh_hist[i].GetYaxis().SetTitleOffset(yoff)
+                        zmh_hist[i].GetYaxis().SetLabelFont(font)
+                        zmh_hist[i].GetYaxis().SetLabelSize(size)
+                        zmh_hist[i].GetYaxis().SetLabelOffset(loff)
                         
-                        zmhist[i].SetAxisRange(0, zmaxE, 'x')
+                        zmh_hist[i].SetAxisRange(0, zmaxE, 'x')
 
-                        if   i+1 == 1: zmhist[i].SetAxisRange(0, 1.6, 'y')
-                        elif i+1 == 2: zmhist[i].SetAxisRange(0, 4.5, 'y')
-                        elif i+1 == 3: zmhist[i].SetAxisRange(0, 2.5, 'y')
-                        elif i+1 == 4: zmhist[i].SetAxisRange(0, 2.0, 'y')
-                        elif i+1 == 5: zmhist[i].SetAxisRange(0, 2.0, 'y')
-                        elif i+1 == 6: zmhist[i].SetAxisRange(0, 1.2, 'y')
-                        elif i+1 == 7: zmhist[i].SetAxisRange(0, 1.2, 'y')
-                        elif i+1 == 8: zmhist[i].SetAxisRange(0, 0.8, 'y')
-                        else:          zmhist[i].SetAxisRange(0, 5.0, 'y')
+                        if   i+1 == 1: zmh_hist[i].SetAxisRange(0, 4.5, 'y')
+                        elif i+1 == 2: zmh_hist[i].SetAxisRange(0, 4.5, 'y')
+                        elif i+1 == 3: zmh_hist[i].SetAxisRange(0, 2.5, 'y')
+                        elif i+1 == 4: zmh_hist[i].SetAxisRange(0, 2.0, 'y')
+                        elif i+1 == 5: zmh_hist[i].SetAxisRange(0, 5.0, 'y')
+                        elif i+1 == 6: zmh_hist[i].SetAxisRange(0, 1.2, 'y')
+                        elif i+1 == 7: zmh_hist[i].SetAxisRange(0, 1.2, 'y')
+                        elif i+1 == 8: zmh_hist[i].SetAxisRange(0, 5.0, 'y')
+                        else:          zmh_hist[i].SetAxisRange(0, 5.0, 'y')
 
                         if 'data' in bla.GetName():
-                            zmhist[i].Draw('same')
+                            zmh_hist[i].Draw('same')
                         else:
-                            zmhist[i].Draw(dopt)
+                            zmh_hist[i].Draw(dopt)
                         
                     except: continue
                 
@@ -2791,96 +2981,495 @@ def main(argv):
                     legs[1][0][i].Draw('same')
                 except: continue
 
-                zmbot[i].cd()
+                zmh_bot[i].cd()
                 
-                #databins = zmdata[i].GetNbinsX()
-                #totalbins = zmtotal[i].GetNbinsX()
-                #residbins = zmresid[i].GetNbinsX()
+                #databins = zmh_data[i].GetNbinsX()
+                #totalbins = zmh_total[i].GetNbinsX()
+                #residbins = zmh_resid[i].GetNbinsX()
                 #print databins, totalbins, residbins
-                #zmresid[i].Rebin(residbins/databins)
-                zmresid[i].Rebin(loEplotRebin)
+                #zmh_resid[i].Rebin(residbins/databins)
+                zmh_resid[i].Rebin(loEplotRebin)
                 
-                #zmresid[i] = zmdata[i]/zmtotal[i]
-                #zmresid[i] = zmdata[i] - zmtotal[i]
+                #zmh_resid[i] = zmh_data[i]/zmh_total[i]
+                #zmh_resid[i] = zmh_data[i] - zmh_total[i]
                 
                 ### in some cases I may not be plotting the total
                 ### so do a 'try'
-                try:
-                    if zdr:
-                        zmresid[i].Divide(zmdata[i], zmtotal[i])
-                    else:
-                        zmresid[i] = zmdata[i] - zmtotal[i]
-                except:
-                    #zmresid[i] = zmdata[i]
-                    pass
+                if zdr:
+                    try:
+                        zmh_resid[i].Divide(zmh_data[i], zmh_total[i])
+                    except:
+                        print 'WARNING: could not divide divide data by total'
+                        pass
+                else:
+                    try:
+                        zmh_resid[i] = zmh_data[i] - zmh_total[i]
+                    except:
+                        print 'WARNING: could not subtract data by total'
+                        pass
                 
                 ### tweak the errors on the residual
-                for n in range(zmresid[i].GetNbinsX()+1):
-                    R  = zmresid[i].GetBinContent(n)
-                    D  = zmdata[i].GetBinContent(n)
-                    sD = zmdata[i].GetBinError(n)
+                for n in range(zmh_resid[i].GetNbinsX()+1):
+                    R  = zmh_resid[i].GetBinContent(n)
+                    D  = zmh_data[i].GetBinContent(n)
+                    sD = zmh_data[i].GetBinError(n)
 
-                    if zdr: zmresid[i].SetBinError(n, R*(sD/D))
-                    else:   zmresid[i].SetBinError(n, sD)
+                    if zdr: zmh_resid[i].SetBinError(n, R*(sD/D))
+                    else:   zmh_resid[i].SetBinError(n, sD)
                     
                     #try:
-                    #    zmresid[i].SetBinError(n, R*(sD/D))
+                    #    zmh_resid[i].SetBinError(n, R*(sD/D))
                     #except:
-                    #    zmresid[i].SetBinError(n, 0)
+                    #    zmh_resid[i].SetBinError(n, 0)
                 
 
                 ### now just formatting stuff
-                zmresid[i].SetTitle('')
+                zmh_resid[i].SetTitle('')
 
-                zmresid[i].SetAxisRange(0, zmaxE, 'x')
-                if zdr: zmresid[i].SetAxisRange(0.8, 1.2, 'y')
-                else:   zmresid[i].SetAxisRange(-0.4, 0.4, 'y')
+                zmh_resid[i].SetAxisRange(0, zmaxE, 'x')
+                if zdr: zmh_resid[i].SetAxisRange(0.8, 1.2, 'y')
+                else:   zmh_resid[i].SetAxisRange(-0.4, 0.4, 'y')
                 
-                zmresid[i].SetXTitle('energy (keV)')
-                zmresid[i].GetXaxis().SetTitleFont(font)
-                zmresid[i].GetXaxis().SetTitleSize(size)
-                zmresid[i].GetXaxis().SetTitleOffset(xoff)
-                zmresid[i].GetXaxis().SetLabelFont(font)
-                zmresid[i].GetXaxis().SetLabelSize(size)
-                zmresid[i].GetXaxis().SetLabelOffset(loff)
+                zmh_resid[i].SetXTitle('energy (keV)')
+                zmh_resid[i].GetXaxis().SetTitleFont(font)
+                zmh_resid[i].GetXaxis().SetTitleSize(size)
+                zmh_resid[i].GetXaxis().SetTitleOffset(xoff)
+                zmh_resid[i].GetXaxis().SetLabelFont(font)
+                zmh_resid[i].GetXaxis().SetLabelSize(size)
+                zmh_resid[i].GetXaxis().SetLabelOffset(loff)
                 
-                if zdr: zmresid[i].SetYTitle('data/mc')
-                else:   zmresid[i].SetYTitle('data-mc (dru)')
-                zmresid[i].GetYaxis().SetTitleFont(font)
-                zmresid[i].GetYaxis().SetTitleSize(size)
-                zmresid[i].GetYaxis().SetTitleOffset(yoff)
-                zmresid[i].GetYaxis().SetLabelFont(font)
-                zmresid[i].GetYaxis().SetLabelSize(size)
-                zmresid[i].GetYaxis().SetLabelOffset(loff)
+                if zdr: zmh_resid[i].SetYTitle('data/mc')
+                else:   zmh_resid[i].SetYTitle('data-mc (dru)')
+                zmh_resid[i].GetYaxis().SetTitleFont(font)
+                zmh_resid[i].GetYaxis().SetTitleSize(size)
+                zmh_resid[i].GetYaxis().SetTitleOffset(yoff)
+                zmh_resid[i].GetYaxis().SetLabelFont(font)
+                zmh_resid[i].GetYaxis().SetLabelSize(size)
+                zmh_resid[i].GetYaxis().SetLabelOffset(loff)
                 
                 # '5' secondary and '05' primary
                 # means 5 divisions will be shown
-                zmresid[i].GetYaxis().SetNdivisions(505)
+                zmh_resid[i].GetYaxis().SetNdivisions(505)
 
                 
                 ### make a line at '1' or '0'
                 if zdr: zero = TLine(0, 1, zmaxE, 1)
                 else:   zero = TLine(0, 0, zmaxE, 0)
-                zmline[i] = zero
-                zmline[i].SetLineColor(kRed)
-                zmline[i].SetLineWidth(1)
+                zmh_line[i] = zero
+                zmh_line[i].SetLineColor(kRed)
+                zmh_line[i].SetLineWidth(1)
 
-                zmresid[i].Draw()
-                zmline[i].Draw('same')
+                zmh_resid[i].Draw()
+                zmh_line[i].Draw('same')
                 
-                zmcanv[i].Update()
-                zmcanv[i].Print(plotdir+'/a_zoomMultiHit_c'+str(i+1)+'.png')
+                zmh_canv[i].Update()
+                zmh_canv[i].Print(plotdir+'/a_multiHitZoom_c'+str(i+1)+'.png')
+
+    
+    ### Plot the single hit alpha channel
+    #-------------------------------------------------------------       
+    if indi and showAlphas:
+        ash_canv = [0 for x in range(numx)]
+        ash_hist = [{} for x in range(numx)]
+        ash_data = [0 for x in range(numx)]
+        ash_total = makeTotal100('S', 2, params[2])
+        ash_resid = makeResid100('S', 2, params[2])
+        ash_line = [0 for x in range(numx)]
+        ash_top = [0 for x in range(numx)]
+        ash_bot = [0 for x in range(numx)]
+        ash_leg = [0 for x in range(numx)]
+        
+        font = 43
+        size = 24
+        loff = 0.005
+        xoff = 3.6
+        yoff = 1.1
+        
+        alphaColors = [
+            kBlue    +1,
+            kCyan    +1,
+            kGreen   +1,
+            kOrange  +1,
+            kMagenta +1,
+            kBlue    -7,
+            kCyan    -7,
+            kGreen   -7,
+            kOrange  -7,
+            kMagenta -7,
+        ]
+        
+        for i in range(numx):
+            if i+1 in justthese and i+1 != 9:
+            #if i+1 in justthese:
+                
+                ash_canv[i] = TCanvas('ash_canv-'+str(i+1),'ash_canv-'+str(i+1),
+                                0, 0, 1200, 700)
+                
+                fraction = 0.3
+                pad1 = TPad('pad1_'+str(i),'pad1_'+str(i),0,fraction,1,1)
+                ash_top[i] = (pad1)
+                ash_top[i].SetBottomMargin(0.01)
+                ash_top[i].SetBorderMode(0)
+                ash_top[i].SetLogy(1)
+                #ash_top[i].SetLogy(0)
+                ash_top[i].Draw()
+                
+                pad2 = TPad('pad2_'+str(i),'pad2_'+str(i),0,0,1,fraction)
+                ash_bot[i] = (pad2)
+                ash_bot[i].SetTopMargin(0.05)
+                ash_bot[i].SetBottomMargin(0.3)
+                ash_bot[i].SetBorderMode(0)
+                #ash_bot[i].SetLogy(1)
+                ash_bot[i].SetLogy(0)
+                ash_bot[i].Draw()
+
+                
+                ash_top[i].cd()
+                
+                for key in datkeys:
+                    if 'x'+str(i+1) in key and '-cS' in key and '-e2' in key:
+                        ash_data[i] = deepcopy(data[key]['hist'])
+                        
+                        ash_data[i].SetXTitle('energy (keV)')
+                        ash_data[i].GetXaxis().SetTitleFont(font)
+                        ash_data[i].GetXaxis().SetTitleSize(size)
+                        ash_data[i].GetXaxis().SetTitleOffset(xoff)
+                        ash_data[i].GetXaxis().SetLabelFont(font)
+                        ash_data[i].GetXaxis().SetLabelSize(size)
+                        ash_data[i].GetXaxis().SetLabelOffset(loff)
+                                                
+                        ash_data[i].SetYTitle('counts (dru)')
+                        ash_data[i].GetYaxis().SetTitleFont(font)
+                        ash_data[i].GetYaxis().SetTitleSize(size)
+                        ash_data[i].GetYaxis().SetTitleOffset(yoff)
+                        ash_data[i].GetYaxis().SetLabelFont(font)
+                        ash_data[i].GetYaxis().SetLabelSize(size)
+                        ash_data[i].GetYaxis().SetLabelOffset(loff)
+                        
+                        ash_data[i].SetAxisRange(aler[0], aler[1], 'x')
+                        ash_data[i].SetAxisRange(1e-5, 10, 'y')
+
+                        ash_data[i].Draw('same')
+                        ldatname = data[key]['info']['tag']+'  '+data[key]['info']['build']
+
+                # join hists of same type together -fx -qx
+                for key in bakkeys:
+                    if 'x'+str(i+1) in key and '-cS' in key and '-e2' in key:
+                        if justQ1 and '-q1-' not in key: continue
+                        if bkgs[key]['hist'].GetEntries() > 0:
+                            histkey = re.split('-f(?:[0-9])-', key)[0]
+                            if histkey in ash_hist[i]:
+                                ash_hist[i][histkey].Add(bkgs[key]['hist'])
+                            else:
+                                ash_hist[i][histkey] = (bkgs[key]['hist'])
+                
+                for key in sigkeys:
+                    if 'x'+str(i+1) in key and '-cS' in key and '-e2' in key:
+                        if justQ1 and '-q1-' not in key: continue
+                        if sigs[key]['hist'].GetEntries() > 0:
+                            histkey = re.split('-f(?:[0-9])-', key)[0]
+                            if histkey in ash_hist[i]:
+                                ash_hist[i][histkey].Add(sigs[key]['hist'])
+                            else:
+                                ash_hist[i][histkey] = (sigs[key]['hist'])
+                
+                N_hists = len(ash_hist[i])
+                # split in half because of q1 and q2 quenching
+                #N_hists = N_hists/2
+                
+                leg = TLegend(0.75, (1-((N_hists+2)*0.08)), 0.98, 0.90)
+                ash_leg[i] = (leg)
+                ash_leg[i].SetFillColor(0)
+                ash_leg[i].SetBorderSize(0)
+                legopt = 'LPE'
+                
+                ash_leg[i].AddEntry(ash_data[i], ldatname, legopt)
+
+                histkeys = sorted([key for key in ash_hist[i]])
+                for N, histkey in enumerate(histkeys):
+                    ash_hist[i][histkey].SetMarkerColor(alphaColors[N])
+                    ash_hist[i][histkey].SetLineColor(alphaColors[N])
+                    ash_hist[i][histkey].Draw(dopt)
+                    bits = histkey.split('-')
+                    legname = bits[1]+' '+bits[2]
+                    ash_leg[i].AddEntry(ash_hist[i][histkey], legname, legopt)
+                    ash_total[i].Add(ash_hist[i][histkey])
+
+
+                if showTotal:
+                    if redtotal:
+                        ash_total[i].SetMarkerColor(kRed)
+                        ash_total[i].SetLineColor(kRed)
+                    ash_total[i].Draw(dopt)
+                    ash_leg[i].AddEntry(ash_total[i], "Total", legopt)
+                    
+                ash_leg[i].Draw('same')
+                
+                
+                # plot residuals
+                ash_bot[i].cd()
+                ash_resid[i].Rebin(alphaPlotRebin)
+                
+                # remove very small bins or the Divide returns 'inf'
+                ash_total[i] = cleanSmallBins(ash_total[i])
+                ash_resid[i].Divide(ash_data[i], ash_total[i])
+                
+                ### tweak the errors on the residual
+                for n in range(ash_resid[i].GetNbinsX()+1):
+                    R  = ash_resid[i].GetBinContent(n)
+                    D  = ash_data[i].GetBinContent(n)
+                    sD = ash_data[i].GetBinError(n)
+                    try:
+                        ash_resid[i].SetBinError(n, R*(sD/D))
+                    except:
+                        ash_resid[i].SetBinError(n, sD)
+                
+                ### now just formatting stuff
+                ash_resid[i].SetTitle('')
+
+                ash_resid[i].SetAxisRange(aler[0], aler[1], 'x')
+                ash_resid[i].SetAxisRange(0.0, 2, 'y')
+                                
+                ash_resid[i].SetXTitle('energy (keV)')
+                ash_resid[i].GetXaxis().SetTitleFont(font)
+                ash_resid[i].GetXaxis().SetTitleSize(size)
+                ash_resid[i].GetXaxis().SetTitleOffset(xoff)
+                ash_resid[i].GetXaxis().SetLabelFont(font)
+                ash_resid[i].GetXaxis().SetLabelSize(size)
+                ash_resid[i].GetXaxis().SetLabelOffset(loff)
+                
+                ash_resid[i].SetYTitle('data/mc')
+                ash_resid[i].GetYaxis().SetTitleFont(font)
+                ash_resid[i].GetYaxis().SetTitleSize(size)
+                ash_resid[i].GetYaxis().SetTitleOffset(yoff)
+                ash_resid[i].GetYaxis().SetLabelFont(font)
+                ash_resid[i].GetYaxis().SetLabelSize(size)
+                ash_resid[i].GetYaxis().SetLabelOffset(loff)
+                
+                # '5' secondary and '05' primary
+                # means 5 divisions will be shown
+                ash_resid[i].GetYaxis().SetNdivisions(505)
+
+                
+                ### make a line at '1'
+                zero = TLine(aler[0], 1, aler[1], 1)
+                ash_line[i] = zero
+                ash_line[i].SetLineColor(kRed)
+                ash_line[i].SetLineWidth(1)
+
+                ash_resid[i].Draw()
+                ash_line[i].Draw('same')
+                
+                ash_canv[i].Update()
+                ash_canv[i].Print(plotdir+'/a_alphaSingleHit_c'+str(i+1)+'.png')
+
+                
+    ### Plot the multi hit alpha channel
+    #-------------------------------------------------------------       
+    if indi and showAlphas:
+        amh_canv = [0 for x in range(numx)]
+        amh_hist = [{} for x in range(numx)]
+        amh_data = [0 for x in range(numx)]
+        amh_total = makeTotal100('M', 2, params[2])
+        amh_resid = makeResid100('M', 2, params[2])
+        amh_line = [0 for x in range(numx)]
+        amh_top = [0 for x in range(numx)]
+        amh_bot = [0 for x in range(numx)]
+        amh_leg = [0 for x in range(numx)]
+        
+        font = 43
+        size = 24
+        loff = 0.005
+        xoff = 3.6
+        yoff = 1.1
+        
+        alphaColors = [
+            kBlue    +1,
+            kCyan    +1,
+            kGreen   +1,
+            kOrange  +1,
+            kMagenta +1,
+            kBlue    -7,
+            kCyan    -7,
+            kGreen   -7,
+            kOrange  -7,
+            kMagenta -7,
+        ]
+        
+        for i in range(numx):
+            if i+1 in justthese and i+1 != 9:
+            #if i+1 in justthese:
+                
+                amh_canv[i] = TCanvas('amh_canv-'+str(i+1),'amh_canv-'+str(i+1),
+                                0, 0, 1200, 700)
+                
+                fraction = 0.3
+                pad1 = TPad('pad1_'+str(i),'pad1_'+str(i),0,fraction,1,1)
+                amh_top[i] = (pad1)
+                amh_top[i].SetBottomMargin(0.01)
+                amh_top[i].SetBorderMode(0)
+                amh_top[i].SetLogy(1)
+                #amh_top[i].SetLogy(0)
+                amh_top[i].Draw()
+                
+                pad2 = TPad('pad2_'+str(i),'pad2_'+str(i),0,0,1,fraction)
+                amh_bot[i] = (pad2)
+                amh_bot[i].SetTopMargin(0.05)
+                amh_bot[i].SetBottomMargin(0.3)
+                amh_bot[i].SetBorderMode(0)
+                #amh_bot[i].SetLogy(1)
+                amh_bot[i].SetLogy(0)
+                amh_bot[i].Draw()
+
+                
+                amh_top[i].cd()
+                
+                for key in datkeys:
+                    if 'x'+str(i+1) in key and '-cM' in key and '-e2' in key:
+                        amh_data[i] = deepcopy(data[key]['hist'])
+                        
+                        amh_data[i].SetXTitle('energy (keV)')
+                        amh_data[i].GetXaxis().SetTitleFont(font)
+                        amh_data[i].GetXaxis().SetTitleSize(size)
+                        amh_data[i].GetXaxis().SetTitleOffset(xoff)
+                        amh_data[i].GetXaxis().SetLabelFont(font)
+                        amh_data[i].GetXaxis().SetLabelSize(size)
+                        amh_data[i].GetXaxis().SetLabelOffset(loff)
+                                                
+                        amh_data[i].SetYTitle('counts (dru)')
+                        amh_data[i].GetYaxis().SetTitleFont(font)
+                        amh_data[i].GetYaxis().SetTitleSize(size)
+                        amh_data[i].GetYaxis().SetTitleOffset(yoff)
+                        amh_data[i].GetYaxis().SetLabelFont(font)
+                        amh_data[i].GetYaxis().SetLabelSize(size)
+                        amh_data[i].GetYaxis().SetLabelOffset(loff)
+                        
+                        amh_data[i].SetAxisRange(aler[0], aler[1], 'x')
+                        amh_data[i].SetAxisRange(1e-7, 1e-2, 'y')
+
+                        amh_data[i].Draw('same')
+                        ldatname = data[key]['info']['tag']+'  '+data[key]['info']['build']
+
+                # join hists of same type together -fx -qx
+                for key in bakkeys:
+                    if 'x'+str(i+1) in key and '-cM' in key and '-e2' in key:
+                        if justQ1 and '-q1-' not in key: continue
+                        if bkgs[key]['hist'].GetEntries() > 0:
+                            histkey = re.split('-f(?:[0-9])-', key)[0]
+                            if histkey in amh_hist[i]:
+                                amh_hist[i][histkey].Add(bkgs[key]['hist'])
+                            else:
+                                amh_hist[i][histkey] = (bkgs[key]['hist'])
+                
+                for key in sigkeys:
+                    if 'x'+str(i+1) in key and '-cM' in key and '-e2' in key:
+                        if justQ1 and '-q1-' not in key: continue
+                        if sigs[key]['hist'].GetEntries() > 0:
+                            histkey = re.split('-f(?:[0-9])-', key)[0]
+                            if histkey in amh_hist[i]:
+                                amh_hist[i][histkey].Add(sigs[key]['hist'])
+                            else:
+                                amh_hist[i][histkey] = (sigs[key]['hist'])
+                
+                N_hists = len(amh_hist[i])
+                # split in half because of q1 and q2 quenching
+                #N_hists = N_hists/2
+                
+                leg = TLegend(0.75, (1-((N_hists+2)*0.08)), 0.98, 0.90)
+                amh_leg[i] = (leg)
+                amh_leg[i].SetFillColor(0)
+                amh_leg[i].SetBorderSize(0)
+                legopt = 'LPE'
+                
+                amh_leg[i].AddEntry(amh_data[i], ldatname, legopt)
+
+                histkeys = sorted([key for key in amh_hist[i]])
+                for N, histkey in enumerate(histkeys):
+                    amh_hist[i][histkey].SetMarkerColor(alphaColors[N])
+                    amh_hist[i][histkey].SetLineColor(alphaColors[N])
+                    amh_hist[i][histkey].Draw(dopt)
+                    bits = histkey.split('-')
+                    legname = bits[1]+' '+bits[2]
+                    amh_leg[i].AddEntry(amh_hist[i][histkey], legname, legopt)
+                    amh_total[i].Add(amh_hist[i][histkey])
+
+
+                if showTotal:
+                    if redtotal:
+                        amh_total[i].SetMarkerColor(kRed)
+                        amh_total[i].SetLineColor(kRed)
+                    amh_total[i].Draw(dopt)
+                    amh_leg[i].AddEntry(amh_total[i], "Total", legopt)
+                    
+                amh_leg[i].Draw('same')
+                
+                
+                # plot residuals
+                amh_bot[i].cd()
+                amh_resid[i].Rebin(alphaPlotRebin)
+                
+                # remove very small bins or the Divide returns 'inf'
+                amh_total[i] = cleanSmallBins(amh_total[i])
+                amh_resid[i].Divide(amh_data[i], amh_total[i])
+                
+                ### tweak the errors on the residual
+                for n in range(amh_resid[i].GetNbinsX()+1):
+                    R  = amh_resid[i].GetBinContent(n)
+                    D  = amh_data[i].GetBinContent(n)
+                    sD = amh_data[i].GetBinError(n)
+                    try:
+                        amh_resid[i].SetBinError(n, R*(sD/D))
+                    except:
+                        amh_resid[i].SetBinError(n, sD)
+                
+                ### now just formatting stuff
+                amh_resid[i].SetTitle('')
+
+                amh_resid[i].SetAxisRange(aler[0], aler[1], 'x')
+                amh_resid[i].SetAxisRange(0.0, 2, 'y')
+                                
+                amh_resid[i].SetXTitle('energy (keV)')
+                amh_resid[i].GetXaxis().SetTitleFont(font)
+                amh_resid[i].GetXaxis().SetTitleSize(size)
+                amh_resid[i].GetXaxis().SetTitleOffset(xoff)
+                amh_resid[i].GetXaxis().SetLabelFont(font)
+                amh_resid[i].GetXaxis().SetLabelSize(size)
+                amh_resid[i].GetXaxis().SetLabelOffset(loff)
+                
+                amh_resid[i].SetYTitle('data/mc')
+                amh_resid[i].GetYaxis().SetTitleFont(font)
+                amh_resid[i].GetYaxis().SetTitleSize(size)
+                amh_resid[i].GetYaxis().SetTitleOffset(yoff)
+                amh_resid[i].GetYaxis().SetLabelFont(font)
+                amh_resid[i].GetYaxis().SetLabelSize(size)
+                amh_resid[i].GetYaxis().SetLabelOffset(loff)
+                
+                # '5' secondary and '05' primary
+                # means 5 divisions will be shown
+                amh_resid[i].GetYaxis().SetNdivisions(505)
+
+                
+                ### make a line at '1'
+                zero = TLine(aler[0], 1, aler[1], 1)
+                amh_line[i] = zero
+                amh_line[i].SetLineColor(kRed)
+                amh_line[i].SetLineWidth(1)
+
+                amh_resid[i].Draw()
+                amh_line[i].Draw('same')
+                
+                amh_canv[i].Update()
+                amh_canv[i].Print(plotdir+'/a_alphaMultiHit_c'+str(i+1)+'.png')
 
                 
     #-----------------------------------------------------------------
     ### print out the fit results
     if fitting:
-        print '\n\n'
-        print '!!!!!  FIT RESULTS  !!!!!\n'
+        print('\n\n!!!!!  FIT RESULTS  !!!!!\n')
         for key in resultskeys:
             if int(key)+1 in justthese:
                 for line in fitresults[key]:
-                    print line
+                    print('{0}'.format(line))
     #-----------------------------------------------------------------
 
     
@@ -2899,10 +3488,16 @@ def main(argv):
     #try: del combPlots
     #except: pass
 
-    #try: del zscanv
-    #except: pass
+    try: del zsh_canv
+    except: pass
     
-    try: del zmcanv
+    try: del zmh_canv
+    except: pass
+
+    try: del ash_canv
+    except: pass
+    
+    try: del amh_canv
     except: pass
     
     try: del sepPlots
@@ -2912,10 +3507,10 @@ def main(argv):
     except: pass
     
     if fitting:
-        print 'Time to complete the fit = '+str(fitTime)+' sec \n'
+        print('Time to complete the fit = {0} sec \n'.format(fitTime))
     
-    if not batch: raw_input('[Enter] to quit \n')
-    else: print "Running in batch mode - quitting now! \n"
+    if not batch: input('[Enter] to quit \n')
+    else: print('Running in batch mode - quitting now! \n')
 
     return
 

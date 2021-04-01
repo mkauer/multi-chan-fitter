@@ -1,7 +1,0 @@
-# -*- sh -*-
-
-# version 2017-10-23
-
-# bsdr  chan    xstl      file                   tag        reuse
-# ----  -----   ----    ------------------      ------     ----------
-D       MS      1       ./set1_00-04-04.dat      set1      dummy.root
