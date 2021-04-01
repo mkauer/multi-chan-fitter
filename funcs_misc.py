@@ -2,49 +2,14 @@
 ######################################################################
 # funcs-misc.py
 # 
-# Get all the default functions in here
+# Put all the general use functions in here
 # 
-# version: 2020-07-15
-# 
-# Change Log (key == [+] added, [-] removed, [~] changed)
-#---------------------------------------------------------------------
-# + added rainbowSix() for new root-6 color scheme
-
-# ~ tweaked crystal geometry from Gyunho's overlap fix
-# ~ changed C4 Z length
-# ~ made the expo surface depth profile function dynamic
-# + added the surfProfile(x) equation
-# + added mcDimensions() for doing surface depth profiles
-# + add "gamma" to setGroup() in funcs_misc.py
-# ~ add a few more checks to the hostname
-# + add numX()
-# + add I129 to setGroup()
-# + add plastic to setGroup()
-# + addHistKey() to test if a key already exists and create one if not
-# ~ tweaked extendHist() because it had a couple bugs
-# + fitPrep() to rebin and resize the histograms
-# + add rootSmoothing() - uses ROOTs TH1.Smooth() method
-# + add averageSmoothing()
-# ~ don't overwrite bin[i] with smoothed value until all done
-# ~ renamed smoothXbins() to triangleSmoothing()
-# + add an extend function to easily extend histograms
-# ~ updated the naming of stuff for the lsveto (crystal 9)
-# ~ tweaked readFile() so the # search is after the """ search
-# ~ tweaked histparam() to also return bins per keV
-# ~ fixed sim path+name so not to combine lsveto and lsvetoair
-# ~ tweaked longNames() in funcs60.py
-# + detailNames() to funcs60.py
-# + chanNames() to funcs60.py
-# + energyNames() to funcs60.py
-# ~ rename everything to 60 version and add other funcs as needed
-# + try to move all main funcs to here funcs60.py - it's becoming too
-#   confusing to find all funcs in all various versions of funcs
-# + building off funcs52.py
+# version: 2021-01-13
 # 
 # email me: mkauer@physics.wisc.edu
 ######################################################################
 
-import os,sys
+import os, sys
 import socket
 from copy import deepcopy
 import numpy as np
@@ -79,6 +44,12 @@ def baseDir():
         return '/home/mkauer/mc-fitting/'
     else:
         return '/home/mkauer/COSINE/CUP/mc-fitting/'
+
+    
+def mkdir(path):
+    if not os.path.exists(path):
+        os.makedirs(path)
+    return
 
 
 def sortKeys(data, bkgs, sigs):
@@ -151,8 +122,8 @@ def cmass(i):
         12.50,
         12.50,
         18.28,
-        ### average crystal mass if grouped into lsveto
-        106.14/8. ]
+        1800.
+        ]
     return mass[int(i)]
 
 
@@ -287,6 +258,7 @@ def energyNames(E=0):
     name = ''
     if E == 0: name = 'lo-energy'
     if E == 1: name = 'hi-energy'
+    if E == 2: name = 'alphas'
     return name
 
     
@@ -506,38 +478,43 @@ def getPars(hist):
 def globalParams(data):
     par0=0
     par1=0
+    par2=0
     for key in data:
         if '-e0' in key and not par0:
             par0 = getPars(data[key]['hist'])
         if '-e1' in key and not par1:
             par1 = getPars(data[key]['hist'])
-        if par0 and par1:
+        if '-e2' in key and not par2:
+            par2 = getPars(data[key]['hist'])
+        if par0 and par1 and par2:
             break
-    params = [par0, par1]
+    params = [par0, par1, par2]
     return params
 
 
 def getDuration(rootfile):
-    duration = -1
+    duration = 0
     try:
         chain = TChain('ntp','')
         chain.Add(rootfile)
         entries = chain.GetEntries()
-        ### only second precission
-        #var = "eventsec"
-        #norm = 1.
-        ### has nano-sec precission
+        ### trgtime has nano-sec precission
         var = "trgtime"
         norm = 1.e9
         chain.GetEntry(0)
         start = float(chain.GetLeaf(var).GetValue())
+        ### just checking - trgtime is NOT indexed by crystal
+        #for j in range(9):
+        #    print('!!! {0}'.format(chain.GetLeaf(var).GetValue(j)))
         chain.GetEntry(entries-1)
         stop = float(chain.GetLeaf(var).GetValue())
         duration = (stop-start)/norm
-        #print var, start, stop, duration
+        #print duration
         return duration
     except:
-        return -1
+        print('WARNING: could not get runtime for --> \"{0}\"'
+              .format(os.path.basename(rootfile)))
+        return 0
 
 
 def setBinError(histo):
@@ -580,6 +557,33 @@ def setGroup(info):
     elif 'veto'    in info['loca']: return 'lsveto'
     elif 'plastic' in info['loca']: return 'plastic'
     elif 'gamma'   in info['loca']: return 'ext-gamma'
+    else:
+        return 'none'
+
+
+def setGroup500(info):
+    if info['loca'] == 'internal':
+        if info['isof'] in ['Cd109',  'Sn113',
+                            'H3',     'Na22',
+                            'I128',   'Na24',
+                            'I125',   'I126',   'I129',
+                            'Te121',  'Te121m',
+                            'Te123m', 'Te125m', 'Te127m']:
+            return 'cosmo'
+        else: return 'internal'
+    elif info['loca'] == 'pmt':      return 'pmts'
+    elif info['loca'] == 'xpmt':     return 'xpmts'
+    #elif 'pmt'      in info['loca']: return 'pmts'
+    elif 'surf'     in info['loca']: return 'surface'
+    elif 'cucase'   in info['loca']: return 'cucase'
+    elif 'copper'   in info['loca']: return 'cucase'
+    elif 'steel'    in info['loca']: return 'steel'
+    elif 'teflon'   in info['loca']: return 'surface'
+    elif 'reflec'   in info['loca']: return 'surface'
+    elif 'lsveto'   in info['loca']: return 'lsveto'
+    elif 'plastic'  in info['loca']: return 'plastic'
+    elif 'cushield' in info['loca']: return 'cushield'
+    elif 'gamma'    in info['loca']: return 'gamma'
     else:
         return 'none'
 
@@ -675,6 +679,28 @@ def histparam64(E):
     if E:
         hmin = 0
         hmax = 4000
+        bpkv = 1
+        bins = (hmax-hmin)*bpkv
+    else:
+        hmin = 0
+        hmax = 200
+        bpkv = 12
+        bins = (hmax-hmin)*bpkv
+
+    pars = [bins, hmin, hmax, bpkv]
+    return pars
+
+
+def histparam6000(E):
+    """
+    Global default histogram parameters for:
+    number of bins, min, max, and bins/keV
+    """
+    # changed hi energy to go to 6 MeV
+    if E:
+        hmin = 0
+        #hmax = 6000
+        hmax = 12000
         bpkv = 1
         bins = (hmax-hmin)*bpkv
     else:
@@ -788,13 +814,19 @@ def extendHist(hist1, hist2):
     
     name  = hist1.GetName()
     bins1 = hist1.GetNbinsX()
+    if bins1 == 1:
+        bins1 = 0
     bins2 = hist2.GetNbinsX()
+    if bins2 == 1:
+        bins2 = 0
     bins  = bins1 + bins2
     hist3 = TH1F(name, name, bins, 0, bins)
-    for n in range(bins1):
-        hist3.SetBinContent(n, hist1.GetBinContent(n))
-    for n in range(bins2):
-        hist3.SetBinContent(n+bins1, hist2.GetBinContent(n))
+    if bins1 > 0:
+        for n in range(bins1):
+            hist3.SetBinContent(n, hist1.GetBinContent(n))
+    if bins2 > 0:
+        for n in range(bins2):
+            hist3.SetBinContent(n+bins1, hist2.GetBinContent(n))
         
     return hist3
 
@@ -805,7 +837,10 @@ def fitPrep(hists, key, params, zeros=0):
     rebin   = params[0]
     kevfmin = params[1]
     kevfmax = params[2]
-
+    if kevfmin == kevfmax:
+        temp = TH1F(key, key, 1, 0, 1)
+        return temp
+    
     # if you rebin now, you need to deepcopy the original hist
     hist = deepcopy(hists[key]['hist'])
     if rebin > 1: hist.Rebin(rebin)
@@ -813,12 +848,14 @@ def fitPrep(hists, key, params, zeros=0):
     bins   = hist.GetXaxis().GetNbins()
     kevmin = hist.GetXaxis().GetBinUpEdge(0)
     kevmax = hist.GetXaxis().GetBinUpEdge(bins)
-
+    #print bins, kevmin, kevmax
+    
     # keV to bin number scaling
     ktb      = bins/(kevmax-kevmin)
     startbin = int(kevfmin*ktb)
     stopbin  = int(kevfmax*ktb)
     newbins  = int(stopbin-startbin)
+    #print newbins, startbin, stopbin
     
     temp = TH1F(key, key, newbins, 0, newbins)
     if zeros:

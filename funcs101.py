@@ -35,8 +35,8 @@ import numpy as np
 from ROOT import *
 import ROOT
 
-sys.path.append("/home/mkauer/COSINE/CUP/mc-fitting/")
-sys.path.append("/home/mkauer/mc-fitting/")
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(HERE)
 from funcs100 import *
 from funcs_misc import *
 

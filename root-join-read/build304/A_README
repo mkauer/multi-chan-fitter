@@ -1,8 +1,0 @@
-
-regenerate all MC with G4.9
-pmt u235 is G4.10
-
-lsveto MC is smeared by 0.6
-
-lsveto data is calib by 1.14
-

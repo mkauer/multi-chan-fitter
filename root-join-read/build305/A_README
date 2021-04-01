@@ -1,8 +1,0 @@
-
-geant 4.9
-
-try the poly fit(s) for the lsveto data
-it assumes the default lsveto resolution smearing
-
-and the lsveto mc is smeared at 1.0
-
