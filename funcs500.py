@@ -2,7 +2,7 @@
 ######################################################################
 # funcs500.py
 # 
-# version: 2021-01-28
+# version: 2021-04-02
 # 
 # Change Log (key == [+] added, [-] removed, [~] changed)
 #---------------------------------------------------------------------
@@ -30,7 +30,9 @@ import ROOT
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(HERE)
-from funcs411 import *
+#from funcs411 import *
+from funcs_old import *
+from funcs_misc import *
 
 # skip processing rootfiles that already exist
 SKIP_EXISTING = False
@@ -769,8 +771,8 @@ def processMC500(chain, mc, info, C, E, fromx=False, Q=False):
         chanCut = TCut('(('+hitCut+') || ('+lsvetocut+'))')
 
     else:
-        print 'ERROR: I do not know what to do with channel -->', C
-        print 'Available channels are [S]Single-hits, [M]Multi-hits'
+        print('ERROR: I do not know what to do with channel -->', C)
+        print('Available channels are [S]Single-hits, [M]Multi-hits')
         sys.exit()
 
 
@@ -1150,7 +1152,7 @@ def processSurf500(chain, mc, info, C, E, fromx, Q=False):
             if zdist > height: continue
 
         else:
-            print 'ERROR: I do not know what to do with', info['loca']
+            print('ERROR: I do not know what to do with', info['loca'])
             sys.exit()
 
 
@@ -1177,7 +1179,7 @@ def processSurf500(chain, mc, info, C, E, fromx, Q=False):
             wtf = func.Eval(1000.*(rad+teflon-dist))
 
         else:
-            print 'ERROR: I do not know what to do with', info['loca']
+            print('ERROR: I do not know what to do with', info['loca'])
             sys.exit()
 
 
@@ -1297,7 +1299,7 @@ def processSurf500(chain, mc, info, C, E, fromx, Q=False):
     ### create a hist of the generated events
     #---------------------------------------------------------------------
     this_generated = temp2.GetEntries()
-    print key, this_generated
+    print(key, this_generated)
     if 'generated_hist' in mc[key]:
         mc[key]['generated_hist'].Add(temp2)
     else:
@@ -1611,7 +1613,7 @@ def processMCbyEvent500(chain, mc, info, C, E, fromx=False, Q=False):
     ### create a hist of the generated events
     #---------------------------------------------------------------------
     this_generated = temp2.GetEntries()
-    print key, this_generated
+    print(key, this_generated)
     if 'generated_hist' in mc[key]:
         mc[key]['generated_hist'].Add(temp2)
     else:
@@ -1734,7 +1736,7 @@ def groupNum500(isotope, numbers=False):
         else:
             return TCut('((groupNo >= '+str(start)+') && (groupNo < '+str(stop)+'))')
     else:
-        print 'ERROR: group numbers not found for -->', isotope
+        print('ERROR: group numbers not found for -->', isotope)
         sys.exit()
 
 

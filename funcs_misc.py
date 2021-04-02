@@ -4,7 +4,7 @@
 # 
 # Put all the general use functions in here
 # 
-# version: 2021-01-13
+# version: 2021-04-02
 # 
 # email me: mkauer@physics.wisc.edu
 ######################################################################
@@ -39,13 +39,16 @@ def onCup():
 
 
 def baseDir():
+    """
     host = socket.gethostname()
     if 'cunpa' in host or 'node' in host or 'ibs' in host:
         return '/home/mkauer/mc-fitting/'
     else:
         return '/home/mkauer/COSINE/CUP/mc-fitting/'
+    """
+    return os.path.dirname(os.path.abspath(__file__))
 
-    
+
 def mkdir(path):
     if not os.path.exists(path):
         os.makedirs(path)
@@ -362,7 +365,10 @@ def rainbowSix(keynames):
     
     colors = {}
     cis = {}
+    #ci = randint(1000, 5000)
+    ci = 1666
     for h, key in enumerate(keynames):
+        ci += 1
         H = float(h)/float(len(keynames)+1)
         if H < 1/5. :
             R=1.
@@ -390,7 +396,8 @@ def rainbowSix(keynames):
             B=1.
 
         #print R, G, B
-        cis[key] = TColor.GetFreeColorIndex()
+        #cis[key] = TColor.GetFreeColorIndex()
+        cis[key] = ci
         colors[key] = TColor(cis[key], R, G, B, key)
         
     return colors, cis
@@ -427,7 +434,7 @@ def dataDRU64(data):
         keVperBin = 1./float(data[key]['pars'][3])
         #print key, keVperBin
         scale = float(1./(days*kgs*keVperBin))
-        print key, scale
+        print(key, scale)
         data[key]['hist'].Scale(scale)
         data[key]['druScale'] = scale
     return data
@@ -667,7 +674,7 @@ def groupNum(info):
     if start != -1 and stop != -1:
         return TCut('((groupNo >= '+str(start)+') && (groupNo < '+str(stop)+'))')
     else:
-        print 'ERROR: groupNo not found for -->', info['chst']
+        print('ERROR: groupNo not found for -->', info['chst'])
         sys.exit()
 
 
@@ -715,7 +722,7 @@ def histparam6000(E):
 
 def triangleSmoothing(bkgs, key, s=0):
 
-    print 'DEBUG: triangle smoothing', key
+    print('DEBUG: triangle smoothing', key)
 
     ### get the number of bins
     bins = bkgs[key]['hist'].GetNbinsX()
@@ -751,7 +758,7 @@ def triangleSmoothing(bkgs, key, s=0):
 
 def averageSmoothing(bkgs, key, s=0):
 
-    print 'DEBUG: average smoothing', key
+    print('DEBUG: average smoothing', key)
     
     ### get the number of bins
     bins = bkgs[key]['hist'].GetNbinsX()
@@ -787,7 +794,7 @@ def averageSmoothing(bkgs, key, s=0):
 
 def rootSmoothing(bkgs, key, s=0):
     
-    print 'DEBUG: root TH1 smoothing', key
+    print('DEBUG: root TH1 smoothing', key)
     bkgs[key]['hist'].Smooth(s)
 
     return bkgs
@@ -880,4 +887,5 @@ def addHistKey(hists, key):
         hists[key]['hist'] = hist
         
     return hists
+
 
