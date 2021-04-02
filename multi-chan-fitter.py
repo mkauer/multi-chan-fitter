@@ -5,7 +5,8 @@
 #-----------------------------------------------------------
 # Revamp the MC format and hist generation
 # 
-# version: 2021-01-12
+# see CHANGELOG
+# version: 2021-04-02
 ############################################################
 
 import os,sys,re
@@ -22,25 +23,35 @@ try:
 except NameError:
     pass
 
-# ROOT6 FIX
+# needed for ROOT-6 compat
 import ctypes
 from ctypes import *
 
 script = os.path.basename(__file__)
-V = 'v1'
-print('INFO: running script --> {0}'.format(script))
+V = 'v'+(script.split('-')[0])
+print('INFO: running script --> {0} ({1})'.format(script, V))
 
+# check python version
+import platform
+py_ver = platform.python_version()
+print('INFO: using python --> {0}'.format(py_ver))
+
+# import ROOT and check version
 import ROOT
 from ROOT import *
 #ROOT.gErrorIgnoreLevel = kWarning
 ROOT.gErrorIgnoreLevel = kError
-try: vroot = ROOT.__version__
-except: vroot = '5'
-print('INFO: using root --> {0}'.format(vroot))
+try: root_ver = float((ROOT.__version__).replace('/', ''))
+except: root_ver = 5.0
+print('INFO: using root --> {0}'.format(root_ver))
 
+# import local functions
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(HERE)
 from funcs500 import *
+from funcs_misc import *
+from funcs_old import *
+
 
 ### batch job?
 #print 'HOSTNAME:', socket.gethostname()
@@ -120,8 +131,8 @@ for i in range(numx):
     ### for just high E fit
     fitranges[i]['S0'] = [1, 0, 0]
     fitranges[i]['S1'] = [2, 80, 3500]
-    fitranges[i]['M0'] = [1, 40, 100]
-    #fitranges[i]['M0'] = [1, 0, 0]
+    #fitranges[i]['M0'] = [1, 40, 100]
+    fitranges[i]['M0'] = [1, 0, 0]
     fitranges[i]['M1'] = [2, 80, 3200]
 
     ### for just alpha fit
@@ -185,7 +196,7 @@ showTotal = 1
 redtotal = 1
 
 ### plot alpha channels? [0,1]
-showAlphas = 1
+showAlphas = 0
 
 ### only show q1 quenched peaks? [0,1]
 justQ1 = 0
@@ -864,7 +875,7 @@ def main(argv):
                                 Q = str(Q)
                                 tmpkey = fskey+'-q'+Q+'-c'+C+'-e'+E
                                 if tmpkey in sigs:
-                                    print tmpkey
+                                    #print(tmpkey)
                                     newkeys.append(tmpkey)
                             for F in range(numx):
                                 F = str(F+1)
@@ -935,7 +946,8 @@ def main(argv):
             fitresults[str(i)].append('runtime = '+str(round(runtimes[i]['S'][0]/60./60./24., 2))+' days')
             if note: fitresults[str(i)].append('note = '+note)
             fitresults[str(i)].append('script = '+script)
-            fitresults[str(i)].append('root = '+vroot)
+            fitresults[str(i)].append('python = '+str(py_ver))
+            fitresults[str(i)].append('root = '+str(root_ver))
             fitresults[str(i)].append('selected xstals = '+str(justthese))
             fitresults[str(i)].append('channels fit = '+str(fitchans))
             fitresults[str(i)].append('globals = '+str(globalmc))
@@ -1081,12 +1093,15 @@ def main(argv):
         
         ### set fit bounds!!!
         for l in range(len(bounds)):
-            #fit.Constrain(l+1, bounds[l][0], bounds[l][1])
             # ROOT6 FIX
-            fit.Constrain(l, bounds[l][0], bounds[l][1])
-            if stepSize != 0:
-                fitter.Config().ParSettings(l).SetStepSize(stepSize)
+            if root_ver >= 6:
+                fit.Constrain(l, bounds[l][0], bounds[l][1])
+                if stepSize != 0:
+                    fitter.Config().ParSettings(l).SetStepSize(stepSize)
+            else:
+                fit.Constrain(l+1, bounds[l][0], bounds[l][1])
             
+                
         ### set the fit range
         #fit.SetRangeX(0, fmax*numx)
         fit.SetRangeX(0, fitbins-1)
@@ -1737,7 +1752,7 @@ def main(argv):
                 
                     sepFitPlot.Print(plotdir+'/'+fisave+'.png')
                 except:
-                    print 'WARNING: could not make plot for xstal-'+str(i+1)
+                    print('WARNING: could not make plot for xstal-'+str(i+1))
                     continue
             
         fcanv.Update()
@@ -2465,7 +2480,7 @@ def main(argv):
                     try:
                         resid[C][E][i].Divide(data[dkey]['hist'], total[C][E][i])
                     except:
-                        print 'WARNING: could not divide', dkey, 'by total'
+                        print('WARNING: could not divide', dkey, 'by total')
                         pass
                     
                 resid[C][E][i].SetTitle('')
@@ -2805,13 +2820,13 @@ def main(argv):
                     try:
                         zsh_resid[i].Divide(zsh_data[i], zsh_total[i])
                     except:
-                        print 'WARNING: could not divide data by total'
+                        print('WARNING: could not divide data by total')
                         pass
                 else:
                     try:
                         zsh_resid[i] = zsh_data[i] - zsh_total[i]
                     except:
-                        print 'WARNING: could not subtract data by total'
+                        print('WARNING: could not subtract data by total')
                         pass
                                 
                 ### tweak the errors on the residual
@@ -2995,13 +3010,13 @@ def main(argv):
                     try:
                         zmh_resid[i].Divide(zmh_data[i], zmh_total[i])
                     except:
-                        print 'WARNING: could not divide divide data by total'
+                        print('WARNING: could not divide divide data by total')
                         pass
                 else:
                     try:
                         zmh_resid[i] = zmh_data[i] - zmh_total[i]
                     except:
-                        print 'WARNING: could not subtract data by total'
+                        print('WARNING: could not subtract data by total')
                         pass
                 
                 ### tweak the errors on the residual
