@@ -1,0 +1,15 @@
+# -*- sh -*-
+
+# re-tweaked low-energy calib, high-energy tweak same as above with xe????p? type correction
+# can now load separate files for different energy calibrations (for C2)
+DR	1	data	SET3	V00-04-19	./joined/data/x99_SET3_V00-04-19_poly3x35v2.root
+DR0	2	data	SET3	V00-04-19	./joined/data/x99_SET3_V00-04-19_poly3x35v2.root
+DR12	2	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_c2-xe33p3-xe3600p2.root
+DR	3	data	SET3	V00-04-19	./joined/data/x99_SET3_V00-04-19_poly3x35v2.root
+DR	4	data	SET3	V00-04-19	./joined/data/x99_SET3_V00-04-19_poly3x35v2.root
+DR	5	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_calib3.root
+DR	6	data	SET3	V00-04-19	./joined/data/x99_SET3_V00-04-19_poly3x35v2.root
+DR	7	data	SET3	V00-04-19	./joined/data/x99_SET3_V00-04-19_poly3x35v2.root
+DR	8	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_calib3.root
+DR	9	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_calib3.root
+

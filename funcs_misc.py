@@ -122,8 +122,8 @@ def cmass(i):
          9.16,
         18.01,
         18.28,
-        12.50,
-        12.50,
+        12.516,
+        12.516,
         18.28,
         1800.
         ]
@@ -134,32 +134,65 @@ def surfArea(i):
     """
     crystal surface area in m^2
     """
-    diameter = [ 5.0,
-                 4.2,
-                 4.2,
-                 5.0,
-                 5.0,
-                 4.8,
-                 4.8,
-                 5.0 ]
-    length = [  7.0,
-               11.0,
-               11.0,
-               15.3,
-               15.5,
-               11.8,
-               11.8,
-               15.5 ]
+    # these don't look right
+    # us mcDimensions() from below
+    """
+    diameter = [
+        5.0,
+        4.2,
+        4.2,
+        5.0,
+        5.0,
+        4.8,
+        4.8,
+        5.0
+    ]
+    length = [
+        7.0,
+        11.0,
+        11.0,
+        15.3,
+        15.5,
+        11.8,
+        11.8,
+        15.5
+    ]
     if i == 8:
         ### average surface area if grouped into lesveto
         return 3.1416 * (sum(np.asarray(diameter)*np.asarray(length))/8.) * 0.00064516
     else:
         return 3.1416 * (diameter[i]*length[i]) * 0.00064516
+    """
 
+    ### do this a new way
+    ### return area in cm^2
+    pi = 3.1416
+    
+    if i < 8:
+        x, y, z, rad, height, dep = mcDimensions(i)
+        R = rad/10. # convert to cm
+        H = (height*2.)/10. # full height and in cm
+        return (2.*pi*R*H) + (2.*pi*(R**2))
+    
+    elif i == 8:
+        ### ls cube area (x=120, y=130, z=130 cm)
+        #return 96200.
+        
+        ### from ls volume estimate (81797)
+        #return 4.*pi*(80.7**2)
+        
+        ### from mean radius of MC events (52739)
+        return 4.*pi*(64.8**2)
+        
+    else:
+        print('ERROR: no surface area calc for crystal {0}'.format(i))
+        sys.exit()
+        
     
 def mcDimensions(i):
 
     ### needed for NaI and Teflon surface depth profiling
+    ### dimensions in mm
     ### 2020-05-12 - updated "X" with Gyunho's new geometry
     
     if i==0: # C1
@@ -171,7 +204,7 @@ def mcDimensions(i):
         height = 177.800/2.0
         dep = 0.01
 
-    if i==1: # C2
+    elif i==1: # C2
         #x = -62.2
         x = -67.2
         y = -26.1
@@ -180,7 +213,7 @@ def mcDimensions(i):
         height = 279.400/2.0
         dep = 0.01
         
-    if i==2: # C3
+    elif i==2: # C3
         #x = 62.2
         x = 67.2
         y = -30.9
@@ -189,7 +222,7 @@ def mcDimensions(i):
         height = 279.400/2.0
         dep = 0.01
         
-    if i==3: # C4
+    elif i==3: # C4
         #x = 191.7
         x = 201.7
         y = -38.6
@@ -199,7 +232,7 @@ def mcDimensions(i):
         height = 387.350/2.0
         dep = 0.01
     
-    if i==4: # C5
+    elif i==4: # C5
         #x = -201.7
         x = -211.7
         y = -283.4
@@ -208,7 +241,7 @@ def mcDimensions(i):
         height = 393.700/2.0
         dep = 0.01
         
-    if i==5: # C6
+    elif i==5: # C6
         #x = -67.8
         x = -72.8
         y = -281.7
@@ -217,7 +250,7 @@ def mcDimensions(i):
         height = 298.450/2.0
         dep = 0.01
 
-    if i==6: # C7
+    elif i==6: # C7
         #x = 67.8
         x = 72.8
         y = -281.7
@@ -226,7 +259,7 @@ def mcDimensions(i):
         height = 298.450/2.0
         dep = 0.01
     
-    if i==7: # C8
+    elif i==7: # C8
         #x = 201.8
         x = 211.8
         y = -281.7
@@ -234,27 +267,32 @@ def mcDimensions(i):
         rad = 63.500
         height = 393.700/2.0
         dep = 0.01
-    
+
+    else:
+        print('ERROR: no crystal dimensions for crystal {0}'.format(i))
+        sys.exit()
+        
     return x, y, z, rad, height, dep
 
 
 def surfProfile(x, pars):
-    #A0 = 1.0
-    p0 = pars[0]
-    A0 = 1./p0
-    return A0*np.exp(-x[0]/p0)
+    # The exp scaling doesn't really matter because
+    # num "generated" events are also weighted so
+    # that the efficiency is always correct.
+    # Double checked 2022-11-10
+    #   - no diff in spectral amplitude
+    #return np.exp(-x[0]/pars[0])
+    return (1/pars[0])*np.exp(-x[0]/pars[0])
 
 
 def surfProfile88(x):
-    A0 = 1.0
     p0 = 0.88
-    return A0*np.exp(-x[0]/p0)
+    return (1/p0)*np.exp(-x[0]/p0)
 
 
 def surfProfile13(x):
-    A0 = 1.0
     p0 = 0.13
-    return A0*np.exp(-x[0]/p0)
+    return (1/p0)*np.exp(-x[0]/p0)
 
 
 def energyNames(E=0):
@@ -362,6 +400,7 @@ def rainbowSix(keynames):
     Generate an array of colors for MC plotting
     Tweaked for ROOT6
     """
+    from random import randint
     
     colors = {}
     cis = {}
@@ -391,9 +430,9 @@ def rainbowSix(keynames):
             G=0.
             B=1.
         elif H >= 1. :
-            R=1.
-            G=1.
-            B=1.
+            R=0.
+            G=0.
+            B=0.
 
         #print R, G, B
         #cis[key] = TColor.GetFreeColorIndex()
@@ -401,6 +440,28 @@ def rainbowSix(keynames):
         colors[key] = TColor(cis[key], R, G, B, key)
         
     return colors, cis
+
+
+def alphaColors(N):
+    ac = [
+        kBlue    +1,
+        kCyan    +1,
+        kGreen   +1,
+        kOrange  +1,
+        kMagenta +1,
+        kBlue    -7,
+        kCyan    -7,
+        kGreen   -7,
+        kOrange  -7,
+        kMagenta -7,
+        kBlue    +3,
+        kCyan    +3,
+        kGreen   +3,
+        kOrange  +3,
+        kMagenta +3,
+    ]
+    n = N % len(ac)
+    return ac[n]
 
 
 def readFile(fileName):
@@ -442,7 +503,7 @@ def dataDRU64(data):
 
 def makeTotal64(chan, E, par):
     total = []
-    #par = histparam(E)
+    #par = histparams(E)
     for i in range(8):
         key  = 'x'+str(i)
         key += '-c'+chan
@@ -458,7 +519,7 @@ def makeTotal64(chan, E, par):
 
 def makeResid64(chan, E, par):
     resid = []
-    #par = histparam(E)
+    #par = histparams(E)
     for i in range(8):
         key  = 'x'+str(i)
         key += '-c'+chan
@@ -477,7 +538,6 @@ def getPars(hist):
     hmin = hist.GetBinLowEdge(1)
     hmax = hist.GetBinLowEdge(bins+1)
     bpkv = bins/(hmax-hmin)
-    #print bins,hmin,hmax,bpkv
     pars = [bins, hmin, hmax, bpkv]
     return pars
 
@@ -809,9 +869,9 @@ def smooth(bkgs, smoothwhat, s=0):
     for key in bkgs:
         for this in smoothwhat:
             if this in key and key not in smoothed:
-                #bkgs = rootSmoothing(bkgs, key, s)
+                bkgs = rootSmoothing(bkgs, key, s)
                 #bkgs = averageSmoothing(bkgs, key, s)
-                bkgs = triangleSmoothing(bkgs, key, s)
+                #bkgs = triangleSmoothing(bkgs, key, s)
                 smoothed.append(key)
     
     return bkgs
@@ -858,9 +918,9 @@ def fitPrep(hists, key, params, zeros=0):
     #print bins, kevmin, kevmax
     
     # keV to bin number scaling
-    ktb      = bins/(kevmax-kevmin)
-    startbin = int(kevfmin*ktb)
-    stopbin  = int(kevfmax*ktb)
+    bpk      = bins/(kevmax-kevmin)
+    startbin = int(kevfmin*bpk)
+    stopbin  = int(kevfmax*bpk)
     newbins  = int(stopbin-startbin)
     #print newbins, startbin, stopbin
     

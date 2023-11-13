@@ -1,0 +1,571 @@
+# -*- sh -*-
+# 2021-11-03 - new surface depth notation
+# 2021-11-03 - moved "joined" rootfiles
+# 2021-11-09 - refit low energy with deeper teflon surface
+# 2022-02-11 - use new skew/gaus distributions for internal pb210 alphas
+# 2022-02-14 - re-tweak quenching for rn222 and th228
+# 2022-02-15 - play with Na22 recalibration - the 01 version looks good
+#-------------
+# 2022-02-16 - use po216 and rn220 as main high energy alphas
+# 2022-02-24 - tweaked Na22 calib now in internal.root
+# 2022-02-24 - try fixing c7 alpha saturation issue
+# 2022-02-24 - now using v50 with 2 quenching functions
+# 2022-02-24 - tweaked teflon surface activity
+# 2022-02-25 - refit na22 and co60
+# 2022-02-28 - refit low energy single hit
+#------------- 502-5
+# 2022-03-11 - get cu shield activities in terms of 3000kg copper
+# 2022-04-05 - testing hacked together Pb206
+# 2022-04-06 - refit low energy and looks great!
+# 2022-04-07 - found a bug with lsveto single hit - can't exclude runtime < run 1800
+# 2022-04-07 - refit cushield components
+# 2022-04-07 - added bit from 502-4 trying to fit with xpmt and innersteel (for reference)
+# 2022-04-07 - added in the neutron MC!
+# 2022-04-19 - the "lsveto fix" is not right, removed that stuff
+# 2022-04-22 - trying fits again with new innersteel
+# 2022-04-25 - innersteel_old k40 is messed up, only hits in C1? No hits is lsveto?
+# 2022-04-25 - refit C1 alpha and low-energy
+# 2022-05-10 - refit with new innersteel - K40 looks good now
+# 2022-05-10 - changed Pb206 to be nai-surface
+# 2022-05-10 - add xpmt Th228_GRND
+# 2022-05-12 - refit with all xpmt plus plastic
+# 2022-06-03 - working on low-energy calibs and using xpmtbase
+# 2022-06-07 - started testing NaI surf Ra228
+# 2022-06-27 - work more on xpmtbase Rn222 components
+# 2022-06-27 - use the SET3 data for bkgs paper
+# 2022-06-28 - refit low-energy with surface Ra228
+# 2022-06-29 - innersteel Th228 looks better than cushield Th228
+# 2022-06-29 - pmt and xpmt looks better than xpmt and xpmtbase
+#------------- 502-6
+# 2022-09-06 - added LS vikuiti K40 to model
+# 2022-09-14 - fix LS, refit externals
+
+
+
+"""
+DR	1	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_c7fix.root
+DR	2	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_c7fix.root
+DR	3	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_c7fix.root
+DR	4	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_c7fix.root
+DR	5	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_c7fix.root
+DR	6	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_c7fix.root
+DR	7	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_c7alpha.root
+DR	8	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_c7fix.root
+#DR	9	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_c7fix.root
+DR	9	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_calib3.root
+#DR	9	data	SET4	V00-04-19	./joined/data/SET4_V00-04-19.root
+"""
+"""
+DR	1	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_low-energy.root
+DR	2	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_low-energy.root
+DR	3	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_low-energy.root
+DR	4	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_low-energy.root
+DR	5	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_low-energy.root
+DR	6	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_low-energy.root
+DR	7	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_low-energy.root
+DR	8	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_low-energy.root
+DR	9	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_low-energy.root
+"""
+"""
+DR	1	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_neutron2.root
+DR	2	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_neutron2.root
+DR	3	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_neutron2.root
+DR	4	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_neutron2.root
+DR	5	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_neutron2.root
+DR	6	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_neutron2.root
+DR	7	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_neutron2.root
+DR	8	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_neutron2.root
+DR	9	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_neutron2.root
+"""
+"""
+DR	1	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_calib3.root
+DR	2	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_calib3.root
+DR	3	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_calib3.root
+DR	4	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_calib3.root
+DR	5	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_calib3.root
+DR	6	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_calib3.root
+DR	7	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_calib3.root
+DR	8	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_calib3.root
+DR	9	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_calib3.root
+"""
+"""
+# low-energy calib tweaked SET4 data (but xstals 2, 5, 8, 9 are SET3)
+DR	1	data	SET4	V00-04-19	./joined/data/SET4_V00-04-19_c1-xe33p3-xe2400p3.root
+DR	2	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_c2-xe33p3-xe3600p2.root
+DR	3	data	SET4	V00-04-19	./joined/data/SET4_V00-04-19_c3-xe33p3-xe2400p3.root
+DR	4	data	SET4	V00-04-19	./joined/data/SET4_V00-04-19_c4-xe33p3-xe2400p3.root
+DR	5	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_calib3.root
+DR	6	data	SET4	V00-04-19	./joined/data/SET4_V00-04-19_c6-xe33p3-xe2650p2.root
+DR	7	data	SET4	V00-04-19	./joined/data/SET4_V00-04-19_c7-xe33p3-xe2600p3-xe3200p2.root
+DR	8	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_calib3.root
+DR	9	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_calib3.root
+"""
+
+# low-energy calib tweaked SET3 data
+DR	1	data	SET3	V00-04-19	./joined/data/SET3_V00-04-19_c1-xe33p3-xe2400p3.root
+DR	2	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_c2-xe33p3-xe3600p2.root
+DR	3	data	SET3	V00-04-19	./joined/data/SET3_V00-04-19_c3-xe33p3-xe2400p3.root
+DR	4	data	SET3	V00-04-19	./joined/data/SET3_V00-04-19_c4-xe33p3-xe2400p3.root
+DR	5	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_calib3.root
+DR	6	data	SET3	V00-04-19	./joined/data/SET3_V00-04-19_c6-xe33p3-xe2650p2.root
+DR	7	data	SET3	V00-04-19	./joined/data/SET3_V00-04-19_c7-xe33p3-xe2600p3-xe3200p2.root
+DR	8	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_calib3.root
+DR	9	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_calib3.root
+
+
+
+
+"""
+# C2 calibration is wonky and single-hit lsveto calibration is wonky?
+#DR	1	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_default-calib.root
+#DR	1	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_calib3.root
+#DR	1	data	SET4	V00-04-19	./joined/data/SET4_V00-04-19.root
+DR	1	data	SET4	V00-04-19	./joined/data/SET4_V00-04-19_c1-xe33p3-xe2400p3.root
+
+#DR	2	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_default-calib.root
+#DR	2	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_calib3.root
+#DR	2	data	SET4	V00-04-19	./joined/data/SET4_V00-04-19.root
+DR	2	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_c2-xe33p3-xe3600p2.root
+
+#DR	3	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_default-calib.root
+#DR	3	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_calib3.root
+#DR	3	data	SET4	V00-04-19	./joined/data/SET4_V00-04-19.root
+DR	3	data	SET4	V00-04-19	./joined/data/SET4_V00-04-19_c3-xe33p3-xe2400p3.root
+
+#DR	4	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_default-calib.root
+#DR	4	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_calib3.root
+#DR	4	data	SET4	V00-04-19	./joined/data/SET4_V00-04-19.root
+DR	4	data	SET4	V00-04-19	./joined/data/SET4_V00-04-19_c4-xe33p3-xe2400p3.root
+
+#DR	5	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_default-calib.root
+DR	5	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_calib3.root
+#DR	5	data	SET4	V00-04-19	./joined/data/SET4_V00-04-19.root
+
+#DR	6	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_default-calib.root
+#DR	6	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_calib3.root
+#DR	6	data	SET4	V00-04-19	./joined/data/SET4_V00-04-19.root
+DR	6	data	SET4	V00-04-19	./joined/data/SET4_V00-04-19_c6-xe33p3-zerox.root
+
+#DR	7	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_default-calib.root
+#DR	7	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_calib3.root
+#DR	7	data	SET4	V00-04-19	./joined/data/SET4_V00-04-19.root
+DR	7	data	SET4	V00-04-19	./joined/data/SET4_V00-04-19_c7-xe33p3-xe2600p3-xe3200p2.root
+
+#DR	8	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_default-calib.root
+DR	8	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_calib3.root
+#DR	8	data	SET4	V00-04-19	./joined/data/SET4_V00-04-19.root
+
+#DR	9	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_default-calib.root
+DR	9	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_calib3.root
+#DR	9	data	SET4	V00-04-19	./joined/data/SET4_V00-04-19.root
+"""
+
+
+"""
+### alpha pb210 parameterization testing
+# this rootfile has other channels included for the various skewgaus pdfs
+BR	1	internal	Pb210	Pb210	GRND	2.60e+00	0.1	10	v4.0.3	./alphas-pb210-all.root
+BR	2	internal	Pb210	Pb210	GRND	1.85e+00	0.1	10	v4.0.3	./alphas-pb210-all.root
+BR	3	internal	Pb210	Pb210	GRND	6.59e-01	0.1	10	v4.0.3	./alphas-pb210-all.root
+BR	4	internal	Pb210	Pb210	GRND	6.58e-01	0.1	10	v4.0.3	./alphas-pb210-all.root
+BR	6	internal	Pb210	Pb210	GRND	1.43e+00	0.1	10	v4.0.3	./alphas-pb210-all.root
+BR	7	internal	Pb210	Pb210	GRND	1.45e+00	0.1	10	v4.0.3	./alphas-pb210-all.root
+"""
+"""
+# these rootfiles don't have the other channels included
+BR	1	internal	Pb210	Pb210	GRND	2.60e+00	0.1	10	v4.0.3	./alphas-pb210-c1-4gaus.root
+BR	2	internal	Pb210	Pb210	GRND	1.85e+00	0.1	10	v4.0.3	./alphas-pb210-c2-4gaus.root
+BR	3	internal	Pb210	Pb210	GRND	6.59e-01	0.1	10	v4.0.3	./alphas-pb210-c3-3gaus.root
+#BR	4	internal	Pb210	Pb210	GRND	6.58e-01	0.1	10	v4.0.3	./alphas-pb210-c4-2skewgaus.root
+BR	4	internal	Pb210	Pb210	GRND	6.58e-01	0.1	10	v4.0.3	./alphas-pb210-c4-3gaus.root
+#BR	6	internal	Pb210	Pb210	GRND	1.43e+00	0.1	10	v4.0.3	./alphas-pb210-c6-2skewgaus.root
+BR	6	internal	Pb210	Pb210	GRND	1.43e+00	0.1	10	v4.0.3	./alphas-pb210-c6-2skewgaus-1gaus.root
+#BR	6	internal	Pb210	Pb210	GRND	1.43e+00	0.1	10	v4.0.3	./alphas-pb210-c6-2skew-2gaus-tail.root
+#BR	7	internal	Pb210	Pb210	GRND	1.45e+00	0.1	10	v4.0.3	./alphas-pb210-c7-2skewgaus.root
+BR	7	internal	Pb210	Pb210	GRND	1.45e+00	0.1	10	v4.0.3	./alphas-pb210-c7-2skewgaus-1gaus.root
+"""
+
+
+BR	1	teflon-surf-expo-5000-in	Pb210	Pb210	GRND	2.38e-02	0.1	10	v4.0.3	./joined/teflon-surf-expo.root
+BR	1	teflon-surf-expo-100-in		Pb210	Pb210	GRND	1.34e-01	0	10	v4.0.3	./joined/teflon-surf-expo.root
+BR	1	teflon		Pb210	Pb210	GRND	1.01e+00	0.1	10	v4.0.3	./joined/teflon.root
+BR	1	internal	Pb210	Pb210	GRND	2.71e+00	0.1	10	v4.0.3	./joined/internal.root
+BR	1	internal	Th232	Ra228	Th228	1.30e-01	0	10	v4.0.3	./joined/internal.root
+BR	1	internal	I126	I126	GRND	4.04e-02	0	10	v4.0.3	./joined/internal.root
+BR	1	internal	Sn113	Sn113	GRND	5.83e-03	0	10	v4.0.3	./joined/internal.root
+BR	1	internal	Cd109	Cd109	GRND	1.11e-02	0	10	v4.0.3	./joined/internal.root
+BR	1	internal	H3	H3	GRND	1.05e-01	0	10	v4.0.3	./joined/internal.root
+BR	1	internal	Te121m	Te121m	GRND	8.08e-04	0	10	v4.0.3	./joined/internal.root
+BR	1	internal	Na22	Na22	GRND	3.67e-01	0.1	10	v4.0.3	./joined/internal.root
+BR	1	internal	I125	I125	GRND	5.21e-08	0.1	10	v4.0.3	./joined/internal.root
+BR	1	internal	I129	I129	GRND	1.63e+00	0.1	10	v4.0.3	./joined/internal.root
+BR	1	internal	Te123m	Te123m	GRND	0.04		0.1	10	v4.0.3	./joined/internal.root
+BR	1	internal	Te127m	Te127m	GRND	5.96e-02	0.1	10	v4.0.3	./joined/internal.root
+BR	1	internal	K40	K40	GRND	1.0		0.1	10	v4.0.3	./joined/internal.root
+BR	1	cucase		Co60	Co60	GRND	3.04e-01	0.1	10	v4.0.3	./joined/cucase.root
+#BR	1	internal	U238	U238	Th230	2.00e-03	0.0	100	v4.0.3	./joined/internal.root
+#BR	1	internal	U238	Th230	Ra226	2.00e-03	0.0	100	v4.0.3	./joined/internal.root
+#BR	1	internal	U238	Ra226	Rn222	2.00e-03	0.0	100	v4.0.3	./joined/internal.root
+#BR	1	internal	U238	Rn222	Pb210	1.00e-03	0.0	2	v4.0.3	./joined/internal.root
+#BR	1	internal	Th232	Th232	Ra228	2.00e-03	0.0	100	v4.0.3	./joined/internal.root
+BR	1	internal	Th232	Th228	GRND	9.08e-03	0.0	10	v4.0.3	./joined/internal.root
+#BR	1	internal	U235	U235	Pa231	5.00e-03	0.0	10	v4.0.3	./joined/internal.root
+#BR	1	internal	U235	Pa231	GRND	1.00e-03	0.0	10	v4.0.3	./joined/internal.root
+
+
+#FR	2	nai-surf-expo-10-side		Th232	Ra228	Th228	4.64e-03	0	10	v4.0.3	./joined/nai-surf-expo.root
+BR	2	nai-surf-expo-50-side		Th232	Ra228	Th228	2.24e-02	0	10	v4.0.3	./joined/nai-surf-expo.root
+BR	2	nai-surf-expo-100-side		Th232	Ra228	Th228	2.49e-02	0	10	v4.0.3	./joined/nai-surf-expo.root
+#FR	2	nai-surf-expo-500-side		Th232	Ra228	Th228	1.99e-02	0	10	v4.0.3	./joined/nai-surf-expo.root
+#FR	2	nai-surf-expo-1000-side		Th232	Ra228	Th228	2.22e-02	0	10	v4.0.3	./joined/nai-surf-expo.root
+#BR	2	nai-surface	Pb210	Pb206	GRND	1.20e-02	0.1	10	v4.0.3	./joined/surf-pb206.root
+#FR	2	nai-surf-expo-20-side		Pb210	Pb210	GRND	5.92e-02	0	10	v4.0.3	./joined/nai-surf-expo.root
+#FR	2	nai-surf-expo-10-side		Pb210	Pb210	GRND	5.92e-02	0	10	v4.0.3	./joined/nai-surf-expo.root
+BR	2	nai-surf-expo-50-side		Pb210	Pb210	GRND	4.33e-02	0	10	v4.0.3	./joined/nai-surf-expo.root
+#FR	2	nai-surf-expo-100-side		Pb210	Pb210	GRND	5.92e-02	0	10	v4.0.3	./joined/nai-surf-expo.root
+#FR	2	nai-surf-expo-500-side		Pb210	Pb210	GRND	5.92e-02	0	10	v4.0.3	./joined/nai-surf-expo.root
+BR	2	teflon-surf-expo-2000-in	Pb210	Pb210	GRND	6.47e-02	0.1	10	v4.0.3	./joined/teflon-surf-expo.root
+#FR	2	teflon-surf-expo-100-in		Pb210	Pb210	GRND	6.68e-02	0	10	v4.0.3	./joined/teflon-surf-expo.root
+BR	2	teflon		Pb210	Pb210	GRND	4.05e-01	0.1	10	v4.0.3	./joined/teflon.root
+BR	2	internal	Pb210	Pb210	GRND	1.87e+00	0.1	10	v4.0.3	./joined/internal.root
+BR	2	internal	Th232	Ra228	Th228	4.78e-02	0	10	v4.0.3	./joined/internal.root
+BR	2	internal	I126	I126	GRND	5.12e-02	0	10	v4.0.3	./joined/internal.root
+BR	2	internal	Sn113	Sn113	GRND	2.85e-03	0	10	v4.0.3	./joined/internal.root
+BR	2	internal	Cd109	Cd109	GRND	6.67e-03	0	10	v4.0.3	./joined/internal.root
+BR	2	internal	H3	H3	GRND	9.80e-02	0	10	v4.0.3	./joined/internal.root
+#FR	2	internal	Te121m	Te121m	GRND	5.23e-13	0	10	v4.0.3	./joined/internal.root
+BR	2	internal	Na22	Na22	GRND	4.04e-01	0.1	10	v4.0.3	./joined/internal.root
+BR	2	internal	I125	I125	GRND	1.27e-02	0	10	v4.0.3	./joined/internal.root
+BR	2	internal	I129	I129	GRND	1.14e+00	0.1	10	v4.0.3	./joined/internal.root
+BR	2	internal	Te123m	Te123m	GRND	0.04		0.1	10	v4.0.3	./joined/internal.root
+BR	2	internal	Te127m	Te127m	GRND	5.96e-02	0.1	10	v4.0.3	./joined/internal.root
+BR	2	internal	K40	K40	GRND	1.8		0.1	10	v4.0.3	./joined/internal.root
+BR	2	cucase		Co60	Co60	GRND	4.75e-01	0.1	10	v4.0.3	./joined/cucase.root
+#BR	2	internal	U238	U238	Th230	5.00e-04	0.0	100	v4.0.3	./joined/internal.root
+#BR	2	internal	U238	Th230	Ra226	5.00e-04	0.0	100	v4.0.3	./joined/internal.root
+#BR	2	internal	U238	Ra226	Rn222	5.00e-04	0.0	100	v4.0.3	./joined/internal.root
+#BR	2	internal	U238	Rn222	Pb210	5.00e-04	0.0	2	v4.0.3	./joined/internal.root
+#BR	2	internal	Th232	Th232	Ra228	2.00e-03	0.0	100	v4.0.3	./joined/internal.root
+BR	2	internal	Th232	Th228	GRND	5.57e-03	0.0	10	v4.0.3	./joined/internal.root
+#BR	2	internal	U235	U235	Pa231	5.00e-03	0.0	10	v4.0.3	./joined/internal.root
+#BR	2	internal	U235	Pa231	GRND	1.00e-03	0.0	10	v4.0.3	./joined/internal.root
+
+
+#FR	3	nai-surf-expo-10-side		Th232	Ra228	Th228	2.41e-03	0	10	v4.0.3	./joined/nai-surf-expo.root
+BR	3	nai-surf-expo-50-side		Th232	Ra228	Th228	1.82e-02	0	10	v4.0.3	./joined/nai-surf-expo.root
+BR	3	nai-surf-expo-100-side		Th232	Ra228	Th228	2.59e-02	0	10	v4.0.3	./joined/nai-surf-expo.root
+#FR	3	nai-surf-expo-500-side		Th232	Ra228	Th228	2.27e-02	0	10	v4.0.3	./joined/nai-surf-expo.root
+#FR	3	nai-surf-expo-1000-side		Th232	Ra228	Th228	2.47e-02	0	10	v4.0.3	./joined/nai-surf-expo.root
+#BR	3	nai-surface	Pb210	Pb206	GRND	1.19e-02	0.1	10	v4.0.3	./joined/surf-pb206.root
+#FR	3	nai-surf-expo-20-side		Pb210	Pb210	GRND	5.17e-02	0	10	v4.0.3	./joined/nai-surf-expo.root
+#FR	3	nai-surf-expo-10-side		Pb210	Pb210	GRND	5.17e-02	0	10	v4.0.3	./joined/nai-surf-expo.root
+BR	3	nai-surf-expo-50-side		Pb210	Pb210	GRND	5.02e-02	0	10	v4.0.3	./joined/nai-surf-expo.root
+#FR	3	nai-surf-expo-100-side		Pb210	Pb210	GRND	5.17e-02	0	10	v4.0.3	./joined/nai-surf-expo.root
+BR	3	teflon-surf-expo-3000-in	Pb210	Pb210	GRND	8.62e-02	0.1	10	v4.0.3	./joined/teflon-surf-expo.root
+#FR	3	teflon-surf-expo-100-in		Pb210	Pb210	GRND	8.40e-02	0	10	v4.0.3	./joined/teflon-surf-expo.root
+#FR	3	teflon-surf-expo-50-in		Pb210	Pb210	GRND	8.40e-02	0	10	v4.0.3	./joined/teflon-surf-expo.root
+BR	3	teflon		Pb210	Pb210	GRND	1.17e+00	0.1	10	v4.0.3	./joined/teflon.root
+BR	3	internal	Pb210	Pb210	GRND	6.62e-01	0.1	10	v4.0.3	./joined/internal.root
+BR	3	internal	Th232	Ra228	Th228	5.46e-02	0	10	v4.0.3	./joined/internal.root
+BR	3	internal	I126	I126	GRND	4.40e-02	0	10	v4.0.3	./joined/internal.root
+BR	3	internal	Sn113	Sn113	GRND	4.71e-03	0	10	v4.0.3	./joined/internal.root
+BR	3	internal	Cd109	Cd109	GRND	1.48e-02	0	10	v4.0.3	./joined/internal.root
+BR	3	internal	H3	H3	GRND	2.27e-01	0	10	v4.0.3	./joined/internal.root
+BR	3	internal	Te121m	Te121m	GRND	3.44e-03	0	10	v4.0.3	./joined/internal.root
+BR	3	internal	Na22	Na22	GRND	3.63e-01	0.1	10	v4.0.3	./joined/internal.root
+BR	3	internal	I125	I125	GRND	2.89e-02	0.1	10	v4.0.3	./joined/internal.root
+BR	3	internal	I129	I129	GRND	1.03e+00	0.1	10	v4.0.3	./joined/internal.root
+BR	3	internal	Te123m	Te123m	GRND	0.04		0.1	10	v4.0.3	./joined/internal.root
+BR	3	internal	Te127m	Te127m	GRND	5.64e-02	0.1	10	v4.0.3	./joined/internal.root
+BR	3	internal	K40	K40	GRND	0.8		0.1	10	v4.0.3	./joined/internal.root
+BR	3	cucase		Co60	Co60	GRND	3.17e-01	0.1	10	v4.0.3	./joined/cucase.root
+#BR	3	internal	U238	U238	Th230	5.00e-05	0.0	100	v4.0.3	./joined/internal.root
+#BR	3	internal	U238	Th230	Ra226	5.00e-05	0.0	100	v4.0.3	./joined/internal.root
+#BR	3	internal	U238	Ra226	Rn222	5.00e-05	0.0	100	v4.0.3	./joined/internal.root
+#BR	3	internal	U238	Rn222	Pb210	1.00e-04	0.0	2	v4.0.3	./joined/internal.root
+#BR	3	internal	Th232	Th232	Ra228	2.00e-03	0.0	100	v4.0.3	./joined/internal.root
+BR	3	internal	Th232	Th228	GRND	1.95e-03	0.0	10	v4.0.3	./joined/internal.root
+#BR	3	internal	U235	U235	Pa231	5.00e-03	0.0	10	v4.0.3	./joined/internal.root
+#BR	3	internal	U235	Pa231	GRND	7.00e-04	0.0	10	v4.0.3	./joined/internal.root
+
+
+#FR	4	nai-surf-expo-10-side		Th232	Ra228	Th228	1.87e-02	0	10	v4.0.3	./joined/nai-surf-expo.root
+BR	4	nai-surf-expo-50-side		Th232	Ra228	Th228	1.67e-02	0	10	v4.0.3	./joined/nai-surf-expo.root
+#BR	4	nai-surf-expo-100-side		Th232	Ra228	Th228	7.49e-03	0	10	v4.0.3	./joined/nai-surf-expo.root
+#BR	4	nai-surf-expo-500-side		Th232	Ra228	Th228	1.18e-02	0	10	v4.0.3	./joined/nai-surf-expo.root
+#BR	4	nai-surf-expo-1000-side		Th232	Ra228	Th228	1.37e-02	0	10	v4.0.3	./joined/nai-surf-expo.root
+#BR	4	nai-surface	Pb210	Pb206	GRND	9.96e-03	0.1	10	v4.0.3	./joined/surf-pb206.root
+#FR	4	nai-surf-expo-20-side		Pb210	Pb210	GRND	4.05e-02	0	10	v4.0.3	./joined/nai-surf-expo.root
+BR	4	nai-surf-expo-50-side		Pb210	Pb210	GRND	4.07e-02	0	10	v4.0.3	./joined/nai-surf-expo.root
+#FR	4	nai-surf-expo-100-side		Pb210	Pb210	GRND	4.05e-02	0	10	v4.0.3	./joined/nai-surf-expo.root
+BR	4	teflon-surf-expo-2000-in	Pb210	Pb210	GRND	3.49e-02	0.1	10	v4.0.3	./joined/teflon-surf-expo.root
+#FR	4	teflon-surf-expo-100-in		Pb210	Pb210	GRND	5.14e-02	0	10	v4.0.3	./joined/teflon-surf-expo.root
+BR	4	teflon		Pb210	Pb210	GRND	4.87e-01	0.1	10	v4.0.3	./joined/teflon.root
+BR	4	internal	Pb210	Pb210	GRND	6.76e-01	0.1	10	v4.0.3	./joined/internal.root
+BR	4	internal	Th232	Ra228	Th228	3.41e-02	0	10	v4.0.3	./joined/internal.root
+BR	4	internal	I126	I126	GRND	7.05e-03	0	10	v4.0.3	./joined/internal.root
+BR	4	internal	Sn113	Sn113	GRND	6.52e-03	0	10	v4.0.3	./joined/internal.root
+BR	4	internal	Cd109	Cd109	GRND	3.19e-02	0	10	v4.0.3	./joined/internal.root
+BR	4	internal	H3	H3	GRND	2.28e-01	0	10	v4.0.3	./joined/internal.root
+BR	4	internal	Te121m	Te121m	GRND	4.63e-02	0	10	v4.0.3	./joined/internal.root
+BR	4	internal	Na22	Na22	GRND	3.90e-01	0.1	10	v4.0.3	./joined/internal.root
+BR	4	internal	K40	K40	GRND	1.08e+00	0.1	10	v4.0.3	./joined/internal.root
+BR	4	internal	I125	I125	GRND	2.78e-02	0.1	10	v4.0.3	./joined/internal.root
+BR	4	internal	I129	I129	GRND	9.95e-01	0.1	10	v4.0.3	./joined/internal.root
+BR	4	internal	Te123m	Te123m	GRND	8.36e-02	0.1	10	v4.0.3	./joined/internal.root
+BR	4	internal	Te127m	Te127m	GRND	8.06e-10	0.1	10	v4.0.3	./joined/internal.root
+BR	4	cucase		Co60	Co60	GRND	3.00e-01	0.1	10	v4.0.3	./joined/cucase.root
+#BR	4	internal	U238	U238	Th230	2.00e-03	0.1	100	v4.0.3	./joined/internal.root
+#BR	4	internal	U238	Th230	Ra226	2.00e-03	0.1	100	v4.0.3	./joined/internal.root
+#BR	4	internal	U238	Ra226	Rn222	2.00e-03	0.1	100	v4.0.3	./joined/internal.root
+#BR	4	internal	U238	Rn222	Pb210	2.00e-03	0.0	2	v4.0.3	./joined/internal.root
+#BR	4	internal	Th232	Th232	Ra228	3.00e-03	0.0	100	v4.0.3	./joined/internal.root
+BR	4	internal	Th232	Th228	GRND	2.90e-03	0.0	10	v4.0.3	./joined/internal.root
+#BR	4	internal	U235	U235	Pa231	1.00e-02	0.0	10	v4.0.3	./joined/internal.root
+#BR	4	internal	U235	Pa231	GRND	7.00e-04	0.0	10	v4.0.3	./joined/internal.root
+
+
+BR	5	teflon		Pb210	Pb210	GRND	4.19e-01	0.1	10	v4.0.3	./joined/teflon.root
+BR	5	internal	Pb210	Pb210	GRND	2.60e+00	0.1	10	v4.0.3	./joined/internal.root
+BR	5	internal	Sn113	Sn113	GRND	1.64e-02	0.1	10	v4.0.3	./joined/internal.root
+BR	5	internal	Cd109	Cd109	GRND	5.78e-03	0.1	10	v4.0.3	./joined/internal.root
+BR	5	internal	H3	H3	GRND	9.75e-02	0.1	10	v4.0.3	./joined/internal.root
+BR	5	internal	Te121m	Te121m	GRND	0.03		0.1	10	v4.0.3	./joined/internal.root
+BR	5	internal	Na22	Na22	GRND	0.35		0.1	10	v4.0.3	./joined/internal.root
+BR	5	internal	Th232	Ra228	Th228	1.85e-01	0.1	10	v4.0.3	./joined/internal.root
+BR	5	internal	I125	I125	GRND	1.08e-07	0.1	10	v4.0.3	./joined/internal.root
+BR	5	internal	I129	I129	GRND	1.73e+00	0.1	10	v4.0.3	./joined/internal.root
+BR	5	internal	Te123m	Te123m	GRND	0.04		0.1	10	v4.0.3	./joined/internal.root
+BR	5	internal	Te127m	Te127m	GRND	5.96e-02	0.1	10	v4.0.3	./joined/internal.root
+BR	5	internal	K40	K40	GRND	1.0		0.1	10	v4.0.3	./joined/internal.root
+BR	5	cucase		Co60	Co60	GRND	0.7		0.1	10	v4.0.3	./joined/cucase.root
+#BR	5	internal	U238	U238	Th230	7.30e-04	0.1	10	v4.0.3	./joined/internal.root
+BR	5	internal	Th232	Th228	GRND	3.00e-03	0.0	10	v4.0.3	./joined/internal.root
+
+
+#BR	6	nai-surf-expo-10-side		Th232	Ra228	Th228	2.80e-03	0	10	v4.0.3	./joined/nai-surf-expo.root
+BR	6	nai-surf-expo-50-side		Th232	Ra228	Th228	2.32e-02	0	10	v4.0.3	./joined/nai-surf-expo.root
+#BR	6	nai-surf-expo-100-side		Th232	Ra228	Th228	1.10e-02	0	10	v4.0.3	./joined/nai-surf-expo.root
+#BR	6	nai-surf-expo-500-side		Th232	Ra228	Th228	1.77e-02	0	10	v4.0.3	./joined/nai-surf-expo.root
+#BR	6	nai-surf-expo-1000-side		Th232	Ra228	Th228	1.98e-02	0	10	v4.0.3	./joined/nai-surf-expo.root
+#BR	6	nai-surface	Pb210	Pb206	GRND	6.75e-03	0.1	10	v4.0.3	./joined/surf-pb206.root
+BR	6	nai-surf-expo-50-side		Pb210	Pb210	GRND	3.21e-02	0	10	v4.0.3	./joined/nai-surf-expo.root
+BR	6	teflon-surf-expo-2000-in	Pb210	Pb210	GRND	1.50e-01	0.1	10	v4.0.3	./joined/teflon-surf-expo.root
+BR	6	teflon-surf-expo-100-in		Pb210	Pb210	GRND	3.26e-02	0	10	v4.0.3	./joined/teflon-surf-expo.root
+BR	6	teflon		Pb210	Pb210	GRND	4.66e-01	0.1	10	v4.0.3	./joined/teflon.root
+BR	6	internal	Pb210	Pb210	GRND	1.57e+00	0.1	10	v4.0.3	./joined/internal.root
+BR	6	internal	Th232	Ra228	Th228	3.90e-02	0	10	v4.0.3	./joined/internal.root
+BR	6	internal	I126	I126	GRND	3.81e-02	0	10	v4.0.3	./joined/internal.root
+BR	6	internal	Sn113	Sn113	GRND	8.42e-04	0	10	v4.0.3	./joined/internal.root
+BR	6	internal	Cd109	Cd109	GRND	7.24e-03	0	10	v4.0.3	./joined/internal.root
+BR	6	internal	H3	H3	GRND	8.00e-02	0	10	v4.0.3	./joined/internal.root
+BR	6	internal	Te121m	Te121m	GRND	1.10e-02	0	10	v4.0.3	./joined/internal.root
+BR	6	internal	Na22	Na22	GRND	2.99e-01	0.1	10	v4.0.3	./joined/internal.root
+BR	6	internal	K40	K40	GRND	0.39		0.1	10	v4.0.3	./joined/internal.root
+BR	6	internal	I125	I125	GRND	3.86e-02	0	10	v4.0.3	./joined/internal.root
+BR	6	internal	I129	I129	GRND	1.35e+00	0.1	10	v4.0.3	./joined/internal.root
+BR	6	internal	Te123m	Te123m	GRND	6.91e-02	0	10	v4.0.3	./joined/internal.root
+BR	6	internal	Te127m	Te127m	GRND	7.23e-02	0	10	v4.0.3	./joined/internal.root
+BR	6	cucase		Co60	Co60	GRND	2.68e-01	0.1	10	v4.0.3	./joined/cucase.root
+#BR	6	internal	U238	U238	Th230	6.00e-04	0.01	100	v4.0.3	./joined/internal.root
+#BR	6	internal	U238	Th230	Ra226	6.00e-04	0.01	100	v4.0.3	./joined/internal.root
+#BR	6	internal	U238	Ra226	Rn222	6.00e-04	0.01	100	v4.0.3	./joined/internal.root
+#BR	6	internal	U238	Rn222	Pb210	6.00e-04	0.9	1.1	v4.0.3	./joined/internal.root
+BR	6	internal	Th232	Th232	Ra228	2.25e-03	0.01	100	v4.0.3	./joined/internal.root
+BR	6	internal	Th232	Th228	GRND	2.25e-03	0.9	1.1	v4.0.3	./joined/internal.root
+#BR	6	internal	U235	U235	Pa231	5.00e-04	0.9	1.1	v4.0.3	./joined/internal.root
+#BR	6	internal	U235	Pa231	GRND	5.00e-04	0.01	100	v4.0.3	./joined/internal.root
+
+
+#FR	7	nai-surf-expo-10-side		Th232	Ra228	Th228	2.80e-02	0	10	v4.0.3	./joined/nai-surf-expo.root
+#FR	7	nai-surf-expo-50-side		Th232	Ra228	Th228	7.92e-02	0	10	v4.0.3	./joined/nai-surf-expo.root
+#FR	7	nai-surf-expo-100-side		Th232	Ra228	Th228	1.10e-02	0	10	v4.0.3	./joined/nai-surf-expo.root
+#FR	7	nai-surf-expo-500-side		Th232	Ra228	Th228	1.77e-02	0	10	v4.0.3	./joined/nai-surf-expo.root
+#FR	7	nai-surf-expo-1000-side		Th232	Ra228	Th228	1.98e-02	0	10	v4.0.3	./joined/nai-surf-expo.root
+#BR	7	nai-surface	Pb210	Pb206	GRND	2.60e-10	0.1	10	v4.0.3	./joined/surf-pb206.root
+#FR	7	nai-surf-expo-20-side		Pb210	Pb210	GRND	5.42e-02	0	10	v4.0.3	./joined/nai-surf-expo.root
+BR	7	nai-surf-expo-50-side		Pb210	Pb210	GRND	4.89e-02	0	10	v4.0.3	./joined/nai-surf-expo.root
+#FR	7	nai-surf-expo-100-side		Pb210	Pb210	GRND	5.42e-02	0	10	v4.0.3	./joined/nai-surf-expo.root
+BR	7	teflon-surf-expo-4000-in	Pb210	Pb210	GRND	8.50e-02	0.1	10	v4.0.3	./joined/teflon-surf-expo.root
+BR	7	teflon-surf-expo-100-in		Pb210	Pb210	GRND	4.66e-02	0	10	v4.0.3	./joined/teflon-surf-expo.root
+BR	7	teflon		Pb210	Pb210	GRND	6.62e-01	0.1	10	v4.0.3	./joined/teflon.root
+BR	7	internal	Pb210	Pb210	GRND	1.59e+00	0.1	10	v4.0.3	./joined/internal.root
+BR	7	internal	Th232	Ra228	Th228	4.86e-02	0	10	v4.0.3	./joined/internal.root
+BR	7	internal	I126	I126	GRND	4.61e-02	0	10	v4.0.3	./joined/internal.root
+BR	7	internal	Sn113	Sn113	GRND	3.95e-03	0	10	v4.0.3	./joined/internal.root
+BR	7	internal	Cd109	Cd109	GRND	1.16e-02	0	10	v4.0.3	./joined/internal.root
+BR	7	internal	H3	H3	GRND	9.29e-02	0	10	v4.0.3	./joined/internal.root
+BR	7	internal	Te121m	Te121m	GRND	1.85e-02	0	10	v4.0.3	./joined/internal.root
+BR	7	internal	Na22	Na22	GRND	3.08e-01	0.1	10	v4.0.3	./joined/internal.root
+BR	7	internal	K40	K40	GRND	0.40		0.1	10	v4.0.3	./joined/internal.root
+BR	7	internal	I125	I125	GRND	3.95e-02	0	10	v4.0.3	./joined/internal.root
+BR	7	internal	I129	I129	GRND	1.33e+00	0.1	10	v4.0.3	./joined/internal.root
+BR	7	internal	Te123m	Te123m	GRND	7.68e-02	0	10	v4.0.3	./joined/internal.root
+BR	7	internal	Te127m	Te127m	GRND	7.55e-02	0	10	v4.0.3	./joined/internal.root
+BR	7	cucase		Co60	Co60	GRND	2.74e-01	0.1	10	v4.0.3	./joined/cucase.root
+#BR	7	internal	U238	U238	Th230	5.00e-05	0.01	100	v4.0.3	./joined/internal.root
+#BR	7	internal	U238	Th230	Ra226	5.00e-05	0.01	100	v4.0.3	./joined/internal.root
+#BR	7	internal	U238	Ra226	Rn222	5.00e-05	0.01	100	v4.0.3	./joined/internal.root
+#BR	7	internal	U238	Rn222	Pb210	6.00e-04	0.9	1.1	v4.0.3	./joined/internal.root
+#BR	7	internal	Th232	Th232	Ra228	6.00e-04	0.01	100	v4.0.3	./joined/internal.root
+BR	7	internal	Th232	Th228	GRND	2.22e-03	0.9	1.1	v4.0.3	./joined/internal.root
+#BR	7	internal	U235	U235	Pa231	1.00e-02	0.9	1.1	v4.0.3	./joined/internal.root
+#BR	7	internal	U235	Pa231	GRND	5.00e-04	0.01	100	v4.0.3	./joined/internal.root
+
+
+BR	8	teflon		Pb210	Pb210	GRND	4.19e-01	0.1	10	v4.0.3	./joined/teflon.root
+BR	8	internal	Pb210	Pb210	GRND	2.60e+00	0.1	10	v4.0.3	./joined/internal.root
+BR	8	internal	Sn113	Sn113	GRND	1.64e-02	0.1	10	v4.0.3	./joined/internal.root
+BR	8	internal	Cd109	Cd109	GRND	5.78e-03	0.1	10	v4.0.3	./joined/internal.root
+BR	8	internal	H3	H3	GRND	9.75e-02	0.1	10	v4.0.3	./joined/internal.root
+BR	8	internal	Te121m	Te121m	GRND	0.03		0.1	10	v4.0.3	./joined/internal.root
+BR	8	internal	Na22	Na22	GRND	0.35		0.1	10	v4.0.3	./joined/internal.root
+BR	8	internal	Th232	Ra228	Th228	1.85e-01	0.1	10	v4.0.3	./joined/internal.root
+BR	8	internal	I125	I125	GRND	1.08e-07	0.1	10	v4.0.3	./joined/internal.root
+BR	8	internal	I129	I129	GRND	1.73e+00	0.1	10	v4.0.3	./joined/internal.root
+BR	8	internal	Te123m	Te123m	GRND	0.04		0.1	10	v4.0.3	./joined/internal.root
+BR	8	internal	Te127m	Te127m	GRND	5.96e-02	0.1	10	v4.0.3	./joined/internal.root
+BR	8	internal	K40	K40	GRND	1.0		0.1	10	v4.0.3	./joined/internal.root
+BR	8	cucase		Co60	Co60	GRND	0.7		0.1	10	v4.0.3	./joined/cucase.root
+#BR	8	internal	U238	U238	Th230	7.30e-04	0.1	10	v4.0.3	./joined/internal.root
+BR	8	internal	Th232	Th228	GRND	3.00e-03	0.0	10	v4.0.3	./joined/internal.root
+
+
+
+# global backgrounds
+#--------------------------
+
+BR	0	neutron		neutron	neutron	GRND	4.46e-5		0.1	10	v4.0.3	./joined/neutron-scaled.root
+
+"""
+FR	1	xpmtbase	U238	Rn222	Pb210	5.97e+01	0	100	v4.0.3	./joined/xpmtbase.root
+FR	2	xpmtbase	U238	Rn222	Pb210	2.81e+02	0	100	v4.0.3	./joined/xpmtbase.root
+FR	3	xpmtbase	U238	Rn222	Pb210	2.29e+02	0	100	v4.0.3	./joined/xpmtbase.root
+FR	4	xpmtbase	U238	Rn222	Pb210	2.03e+02	0	100	v4.0.3	./joined/xpmtbase.root
+BR	5	xpmtbase	U238	Rn222	Pb210	200		0	100	v4.0.3	./joined/xpmtbase.root
+FR	6	xpmtbase	U238	Rn222	Pb210	1.28e+02	0	100	v4.0.3	./joined/xpmtbase.root
+FR	7	xpmtbase	U238	Rn222	Pb210	1.17e+02	0	100	v4.0.3	./joined/xpmtbase.root
+BR	8	xpmtbase	U238	Rn222	Pb210	200		0	100	v4.0.3	./joined/xpmtbase.root
+"""
+
+BR	1	xpmtbase	K40	K40	GRND	3.08e+02	0	100	v4.0.3	./joined/xpmtbase.root
+BR	2	xpmtbase	K40	K40	GRND	7.90e+02	0	100	v4.0.3	./joined/xpmtbase.root
+BR	3	xpmtbase	K40	K40	GRND	6.94e+02	0	100	v4.0.3	./joined/xpmtbase.root
+BR	4	xpmtbase	K40	K40	GRND	4.19e+02	0	100	v4.0.3	./joined/xpmtbase.root
+BR	5	xpmtbase	K40	K40	GRND	500		0	100	v4.0.3	./joined/xpmtbase.root
+BR	6	xpmtbase	K40	K40	GRND	4.93e+02	0	100	v4.0.3	./joined/xpmtbase.root
+BR	7	xpmtbase	K40	K40	GRND	5.54e+02	0	100	v4.0.3	./joined/xpmtbase.root
+BR	8	xpmtbase	K40	K40	GRND	500		0	100	v4.0.3	./joined/xpmtbase.root
+
+
+BR	1	xpmtbase	Th232	Ra228	Th228	2.98e+01	0	100	v4.0.3	./joined/xpmtbase.root
+BR	2	xpmtbase	Th232	Ra228	Th228	1.27e+02	0	100	v4.0.3	./joined/xpmtbase.root
+BR	3	xpmtbase	Th232	Ra228	Th228	1.41e+02	0	100	v4.0.3	./joined/xpmtbase.root
+BR	4	xpmtbase	Th232	Ra228	Th228	9.53e+01	0	100	v4.0.3	./joined/xpmtbase.root
+BR	5	xpmtbase	Th232	Ra228	Th228	100		0	100	v4.0.3	./joined/xpmtbase.root
+BR	6	xpmtbase	Th232	Ra228	Th228	9.51e+01	0	100	v4.0.3	./joined/xpmtbase.root
+BR	7	xpmtbase	Th232	Ra228	Th228	1.26e+02	0	100	v4.0.3	./joined/xpmtbase.root
+BR	8	xpmtbase	Th232	Ra228	Th228	100		0	100	v4.0.3	./joined/xpmtbase.root
+
+"""
+FR	1	xpmtbase	Th232	Th228	GRND	2.89e+01	0	100	v4.0.3	./joined/xpmtbase.root
+FR	2	xpmtbase	Th232	Th228	GRND	3.99e+01	0	100	v4.0.3	./joined/xpmtbase.root
+FR	3	xpmtbase	Th232	Th228	GRND	4.18e+01	0	100	v4.0.3	./joined/xpmtbase.root
+FR	4	xpmtbase	Th232	Th228	GRND	5.55e+01	0	100	v4.0.3	./joined/xpmtbase.root
+BR	5	xpmtbase	Th232	Th228	GRND	40		0	100	v4.0.3	./joined/xpmtbase.root
+FR	6	xpmtbase	Th232	Th228	GRND	2.51e+01	0	100	v4.0.3	./joined/xpmtbase.root
+FR	7	xpmtbase	Th232	Th228	GRND	3.16e+01	0	100	v4.0.3	./joined/xpmtbase.root
+BR	8	xpmtbase	Th232	Th228	GRND	40		0	100	v4.0.3	./joined/xpmtbase.root
+"""
+
+BR	1	xpmt	U238	Rn222	Pb210	1.29e+02	0.1	10	v4.0.3	./joined/xpmt.root
+BR	2	xpmt	U238	Rn222	Pb210	1.49e+02	0.1	10	v4.0.3	./joined/xpmt.root
+BR	3	xpmt	U238	Rn222	Pb210	1.04e+02	0.1	10	v4.0.3	./joined/xpmt.root
+BR	4	xpmt	U238	Rn222	Pb210	1.09e+02	0.1	10	v4.0.3	./joined/xpmt.root
+BR	5	xpmt	U238	Rn222	Pb210	120		0.1	10	v4.0.3	./joined/xpmt.root
+BR	6	xpmt	U238	Rn222	Pb210	1.18e+02	0.1	10	v4.0.3	./joined/xpmt.root
+BR	7	xpmt	U238	Rn222	Pb210	1.05e+02	0.1	10	v4.0.3	./joined/xpmt.root
+BR	8	xpmt	U238	Rn222	Pb210	120		0.1	10	v4.0.3	./joined/xpmt.root
+
+"""
+FR	1	xpmt	Th232	Ra228	Th228	8.79e+00	0	10	v4.0.3	./joined/xpmt.root
+FR	2	xpmt	Th232	Ra228	Th228	5.56e+01	0	10	v4.0.3	./joined/xpmt.root
+FR	3	xpmt	Th232	Ra228	Th228	6.19e+01	0	10	v4.0.3	./joined/xpmt.root
+FR	4	xpmt	Th232	Ra228	Th228	5.09e+01	0	10	v4.0.3	./joined/xpmt.root
+BR	5	xpmt	Th232	Ra228	Th228	50		0	10	v4.0.3	./joined/xpmt.root
+FR	6	xpmt	Th232	Ra228	Th228	2.84e+01	0	10	v4.0.3	./joined/xpmt.root
+FR	7	xpmt	Th232	Ra228	Th228	3.36e+01	0	10	v4.0.3	./joined/xpmt.root
+BR	8	xpmt	Th232	Ra228	Th228	50		0	10	v4.0.3	./joined/xpmt.root
+"""
+
+BR	1	xpmt	Th232	Th228	GRND	2.93e+01	0	10	v4.0.3	./joined/xpmt.root
+BR	2	xpmt	Th232	Th228	GRND	4.22e+01	0	10	v4.0.3	./joined/xpmt.root
+BR	3	xpmt	Th232	Th228	GRND	4.23e+01	0	10	v4.0.3	./joined/xpmt.root
+BR	4	xpmt	Th232	Th228	GRND	5.86e+01	0	10	v4.0.3	./joined/xpmt.root
+BR	5	xpmt	Th232	Th228	GRND	40		0	10	v4.0.3	./joined/xpmt.root
+BR	6	xpmt	Th232	Th228	GRND	4.49e+01	0	10	v4.0.3	./joined/xpmt.root
+BR	7	xpmt	Th232	Th228	GRND	5.31e+01	0	10	v4.0.3	./joined/xpmt.root
+BR	8	xpmt	Th232	Th228	GRND	40		0	10	v4.0.3	./joined/xpmt.root
+
+"""
+FR	1	xpmt	K40	K40	GRND	1.08e+02	0	10	v4.0.3	./joined/xpmt.root
+FR	2	xpmt	K40	K40	GRND	1.97e+02	0	10	v4.0.3	./joined/xpmt.root
+FR	3	xpmt	K40	K40	GRND	1.76e+02	0	10	v4.0.3	./joined/xpmt.root
+FR	4	xpmt	K40	K40	GRND	1.17e+02	0	10	v4.0.3	./joined/xpmt.root
+BR	5	xpmt	K40	K40	GRND	170		0	10	v4.0.3	./joined/xpmt.root
+FR	6	xpmt	K40	K40	GRND	1.73e+02	0	10	v4.0.3	./joined/xpmt.root
+FR	7	xpmt	K40	K40	GRND	1.75e+02	0	10	v4.0.3	./joined/xpmt.root
+BR	8	xpmt	K40	K40	GRND	170		0	10	v4.0.3	./joined/xpmt.root
+"""
+
+BR	1	xpmt	U235	U235	Pa231	1.40e+01	0.1	10	v4.0.3	./joined/xpmt.root
+BR	2	xpmt	U235	U235	Pa231	1.41e+01	0.1	10	v4.0.3	./joined/xpmt.root
+BR	3	xpmt	U235	U235	Pa231	1.58e+01	0.1	10	v4.0.3	./joined/xpmt.root
+BR	4	xpmt	U235	U235	Pa231	4.06e+01	0.1	10	v4.0.3	./joined/xpmt.root
+BR	5	xpmt	U235	U235	Pa231	20		0.1	10	v4.0.3	./joined/xpmt.root
+BR	6	xpmt	U235	U235	Pa231	2.30e+01	0.1	10	v4.0.3	./joined/xpmt.root
+BR	7	xpmt	U235	U235	Pa231	2.60e+01	0.1	10	v4.0.3	./joined/xpmt.root
+BR	8	xpmt	U235	U235	Pa231	20		0.1	10	v4.0.3	./joined/xpmt.root
+
+
+#FR	0	pmt		K40	K40	GRND	1.63e+02	0	100	v4.0.3	./joined/pmt.root
+#FR	0	pmt		Th232	Ra228	Th228	8.85e+00	0	100	v4.0.3	./joined/pmt.root
+BR	0	pmt		U238	Rn222	Pb210	1.48e+01	0	100	v4.0.3	./joined/pmt.root
+#FR	0	pmt		Th232	Th228	GRND	9.04e+00	0	100	v4.0.3	./joined/pmt.root
+#FR	0	pmt		U235	U235	Pa231	2.28e+01	0	100	v4.0.3	./joined/pmt.root
+
+#FR	0	plastic		K40	K40	GRND	2.12e+00	0	10	v4.0.3	./joined/plastic.root
+#FR	0	plastic		Th232	Ra228	Th228	1.00e-01	0	100	v4.0.3	./joined/plastic.root
+BR	0	plastic		U238	Rn222	Pb210	1.69e-01	0	100	v4.0.3	./joined/plastic.root
+BR	0	plastic		Th232	Th228	GRND	1.16e-01	0	100	v4.0.3	./joined/plastic.root
+
+#FR	0	lsveto		K40	K40	GRND	2.12e+00	0	100	v4.0.3	./joined/lsveto.root
+#FR	0	lsveto		U238	U238	Th230	3.00e-03	0	100	v4.0.3	./joined/lsveto.root
+#FR	0	lsveto		U238	Rn222	Pb210	2.23e-01	0	100	v4.0.3	./joined/lsveto.root
+#FR	0	lsveto		U238	Pb210	GRND	1.00e+00	0	100	v4.0.3	./joined/lsveto.root
+#FR	0	lsveto		Th232	Th232	Ra228	1.00e-03	0	100	v4.0.3	./joined/lsveto.root
+#FR	0	lsveto		Th232	Ra228	Th228	8.56e-01	0	100	v4.0.3	./joined/lsveto.root
+#FR	0	lsveto		Th232	Th228	GRND	8.00e-04	0	100	v4.0.3	./joined/lsveto.root
+# from ICP-MS
+BR	0	lsveto		U238	Rn222	Pb210	8.64e-02	0	100	v4.0.3	./joined/lsveto.root
+#BR	0	lsveto		U238	Pb210	GRND	8.64e-02	0	100	v4.0.3	./joined/lsveto.root
+BR	0	lsveto		Th232	Ra228	Th228	1.62e-02	0	100	v4.0.3	./joined/lsveto.root
+#BR	0	lsveto		Th232	Th228	GRND	1.62e-02	0	100	v4.0.3	./joined/lsveto.root
+
+BR	0	film		K40	K40	GRND	3.21e+04	0	100	v4.0.3	./joined/film.root
+
+#FR	0	cushield	Co60	Co60	GRND	2.12e+00	0	1e3	v4.0.3	./joined/cushield.root
+BR	0	cushield	K40	K40	GRND	1.02e+02	0	1e3	v4.0.3	./joined/cushield.root
+#FR	0	cushield	U238	U238	Th230	3.18e+02	0	1e3	v4.0.3	./joined/cushield.root
+BR	0	cushield	U238	Rn222	Pb210	1.01e+01	0	1e3	v4.0.3	./joined/cushield.root
+BR	0	cushield	Th232	Ra228	Th228	1.54e+01	0	1e3	v4.0.3	./joined/cushield.root
+#FR	0	cushield	Th232	Th228	GRND	4.45e+00	0	1e3	v4.0.3	./joined/cushield.root
+BR	0	gamma		Tl208	Tl208	GRND	4.95e+00	0	1e3	v4.0.3	./joined/gamma.root
+
+# just Cu shield looks better for crystal single hit high energy 500-1500 keV
+#FR	0	innersteel	K40	K40	GRND	4.32e+02	0	1e3	v4.0.3	./joined/innersteel.root
+#BR	0	innersteel	U238	U238	Th230	8.76e+01	0	1e3	v4.0.3	./joined/innersteel.root
+#FR	0	innersteel	U238	Rn222	Pb210	8.76e+01	0	1e3	v4.0.3	./joined/innersteel.root
+#FR	0	innersteel	Th232	Ra228	Th228	1.79e+02	0	1e3	v4.0.3	./joined/innersteel.root
+#FR	0	innersteel	Th232	Th228	GRND	7.80e+01	0	1e3	v4.0.3	./joined/innersteel.root
+
