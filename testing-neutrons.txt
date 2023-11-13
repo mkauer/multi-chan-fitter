@@ -1,0 +1,53 @@
+# -*- sh -*-
+
+#DR	1	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_default-calib.root
+DR	1	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_calib3.root
+#DR	1	data	SET4	V00-04-19	./joined/data/SET4_V00-04-19.root
+
+#DR	2	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_default-calib.root
+DR	2	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_calib3.root
+#DR	2	data	SET4	V00-04-19	./joined/data/SET4_V00-04-19.root
+
+#DR	3	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_default-calib.root
+#DR	3	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_calib3.root
+#DR	3	data	SET4	V00-04-19	./joined/data/SET4_V00-04-19.root
+DR	3	data	SET4	V00-04-19	./joined/data/SET4_V00-04-19_c3-xe33p3-xe2400p3.root
+
+#DR	4	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_default-calib.root
+#DR	4	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_calib3.root
+#DR	4	data	SET4	V00-04-19	./joined/data/SET4_V00-04-19.root
+DR	4	data	SET4	V00-04-19	./joined/data/SET4_V00-04-19_c4-xe33p3-xe2400p3.root
+
+DR	5	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_calib3.root
+#DR	5	data	SET4	V00-04-19	./joined/data/SET4_V00-04-19.root
+
+#DR	6	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_calib3.root
+#DR	6	data	SET4	V00-04-19	./joined/data/SET4_V00-04-19.root
+DR	6	data	SET4	V00-04-19	./joined/data/SET4_V00-04-19_c6-xe33p3-zerox.root
+#DR	6	data	SET4	V00-04-19	./joined/data/SET4_V00-04-19_c6-xe33p3.root
+#DR	6	data	SET4	V00-04-19	./joined/data/SET4_V00-04-19_c6-xe50-xe2650.root
+#DR	6	data	SET4	V00-04-19	./joined/data/SET4_V00-04-19_c6-poly1.root
+#DR	6	data	SET4	V00-04-19	./joined/data/SET4_V00-04-19_c6-p1g0.root
+#DR	6	data	SET4	V00-04-19	./joined/data/SET4_V00-04-19_c6-p0g0-2.root
+
+#DR	7	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_default-calib.root
+#DR	7	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_neutron2.root
+#DR	7	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_calib3.root
+#DR	7	data	SET4	V00-04-19	./joined/data/SET4_V00-04-19.root
+DR	7	data	SET4	V00-04-19	./joined/data/SET4_V00-04-19_c7-xe33p3-xe2600p3-xe3200p2.root
+
+DR	8	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_calib3.root
+#DR	8	data	SET4	V00-04-19	./joined/data/SET4_V00-04-19.root
+
+#DR	9	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_default-calib.root
+DR	9	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_calib3.root
+#DR	9	data	SET4	V00-04-19	./joined/data/SET4_V00-04-19.root
+
+
+
+
+# 4.46e-5 value from A5 paper
+BR	0	neutron	neutron	neutron	GRND	4.46e-5		0.1	10	v4.0.3	./joined/neutron-scaled.root
+#BR	0	neutron	neutron	neutron	GRND	4.46e-5		0.1	10	v4.0.3	./joined/neutron-no-smear.root
+
+

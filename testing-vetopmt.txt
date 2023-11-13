@@ -1,0 +1,21 @@
+# -*- sh -*-
+
+
+DR	1	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_c7fix.root
+DR	2	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_c7fix.root
+DR	3	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_c7fix.root
+DR	4	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_c7fix.root
+DR	5	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_c7fix.root
+DR	6	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_c7fix.root
+DR	7	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_c7fix.root
+DR	8	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_c7fix.root
+DR	9	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_c7fix.root
+
+
+BR	0	vetopmt		K40	K40	GRND	4.23e+02	0	1	v4.0.3	./joined/vetopmt.root
+BR	0	vetopmt		U238	Rn222	Pb210	4.23e+02	0	1	v4.0.3	./joined/vetopmt.root
+BR	0	vetopmt		Th232	Ra228	Th228	4.23e+02	0	1	v4.0.3	./joined/vetopmt.root
+BR	0	vetopmt		Th232	Th228	GRND	4.23e+02	0	1	v4.0.3	./joined/vetopmt.root
+
+#BR	0	film		K40	K40	GRND	1.06e+05	0	1	v4.0.3	./joined/film.root
+#BR	0	cushield	K40	K40	GRND	1.09e+02	0	1	v4.0.3	./joined/cushield.root
