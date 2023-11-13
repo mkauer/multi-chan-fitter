@@ -404,10 +404,9 @@ def rainbowSix(keynames):
     
     colors = {}
     cis = {}
-    ci = randint(2000, 7000)
-    #ci = 1666
+    #ci = randint(1000, 5000)
+    ci = 1666
     for h, key in enumerate(keynames):
-        h = h+1
         ci += 1
         H = float(h)/float(len(keynames)+1)
         if H < 1/5. :
@@ -435,8 +434,7 @@ def rainbowSix(keynames):
             G=0.
             B=0.
 
-        #print('{0} [{1}, {2}, {3}] {4}'.format(H, R, G, B, key))
-        # doesn't work with root < 6.07
+        #print R, G, B
         #cis[key] = TColor.GetFreeColorIndex()
         cis[key] = ci
         colors[key] = TColor(cis[key], R, G, B, key)
@@ -544,15 +542,24 @@ def getPars(hist):
     return pars
 
 
-def globalParams():
-    params = []
-    for E in [0, 1, 2]:
-        params.append(histparams(E))
+def globalParams(data):
+    par0=0
+    par1=0
+    par2=0
+    for key in data:
+        if '-e0' in key and not par0:
+            par0 = getPars(data[key]['hist'])
+        if '-e1' in key and not par1:
+            par1 = getPars(data[key]['hist'])
+        if '-e2' in key and not par2:
+            par2 = getPars(data[key]['hist'])
+        if par0 and par1 and par2:
+            break
+    params = [par0, par1, par2]
     return params
 
 
 def getDuration(rootfile):
-    # get run duration in seconds
     duration = 0
     try:
         chain = TChain('ntp','')
@@ -632,25 +639,19 @@ def setGroup500(info):
             return 'cosmo'
         else: return 'internal'
     elif info['loca'] == 'pmt':      return 'pmts'
-    elif info['loca'] == 'xpmt':     return 'pmts'
-    elif info['loca'] == 'pmtbase':  return 'pmts'
-    elif info['loca'] == 'xpmtbase': return 'pmts'
+    elif info['loca'] == 'xpmt':     return 'xpmts'
+    #elif 'pmt'      in info['loca']: return 'pmts'
+    elif 'surf'     in info['loca']: return 'surface'
     elif 'cucase'   in info['loca']: return 'cucase'
     elif 'copper'   in info['loca']: return 'cucase'
-    elif 'surf'     in info['loca']: return 'surface'
+    elif 'steel'    in info['loca']: return 'steel'
     elif 'teflon'   in info['loca']: return 'surface'
     elif 'reflec'   in info['loca']: return 'surface'
     elif 'lsveto'   in info['loca']: return 'lsveto'
-    elif 'vetopmt'  in info['loca']: return 'vetopmt'
-    elif 'film'     in info['loca']: return 'film'
     elif 'plastic'  in info['loca']: return 'plastic'
     elif 'cushield' in info['loca']: return 'cushield'
-    elif 'steel'    in info['loca']: return 'steel'
-    #elif 'gamma'    in info['loca']: return 'gamma'
-    elif 'gamma'    in info['loca']: return 'cushield'
-    elif 'neutron'  in info['loca']: return 'neutron'
+    elif 'gamma'    in info['loca']: return 'gamma'
     else:
-        print('WARNING: no group defined for {0}'.format(info['loca']))
         return 'none'
 
 
@@ -757,108 +758,31 @@ def histparam64(E):
     return pars
 
 
-def histparam12000(E):
+def histparam6000(E):
     """
     Global default histogram parameters for:
     number of bins, min, max, and bins/keV
     """
-    E = int(E)
-    # changed hi energy to go to 12 MeV
-    if E == 0:
+    # changed hi energy to go to 6 MeV
+    if E:
+        hmin = 0
+        #hmax = 6000
+        hmax = 12000
+        bpkv = 1
+        bins = (hmax-hmin)*bpkv
+    else:
         hmin = 0
         hmax = 200
         bpkv = 12
         bins = (hmax-hmin)*bpkv
-    elif E == 1:
-        hmin = 0
-        hmax = 12000
-        bpkv = 1
-        bins = (hmax-hmin)*bpkv
-    elif E == 2:
-        hmin = 0
-        hmax = 12000
-        bpkv = 1
-        bins = (hmax-hmin)*bpkv
-    else:
-        print('ERROR: histparam12000() : invalid E = {0}'.format(E))
-        sys.exit()
-        
+
     pars = [bins, hmin, hmax, bpkv]
     return pars
-
-
-def histparam20000(E):
-    """
-    Global default histogram parameters for:
-    number of bins, min, max, and bins/keV
-    """
-    # changed high energy to 20 MeV
-    # changed low energy to 1000 keV
-
-    E = int(E)
-    if E == 0:
-        hmin = 0
-        #hmax = 200
-        hmax = 1000
-        bpkv = 12
-        bins = (hmax-hmin)*bpkv
-    elif E == 1:
-        hmin = 0
-        hmax = 20000
-        bpkv = 1
-        bins = (hmax-hmin)*bpkv
-    elif E == 2:
-        hmin = 0
-        hmax = 12000
-        bpkv = 1
-        bins = (hmax-hmin)*bpkv
-    else:
-        print('ERROR: histparam20000() : invalid E = {0}'.format(E))
-        sys.exit()
-        
-    pars = [bins, hmin, hmax, bpkv]
-    return pars
-
-
-def rawHistPars(E):
-    # for checking/plotting charge in ADC
-    E = int(E)
-    if E == 0:
-        hmin = 0
-        hmax = 1e7
-        bpkv = 1
-        bins = int((hmax-hmin)*bpkv)
-    elif E == 1:
-        hmin = 0
-        hmax = 1e7
-        bpkv = 1
-        bins = int((hmax-hmin)*bpkv)
-    elif E == 2:
-        hmin = 0
-        hmax = 1e7
-        bpkv = 1
-        bins = int((hmax-hmin)*bpkv)
-    else:
-        print('ERROR: rawHistPars() : invalid E = {0}'.format(E))
-        sys.exit()
-        
-    pars = [bins, hmin, hmax, bpkv]
-    return pars
-
-    
-def histparams(E):
-    E = int(E)
-    if E not in [0, 1, 2]:
-        print('ERROR: histparams() : invalid E = {0}'.format(E))
-        sys.exit()
-    #return histparam12000(E)
-    #return rawHistPars(E)
-    return histparam20000(E)
 
 
 def triangleSmoothing(bkgs, key, s=0):
 
-    #print('DEBUG: triangle smoothing', key)
+    print('DEBUG: triangle smoothing', key)
 
     ### get the number of bins
     bins = bkgs[key]['hist'].GetNbinsX()
@@ -894,7 +818,7 @@ def triangleSmoothing(bkgs, key, s=0):
 
 def averageSmoothing(bkgs, key, s=0):
 
-    #print('DEBUG: average smoothing', key)
+    print('DEBUG: average smoothing', key)
     
     ### get the number of bins
     bins = bkgs[key]['hist'].GetNbinsX()
@@ -930,8 +854,7 @@ def averageSmoothing(bkgs, key, s=0):
 
 def rootSmoothing(bkgs, key, s=0):
     
-    #print('DEBUG: root TH1 smoothing', key)
-    
+    print('DEBUG: root TH1 smoothing', key)
     bkgs[key]['hist'].Smooth(s)
 
     return bkgs
