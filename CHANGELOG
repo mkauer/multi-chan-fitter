@@ -1,0 +1,1651 @@
+# -*- sh -*-
+
+# -------------------------------------------------
+# CHANGELOG - multi-chan-fit.py
+# -------------------------------------------------
+
+# Key is:
+# [+] added
+# [-] removed
+# [~] changed/updated
+# [V] version change
+# ====================================================================
+
+
+# 2020-05-18
+#---------------------------------------------------------------------
+# + ScaleEnergy400() and MCBinShift400()
+
+
+# 2020-05-12
+#---------------------------------------------------------------------
+# ~ updated "X" with Gyunho's new geometry in mcDimensions()
+# ~ new paths for Gyunho's NaI and Teflon surface Pb210 in mcPath301()
+
+
+# 2020-05-04
+#---------------------------------------------------------------------
+# + add alpha cut to surface teflon
+
+
+# 2020-04-27
+#---------------------------------------------------------------------
+# + added residuals to the zoomed low-energy multi-hit
+
+
+# 2020-04-23
+#---------------------------------------------------------------------
+# + added lsveto mc locations to mcPath300() and mcPath301()
+# ~ tested alpha cut on internal MC - no effect
+# ~ tested alpha cut on lsveto MC - no effect
+
+
+# 2020-04-13
+#---------------------------------------------------------------------
+# + added "alpha" cut on nai-surf, reflector, teflon-bulk, and teflon-surf
+# + add exceptions for nai-surf, teflon, and reflector in build400()
+#   but this is just for quick testing - shouldn't be there for the real thing
+
+
+# 2020-04-09
+#---------------------------------------------------------------------
+# V 402-plot-tweaks.py
+# + add residual plot to the low energy zoom-in histogram
+# ~ fixed a bug in makeTotal() and makeResid() where the key name
+#   key should be str(i+1) in funcs100.py
+# + add option for zoom resid to be dat/mc or dat-mc
+
+
+# 2020-04-06
+#---------------------------------------------------------------------
+# + create and exception for nai-surf-expo in build400()
+# ~ changed C4 Z length
+# ~ made the expo surface depth profile function dynamic
+
+
+# 2020-04-02
+#---------------------------------------------------------------------
+# + a few cosmetic changes and additions to allow for new deep and
+#   shallow Pb210 surface profiles
+# ~ tweaked the main script to copy backgrounds file and itself
+#   before starting the fit just to have them on hand
+
+
+# 2020-03-30
+#---------------------------------------------------------------------
+# ~ plot out to 4000 keV just to see - it's key for surface components
+# ~ changed the background model to fit with Govinda and Gyunho
+# ~ changed the fitting ranges
+# ~ changed high energy bin range in makePlots93() to 4000 keV
+# ~ sticking with poly43 lsveto calibration for V00-04-15 data
+# + added cases for V00-04-15 data in buildData400()
+# + special case for surf-expo-side and surf-expo-face in mcPath301()
+# + special case for surf-expo in mcPath301()
+# ~ tweak volume cuts for positional degeneracy in buildMCSurf400()
+# ~ fixed a from-crystal bug in buildMCSurf400()
+# ~ build400() has option to use new buildMCSurf400()
+# + added the buildMCSurf400() for special case expo profile
+
+
+# 2019-11-27
+#---------------------------------------------------------------------
+# + add merge-histos.py to merge NaI surface with exponential weights
+# ~ fixed the fit result plotting in the multi-crystal plot
+# ~ fixed xstalbins to start at 0
+
+
+# 2019-09-03
+#---------------------------------------------------------------------
+# + add join400.py and build400 files for new data format
+# + use good runs db to generate a list of good runs for each crystal
+# ~ replace runtime with runtimes[] list for each crystal
+# + now separate run/subrun list for each crystal
+# ~ change data format in backgrounds file(s)
+# V switch to main functions module "funcs400.py"
+# V switch to main script "400-new-data-format.py"
+# + cut release v11.0
+
+
+# 2019-06-24
+#---------------------------------------------------------------------
+# + adding Govindas external Tl208 gamma MC with the following additions...
+# + add "gamma" to globalmc in main script 300-g410-set12.py
+# + add "gamma" to makePlots93() exceptions in funcs93.py
+# + add "gamma" as an MC location option in bkg/sig scalings in funcs101.py
+# + add location 'gamma' to build300() global excludes in funcs300.py
+# + add location 'gamma' to buildMC300() volumeCut in funcs300.py
+# + add external 'gamma' file locations to mcPath301() in funcs300.py
+# + added special case for external Tl208 gammas to groupNum93() in funcs93.py
+# + added special event type cut for "*-gamma-CuShield-SET1-Tl208-*" in funcs300.py
+# + add "gamma" to setGroup() in funcs_misc.py
+# ~ update group colors in main scriipt 300-g410-set12.py
+
+
+# 2019-05-15
+#---------------------------------------------------------------------
+# ~ do not sys.exit() if there are no generated events in buildMC300()
+
+
+# 2019-05-06
+#---------------------------------------------------------------------
+# + add mcPath301() to use SET2 simulations
+# ~ lsveto cut on MC now 80keV
+# ~ lsveto cut on data now 80keV
+
+
+# 2019-04-24
+#---------------------------------------------------------------------
+# + now plot the 0-20 keV region
+# ~ tweaked the fit bounds and changed the rebinning a bit
+# ~ started testing with SET2 data
+# ~ tweaked the plotting labels and offsets
+# + added new cutsBDT300()
+# ~ now using lsveto calib poly41
+
+
+# 2019-04-15
+#---------------------------------------------------------------------
+# + added print out to show the rebinning of the various spectra fits
+# ~ tested a few new fit bounds to optimize for the new lsveto calib
+# ~ tested many lsveto data calibrations
+# ~ tested many lsveto MC resolutions
+# ~ tested many fits on the cup cluster
+
+
+# 2019-04-02
+#---------------------------------------------------------------------
+# ~ now have a cup-cluster script working to crank out fits
+# ~ tweaked many other paths to be absolute for cup cluster jobs
+# ~ make rootfile path absolute in getInfo300()
+# ~ make all paths absolute in main script so you can send to cluster
+# ~ tweaked updateBkgsFile300() to accept a path for the new file
+# ~ tweaked the way the crystal numbers are parsed in the main script
+
+
+# 2019-04-01
+#---------------------------------------------------------------------
+# ~ testing fits with new cosmo MC and adding back innersteel U238
+#   for some reason the innersteel U238 is touchy to get fit convergence
+
+
+# 2019-03-26
+#---------------------------------------------------------------------
+# ~ regenerated the MC for Na22, Te121m, Te127m
+# ~ changed the generated event type cut to > 10 for Na22, Te121m, Te127m
+# ~ did a lot of fitting tests in the meantime since 2019-01-30
+
+
+# 2019-01-30
+#---------------------------------------------------------------------
+# ~ fit to C679 now looks really good with SET v00-04-12
+# ~ I126 does not seem to be needed
+# ~ Te121 does not seem to be needed
+# ~ teflon-surf-Pb210 does not seem to be needed
+# ~ played around the C6 background model to get a better fit
+# ~ testing Govindas new surface mc - looks good in C7 and C6
+
+
+# 2019-01-29
+#---------------------------------------------------------------------
+# ~ played around with the C7 background model to get a better fit
+# ~ change single-hit low-energy fit to go up to 106 keV
+# + add plastic to makePlots93() exceptions
+
+
+# 2019-01-28
+#---------------------------------------------------------------------
+# ~ fixed the showTotal=0 bit to avoid weird plotting artifacts
+# ~ actually do NOT specify the crystal number for surface components
+#   in mcPath300() because then you can not generate events from the
+#   other surrounding crystals
+# ~ tweaked the primVolumeNames for teflon and copper MC
+# ~ specify the crystal number for surface components in mcPath300()
+
+
+# 2019-01-23
+#---------------------------------------------------------------------
+# + add Te121 to the fit
+# + add fit time to the printed fit results
+# ~ split U235 into sub-groups 41 and 42 in groupNum93()
+# ~ switch back to representing surface components in mBq/kg
+
+
+# 2019-01-21
+#---------------------------------------------------------------------
+# + add U235 to groupNum93()
+
+
+# 2019-01-11
+#---------------------------------------------------------------------
+# ~ updated config generation scripts for new backgrounds file format
+# ~ create processed rootfiles after the processing is done
+# ~ separate MC paths and handling for v3.1.1 and v4.0.1
+# ~ separate calibrations for v00-04-04 and v-00-04-12
+# ~ major refactor of the backgrounds file format
+# + add updateBkgsFile300() for new backgrounds file format
+# + add mcPath101() and mcPath300() for different mc paths
+# + add calib300() for v00-04-12 calibrations from govinda
+# + add buildData300() and buildMC300() for new processing info
+# + add getInfo300() and build300() for new processing info
+
+
+# 2019-01-10
+#---------------------------------------------------------------------
+# V switch to funcs300.py
+# V switch to 300-g410-set12.py
+
+
+# 2019-01-09
+#---------------------------------------------------------------------
+# + cut release v10.2
+# ~ uses generated simulation from Pushpa and Estella
+# ~ uses KimsSim v3.1.1
+# ~ uses Geant4.9.6.p02
+
+
+# 2018-12-17
+#---------------------------------------------------------------------
+# ~ redo the fits using plastic as the external
+
+
+# 2018-12-14
+#---------------------------------------------------------------------
+# ~ fixed up the background model - it works great now!
+# + surface components are nomalized to the crystal surface area (m^2)
+# ~ fixed a weird issue with the mass normalization when fitting
+#   the lsveto and setting a component to global - the internals and
+#   surface components were bugy but the effect is small.
+
+
+# 2018-12-12
+#---------------------------------------------------------------------
+# ~ still need to change versions in main program to v101 and test
+# + add scaleBkgs101() and scaleSigs101() to account for surface area
+# + add surfArea() calculation for surface components
+
+
+# 2018-12-11
+#---------------------------------------------------------------------
+# + generating reduced MC for I129
+# + add I129 to groupNum93()
+# + add I129 to setGroup()
+# + add I129 to background model
+
+
+# 2018-12-10
+#---------------------------------------------------------------------
+# + add new color for plastic group
+# + add plastic to setGroup()
+# + generating reduced MC for the plastic
+# + add plastic to globalMC in 201-global-bkgs.py
+# + add plastic to the backgrounds file
+# + add plastic to build101() exclude list
+# + add plastic to scaleBkgs100()
+# + add plastic to scaleSigs100()
+# + add plastic to buildMC101()
+
+
+# 2018-12-05
+#---------------------------------------------------------------------
+# ~ comparing my generated lsveto to estella's lsveto
+# ~ now have a working background model including innersteel! 
+
+
+# 2018-11-15
+#---------------------------------------------------------------------
+# + setting pmt K40 as a global background now works in 201-global-bkgs.py
+# + added more code to handle global backgrounds like PMT K40 for example
+# + using [0,0,0] in the fit params does ignore separate channels
+#   which is great for the lsveto!
+# - removed a lot of old outdated commented out code blocks
+
+
+# 2018-11-14
+#---------------------------------------------------------------------
+# ~ now have separate bounds for each crystal and channel!
+# ~ major refactor to how the fitting histograms are put together
+# + keep track of order when extending histgrams
+# + expand usage to signals and backgrounds
+# + reproduce old fits by using pre rebinned and cropped histograms
+# + addHistKey() to test if a key already exists and create one if not
+# ~ tweaked extendHist() because it had a couple bugs
+# + fitPrep() to rebin and resize the histograms
+
+
+# 2018-11-06
+#---------------------------------------------------------------------
+# ~ trying to get activities for steel and innersteel
+# ~ testing fits with and without smoothing
+# + add rootSmoothing() - uses ROOTs TH1.Smooth() method
+# + add averageSmoothing()
+# ~ don't overwrite bin[i] with smoothed value until all done
+# ~ renamed smoothXbins() to triangleSmoothing()
+# ~ do the smoothing after combining the histos
+
+
+# 2018-11-05
+#---------------------------------------------------------------------
+# + add smoothXbins() for testing - this works! - Awesome!!
+
+
+# 2018-10-23
+#---------------------------------------------------------------------
+# ~ fixed issue with steel vs innersteel unique key names
+# - do not init THF1 in makePlots93()
+# + add steel to makePlots93() exclude list
+
+
+# 2018-10-12
+# --------------------------------------------------------------------
+# ~ regenerate steel MC
+# + add steel to the build101() exclude list
+# ~ fix scalings for lsveto, steel, pmts in the lsveto
+
+
+# 2018-10-09
+# --------------------------------------------------------------------
+# + generate all new MC with the > 0.1 keV requirement
+# + lsveto needs minimum energy deposit in any crystal > 0.1 keV
+# + test Estella's LSveto background model
+# + generate MC for steel
+# ~ include all pmts for x9 in combineOthers100()
+
+
+# 2018-09-13
+# --------------------------------------------------------------------
+# + generate new rootfiles with lsveto energy resolution of 0.95
+# ~ fixed the lsveto signal scalings for lsveto and pmt backgrounds
+
+
+# 2018-09-04
+# --------------------------------------------------------------------
+# V switch to 101-better-bounds.py
+# + cut a release v10.0
+
+
+# 2018-08-28
+# --------------------------------------------------------------------
+# ~ change the lsveto energy cut to use resolution smearing
+#   for example (edepResol[8]*1000. > 20.0)
+# ~ now generate "others" for everything except lsveto and innersteel
+
+
+# 2018-06-28
+# --------------------------------------------------------------------
+# ~ couples tweaks to v93-fix-other-crystals.py for cross-checking
+# ~ simplified scaleBkgs100() and scaleSigs100()
+# ~ select crystal mass by which crystal the background is FROM
+
+
+# 2018-06-27
+# --------------------------------------------------------------------
+# ~ fitting is now working but activity scaling I think is still wrong
+# ~ tweaked main script 100-add-lsveto.py for fitting and plotting
+#   of a 9th sudo-crystal
+# + more new/updated functions in funcs100.py for x9/lsveto
+#    + scaleSigs100() and tweaked the lsveto
+#    + combineOthers100() and tweaked for the lsveto pmt sigs
+# ~ working on getting the correct normalization for the MC
+# ~ was using groupNo 1 for K40! changed to 31 in groupNum93()
+
+
+# 2018-06-26
+# --------------------------------------------------------------------
+# + many tweaks to get plotting working for x9/lsveto
+# + added lsveto (x9) info to a bunch of old "standard" functions
+#   in funcs60.py
+# + many new/updated functions in funcs100.py for x9/lsveto
+#    + buildMC100() and scaleBkgs100()
+#    + numX()
+#    + calib100()
+#    + makeTotal100 and makeResid100
+#    + buildData100 and cutsBDT100
+#    + getInfo100 and build100
+# V switch to funcs100.py
+# V switch to 100-add-lsveto.py
+
+
+# 2018-06-25
+# --------------------------------------------------------------------
+# + cut a release v9.3
+
+
+# 2018-05-29
+# --------------------------------------------------------------------
+# ~ regenerate the H3 - the normalization was still wrong
+# ~ fixed H3 normalization in funcs93.py --> buildMC93()
+
+
+# 2018-05-28
+# --------------------------------------------------------------------
+# ~ regenerate internals with new efficiency cut (mainly H3 and Na22)
+
+
+# 2018-05-21
+# --------------------------------------------------------------------
+# + argv parsing for the xstals
+# + added calib93() and buildData93() to funcs93.py
+
+
+# 2018-05-17
+# --------------------------------------------------------------------
+# + add path to Sn113 MC and groupNo for Sn113
+# + add Sn113 to the cosmo group in setGroup()
+
+
+# 2018-05-16
+# --------------------------------------------------------------------
+# + added option to just fit/plot crystals in a specified list
+# ~ massive revamp of the backgrounds file, new initial values and bounds
+
+
+# 2018-05-15
+# --------------------------------------------------------------------
+# ~ tweaked fit energy windows 6-70, 100-2500, and fit rebinning 6, 4
+
+
+# 2018-05-03
+# --------------------------------------------------------------------
+# ~ using more accurate list of pmt isotope fit parameters from Pushpa
+# ~ using more accurate list of internal isotope fit parameters from Pushpa
+
+
+# 2018-04-25
+# --------------------------------------------------------------------
+# ~ updated the cuts on generated events!
+
+
+# 2018-04-24
+# --------------------------------------------------------------------
+# ~ trying backgrounds953-C12345678-v3 with new Co60 and also
+#   no teflon bulk Pb210 in crystals 1 or 2
+# ~ played around with cut efficiencies and I think using the
+#   groupNo cut and no evt_type cut looks most accurate...
+
+
+# 2018-04-17
+# --------------------------------------------------------------------
+# + tweaked functions for new copper Co60 from pushpa
+
+
+# 2018-04-11
+# --------------------------------------------------------------------
+# ~ re did the old C123467 fit and it worked with new Tl208 activity!!
+# ~ fit just PMT Tl208 in Multi-hit channel == 42.2 +/- 9 mBq/kg
+
+
+# 2018-04-10
+# --------------------------------------------------------------------
+# ~ only print out fit results info to crystals in justthese
+# + build justthese list based off which crystals have loaded data
+# ~ no I125 for C1 or C2
+
+
+# 2018-04-05
+# --------------------------------------------------------------------
+# + generate new plots now using surface Pb210, Co60 and G4.10 Cd109
+
+
+# 2018-04-04
+# --------------------------------------------------------------------
+# ~ no change that back to just PMT and INTERNAL use "others"
+# ~ everything has "others" generated except for lsveto and innersteel
+#   and data! - missed that one
+# ~ fixed order in which groups are plotted
+# ~ fixed group colors to group name
+# ~ updated setGroup() in funcs64.py
+# + write scaled histograms to rootfile
+# ~ rebuild pmt mc for C5 and C8 including 'others'
+# + copper-case Co60 and G4.10 Cd109
+# + new funcs93.py to handle new MC from Pushpa
+
+
+# 2018-03-13
+# --------------------------------------------------------------------
+# ~ managed to fit all C123467 !!!
+
+
+# 2018-03-08
+# --------------------------------------------------------------------
+# ~ simultaneous fits to C123467 is NOT working!
+# ~ simultaneous fits to C13467 works! lsveto and pmt as globals
+# ~ all crystals fit well except 5 and 8 because I was missing MC
+# ~ generating some test plots
+# ~ fixed a couple bugs but now this looks to be working correctly
+# + new sortSimKeys92()
+# + new sortDataKeys92()
+# + new combineOthers92() to add -fx hists into mother hist
+
+
+# 2018-03-07
+# --------------------------------------------------------------------
+# ~ code is getting pretty messy - I need to clean this up eventually
+# + added a lot of tests to see if ['hist'] exists before doing anything
+# + new scaleSigs92() that now checks for ['fitscale']
+# + new sortKeys92() that deletes empty histograms
+# ~ almost there with the fix!
+
+
+# 2018-03-06
+# --------------------------------------------------------------------
+# ~ trying to reproduce the C13467 simultaneous fit...
+# ~ the issue is with including "other" internal backgrounds...
+#   I need to add all the "others" to the mother histo but I'm still
+#   working on that - making sure I don't mess something else up...
+# ~ still working on this issue of globals and others
+
+
+# 2018-03-05
+# --------------------------------------------------------------------
+# ~ trying to fix errors when or when-not selecting global MC
+#   shows up when not using globals or mc with the -fx- in name/key
+#   the issue seems to be due to how the global mc is being handled
+#   probably 2 related issues when handling MC with -fx- in name/key
+# V switched to v93-fix-other-crystals.py
+
+
+# 2017-12-20
+# --------------------------------------------------------------------
+# ~ try a slightly different offset in c6,c7 = [-4, -10]
+
+
+# 2017-12-19
+# --------------------------------------------------------------------
+# ~ tweak plotting colors for grouped MC
+# + generating new Pushpa surface MC - just for C6 and C7 right now
+# + regenerating C6 and C7 data with new calib offsets -6 and -12
+# ~ tweaked calib92() for an offset in C6 and C7 hi energy
+# ~ heavily modified buildMC92() to accommodate Pushpa's C7 surface MC
+# ~ tweaked resol80() for Pushpa C7 surface modification
+# ~ tweaked scaleBkgs71() and scaleSigs71() for Pushpas C7 teflon-bulk
+
+
+# 2017-12-15
+# --------------------------------------------------------------------
+# ~ regenerate the internal components including 'others' v92
+# + include 'other' internal components
+# + new buildMC92() to include internal 'others'
+# ~ combine the 'other' pmt contributions for makePlots92()
+
+
+# 2017-12-14
+# --------------------------------------------------------------------
+# ~ regenerated with and without the alpha cuts
+# ~ regenerated v92 v00-04-04 data because it wasn't right before
+
+
+# 2017-12-13
+# --------------------------------------------------------------------
+# ~ move the global component string to the beginning of the program
+# ~ trimmed down some of the file/plot names being saved
+# + makePlots92() so you can see every isotope separately
+# + double check fit binning and print out as part of summary
+
+
+# 2017-12-12
+# --------------------------------------------------------------------
+# + new bdt and bdtA cuts
+# + new calibration numbers
+# + build92(), buildData92(), calib92(), cutsBDT92()
+# + funcs92.py
+# V switched to v92-new-data.py
+
+
+# 2017-12-11
+# --------------------------------------------------------------------
+# ~ change the fit settings to be same as Pushpas fit settings
+# + cut a v91 release
+
+
+# 2017-12-05
+# --------------------------------------------------------------------
+# ~ switched the group colors around
+# ~ make the total MC red like Pushpas plots
+# + generating build91 internal U238 and Th232 into subgroups
+
+
+# 2017-12-04
+# --------------------------------------------------------------------
+# ~ make fits for 2keV, 4keV, and 6keV - no change to code
+#   just some book-keeping...
+# + add save text about which mc is being fit globally
+
+
+# 2017-11-28
+# --------------------------------------------------------------------
+# + fit everything in C6 and C7 globally!
+# + add a globalmc list so you can select which things to fit globally
+
+
+# 2017-11-27
+# --------------------------------------------------------------------
+# + create joined rootfiles for innersteel U238 and Th232 - v91
+# ~ generate comparison plots to make sure things are still the same
+# ~ make v80 plots same format as v91 plots
+# ~ make v90 plots same format as v91 plots
+# + add innersteel mass of 4000kg to scaleBkgs71() and scaleSigs71()
+# + add innersteel to buildMC80()
+# + add steel to the groups
+# ~ move Cd109 to cosmogenics group
+
+
+# 2017-11-22
+# --------------------------------------------------------------------
+# ~ use non-zero bins from fitdata as the ndf for chi2/ndf
+# + add memory mapping for the combined plots
+# ~ have C3+C6 fitting working with other pmts
+# + adding master plot showing global fit histograms
+# ~ tweaked v91 to handle multiple pmt sims
+# ~ rebuilding C6 and C7 simulations with other pmts
+# + add option to build91() to use old/new pmt handling
+# V switch to branch 91
+# ~ verified that v80 and v90 give same fit results
+
+
+# 2017-11-21
+# --------------------------------------------------------------------
+# ~ rebuild C3 PMT sim with other pmts added in
+# + new join91.py for build91
+# - do not need info['error'] anymore in getInfo91()
+# + add pmt key loop to build91()
+# + add key info['from'] to getInfo91()
+# + build91(), getInfo91(), buildMC91()
+# + new funcs91.py
+
+
+# 2017-11-16
+# --------------------------------------------------------------------
+# ~ tweak getInfo80() to be compatible with no activity error
+# ~ tweak updateBkgsFile70() to be compatible with no activity error
+# ~ tweak fit results print out so updateBkgsFile() still works
+# ~ another fix to the boundskeys for global MC
+# ~ fixed the fit results plotting bug
+# ~ fixed 2x scaling bug
+# ~ fixed bugs with fit results print out
+# ~ fixed bugs with bounds setting
+
+
+# 2017-11-15
+# --------------------------------------------------------------------
+# ~ set same activity and bounds for C6 and C7 testing
+# ~ tweaked a bunch of fit scalings, bounds, results
+# + adding in lsveto as a global fit component
+# ~ trimmed out extra debug code that's not needed anymore
+# + fixed the scaling bug
+
+
+# 2017-11-07
+# --------------------------------------------------------------------
+# ~ changes to extracting the fit results
+# ~ changes to setting the fit bounds
+# ~ changes to building the fitting signal object
+# ~ changes to plotting layout
+# ~ many changes to accomodate the global fitting structure
+# + new 900 series backgrounds files
+# V switch to branch 90
+
+
+# 2017-10-31
+# --------------------------------------------------------------------
+# ~ changed to file handling structure of join80.py
+# ~ updateBkgsFile70() now sets lower/upper bounds to 0.1 and 10
+# + added getInfo80() so I can select which xstals to build
+# ~ smearing C8 hi energy resolution more
+# + added resol80() and buildMC80()
+
+
+# 2017-10-30
+# --------------------------------------------------------------------
+# ~ i screwed up the high energy alpha cuts, i need to reprocess data
+# ~ fix cutsBDT80() to include the alpha cut
+# ~ ignore signals with 0 entries
+# ~ fixed some initializations that used a list of lists
+
+
+# 2017-10-25
+# --------------------------------------------------------------------
+# + now have data build v00-04-03 with new calibs
+
+
+# 2017-10-24
+# --------------------------------------------------------------------
+# ~ fixed a bug when getting run duration from a rootfile
+
+
+# 2017-10-23
+# --------------------------------------------------------------------
+# + had to upload my own root package to cup
+#   it's here: /home/mkauer/soft/root/v5.34.36/
+# + building new data histos for v00-04-03 with new calibs and
+#   and new/updated BDT cuts for all 8 crystals
+#   ~ crystal 5 and 8 have my tweaked calibrations
+# ~ tweaking hi energy calibration for crystal 5 and 8
+
+
+# 2017-10-20
+# --------------------------------------------------------------------
+# ~ changed cut names for BLSVeto.something format
+
+
+# 2017-10-19
+# --------------------------------------------------------------------
+# + new dataset to the backgrounds800.txt
+# + new dataset V00-04-03 as set1_00-04-03.dat
+# + new calib80(), resol80() cutsBDT80()
+
+
+# 2017-10-18
+# --------------------------------------------------------------------
+# + merged fits into backgrounds800.txt
+# ~ fit all crystals independantly
+# ~ update calibration funcitons with Pushpa's new version
+# + new funcs80.py
+
+
+# 2017-10-17
+# --------------------------------------------------------------------
+# + add new combined plots showing all chans and energies for a xstal
+# ~ new fit files are the 800 series
+# ~ refit all crystals individually
+
+
+# 2017-10-16
+# --------------------------------------------------------------------
+# V switch to branch 80
+
+
+# 2017-09-12
+# --------------------------------------------------------------------
+# + add new steel rootfiles and backgrounds file
+
+
+# 2017-08-29
+# --------------------------------------------------------------------
+# V switch to branch 71
+# + cut release v7.0
+
+
+# 2017-07-26
+# --------------------------------------------------------------------
+# + new backgrounds705 to test out broken chain lsveto
+# + generate broken chains for the lsveto MC
+# ~ regenerate the pmtPb210_GRND because it was using wrong files
+# ~ tweaked readFile() so the # search is after the """ search
+# ~ modify updateBkgsFile70() to exclude lines between the """
+
+
+# 2017-07-13
+# --------------------------------------------------------------------
+# ~ internal K40 too low - testing out fit with fixing K40 activity
+# ~ more fine tuning of C7 fit - no fit bounds hit limits this time
+# ~ tweaked updateBkgsFile70() to handle new fit results format
+# + new MC - split pmt U238 at the Ra226 level
+# ~ did a bit of code clean up
+# ~ scale errors correctly for the residual plots
+# ~ put H3 in cosmo group
+# + add errors just to data and set to 0 for the residual
+# ~ more fine tuning of the C7 fit
+
+
+# 2017-07-12
+# --------------------------------------------------------------------
+# + add warnings when fits are to the limit
+# ~ fixed BIG bug with fitting lower bound
+# ~ had to tweak the chans handling a bit
+# + add uniqString() to unique 'SM' and 'S' for example
+# ~ make separate fitchans and pltchans options
+# ~ (evt_Type > 10) still works with new rootfiles
+# + add I126 and Te121 to cosmo group
+# ~ primParticalName is 'triton' for H3
+# ~ tweaks to buildMC70() to get Cd109 and H3 working
+# + new paths to pushpa's Cd109 and H3
+
+
+# 2017-07-11
+# --------------------------------------------------------------------
+# ~ fixed issue with Te names not showing the 'm'
+# + add linear scale option to the residual plots
+# + added setBinError() to test different error schemes
+
+
+# 2017-06-28
+# --------------------------------------------------------------------
+# + add cucase and teflon to surf group
+# ~ updated updateBkgsFile70()
+# ~ treat surface and bulk teflon and copper as a unit of 1
+
+
+# 2017-06-27
+# --------------------------------------------------------------------
+# + now prints out the correct fit bounds being used
+# ~ find the average dru scaling in the fit distributions
+# ~ print out fit errors and add %.3e format to legend
+# ~ fit results are consistent between dru=0 and dru=1
+# ~ bounds do work correctly with dru=0 and dru=1
+# ~ now scale the chi2 by the dru scaling to normalize it correctly
+# ~ have to use mcscale=1 to get the fit fractions correct...
+#   until i eventually change that
+# ~ fixed legend ordering for bkgs and sigs
+# ~ changed signif figs to use the "%.3e" format
+# + added fit errors to the scaleSigs() function in funcs70.py
+
+
+# 2017-06-26
+# --------------------------------------------------------------------
+# ~ had to change the fskey splitting '-c' to
+#   not select cu-case or cu-surf, ie went to "-cS-e0"
+# + had added "re" for line splitting but probably don't need it
+# + new files for build70
+# + added new criteria for cu-case and teflon
+# + added new criteria for surface stuff
+
+
+# 2017-06-22
+# --------------------------------------------------------------------
+# ~ fixed bug with dru scaling vs not scaling
+# ~ fixed another big bug with bkgs being subtracted twice
+# ~ include the primVolumeName cut now for all MC!
+# + new funcs70.py
+
+
+# 2017-06-21
+# --------------------------------------------------------------------
+# ~ mega revamp of the surface component syntax
+# ~ fixed AGAIN the bug with the primVolumeName cuts!
+
+
+# 2017-06-16
+# --------------------------------------------------------------------
+# ~ more tweaks to how legends are displayed
+# + option to either stack or extend the histos for fitting
+# ~ now fit results of 'MS' and 'SM' are more consistent!!!
+# + have the histo extending finally working!
+
+
+# 2017-06-14
+# --------------------------------------------------------------------
+# V switch to 70-extend-histos.py
+# + cut release v6.4
+# + added new calib64() and resol64()
+
+
+# 2017-06-12
+# --------------------------------------------------------------------
+# ~ split data in build64 into crystal number to speed up processing
+# ~ added the alpha cut back in
+# ~ pushpa fixed merging issue with rqtD1_5
+
+
+# 2017-06-08
+# --------------------------------------------------------------------
+# ~ temp got rid of alpha cut
+# ~ should NOT be doing groupNo > 1 cut
+# ~ change cut to crystalX.rqcn > -1
+# ~ fixed a few more plotting bugs
+
+
+# 2017-06-07
+# --------------------------------------------------------------------
+# ~ tweak legend size
+# + add groups to the legends
+# + start working on plotting bkgs and sigs in groups
+# + added setGroup() to start organizing things into groups
+# + added chan [A] cuts to cutsBDT()
+# ~ cleaned up some print statements
+# ~ itterate over channels after reading in rootfiles - this should
+#   speed up the processing time
+# + added onCup() and baseDir() to make paths a little easier
+# ~ change data[key][runtime] to use real duration
+# + added getDuration() to get duration of data rootfiles
+
+
+# 2017-06-06
+# --------------------------------------------------------------------
+# ~ changed default histogram binning parameters
+# + rebinning option for low energy fits and final plots
+# + added histparam64()
+# + added makeTotal64(), makeResid64(), and globalParams()
+# ~ scaling functions now get histogram params to determine keV per bin
+# ~ tweaked histparam() to also return bins per keV
+# + added getPars(), dataDRU64(), scaleBkgs64(), and scaleSigs64()
+# ~ more cleanup for when not plotting all 8 crystals
+# ~ cleaned up code to get rid of chi2 errors
+
+
+# 2017-06-05
+# --------------------------------------------------------------------
+# + added BDT cuts in cutsBDT()
+# ~ moved old data cuts to cutsOld()
+# + added set1.dat with list of run files
+# ~ new data format in the backgrounds file
+# + added getInfo64(), build64(), buildData64(), buildMC64()
+# V switch to 64-set1-bdt.py
+# + cut release v6.3
+# + add groupNo>1 for all MC in buildMC63()
+
+
+# 2017-06-02
+# --------------------------------------------------------------------
+# + new updateBkgsFile63() to work with new results print out
+# ~ fixed issue with chi2/ndf not showing up in the fit results plots
+# + add more info to the fit results print out
+# + outputModel63.py works when not all crystals are in the bkgs file
+
+
+# 2017-05-25
+# --------------------------------------------------------------------
+# + add 200 ppb lsveto K40 = 6.19 mBq/kg
+
+
+# 2017-05-24
+# --------------------------------------------------------------------
+# ~ default bkg model looks complete at this point
+# ~ found/fixed bug with primPMTid vs primPMTid[0]
+# + new build63 rootfiles
+
+
+# 2017-05-23
+# --------------------------------------------------------------------
+# ~ BIG bug fixed - wasn't selecting volumeCut for non-internal mc!
+# + generated more rootfiles for the extpmt stuff
+# + new backgrounds630-extpmts.txt with extpmt stuff included
+# + new funcs63.py with new functions to handle 'extpmt' syntax
+# V switch to 63-extpmt.py
+
+
+# 2017-05-22
+# --------------------------------------------------------------------
+# + cut release v6.2
+# ~ renamed some backgrounds files
+# ~ fixed a couple bugs with doing fits to just some (not all 8) crystals
+# + new joined rootfiles for internal and pmt U238_Pb210
+# ~ fixed bug in code where U238_Rn222 was not including Rn222 decays
+# + added in new build62 broken chain Internal U238 and Th232
+#   processed rootfiles
+
+
+# 2017-04-23
+# --------------------------------------------------------------------
+# + added option to show the legends on the plots
+# + added in new build62 broken chain PMT U238 and Th232
+#   processed rootfiles
+
+
+# 2017-04-19
+# --------------------------------------------------------------------
+# ~ fixed the problem - I wasn't using my new buildMC62() - oops
+# ~ testing new groupNo selection on PMT U238 and Th232 with v61 and v62
+#   something wonky going on...
+# ~ changed 62-new-bkgs-format.py to use new funcs62.py and build62()
+# + new build62() to use getInfo62()
+# + new getInfo62() for the 'chsp' 'GRND' option
+# + new funcs62.py with new funcs for GRND chsp value
+# ~ change backgrounds chsp format to GRND for ground state
+# V switch to 62-new-bkgs-format.py
+# + cut release v6.1
+
+
+# 2017-04-18
+# --------------------------------------------------------------------
+# + added in Te121m, Te123m, Te125m, Te127m
+# ~ fix bug in buildMC61() returning 'data' and not 'mc'
+
+
+# 2017-04-12
+# --------------------------------------------------------------------
+# + change data path to the new V00-03-02 version in buildData61()
+# + add buildData61()
+
+
+# 2017-04-10
+# --------------------------------------------------------------------
+# ~ tweak backgrounds files for new reuse rootfiles for data1546
+# + new joined61 data rootfiles for run 1546 and 1544
+# + backgrounds62.txt
+
+
+# 2017-04-04
+# --------------------------------------------------------------------
+# + do not append background activity if fit result is 0.0
+
+
+# 2017-04-03
+# --------------------------------------------------------------------
+# + added updateBkgsFile61() and outputModelTable61() to v61
+# + added updateBkgsFile61() and outputModelTable61() to v60
+# + added outputModelTable61()
+# + added updateBkgsFile61()
+
+
+# 2017-03-28
+# --------------------------------------------------------------------
+# + new build61() for the new [F] format
+# ~ changed signal [S] format to [F] for "Fit"
+
+
+# 2017-03-26
+# --------------------------------------------------------------------
+# ~ updated join61.py
+# ~ set ROOT.gErrorIgnoreLevel = kWarning
+# ~ fixed how the generated events histos are filled and read
+
+
+# 2017-03-24
+# --------------------------------------------------------------------
+# ~ fixed sim path+name so not to combine lsveto and lsvetoair
+# ~ regenerate pmt U238 and Th232 with primPMTid cuts
+# ~ regenerate lsveto so not to include lsvetoair
+# ~ think I have the primPMTid cuts working right
+# ~ change number of pmts to '2' for scaleSigs61()
+# ~ change number of pmts to '2' for scaleBkgs61()
+# + added in new primPMTid cuts to buildMC61()
+# + new funcs61.py to add in pmt_id selection functions
+# V switch to 61-new-pmt-id.py
+# + cut release v6.0
+
+
+# 2017-03-14
+# --------------------------------------------------------------------
+# + add option to turn on/off the errors on the total mc histo
+# ~ tweaked the histo titles to include channel and energy region
+# ~ tweaked longNames() in funcs60.py
+# + detailNames() to funcs60.py
+# + chanNames() to funcs60.py
+# + energyNames() to funcs60.py
+# ~ changed legends to be 2 column - hopefully looks better
+# + added internal i125
+# + added internal na22
+# ~ changed the naming format for internalsurf pb210
+# + added the rest of internalsurf pb210
+
+
+# 2017-03-13
+# --------------------------------------------------------------------
+# V switch to 60-add-more-mc.py - start adding more MC and tweak the
+#   the code as needed
+# + version 52-whats-next.py now works with purely funcs52.py
+# ~ version 51-multi-chan2.py should still work as-is using funcs50.py
+# ~ shift everything over to new funcs52.py for better managing...
+# ~ change location name to 'internalsurf' - makes the code easier
+# - remove the mod for 'internal-surf'
+# + added a primVolume cut for 'internal-surf'
+# + specific path for surface pb210 in buildMC50()
+
+
+# 2017-03-12
+# --------------------------------------------------------------------
+# V switch to 52-whats-next.py
+# + cut release v5.1
+# ~ revamped the fit results print out, it now prints the fit activities
+#   and does a big print out and the end of everything so you can easily
+#   see the results per crystal.
+# + added an option to sumw2 the fit data before fitting
+
+
+# 2017-03-11
+# --------------------------------------------------------------------
+# ~ fixed a BIG bug with the second channel showing less activity,
+#   turns out I was double scaling the fit hist to data/mc integral
+# + add init to make sure the fit bounds get set correctly
+# ~ set the fit rebin rescale to help the fit converge
+# ~ expanded the fit range a little bit
+
+
+# 2017-03-10
+# --------------------------------------------------------------------
+# ~ fixed a bug in makeResid50() histo naming
+# ~ fixed return data/mc bugs in buildData50() and buildMC50()
+
+
+# 2017-03-09
+# --------------------------------------------------------------------
+# + using backgrounds50.txt
+# + mega code revamp to ger multi chans separately plotted
+# + mega code revamp to get multi chans included in the fit
+# V switch to 51-multi-chan2.py - more big code rewrite needed
+# + iterate through the chars in the chans string
+# ~ mashed all the fitting histo code together
+# ~ tweaked the multi channel handling
+# + new buildMC50() in funcs50.py
+# + new buildData50() in funcs50.py
+
+
+# 2017-03-07
+# --------------------------------------------------------------------
+# ~ fixed data comparison with Pushpa's low energy noise cuts
+
+
+# 2017-02-27
+# --------------------------------------------------------------------
+# + new build50() to deal with format changes
+# + new getInfo50() to deal with format changes
+# ~ changed "chan" format to be "D", "A", "S", "M" instead of 0,1,2,3
+# V switched to v50-multi-chan.py - this requires some big changes
+#   within the various functions I have - I want to keep v43 for
+#   comparing and cross-checking
+# + add the fit bin counts instead of setting bin counts - prep for the
+#   multi chan fitting
+# + start working on adding single and multi hit channels to the fit
+# V switched to 43-add-arbitrary-chans.py
+# - remove setting data bin erros for the combined fit histo because
+#   tfractionfitter gives the same results either way.
+# + found out that setting constraints with TFractionFitter you need to
+#   use the param numbers, which start at [1] and not [0] as I assumed.
+#   Setting a param contraint with [0] sets ALL the param contraints
+#   to that value. Not clear at all in the documentation. 
+# + changed backgrounds file to have fit bounds in a %
+# + add signal fit scaling to be in % and relative to initial set activity
+
+
+# 2017-02-23
+# --------------------------------------------------------------------
+# + key for "bkgs[key]['scale'] = scale" in funcs40.py for sigs
+#   normalization with sigs[fskey]['fitscale']
+# + scale sigs same as bkgs before doing the fitting,
+#   as in - "sigs = scaleBkgs40(sigs)"
+# - removed all Sumw2() in 42-try-again.py
+# - removed all Sumw2() in funcs40.py
+# V switched to 42-try-again.py
+# ~ copy v40 to v42 and try again with smaller changes...
+# + too many changes in v41 - I don't understand what's going on there
+# + add Sumw2() to all data and MC histos in funcs40.py - not sure this
+#   is needed but during some debugging tests it seemed like a good idea
+
+
+# 2017-02-22
+# --------------------------------------------------------------------
+# + set any negative data-bkgs bins to 0
+# ~ bunch of minor tweaks and clean up
+
+
+# 2017-02-21
+# --------------------------------------------------------------------
+# + add noiseCuts40() in funcs40.py with Pushpa's noise cuts, this is
+#   really noise cuts for loE and alpha cuts for hiE
+
+
+# 2017-02-20
+# --------------------------------------------------------------------
+# ~ create new build41 joined rootfiles with new resol40() and
+#   tweaks to the C5 and C8 resolutions
+# ~ tweak resolution for C5 and C8
+# + add new resol40() function in funcs40.py
+
+
+# 2017-02-17
+# --------------------------------------------------------------------
+# V switching to version 41-single-multi-hit-fit.py
+# + cut release v4.0
+# + backgrounds41.txt with pmt u238-rn222 and pb210
+# + all joined rootfiles for buil41
+
+
+# 2017-02-16
+# --------------------------------------------------------------------
+# ~ tweaked cluster script for build41
+# ~ changed to join41.py and build41
+# + build everything - all/single/multi hit into one rootfile
+
+
+# 2017-02-15
+# --------------------------------------------------------------------
+# ~ get runNum from data['info']
+# ~ packed all the calibration root text stuff into the calib functions
+# + add new calib41() new calib points from Pushpa
+# ~ revamped the way the data calibration is handled for lo/hi energy
+# + add new calib40() with old calib points and new format
+# ~ change low energy hist to be 0-200 keV
+
+
+# 2017-02-14
+# --------------------------------------------------------------------
+# ~ cleaned up some code in funcs40.py
+# + added edep and lsveto cuts to MC selection
+
+
+# 2017-02-13
+# --------------------------------------------------------------------
+# + added lsveto cuts to the data selection
+# + added ncluster cuts to data selection - not much difference from
+#   the edep cuts
+# ~ revamped the sigle/multi hit TCut making in funcs40.py
+# + fix for lsveto MC rootfile selection - my code was also selecting
+#   lsvetoair rootfiles - this is now fixed - no big impact on anything
+# ~ checked merged data files against normal files and output was the same
+# + added paths in funcs40.py to use the Vxx-xx-xx_MERGED rootfiles for data
+
+
+# 2017-02-09
+# --------------------------------------------------------------------
+# + finally fixed the bug with the single/multi hit selection criteria
+#   It was because the primVolumeName cut was messing stuff up.
+
+
+# 2017-02-06
+# --------------------------------------------------------------------
+# + add TCut('1') for simulation as default setting,
+#   it works! (no more if-else)
+# + add TCut('1') for data as default setting,
+#   it works! (no more if-else)
+# + added simple data cuts for 'all-hits', 'single-hits', and 'multi-hits'
+# + added option 'chan' to force a type of data selection
+
+
+# 2017-02-02
+# --------------------------------------------------------------------
+# ~ add new rootfile names to backgrounds40
+# ~ generated the new build40 MC rootfiles
+
+
+# 2017-02-01
+# --------------------------------------------------------------------
+# ~ backgrounds40.txt now uses V00.02.03 data
+# ~ move to V00.02.03 processing of the 1546 data
+# + revamp of join40.py for new v40 format
+# + add force reuse options in funcs40.py
+# + reuse rootfiles works now in funcs40.py
+# + forgot to add "from copy import deepcopy" in funcs40.py - oops
+# + many tweaks to get "reuse" working
+# + add scaleBkgs40() in funcs40.py
+# + add scaleSigs40() in funcs40.py
+# + add info{} to data,bkgs,sigs in funcs40.py# 
+# + mcfile is now a top level option
+# - remove the [bp] option, I know it should be 1
+
+
+# 2017-01-31
+# --------------------------------------------------------------------
+# - remove the [np] option, I know it should be 1
+# ~ fixed a bunch of [key] bugs
+# + add data[key]['runtime'] to getData32() in funcs32.py
+# ~ tweaked 40-single-hit.py for new functions
+# + add dataDRU40() in funcs40.py
+# + add build() in funcs40.py
+# + add buildMC40() in funcs40.py
+# + add buildData40() in funcs40.py
+# + add getInfo() in funcs40.py
+# + new backgrounds40.txt mcfile
+# - remove the [dru2] scaling option after the fit [dru2=1],
+#   seems the best thing to do is dru scale before the fit
+
+
+# 2017-01-30
+# --------------------------------------------------------------------
+# + new column for channel [A]All, [S]Single, or [M]Multi hit data
+#   in backgrounds40.txt
+# V switching to 40-single-hit.py
+# + cut release v3.3 for individual plotting and other tweaks
+
+
+# 2017-01-25
+# --------------------------------------------------------------------
+# + have both options for fit chi2/ndf and fit Chi2TestX() but the
+#   numbers don't agree... but the Chi2TestX() number looks
+#   more reseanable I think?
+# + added the number of days to 'data' in the hi-e and lo-e plots
+# + added chi2/ndf to the total mc fit results plots
+# + print chi2/ndf of the total mc compared to data...
+#   it will need some tweaking later one...
+# + now save plots to ./plots and make dir if doesn't exist
+# + separate/individual plotting now works for all things!
+#   The key was to have a separate canvas name for everything
+#   and to Clone() the top and bottom pads - I'm super excited
+#   about this awesome feature!
+# V switching to 33-separate-plots.py
+# + cut a new release v3.2 since things are in good shape right now
+# + print bkgs and sigs activities in the legend
+
+
+# 2017-01-24
+# --------------------------------------------------------------------
+# ~ rebuilt all backgrounds with primParticleName cut
+# ~ cleaned up scaleSigs32() and scaleBkgs32() 
+# ~ v32 now using scaleSigs32() and scaleBkgs32()
+# + add scaleSigs32() and doesn't need data input anymore
+# + add scaleBkgs32() and doesn't need data input anymore
+# ~ cleaned up scaleBkgs()
+# + TCut on primParticleName! This was critial to get generated
+#   event count correct.
+
+
+# 2017-01-23
+# --------------------------------------------------------------------
+# + add full path to funcs.py files so things work on the cluster
+#   mainly for join.py files
+# ~ throw a warning in readROOT32() if the histo isn't found
+# + added in all Estella's internal bkgs numbers from spreadsheet
+# + assume 1800 kg of lsveto
+# + 7ppt U238 and 4ppt Th232 to backgrounds file
+
+
+# 2017-01-18
+# --------------------------------------------------------------------
+# + command line arg for the input file in join32.py
+# + add run num to backgrounds file for data items
+# + add more sig fit scalings for the externals in scaleSigs()
+# + add more bkg scalings for the externals in scaleBkgs()
+# + add more selection criteria for the extra bkgs in buildMC32()
+# + add more external bkgs to the global input file
+
+
+# 2017-01-17
+# --------------------------------------------------------------------
+# + readROOT32() now reads in the file name from backgrounds.txt
+# + global input file now has reuse file name specified
+# + funcs32 has getData32() with build variable option
+
+
+# 2017-01-16
+# --------------------------------------------------------------------
+# ~ join32.py has tweaked paths for MC and Data
+# ~ comparison of run 1546 to run 1544 looks good
+# ~ use newGeometry sim and phys run 1546
+# + funcs32.py has buildMC32()
+# V changed to 32-new-geometry-sim.py
+
+
+# 2017-01-11
+# --------------------------------------------------------------------
+# ~ added more activities the backgrounds file
+# ~ simplified the bkgs and sigs scalings
+# ~ fixed the sigs scalings from the fit
+# ~ cleaned up v31 a little bit
+
+
+# 2017-01-02
+# --------------------------------------------------------------------
+# + add scaleSigs() to funcs3.py
+# + fit scaling to dict, ie sigs['key']['scale']
+
+
+# 2016-12-28
+# --------------------------------------------------------------------
+# ~ fixed issue with last bin Total MC error being large
+# ~ minor tweaks to the axis ranges
+# V changed to 31-fit-activity.py
+
+
+# 2016-12-27
+# --------------------------------------------------------------------
+# + cut a gitlab release v3.0 here at this point
+# + created a new join3-1544-master.root with the U238 chain breaking
+# + found and fixed a big bug with the TPad memory allocation 
+# + added readROOT3() to funcs3.py
+# + backgrounds3.txt now has a new format for broken chain handling
+# ~ tweaked join3.py for new format
+# + delete signal keys that aren't being fit ie if there is not 2 or
+#   more signals, then the plotting just shows what was actually fit
+# + skip fitting if not 2 or more signals for a crystal
+# + can now skip all lines in backgrounds file enclosed with """
+# + add readFile() function to read in the backgrounds file
+
+
+# 2016-12-26
+# --------------------------------------------------------------------
+# ~ did not need to change anything in v30 to get this working
+#   except replacing buildMC2() with buildMC3()
+# + first attempt at getting broken chain Pb210 in the mix in funcs3.py
+# + added new chain breaking variables to backgrounds3.txt 
+# ~ using local U238 data for broken chain testing
+
+
+# 2016-12-20
+# --------------------------------------------------------------------
+# ~ testing v30 with local data right now...
+# + use funcs3.py
+# + use backgrounds3.txt
+# V switch to v30-broken-chain.py
+# V switch to v24-broken-chain.py - nope, this is going to be a big
+#   addition with many changes to code everywhere - go v30 for this
+# + now only crystals with 2 or more signals get TFractionFitter
+# + need at least 2 MC for TFractionFitter to work
+# - do not add the bkgs to the total MC from the fit - the data is
+#   already bkg subtracted
+
+
+# 2016-12-17
+# --------------------------------------------------------------------
+# ~ can now arbitrarily set backgrounds and signals per crystal
+# + unique colors now working for the legends too
+# + add uniqColor so each location and isotope has the same color
+
+
+# 2016-12-16
+# --------------------------------------------------------------------
+# + add uniqSig to get unigue sig names and length for fitter object
+# + add uniqAll to get unique names of bkgs and sigs for color scheme
+# V switch to 23-separate-sig-bkg.py
+
+
+# 2016-12-15
+# --------------------------------------------------------------------
+# ~ played around with the activity scalings - I think I'm close
+# ~ updates the backgrounds2.txt file with PMT K40 activities
+# + I have a new joined rootfile with Pushpa's calibs and resols
+#   called join22-1544-master.root
+# ~ ah, and was forgetting to scale by the dru factor - internal K40
+#   looks correct again - now back to work on the pmt scalings...
+# ~ shoot, i had mbqkg/kg and that should be mbqkg*kg!!!
+# + start working on pmt scaling
+# ~ i think the internal scaling should be events/detected
+#   which becomes bq * runtime * (1./generated)
+# ~ tweaked v21 to plot just data for comparison to v22
+# ~ tweaked v22 to use new calibs and resols
+# + added join22.py to use new calibs and resols
+# ~ tweak join2.py to use a specified mcfile in buildMC2()
+# ~ tweaked buildMC2() to select either resol() or resol2()
+# + added resol2() and Pushpa's resols
+# ~ changed root branches in calib22() to use energyD for hi-E
+
+
+# 2016-12-14
+# --------------------------------------------------------------------
+# + added calib22() and getData22() for the new calibrations
+# + a couple tweaks so you can just plot data! 
+
+
+# 2016-12-13
+# --------------------------------------------------------------------
+# V switching to 22-pushpa-calib.py to get calib and reso functions in
+# ~ cut a v2.1 release now that internal background activity scaling
+#   is working as expected
+# ~ looks like scaling is working for internal K40 at least
+# + added scaleBkgs() to funcs2.py to scale into real mBq/kg units
+# + added key data[key]['runtime'] to dataDRU2()
+# ~ use backgrounds2.txt for v21
+# ~ don't use bkgs scaling in readROOT2() for v21
+# ~ oops, run 1544 has 2 hour subruns - changed in dataDRU2()
+# V switch to 21-get-activity-values.py as main/master script
+# ~ program now skips the fitting bit if no signals [S] are specified
+# ~ program works if there are no backgrounds [B] specified
+# ~ add 'reuse' tag to the saved plot names
+# ~ dru1 and dru2 with "reuse" now return the exact same results!
+# ~ AH! dru1 fitting fails if the fixed K40 scaling is too high
+# + new data in join2-1544-master.root
+
+
+# 2016-12-12
+# --------------------------------------------------------------------
+# ~ fixed a bug if not using dru1 or dru2 in v20
+# + in v14, in func.py I needed to do init mc[loc][iso]['act'] = []
+#   and then do mc[loc][iso]["act"].append(-1) for fixed activities
+
+
+# 2016-12-09
+# --------------------------------------------------------------------
+# + cut a v2.0 release now that the fit rebinning is fixed
+# ~ fixed the rebinscale to work with new v20 format but I still
+#   don't understand why it effects the fit results so much
+# + applied rebin bug fix to v14 and v20
+# ~ FINALLY fixed the fit rebinning issue! I was selecting the wrong
+#   subset of bins in the HiE filling section. It needs to look like:
+#   hist.SetBinContent(n+np, rsigs[key]['hist'].GetBinContent(fHi[0]+r))
+
+
+# 2016-12-06
+# --------------------------------------------------------------------
+# V 20-global-input-file.py is the new standard
+# ~ cleaned up the comments a bit in 20-global-input-file.py
+# + cut release v1.1 based off of 14-set-bkg-activity.py
+# ~ it's working! v14 vs v20 is basically identical! Woo Hoo!!
+# ~ hacked a bunch of stuff in 20-global-input-file.py to get this
+#   working - I'm sure there's some bugs yet to fix
+# ~ fixed dataDRU2()
+# ~ the set bkgs activities are now plotted seperatly
+# ~ changed a bunch of stuff in 20-global-input-file.py to allow for
+#   the new text list based format
+
+
+# 2016-12-05
+# --------------------------------------------------------------------
+# ~ applied same fix "range(fLoBins,fbins)" to 20-global-input-file.py
+# ~ fixed a bug in 14-set-bkg-activity.py...
+#   line 307 should be "range(fLoBins,fbins)" and not
+#   "range(fLoBins)" - didn't make much difference in the fitting
+#   results? I don't understand that, but a bug none the less.
+# + added new dataDRU2() function
+# + use funcs2.py with buildMC2(), getData2(), and readROOT2()
+
+
+# 2016-11-29
+# --------------------------------------------------------------------
+# + scale non dur1/dru2 rebinned errors by the rebinning/sqrt(2)
+#   I'm not sure if this is physics right, but it looks about right
+#   in the plots. I'll need to check this again...
+# + many additions to set the internal K40 activity, it
+#   seems to be working? I'm sure I'll find some bugs...
+# + set internal k40 as a fixed activity background
+# ~ tweaked funcs.py to have mc[loc][iso]['act'] = -1 by default
+#   in readROOT()
+# V switch to 14-set-bkg-activity.py
+
+
+# 2016-11-29
+# --------------------------------------------------------------------
+# + cut release v1.0 based off of 13-data-dru.py
+# - remove the y axis scaling for easier comparison amoung variations
+
+
+# 2016-11-28
+# --------------------------------------------------------------------
+# + added y-axis title to resid plots
+# - removed legend from resid plots
+# ~ changed joined-master.root path to be relative
+# + added dru1 histos now have the total mc errors being scaled to dru
+# ~ fixed 'fitdata' and 'fitmc' histo filling needs to start at bin 1
+#   because bin 0 is the underflow bin - this was a small effect
+#   but now it is correct
+
+
+# 2016-11-23
+# --------------------------------------------------------------------
+# ~ changed variable 'rebin' to 'hiEfitRebin'
+# ~ changed variable 'hiErebin' to 'hiEplotRebin'
+# + write the fit results to a text file
+# - removed/cleaned up a bunch of outdated code and comments
+
+
+# 2016-11-22
+# --------------------------------------------------------------------
+# ~ scale the total-mc histo error by dru scaling
+# + add dru2 which scales the data and mc after the fit
+# ~ dru1 scales the data before the fit
+# + have to also scale by 1/rebinning factor
+
+
+# Older Comments - I didn't have dates for these
+# --------------------------------------------------------------------
+# ~ have to use deepcopy when doing mc[E]=deepcopy(mcHi)
+# + have to create a seperate mc[E] dict when rebinning
+# + add rebinning to the hi-E plots
+# + add dru2 which scales the data and mc after the fit
+# ~ dru1 scales the data before the fit
+# + all data and mc needs seperate dict to preserve memory space
+# + the canvas pads need different names to preserve memory space
+# ~ fixed some major plotting bugs, nothing physics related,
+#   just root plotting maddness
+# + dru conversion is working i think...
+# + rebinning of the hi-E is working i think...
+# ~ I'm probably missing another factor here but it acutally seems
+#   that by NOT scaling the rebinned data/mc by 1/rebin, the fit
+#   does a better job - I don't understand this yet...
+# + scale the data and mc by 1/rebin factor or the lo-E to hi-E scale
+#   will bias the higher stats from the rebinned histos
+# + I kinda fixed the rebinning bug. still needs more testing...
+#   The fit still freaks out sometimes with some rebin factors
+#   Not sure why but I need to investigate that more...
+# + fixed another big bug with the combined fit histo gap
+# + fixed a major bug with the filling of the fit-histos
+# ~ let's make the residual show data/MC not data-MC
+# + add more lists for total,resid,legs,zeros so they have their
+#   own memory space and aren't lost when modifying the canvases
+# ~ resolution function should be divided by 2 (see funcs.py)
+#   I generated a new joined rootfile with the MC reso / 2
+# + added TFractionFitter weight histo but it doesn't work?
+#   Still need to work on that. Don't understand why that doesn't work.
+# + plot both loE and hiE histos that are scaled from the multi-fit
+# + combine loE and hiE histos into 1 histo for fitting
+# + need copy.copy or copy.deepcopy when reading histos from rootfile
+#   and adding to a list or dict. Going to use deepcopy just to be sure.
+# ~ now use buildMC() to get your MC
+# ~ all histograms should have a unique key
+# ~ fixed hostname selection
+# + NOTE: The funcs.py import will only work for 10-mc-fit.py and later!!!
+# + I guess importing other personal python modules now works
+#   with the cup cluster? It didn't work in the past. Weird.
+#   Well okay, now I have a seperate funcs.py to import and it seems
+#   to be working with the cup cluster as well.
+# ~ big re-write - set mc as mc[loc][iso] - just seems more logical
+#   just to be clear - it was mc[iso][loc] - now it's mc[loc][iso]
+# ~ fixed a bug with enumerate [iso][loc] j+k thing that doesn't work!!
+#   that also effected the mc scaling and plotting...
+# + get p-value from fit - doesn't seem right?
+# ~ tweaked the plotting cosmetics a bit to make it look better,
+#   good grief, what a bitch...
+# + put residuals on the same canvas! awesome!
+# ~ add options to scale and/or weight the MC
+# ~ change plot names if generated on CUP or not
+# ~ low energy fit needs to be >= 5keV? not 0keV!
+# ~ that was a lot of if-else statements... good grief...
+# + option for CUP testing - just 1 root file for testing
+# + option for hi/lo energy fitting
+# ~ tweak for low energy fit
+# ~ fixed mc+data+tot+resid length issue
+# + another canvas showing the residuals
+# + show the total mc in gray after the fit
+# + get hostname and select data path based off hostname
+# + try to fit high energy stuff - based off my dm17 fitting code
+# ~ tweak legend size to make a little more consistent,
+#   but it's still not quite right, i don't know why..
+# ~ plot low energy things - ah, use pmtXX.qc5 not qc_5 - oops
+# + added low energy calib and resolution functions
+# ~ use assumption that res~srqt(E) with intercept=0
+# + working on resolution params, but need at least a linear
+#   fit to the resolution points to get anything reasonable
+# + working on hiE parameters
+# + finally got colors to work. What a pain in the ass.
+#   The color index can't be too big > 10,000 and you have to
+#   save the list of colors and indexes or they get dumped
+#   out of memory and then it doesn't work right.
+# + urgh... finally got hists into dictionary
+#   hist name must be same as hist var-name (don't know why)
+# + start adding in external backgrounds too
+# ~ use Pushpa's data calibrations - wrong but a start
+# ~ just use this as the default so I don't have multiple
+#   versions of scripts around
+# ~ for some weird reason importing my "funcs.py" doesn't work
+#   on the cup cluster? Very weird. So I've put all the extra
+#   functions in this script and now it works on CUP. ???
+# ~ moved sim stuff to under CUP
+# ~ tweaked spacings and labels on the canvas
+# + got legends working for the plots
+# ~ tweaked the layout to be 4x2 as real layout
+# + seperate funcs.py import for extra functions
+# + adding in U238 with K40
+# + functionized some things in prep for the future fitting
+# + ROOT batch settings [0 or 1]
+# + canvas as a python list
+# + histos as a python list
+# + hacking at multi-plot-test.py
+# + hacking at plot-test.py
+
