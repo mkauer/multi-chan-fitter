@@ -102,14 +102,17 @@ note = ''
 #mcfile = 'backgrounds_502-12_test.txt' # stuff for Gyunho
 #mcfile = 'backgrounds_502-data.txt' # testing new data format
 #mcfile = 'backgrounds_502-15.txt' # try new Pb206
-#mcfile = 'backgrounds_502-15-po210.txt' # new Po210 functions for all
-mcfile = 'backgrounds_502-16.txt' # try refitting with Pb206+betas
+mcfile = 'backgrounds_502-15-po210.txt' # new Po210 functions for all
+#mcfile = 'backgrounds_502-16.txt' # try refitting with Pb206+betas
 
-#mcfile = 'backgrounds_502-gyunho.txt' # using Gyunho's data
+#mcfile = 'backgrounds_502-gyunho-1.txt' # using Gyunho's data
 #mcfile = 'backgrounds_502-gyunho-2.txt' # try refitting
 
+#mcfile = 'backgrounds_502-gyunho-mlp.txt' # try refitting
 
 
+
+#mcfile = 'testing-gyunho-data.txt'
 #mcfile = 'testing-BiPo.txt'
 #mcfile = 'testing-pb210-alphas.txt'
 #mcfile = 'testing-neutrons.txt'
@@ -131,6 +134,10 @@ mcfile = 'backgrounds_502-16.txt' # try refitting with Pb206+betas
 #mcfile = 'testing-alphas.txt'
 
 
+# get a short name for the plot dir
+if mcfile.startswith('backgrounds'): shortname = mcfile[12:-4]
+elif mcfile.startswith('testing'): shortname = mcfile[:-4]
+else: shortname = ''
 
 print('INFO: using backgrounds config file --> {0}'.format(mcfile))
 
@@ -144,13 +151,22 @@ binShift['internal-Pb210'] = [ -7,  -5,  -5,  -8,   0,  -7,  -7,   0,   0]
 binShift[ 'mystery-My007'] = [ 18,  12,  12,  18,   0,  18,  18,   0,   0]
 #binShift[ 'internal-I129'] = [  0,   0,   0,   0,   0, -6,   0,   0,   0]
 
-### don't shift MC for Gyunho's recalibrted data
-if 'gyunho' in mcfile:
-    print('INFO: tweaking energy shifts')
+### shift MC for Gyunho's recalibrted data
+if 'gyunho-1' in mcfile or 'gyunho-2' in mcfile:
+    print('INFO: shifting Gyunho energy')
     binShift = {}
     ###             for xstals :    1    2    3    4    5    6    7    8    9
     binShift[  'teflon-Pb210'] = [  0,  -6,  -8,  -2,   0, -17,  -9,   0,   0]
     #binShift['internal-Pb210'] = [  0,   0,   0,   0,   0,  -3,   0,   0,   0]
+
+### shift MC for Gyunho's MLP data
+if 'gyunho-mlp' in mcfile:
+    print('INFO: shifting MLP data energy')
+    binShift = {}
+    ###             for xstals :    1    2    3    4    5    6    7    8    9
+    #binShift[  'teflon-Pb210'] = [  0,   0,   0,   0,   0,   0,   0,   0,   0]
+    #binShift['internal-Pb210'] = [  0,   0,   0,   0,   0,   0,   0,   0,   0]
+
 
 
 ### test MC smoothing?
@@ -170,10 +186,10 @@ fix_nbins = 1
 showNoneGroup = 0
 
 ### plot components in groups? [0,1]
-ingroups   = 0
+ingroups   = 1
 
 ### show the legends? [0,1]
-showLeg    = 0
+showLeg    = 1
 
 ### show the total? [0,1]
 showTotal  = 1
@@ -182,7 +198,7 @@ showTotal  = 1
 redtotal   = 1
 
 ### plot the residuals? [0,1]
-showResid  = 1
+showResid  = 0
 
 ### show individual channel plots? [0,1]
 save_indi  = 0
@@ -190,12 +206,12 @@ show_indi  = 0
 
 ### show low energy zoomed plots? [0,1]
 save_zoom  = 0
-show_zoom  = 1
+show_zoom  = 0
 zoomLog    = 0
 
 ### plot alpha channels? [0,1]
 save_alpha = 0
-show_alpha = 0
+show_alpha = 1
 and_multi  = 0
 
 ### only show qX alpha peaks? [0,1,2]
@@ -213,7 +229,7 @@ gyunhoChi2 = 0
 
 ### set data label for legend? [0,'name']
 dataname   = 0
-dataname   = 'Data'
+#dataname   = 'Data'
 
 ### set total label for legend? [0,'name']
 totname    = 0
@@ -247,7 +263,7 @@ fitchans = ['S', 'M']
 
 ### try fitting Qs separately?
 ### must set to 0 if not fitting alphas
-fit_Q_separate = 0
+fit_Q_separate = 1
 
 ### set the fitter step size
 ### can help to go smaller than default 1e-2
@@ -271,7 +287,7 @@ for i in range(numx):
     fitranges[i]['M2'] = [1,   0,    0]  # multi-hit alphas
     
     ### for just low E fit
-    
+    """
     #fitranges[i]['S0'] = [1, 0, 0]
     #fitranges[i]['S0'] = [1, 60, 96]
     fitranges[i]['S0'] = [1, 40, 50]
@@ -282,7 +298,7 @@ for i in range(numx):
     fitranges[i]['M1'] = [1, 0, 0]
     # with alpha?
     #fitranges[i]['S2'] = [1, 1000, 2300]
-    
+    """
     ### for general fitting
     """
     #fitranges[i]['S0'] = [1, 0, 0]
@@ -309,16 +325,16 @@ for i in range(numx):
     fitranges[i]['M1'] = [2, 2500, 3500]
     """
     ### for just alpha fit
-    """
+    
     fitranges[i]['S0'] = [1, 0, 0]
     #fitranges[i]['S0'] = [1, 40, 60]
     fitranges[i]['S1'] = [1, 0, 0]
     fitranges[i]['M0'] = [1, 0, 0]
     fitranges[i]['M1'] = [1, 0, 0]
-    fitranges[i]['S2'] = [1, 2350, 3150]
+    fitranges[i]['S2'] = [1, 2500, 3500]
     fitranges[i]['M2'] = [1, 0, 0]
     #fitranges[i]['M2'] = [4, 1100, 4100]
-    """
+    
     ### for just lsveto fit
     """
     fitranges[i]['S0'] = [1, 0, 0]
@@ -689,7 +705,7 @@ def main(argv):
     print('INFO: plotting/fitting crystals --> {0}'.format(justthese))
     
     ### create dir for saving the plots...
-    plotdir = HERE+'/plots/c'
+    plotdir = HERE+'/plots/'+shortname+'_c'
     for x in justthese:
         plotdir += str(x)
     if not os.path.exists(plotdir): 
@@ -3266,10 +3282,21 @@ def main(argv):
                 ash_leg[i].AddEntry(ash_data[i], ldatname, legopt)
 
                 histkeys = sorted([key for key in ash_hist[i]])
+
+                # fix the colors for the paper
+                isoColors = {
+                    'internal Pb210': kBlue    +1,
+                    'internal Th228': kCyan    +1,
+                    'nai-surf Pb210': kGreen   +1,
+                    'teflon Pb210': kOrange  +1,
+                    'teflon-surf Pb210': kMagenta +1,
+                }
+
+                
                 for N, histkey in enumerate(histkeys):
-                    ash_hist[i][histkey].SetMarkerColor(alphaColors(N))
-                    ash_hist[i][histkey].SetLineColor(alphaColors(N))
-                    ash_hist[i][histkey].Draw(dopt)
+                    #ash_hist[i][histkey].SetMarkerColor(alphaColors(N))
+                    #ash_hist[i][histkey].SetLineColor(alphaColors(N))
+                    #ash_hist[i][histkey].Draw(dopt)
                     # tweak legend labels
                     bits = histkey.split('-')
                     if combineExp and 'surf' in histkey:
@@ -3283,6 +3310,13 @@ def main(argv):
                     if bits[2] == 'Rn222': bits[2] = 'Ra226'
                     
                     legname = bits[1]+' '+bits[2]
+                    if legname in isoColors:
+                        ash_hist[i][histkey].SetMarkerColor(isoColors[legname])
+                        ash_hist[i][histkey].SetLineColor(isoColors[legname])
+                    else:
+                        ash_hist[i][histkey].SetMarkerColor(alphaColors(N))
+                        ash_hist[i][histkey].SetLineColor(alphaColors(N))
+                    ash_hist[i][histkey].Draw(dopt)
                     ash_leg[i].AddEntry(ash_hist[i][histkey], legname, legopt)
                     ash_total[i].Add(ash_hist[i][histkey])
 

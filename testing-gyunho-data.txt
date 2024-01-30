@@ -1,0 +1,17 @@
+# -*- sh -*-
+
+DR01	2	data	SET3	V00-04-20	./testing-stuff/gyunho-mlp-data/gyunho-mlp-data.root
+DR01	2	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_c2-xe33p3-xe3600p2.root
+
+DR01	3	data	SET3	V00-04-20	./testing-stuff/gyunho-mlp-data/gyunho-mlp-data.root
+DR01	3	data	SET3	V00-04-19	./joined/data/x99_SET3_V00-04-19_poly3x35v2.root
+
+DR01	4	data	SET3	V00-04-20	./testing-stuff/gyunho-mlp-data/gyunho-mlp-data.root
+DR01	4	data	SET3	V00-04-19	./joined/data/x99_SET3_V00-04-19_poly3x35v2.root
+
+DR01	6	data	SET3	V00-04-20	./testing-stuff/gyunho-mlp-data/gyunho-mlp-data.root
+DR01	6	data	SET3	V00-04-19	./joined/data/x99_SET3_V00-04-19_poly3x35v2.root
+
+DR01	7	data	SET3	V00-04-20	./testing-stuff/gyunho-mlp-data/gyunho-mlp-data.root
+DR01	7	data	SET3	V00-04-19	./joined/data/x99_SET3_V00-04-19_poly3x35v2.root
+

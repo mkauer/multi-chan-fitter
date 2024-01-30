@@ -74,86 +74,27 @@
 #------------- 502-15-po210
 # 2023-08-31 - use new fits to po210 for all crystals
 # 2023-08-31 - refit po210 and th228 alphas
+#------------- 502-gyunho-mlp
+# 2023-11-16 - use new MLP data from Gyunho
 
-
-
-# split data into sets for alpha Th228 fitting (C2 is different)
-#DR	1	data	SET1	V00-04-19	./joined/data/x99_SET1_V00-04-19_set-period.root
-#DR	1	data	SET2	V00-04-19	./joined/data/x99_SET2_V00-04-19_set-period.root
-#DR	1	data	SET3	V00-04-19	./joined/data/x99_SET3_V00-04-19_set-period.root
-#DR	1	data	SET4	V00-04-19	./joined/data/x99_SET4_V00-04-19_set-period.root
-
-#DR	2	data	SET1	V00-04-15	./joined/data/x2_SET1_V00-04-15_set-period.root
-#DR	2	data	SET2	V00-04-15	./joined/data/x2_SET2_V00-04-15_set-period.root
-#DR	2	data	SET3	V00-04-15	./joined/data/x2_SET3_V00-04-15_set-period.root
-
-#DR	3	data	SET1	V00-04-19	./joined/data/x99_SET1_V00-04-19_set-period.root
-#DR	3	data	SET2	V00-04-19	./joined/data/x99_SET2_V00-04-19_set-period.root
-#DR	3	data	SET3	V00-04-19	./joined/data/x99_SET3_V00-04-19_set-period.root
-#DR	3	data	SET4	V00-04-19	./joined/data/x99_SET4_V00-04-19_set-period.root
-
-#DR	4	data	SET1	V00-04-19	./joined/data/x99_SET1_V00-04-19_set-period.root
-#DR	4	data	SET2	V00-04-19	./joined/data/x99_SET2_V00-04-19_set-period.root
-#DR	4	data	SET3	V00-04-19	./joined/data/x99_SET3_V00-04-19_set-period.root
-#DR	4	data	SET4	V00-04-19	./joined/data/x99_SET4_V00-04-19_set-period.root
-
-#DR	6	data	SET1	V00-04-19	./joined/data/x99_SET1_V00-04-19_set-period.root
-#DR	6	data	SET2	V00-04-19	./joined/data/x99_SET2_V00-04-19_set-period.root
-#DR	6	data	SET3	V00-04-19	./joined/data/x99_SET3_V00-04-19_set-period.root
-#DR	6	data	SET4	V00-04-19	./joined/data/x99_SET4_V00-04-19_set-period.root
-
-#DR	7	data	SET1	V00-04-19	./joined/data/x99_SET1_V00-04-19_set-period.root
-#DR	7	data	SET2	V00-04-19	./joined/data/x99_SET2_V00-04-19_set-period.root
-#DR	7	data	SET3	V00-04-19	./joined/data/x99_SET3_V00-04-19_set-period.root
-#DR	7	data	SET4	V00-04-19	./joined/data/x99_SET4_V00-04-19_set-period.root
 
 
 # re-tweaked low-energy calib, high-energy tweak same as above with xe????p? type correction
 # can now load separate files for different energy calibrations (for C2)
 DR	1	data	SET3	V00-04-19	./joined/data/x99_SET3_V00-04-19_poly3x35v2.root
-DR0	2	data	SET3	V00-04-19	./joined/data/x99_SET3_V00-04-19_poly3x35v2.root
-DR12	2	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_c2-xe33p3-xe3600p2.root
-DR	3	data	SET3	V00-04-19	./joined/data/x99_SET3_V00-04-19_poly3x35v2.root
-DR	4	data	SET3	V00-04-19	./joined/data/x99_SET3_V00-04-19_poly3x35v2.root
+DR01	2	data	SET3	V00-04-20	./testing-stuff/gyunho-mlp-data/gyunho-mlp-data.root
+DR2	2	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_c2-xe33p3-xe3600p2.root
+DR01	3	data	SET3	V00-04-20	./testing-stuff/gyunho-mlp-data/gyunho-mlp-data.root
+DR2	3	data	SET3	V00-04-19	./joined/data/x99_SET3_V00-04-19_poly3x35v2.root
+DR01	4	data	SET3	V00-04-20	./testing-stuff/gyunho-mlp-data/gyunho-mlp-data.root
+DR2	4	data	SET3	V00-04-19	./joined/data/x99_SET3_V00-04-19_poly3x35v2.root
 DR	5	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_calib3.root
-DR	6	data	SET3	V00-04-19	./joined/data/x99_SET3_V00-04-19_poly3x35v2.root
-DR	7	data	SET3	V00-04-19	./joined/data/x99_SET3_V00-04-19_poly3x35v2.root
+DR01	6	data	SET3	V00-04-20	./testing-stuff/gyunho-mlp-data/gyunho-mlp-data.root
+DR2	6	data	SET3	V00-04-19	./joined/data/x99_SET3_V00-04-19_poly3x35v2.root
+DR01	7	data	SET3	V00-04-20	./testing-stuff/gyunho-mlp-data/gyunho-mlp-data.root
+DR2	7	data	SET3	V00-04-19	./joined/data/x99_SET3_V00-04-19_poly3x35v2.root
 DR	8	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_calib3.root
 DR	9	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_calib3.root
-
-"""
-DR	1	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_default-calib.root
-DR	2	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_default-calib.root
-DR	3	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_default-calib.root
-DR	4	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_default-calib.root
-DR	5	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_default-calib.root
-DR	6	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_default-calib.root
-DR	7	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_default-calib.root
-DR	8	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_default-calib.root
-DR	9	data	SET3	V00-04-15	./joined/data/SET3_V00-04-15_default-calib.root
-"""
-"""
-DR	1	data	SET3	V00-04-19	./joined/data/SET3_V00-04-19_default-calib.root
-DR	2	data	SET3	V00-04-19	./joined/data/SET3_V00-04-19_default-calib.root
-DR	3	data	SET3	V00-04-19	./joined/data/SET3_V00-04-19_default-calib.root
-DR	4	data	SET3	V00-04-19	./joined/data/SET3_V00-04-19_default-calib.root
-DR	5	data	SET3	V00-04-19	./joined/data/SET3_V00-04-19_default-calib.root
-DR	6	data	SET3	V00-04-19	./joined/data/SET3_V00-04-19_default-calib.root
-DR	7	data	SET3	V00-04-19	./joined/data/SET3_V00-04-19_default-calib.root
-DR	8	data	SET3	V00-04-19	./joined/data/SET3_V00-04-19_default-calib.root
-DR	9	data	SET3	V00-04-19	./joined/data/SET3_V00-04-19_default-calib.root
-"""
-"""
-DR	1	data	SET4	V00-04-19	./joined/data/SET4_V00-04-19.root
-DR	2	data	SET4	V00-04-19	./joined/data/SET4_V00-04-19.root
-DR	3	data	SET4	V00-04-19	./joined/data/SET4_V00-04-19.root
-DR	4	data	SET4	V00-04-19	./joined/data/SET4_V00-04-19.root
-DR	5	data	SET4	V00-04-19	./joined/data/SET4_V00-04-19.root
-DR	6	data	SET4	V00-04-19	./joined/data/SET4_V00-04-19.root
-DR	7	data	SET4	V00-04-19	./joined/data/SET4_V00-04-19.root
-DR	8	data	SET4	V00-04-19	./joined/data/SET4_V00-04-19.root
-DR	9	data	SET4	V00-04-19	./joined/data/SET4_V00-04-19.root
-"""
 
 
 #FR	1	teflon-surf-expo-5000-in	Pb210	Pb210	GRND	2.38e-02	0	1e3	v4.0.3	./joined/teflon-surf-expo.root
@@ -216,7 +157,7 @@ BR	2	teflon-surf-expo-500-in		Pb210	Pb210	GRND	8.41e-02	0.9	1.1	v4.0.3	./joined/
 #FR	2	teflon-surf-expo-100-in		Pb210	Pb210	GRND	6.68e-02	0	1e3	v4.0.3	./joined/teflon-surf-expo.root
 BR	2	teflon		Pb210	Pb210	GRND	3.67e-01	0.1	10	v4.0.3	./joined/teflon.root
 BR01	2	internal	Pb210	Pb210	GRND	1.85e+00	0.8	1.2	v4.0.3	./joined/internal.root
-FR2	2	internal	Pb210	Pb210	GRND	1.860e+00	0.1	1.9	v4.0.3	./joined/po210/c2-po210-alphas.root
+BR2	2	internal	Pb210	Pb210	GRND	1.860e+00	0.1	1.9	v4.0.3	./joined/po210/c2-po210-alphas.root
 #BR	2	internal	Th232	Ra228	Th228	4.78e-02	0	10	v4.0.3	./joined/internal.root
 BR	2	internal	Th232	Ra228	Th228	5.57e-03	0	10	v4.0.3	./joined/internal.root
 #BR	2	internal	I126	I126	GRND	6.59e-02	0	10	v4.0.3	./joined/internal.root
@@ -378,7 +319,7 @@ BR	6	teflon-surf-expo-1000-in	Pb210	Pb210	GRND	1.70e-01	0.9	1.1	v4.0.3	./joined/
 #BR	6	teflon-surf-expo-100-in		Pb210	Pb210	GRND	5.56e-02	0	1e3	v4.0.3	./joined/teflon-surf-expo.root
 BR	6	teflon		Pb210	Pb210	GRND	5.80e-01	0.1	10	v4.0.3	./joined/teflon.root
 BR01	6	internal	Pb210	Pb210	GRND	1.60e+00	0.8	1.2	v4.0.3	./joined/internal.root
-FR2	6	internal	Pb210	Pb210	GRND	1.624e+00	0.1	1.9	v4.0.3	./joined/po210/c6-po210-alphas.root
+BR2	6	internal	Pb210	Pb210	GRND	1.624e+00	0.1	1.9	v4.0.3	./joined/po210/c6-po210-alphas.root
 #FR2	6	internal	Pb210	Pb210	GRND	1.624e+00	0.1	1.9	v4.0.3	./joined/po210/c6-po210-alphas-simple.root
 #BR	6	internal	Th232	Ra228	Th228	3.90e-02	0	1e3	v4.0.3	./joined/internal.root
 BR	6	internal	Th232	Ra228	Th228	2.25e-03	0	1e3	v4.0.3	./joined/internal.root

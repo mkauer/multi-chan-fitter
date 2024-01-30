@@ -13,11 +13,12 @@ plots-status
 root-join-read
 testing-stuff
 
-2021_really-old
-2022-11-29_before-reprocessed-with-higher-energy-ranges
-2022-12-16_before-xplastic-and-xgamma
-2023-02-21_before-changing-surface-alpha-quenching
-2023-07-06_before-new-surf-expo-Pb206
+joined/2021_really-old
+joined/2022-11-29_before-reprocessed-with-higher-energy-ranges
+joined/2022-12-16_before-xplastic-and-xgamma
+joined/2023-02-21_before-changing-surface-alpha-quenching
+joined/2023-07-06_before-new-surf-expo-Pb206
 
+# need to make these files smaller
 nai-surf-expo.root
 teflon-surf-expo.root
