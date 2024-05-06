@@ -51,7 +51,7 @@ ROOT.gErrorIgnoreLevel = kWarning
 # import local functions
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(HERE)
-from funcs500 import *
+from funcs_500 import *
 from funcs_old import *
 from funcs_new import *
 

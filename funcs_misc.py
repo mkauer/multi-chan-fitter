@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 ######################################################################
-# funcs-misc.py
+# funcs_misc.py
 # 
 # Put all the general use functions in here
 # 
