@@ -1,6 +1,8 @@
 *.pyc
 *~
 
+501-lsveto-fix.py
+
 0_help
 activity-pretty-plot
 cluster-fits
