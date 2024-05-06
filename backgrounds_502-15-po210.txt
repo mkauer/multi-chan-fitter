@@ -74,6 +74,7 @@
 #------------- 502-15-po210
 # 2023-08-31 - use new fits to po210 for all crystals
 # 2023-08-31 - refit po210 and th228 alphas
+# 2024-05-06 - split nai-surf-expo and teflon-surf-expo by crystal
 
 
 
@@ -156,14 +157,14 @@ DR	9	data	SET4	V00-04-19	./joined/data/SET4_V00-04-19.root
 """
 
 
-#FR	1	teflon-surf-expo-5000-in	Pb210	Pb210	GRND	2.38e-02	0	1e3	v4.0.3	./joined/teflon-surf-expo.root
-BR	1	teflon-surf-expo-4000-in	Pb210	Pb210	GRND	1.87e-02	0.9	1.1	v4.0.3	./joined/teflon-surf-expo.root
-#FR	1	teflon-surf-expo-3000-in	Pb210	Pb210	GRND	1.27e-02	0	1e3	v4.0.3	./joined/teflon-surf-expo.root
-#FR	1	teflon-surf-expo-2000-in	Pb210	Pb210	GRND	2.16e-02	0	1e3	v4.0.3	./joined/teflon-surf-expo.root
-#FR	1	teflon-surf-expo-1000-in	Pb210	Pb210	GRND	1.27e-02	0	1e3	v4.0.3	./joined/teflon-surf-expo.root
-BR	1	teflon-surf-expo-500-in		Pb210	Pb210	GRND	4.11e-02	0.9	1.1	v4.0.3	./joined/teflon-surf-expo.root
-#FR	1	teflon-surf-expo-200-in		Pb210	Pb210	GRND	1.44e-01	0	1e3	v4.0.3	./joined/teflon-surf-expo.root
-#FR	1	teflon-surf-expo-100-in		Pb210	Pb210	GRND	1.44e-01	0	1e3	v4.0.3	./joined/teflon-surf-expo.root
+#FR	1	teflon-surf-expo-5000-in	Pb210	Pb210	GRND	2.38e-02	0	1e3	v4.0.3	./joined/surf/teflon-surf-expo_C1.root
+BR	1	teflon-surf-expo-4000-in	Pb210	Pb210	GRND	1.87e-02	0.9	1.1	v4.0.3	./joined/surf/teflon-surf-expo_C1.root
+#FR	1	teflon-surf-expo-3000-in	Pb210	Pb210	GRND	1.27e-02	0	1e3	v4.0.3	./joined/surf/teflon-surf-expo_C1.root
+#FR	1	teflon-surf-expo-2000-in	Pb210	Pb210	GRND	2.16e-02	0	1e3	v4.0.3	./joined/surf/teflon-surf-expo_C1.root
+#FR	1	teflon-surf-expo-1000-in	Pb210	Pb210	GRND	1.27e-02	0	1e3	v4.0.3	./joined/surf/teflon-surf-expo_C1.root
+BR	1	teflon-surf-expo-500-in		Pb210	Pb210	GRND	4.11e-02	0.9	1.1	v4.0.3	./joined/surf/teflon-surf-expo_C1.root
+#FR	1	teflon-surf-expo-200-in		Pb210	Pb210	GRND	1.44e-01	0	1e3	v4.0.3	./joined/surf/teflon-surf-expo_C1.root
+#FR	1	teflon-surf-expo-100-in		Pb210	Pb210	GRND	1.44e-01	0	1e3	v4.0.3	./joined/surf/teflon-surf-expo_C1.root
 BR	1	teflon		Pb210	Pb210	GRND	3.60e-01	0	1e3	v4.0.3	./joined/teflon.root
 BR01	1	internal	Pb210	Pb210	GRND	2.82e+00	0.8	1.2	v4.0.3	./joined/internal.root
 BR2	1	internal	Pb210	Pb210	GRND	2.930e+00	0.1	1.9	v4.0.3	./joined/po210/c1-po210-alphas.root
@@ -194,26 +195,26 @@ BR	1	internal	Th232	Th228	GRND	7.47e-03	1.1e-3	1.1e3	v4.0.3	./joined/internal.ro
 #BR	1	internal	U235	Pa231	GRND	1.00e-03	0.0	10	v4.0.3	./joined/internal.root
 
 
-#FR	2	nai-surf-expo-10-side		Th232	Ra228	Th228	4.64e-03	0	1e3	v4.0.3	./joined/nai-surf-expo.root
-BR	2	nai-surf-expo-20-side		Th232	Ra228	Th228	1.14e-02	0	1e3	v4.0.3	./joined/nai-surf-expo.root
-BR	2	nai-surf-expo-30-side		Th232	Ra228	Th228	1.47e-02	0	1e3	v4.0.3	./joined/nai-surf-expo.root
-BR	2	nai-surf-expo-40-side		Th232	Ra228	Th228	1.71e-02	0	1e3	v4.0.3	./joined/nai-surf-expo.root
-BR	2	nai-surf-expo-50-side		Th232	Ra228	Th228	1.87e-02	0	1e3	v4.0.3	./joined/nai-surf-expo.root
-BR	2	nai-surf-expo-100-side		Th232	Ra228	Th228	2.27e-02	0	1e3	v4.0.3	./joined/nai-surf-expo.root
-#FR	2	nai-surf-expo-500-side		Th232	Ra228	Th228	1.99e-02	0	1e3	v4.0.3	./joined/nai-surf-expo.root
-#FR	2	nai-surf-expo-1000-side		Th232	Ra228	Th228	2.22e-02	0	1e3	v4.0.3	./joined/nai-surf-expo.root
+#FR	2	nai-surf-expo-10-side		Th232	Ra228	Th228	4.64e-03	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C2.root
+BR	2	nai-surf-expo-20-side		Th232	Ra228	Th228	1.14e-02	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C2.root
+BR	2	nai-surf-expo-30-side		Th232	Ra228	Th228	1.47e-02	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C2.root
+BR	2	nai-surf-expo-40-side		Th232	Ra228	Th228	1.71e-02	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C2.root
+BR	2	nai-surf-expo-50-side		Th232	Ra228	Th228	1.87e-02	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C2.root
+BR	2	nai-surf-expo-100-side		Th232	Ra228	Th228	2.27e-02	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C2.root
+#FR	2	nai-surf-expo-500-side		Th232	Ra228	Th228	1.99e-02	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C2.root
+#FR	2	nai-surf-expo-1000-side		Th232	Ra228	Th228	2.22e-02	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C2.root
 #BR	2	nai-surface			Pb210	Pb206	GRND	1.20e-02	0	1e3	v4.0.3	./joined/surf-pb206.root
 BR	2	nai-surf-expo-130-side		Pb206	Pb206	GRND	2.80e-02	0	1e3	v4.0.3	./joined/surf-expo-Pb206.root
-#FR	2	nai-surf-expo-20-side		Pb210	Pb210	GRND	5.92e-02	0	1e3	v4.0.3	./joined/nai-surf-expo.root
-#FR	2	nai-surf-expo-10-side		Pb210	Pb210	GRND	5.92e-02	0	1e3	v4.0.3	./joined/nai-surf-expo.root
-BR	2	nai-surf-expo-50-side		Pb210	Pb210	GRND	2.95e-02	0	1e3	v4.0.3	./joined/nai-surf-expo.root
-#FR	2	nai-surf-expo-100-side		Pb210	Pb210	GRND	5.92e-02	0	1e3	v4.0.3	./joined/nai-surf-expo.root
-#FR	2	nai-surf-expo-500-side		Pb210	Pb210	GRND	5.92e-02	0	1e3	v4.0.3	./joined/nai-surf-expo.root
-BR	2	teflon-surf-expo-2000-in	Pb210	Pb210	GRND	3.26e-02	0.9	1.1	v4.0.3	./joined/teflon-surf-expo.root
-#FR	2	teflon-surf-expo-1000-in	Pb210	Pb210	GRND	6.88e-02	0	1e3	v4.0.3	./joined/teflon-surf-expo.root
-BR	2	teflon-surf-expo-500-in		Pb210	Pb210	GRND	8.41e-02	0.9	1.1	v4.0.3	./joined/teflon-surf-expo.root
-#FR	2	teflon-surf-expo-400-in		Pb210	Pb210	GRND	6.68e-02	0	1e3	v4.0.3	./joined/teflon-surf-expo.root
-#FR	2	teflon-surf-expo-100-in		Pb210	Pb210	GRND	6.68e-02	0	1e3	v4.0.3	./joined/teflon-surf-expo.root
+#FR	2	nai-surf-expo-20-side		Pb210	Pb210	GRND	5.92e-02	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C2.root
+#FR	2	nai-surf-expo-10-side		Pb210	Pb210	GRND	5.92e-02	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C2.root
+BR	2	nai-surf-expo-50-side		Pb210	Pb210	GRND	2.95e-02	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C2.root
+#FR	2	nai-surf-expo-100-side		Pb210	Pb210	GRND	5.92e-02	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C2.root
+#FR	2	nai-surf-expo-500-side		Pb210	Pb210	GRND	5.92e-02	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C2.root
+BR	2	teflon-surf-expo-2000-in	Pb210	Pb210	GRND	3.26e-02	0.9	1.1	v4.0.3	./joined/surf/teflon-surf-expo_C2.root
+#FR	2	teflon-surf-expo-1000-in	Pb210	Pb210	GRND	6.88e-02	0	1e3	v4.0.3	./joined/surf/teflon-surf-expo_C2.root
+BR	2	teflon-surf-expo-500-in		Pb210	Pb210	GRND	8.41e-02	0.9	1.1	v4.0.3	./joined/surf/teflon-surf-expo_C2.root
+#FR	2	teflon-surf-expo-400-in		Pb210	Pb210	GRND	6.68e-02	0	1e3	v4.0.3	./joined/surf/teflon-surf-expo_C2.root
+#FR	2	teflon-surf-expo-100-in		Pb210	Pb210	GRND	6.68e-02	0	1e3	v4.0.3	./joined/surf/teflon-surf-expo_C2.root
 BR	2	teflon		Pb210	Pb210	GRND	3.67e-01	0.1	10	v4.0.3	./joined/teflon.root
 BR01	2	internal	Pb210	Pb210	GRND	1.85e+00	0.8	1.2	v4.0.3	./joined/internal.root
 BR2	2	internal	Pb210	Pb210	GRND	1.860e+00	0.1	1.9	v4.0.3	./joined/po210/c2-po210-alphas.root
@@ -243,27 +244,27 @@ BR	2	internal	Th232	Th228	GRND	4.56e-03	1.1e-3	1.1e3	v4.0.3	./joined/internal.ro
 #BR	2	internal	U235	Pa231	GRND	1.00e-03	0.0	10	v4.0.3	./joined/internal.root
 
 
-#FR	3	nai-surf-expo-10-side		Th232	Ra228	Th228	1.01e-02	0	1e3	v4.0.3	./joined/nai-surf-expo.root
-BR	3	nai-surf-expo-20-side		Th232	Ra228	Th228	6.67e-03	0	1e3	v4.0.3	./joined/nai-surf-expo.root
-BR	3	nai-surf-expo-30-side		Th232	Ra228	Th228	1.16e-02	0	1e3	v4.0.3	./joined/nai-surf-expo.root
-BR	3	nai-surf-expo-40-side		Th232	Ra228	Th228	1.55e-02	0	1e3	v4.0.3	./joined/nai-surf-expo.root
-BR	3	nai-surf-expo-50-side		Th232	Ra228	Th228	1.85e-02	0	1e3	v4.0.3	./joined/nai-surf-expo.root
-BR	3	nai-surf-expo-100-side		Th232	Ra228	Th228	2.61e-02	0	1e3	v4.0.3	./joined/nai-surf-expo.root
-#FR	3	nai-surf-expo-500-side		Th232	Ra228	Th228	4.28e-02	0	1e3	v4.0.3	./joined/nai-surf-expo.root
-#FR	3	nai-surf-expo-1000-side		Th232	Ra228	Th228	2.47e-02	0	1e3	v4.0.3	./joined/nai-surf-expo.root
+#FR	3	nai-surf-expo-10-side		Th232	Ra228	Th228	1.01e-02	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C3.root
+BR	3	nai-surf-expo-20-side		Th232	Ra228	Th228	6.67e-03	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C3.root
+BR	3	nai-surf-expo-30-side		Th232	Ra228	Th228	1.16e-02	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C3.root
+BR	3	nai-surf-expo-40-side		Th232	Ra228	Th228	1.55e-02	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C3.root
+BR	3	nai-surf-expo-50-side		Th232	Ra228	Th228	1.85e-02	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C3.root
+BR	3	nai-surf-expo-100-side		Th232	Ra228	Th228	2.61e-02	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C3.root
+#FR	3	nai-surf-expo-500-side		Th232	Ra228	Th228	4.28e-02	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C3.root
+#FR	3	nai-surf-expo-1000-side		Th232	Ra228	Th228	2.47e-02	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C3.root
 #BR	3	nai-surface			Pb210	Pb206	GRND	1.19e-02	0	1e3	v4.0.3	./joined/surf-pb206.root
 BR	3	nai-surf-expo-130-side		Pb206	Pb206	GRND	3.50e-02	0	1e3	v4.0.3	./joined/surf-expo-Pb206.root
-#FR	3	nai-surf-expo-20-side		Pb210	Pb210	GRND	5.17e-02	0	1e3	v4.0.3	./joined/nai-surf-expo.root
-#FR	3	nai-surf-expo-10-side		Pb210	Pb210	GRND	5.17e-02	0	1e3	v4.0.3	./joined/nai-surf-expo.root
-#FR	3	nai-surf-expo-50-side		Pb210	Pb210	GRND	5.02e-02	0	1e3	v4.0.3	./joined/nai-surf-expo.root
-BR	3	nai-surf-expo-100-side		Pb210	Pb210	GRND	3.85e-02	0	1e3	v4.0.3	./joined/nai-surf-expo.root
-#FR	3	nai-surf-expo-1000-side		Pb210	Pb210	GRND	5.17e-02	0	1e3	v4.0.3	./joined/nai-surf-expo.root
-#FR	3	teflon-surf-expo-3000-in	Pb210	Pb210	GRND	8.62e-02	0	1e3	v4.0.3	./joined/teflon-surf-expo.root
-BR	3	teflon-surf-expo-2000-in	Pb210	Pb210	GRND	4.34e-02	0.9	1.1	v4.0.3	./joined/teflon-surf-expo.root
-BR	3	teflon-surf-expo-1000-in	Pb210	Pb210	GRND	7.14e-02	0.9	1.1	v4.0.3	./joined/teflon-surf-expo.root
-#FR	3	teflon-surf-expo-400-in		Pb210	Pb210	GRND	8.40e-02	0	1e3	v4.0.3	./joined/teflon-surf-expo.root
-#FR	3	teflon-surf-expo-100-in		Pb210	Pb210	GRND	8.40e-02	0	1e3	v4.0.3	./joined/teflon-surf-expo.root
-#FR	3	teflon-surf-expo-50-in		Pb210	Pb210	GRND	8.40e-02	0	1e3	v4.0.3	./joined/teflon-surf-expo.root
+#FR	3	nai-surf-expo-20-side		Pb210	Pb210	GRND	5.17e-02	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C3.root
+#FR	3	nai-surf-expo-10-side		Pb210	Pb210	GRND	5.17e-02	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C3.root
+#FR	3	nai-surf-expo-50-side		Pb210	Pb210	GRND	5.02e-02	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C3.root
+BR	3	nai-surf-expo-100-side		Pb210	Pb210	GRND	3.85e-02	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C3.root
+#FR	3	nai-surf-expo-1000-side		Pb210	Pb210	GRND	5.17e-02	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C3.root
+#FR	3	teflon-surf-expo-3000-in	Pb210	Pb210	GRND	8.62e-02	0	1e3	v4.0.3	./joined/surf/teflon-surf-expo_C3.root
+BR	3	teflon-surf-expo-2000-in	Pb210	Pb210	GRND	4.34e-02	0.9	1.1	v4.0.3	./joined/surf/teflon-surf-expo_C3.root
+BR	3	teflon-surf-expo-1000-in	Pb210	Pb210	GRND	7.14e-02	0.9	1.1	v4.0.3	./joined/surf/teflon-surf-expo_C3.root
+#FR	3	teflon-surf-expo-400-in		Pb210	Pb210	GRND	8.40e-02	0	1e3	v4.0.3	./joined/surf/teflon-surf-expo_C3.root
+#FR	3	teflon-surf-expo-100-in		Pb210	Pb210	GRND	8.40e-02	0	1e3	v4.0.3	./joined/surf/teflon-surf-expo_C3.root
+#FR	3	teflon-surf-expo-50-in		Pb210	Pb210	GRND	8.40e-02	0	1e3	v4.0.3	./joined/surf/teflon-surf-expo_C3.root
 BR	3	teflon		Pb210	Pb210	GRND	1.21e+00	0.1	10	v4.0.3	./joined/teflon.root
 BR01	3	internal	Pb210	Pb210	GRND	6.37e-01	0.8	1.2	v4.0.3	./joined/internal.root
 BR2	3	internal	Pb210	Pb210	GRND	6.360e-01	0.1	1.9	v4.0.3	./joined/po210/c3-po210-alphas.root
@@ -293,25 +294,25 @@ BR	3	internal	Th232	Th228	GRND	1.909e-03	1.1e-3	1.1e3	v4.0.3	./joined/internal.r
 #BR	3	internal	U235	Pa231	GRND	7.00e-04	0.0	10	v4.0.3	./joined/internal.root
 
 
-#FR	4	nai-surf-expo-10-side		Th232	Ra228	Th228	7.33e-03	0	1e3	v4.0.3	./joined/nai-surf-expo.root
-BR	4	nai-surf-expo-20-side		Th232	Ra228	Th228	3.65e-03	0	1e3	v4.0.3	./joined/nai-surf-expo.root
-BR	4	nai-surf-expo-30-side		Th232	Ra228	Th228	7.06e-03	0	1e3	v4.0.3	./joined/nai-surf-expo.root
-BR	4	nai-surf-expo-40-side		Th232	Ra228	Th228	9.43e-03	0	1e3	v4.0.3	./joined/nai-surf-expo.root
-BR	4	nai-surf-expo-50-side		Th232	Ra228	Th228	1.12e-02	0	1e3	v4.0.3	./joined/nai-surf-expo.root
-BR	4	nai-surf-expo-100-side		Th232	Ra228	Th228	1.57e-02	0	1e3	v4.0.3	./joined/nai-surf-expo.root
-#FR	4	nai-surf-expo-500-side		Th232	Ra228	Th228	1.18e-02	0	1e3	v4.0.3	./joined/nai-surf-expo.root
-#FR	4	nai-surf-expo-1000-side		Th232	Ra228	Th228	1.37e-02	0	1e3	v4.0.3	./joined/nai-surf-expo.root
+#FR	4	nai-surf-expo-10-side		Th232	Ra228	Th228	7.33e-03	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C4.root
+BR	4	nai-surf-expo-20-side		Th232	Ra228	Th228	3.65e-03	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C4.root
+BR	4	nai-surf-expo-30-side		Th232	Ra228	Th228	7.06e-03	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C4.root
+BR	4	nai-surf-expo-40-side		Th232	Ra228	Th228	9.43e-03	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C4.root
+BR	4	nai-surf-expo-50-side		Th232	Ra228	Th228	1.12e-02	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C4.root
+BR	4	nai-surf-expo-100-side		Th232	Ra228	Th228	1.57e-02	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C4.root
+#FR	4	nai-surf-expo-500-side		Th232	Ra228	Th228	1.18e-02	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C4.root
+#FR	4	nai-surf-expo-1000-side		Th232	Ra228	Th228	1.37e-02	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C4.root
 #FR	4	nai-surface			Pb210	Pb206	GRND	9.96e-03	0	10	v4.0.3	./joined/surf-pb206.root
 BR	4	nai-surf-expo-130-side		Pb206	Pb206	GRND	2.50e-02	0	1e3	v4.0.3	./joined/surf-expo-Pb206.root
-#FR	4	nai-surf-expo-10-side		Pb210	Pb210	GRND	4.05e-02	0	1e3	v4.0.3	./joined/nai-surf-expo.root
-#FR	4	nai-surf-expo-50-side		Pb210	Pb210	GRND	4.07e-02	0	1e3	v4.0.3	./joined/nai-surf-expo.root
-#FR	4	nai-surf-expo-100-side		Pb210	Pb210	GRND	4.05e-02	0	1e3	v4.0.3	./joined/nai-surf-expo.root
-#FR	4	teflon-surf-expo-3000-in	Pb210	Pb210	GRND	3.49e-02	0	1e3	v4.0.3	./joined/teflon-surf-expo.root
-#FR	4	teflon-surf-expo-2000-in	Pb210	Pb210	GRND	2.00e-02	0	1e3	v4.0.3	./joined/teflon-surf-expo.root
-BR	4	teflon-surf-expo-1000-in	Pb210	Pb210	GRND	2.50e-02	0.9	1.1	v4.0.3	./joined/teflon-surf-expo.root
-#FR	4	teflon-surf-expo-500-in		Pb210	Pb210	GRND	6.50e-02	0	1e3	v4.0.3	./joined/teflon-surf-expo.root
-BR	4	teflon-surf-expo-400-in		Pb210	Pb210	GRND	5.93e-02	0.9	1.1	v4.0.3	./joined/teflon-surf-expo.root
-#FR	4	teflon-surf-expo-100-in		Pb210	Pb210	GRND	5.14e-02	0	1e3	v4.0.3	./joined/teflon-surf-expo.root
+#FR	4	nai-surf-expo-10-side		Pb210	Pb210	GRND	4.05e-02	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C4.root
+#FR	4	nai-surf-expo-50-side		Pb210	Pb210	GRND	4.07e-02	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C4.root
+#FR	4	nai-surf-expo-100-side		Pb210	Pb210	GRND	4.05e-02	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C4.root
+#FR	4	teflon-surf-expo-3000-in	Pb210	Pb210	GRND	3.49e-02	0	1e3	v4.0.3	./joined/surf/teflon-surf-expo_C4.root
+#FR	4	teflon-surf-expo-2000-in	Pb210	Pb210	GRND	2.00e-02	0	1e3	v4.0.3	./joined/surf/teflon-surf-expo_C4.root
+BR	4	teflon-surf-expo-1000-in	Pb210	Pb210	GRND	2.50e-02	0.9	1.1	v4.0.3	./joined/surf/teflon-surf-expo_C4.root
+#FR	4	teflon-surf-expo-500-in		Pb210	Pb210	GRND	6.50e-02	0	1e3	v4.0.3	./joined/surf/teflon-surf-expo_C4.root
+BR	4	teflon-surf-expo-400-in		Pb210	Pb210	GRND	5.93e-02	0.9	1.1	v4.0.3	./joined/surf/teflon-surf-expo_C4.root
+#FR	4	teflon-surf-expo-100-in		Pb210	Pb210	GRND	5.14e-02	0	1e3	v4.0.3	./joined/surf/teflon-surf-expo_C4.root
 BR	4	teflon		Pb210	Pb210	GRND	4.28e-01	0.1	10	v4.0.3	./joined/teflon.root
 BR01	4	internal	Pb210	Pb210	GRND	6.75e-01	0.8	1.2	v4.0.3	./joined/internal.root
 BR2	4	internal	Pb210	Pb210	GRND	6.780e-01	0.1	1.9	v4.0.3	./joined/po210/c4-po210-alphas.root
@@ -360,22 +361,22 @@ BR	5	internal	Na22	Na22	GRND	3.50e-01	0.1	10	v4.0.3	./joined/internal.root
 BR	5	internal	Th232	Th228	GRND	3.00e-03	0.0	10	v4.0.3	./joined/internal.root
 
 
-#FR	6	nai-surf-expo-10-side		Th232	Ra228	Th228	2.80e-03	0	1e3	v4.0.3	./joined/nai-surf-expo.root
-BR	6	nai-surf-expo-50-side		Th232	Ra228	Th228	3.38e-02	0	1e3	v4.0.3	./joined/nai-surf-expo.root
-#FR	6	nai-surf-expo-100-side		Th232	Ra228	Th228	1.10e-02	0	1e3	v4.0.3	./joined/nai-surf-expo.root
-#FR	6	nai-surf-expo-500-side		Th232	Ra228	Th228	1.77e-02	0	1e3	v4.0.3	./joined/nai-surf-expo.root
-#FR	6	nai-surf-expo-1000-side		Th232	Ra228	Th228	1.98e-02	0	1e3	v4.0.3	./joined/nai-surf-expo.root
-#FR	6	nai-surf-expo-2000-side		Th232	Ra228	Th228	1.98e-02	0	1e3	v4.0.3	./joined/nai-surf-expo.root
+#FR	6	nai-surf-expo-10-side		Th232	Ra228	Th228	2.80e-03	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C6.root
+BR	6	nai-surf-expo-50-side		Th232	Ra228	Th228	3.38e-02	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C6.root
+#FR	6	nai-surf-expo-100-side		Th232	Ra228	Th228	1.10e-02	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C6.root
+#FR	6	nai-surf-expo-500-side		Th232	Ra228	Th228	1.77e-02	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C6.root
+#FR	6	nai-surf-expo-1000-side		Th232	Ra228	Th228	1.98e-02	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C6.root
+#FR	6	nai-surf-expo-2000-side		Th232	Ra228	Th228	1.98e-02	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C6.root
 #FR	6	nai-surface			Pb210	Pb206	GRND	6.75e-03	0	1e3	v4.0.3	./joined/surf-pb206.root
 BR	6	nai-surf-expo-130-side		Pb206	Pb206	GRND	5.14e-02	0	1e3	v4.0.3	./joined/surf-expo-Pb206.root
-#FR	6	nai-surf-expo-100-side		Pb210	Pb210	GRND	5.14e-02	0	1e3	v4.0.3	./joined/nai-surf-expo.root
-BR	6	nai-surf-expo-50-side		Pb210	Pb210	GRND	3.95e-02	0	1e3	v4.0.3	./joined/nai-surf-expo.root
-#FR	6	nai-surf-expo-40-side		Pb210	Pb210	GRND	3.21e-02	0	1e3	v4.0.3	./joined/nai-surf-expo.root
-#BR	6	teflon-surf-expo-3000-in	Pb210	Pb210	GRND	8.92e-02	0	1e3	v4.0.3	./joined/teflon-surf-expo.root
-#FR	6	teflon-surf-expo-2000-in	Pb210	Pb210	GRND	1.50e-01	0	1e3	v4.0.3	./joined/teflon-surf-expo.root
-BR	6	teflon-surf-expo-1000-in	Pb210	Pb210	GRND	1.70e-01	0.9	1.1	v4.0.3	./joined/teflon-surf-expo.root
-#FR	6	teflon-surf-expo-500-in		Pb210	Pb210	GRND	1.70e-01	0	1e3	v4.0.3	./joined/teflon-surf-expo.root
-#BR	6	teflon-surf-expo-100-in		Pb210	Pb210	GRND	5.56e-02	0	1e3	v4.0.3	./joined/teflon-surf-expo.root
+#FR	6	nai-surf-expo-100-side		Pb210	Pb210	GRND	5.14e-02	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C6.root
+BR	6	nai-surf-expo-50-side		Pb210	Pb210	GRND	3.95e-02	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C6.root
+#FR	6	nai-surf-expo-40-side		Pb210	Pb210	GRND	3.21e-02	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C6.root
+#BR	6	teflon-surf-expo-3000-in	Pb210	Pb210	GRND	8.92e-02	0	1e3	v4.0.3	./joined/surf/teflon-surf-expo_C6.root
+#FR	6	teflon-surf-expo-2000-in	Pb210	Pb210	GRND	1.50e-01	0	1e3	v4.0.3	./joined/surf/teflon-surf-expo_C6.root
+BR	6	teflon-surf-expo-1000-in	Pb210	Pb210	GRND	1.70e-01	0.9	1.1	v4.0.3	./joined/surf/teflon-surf-expo_C6.root
+#FR	6	teflon-surf-expo-500-in		Pb210	Pb210	GRND	1.70e-01	0	1e3	v4.0.3	./joined/surf/teflon-surf-expo_C6.root
+#BR	6	teflon-surf-expo-100-in		Pb210	Pb210	GRND	5.56e-02	0	1e3	v4.0.3	./joined/surf/teflon-surf-expo_C6.root
 BR	6	teflon		Pb210	Pb210	GRND	5.80e-01	0.1	10	v4.0.3	./joined/teflon.root
 BR01	6	internal	Pb210	Pb210	GRND	1.60e+00	0.8	1.2	v4.0.3	./joined/internal.root
 BR2	6	internal	Pb210	Pb210	GRND	1.624e+00	0.1	1.9	v4.0.3	./joined/po210/c6-po210-alphas.root
@@ -409,23 +410,23 @@ BR	6	internal	Th232	Th228	GRND	2.097e-03	1.1e-3	1.1e3	v4.0.3	./joined/internal.r
 #FR	6	internal	U235	Pa231	GRND	5.00e-04	0	1e3	v4.0.3	./joined/internal.root
 
 
-#FR	7	nai-surf-expo-10-side		Th232	Ra228	Th228	2.80e-02	0	1e3	v4.0.3	./joined/nai-surf-expo.root
-#FR	7	nai-surf-expo-50-side		Th232	Ra228	Th228	7.92e-02	0	1e3	v4.0.3	./joined/nai-surf-expo.root
-#FR	7	nai-surf-expo-100-side		Th232	Ra228	Th228	1.10e-02	0	1e3	v4.0.3	./joined/nai-surf-expo.root
-#FR	7	nai-surf-expo-500-side		Th232	Ra228	Th228	3.63e-02	0	1e3	v4.0.3	./joined/nai-surf-expo.root
-BR	7	nai-surf-expo-400-side		Th232	Ra228	Th228	3.65e-02	0	1e3	v4.0.3	./joined/nai-surf-expo.root
-#FR	7	nai-surf-expo-1000-side		Th232	Ra228	Th228	1.98e-02	0	1e3	v4.0.3	./joined/nai-surf-expo.root
+#FR	7	nai-surf-expo-10-side		Th232	Ra228	Th228	2.80e-02	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C7.root
+#FR	7	nai-surf-expo-50-side		Th232	Ra228	Th228	7.92e-02	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C7.root
+#FR	7	nai-surf-expo-100-side		Th232	Ra228	Th228	1.10e-02	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C7.root
+#FR	7	nai-surf-expo-500-side		Th232	Ra228	Th228	3.63e-02	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C7.root
+BR	7	nai-surf-expo-400-side		Th232	Ra228	Th228	3.65e-02	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C7.root
+#FR	7	nai-surf-expo-1000-side		Th232	Ra228	Th228	1.98e-02	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C7.root
 #BR	7	nai-surface			Pb210	Pb206	GRND	2.60e-10	0	1e3	v4.0.3	./joined/surf-pb206.root
 BR	7	nai-surf-expo-130-side		Pb206	Pb206	GRND	4.71e-02	0	1e3	v4.0.3	./joined/surf-expo-Pb206.root
-#FR	7	nai-surf-expo-20-side		Pb210	Pb210	GRND	5.42e-02	0	1e3	v4.0.3	./joined/nai-surf-expo.root
-BR	7	nai-surf-expo-50-side		Pb210	Pb210	GRND	4.61e-02	0	1e3	v4.0.3	./joined/nai-surf-expo.root
-#FR	7	nai-surf-expo-100-side		Pb210	Pb210	GRND	5.42e-02	0	1e3	v4.0.3	./joined/nai-surf-expo.root
-#FR	7	teflon-surf-expo-4000-in	Pb210	Pb210	GRND	8.50e-02	0	1e3	v4.0.3	./joined/teflon-surf-expo.root
-#BR	7	teflon-surf-expo-3000-in	Pb210	Pb210	GRND	7.58e-02	0	1e3	v4.0.3	./joined/teflon-surf-expo.root
-BR	7	teflon-surf-expo-2000-in	Pb210	Pb210	GRND	4.86e-02	0.9	1.1	v4.0.3	./joined/teflon-surf-expo.root
-BR	7	teflon-surf-expo-1000-in	Pb210	Pb210	GRND	6.48e-02	0.9	1.1	v4.0.3	./joined/teflon-surf-expo.root
-#FR	7	teflon-surf-expo-500-in		Pb210	Pb210	GRND	4.97e-02	0	1e3	v4.0.3	./joined/teflon-surf-expo.root
-#BR	7	teflon-surf-expo-100-in		Pb210	Pb210	GRND	4.97e-02	0	1e3	v4.0.3	./joined/teflon-surf-expo.root
+#FR	7	nai-surf-expo-20-side		Pb210	Pb210	GRND	5.42e-02	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C7.root
+BR	7	nai-surf-expo-50-side		Pb210	Pb210	GRND	4.61e-02	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C7.root
+#FR	7	nai-surf-expo-100-side		Pb210	Pb210	GRND	5.42e-02	0	1e3	v4.0.3	./joined/surf/nai-surf-expo_C7.root
+#FR	7	teflon-surf-expo-4000-in	Pb210	Pb210	GRND	8.50e-02	0	1e3	v4.0.3	./joined/surf/teflon-surf-expo_C7.root
+#BR	7	teflon-surf-expo-3000-in	Pb210	Pb210	GRND	7.58e-02	0	1e3	v4.0.3	./joined/surf/teflon-surf-expo_C7.root
+BR	7	teflon-surf-expo-2000-in	Pb210	Pb210	GRND	4.86e-02	0.9	1.1	v4.0.3	./joined/surf/teflon-surf-expo_C7.root
+BR	7	teflon-surf-expo-1000-in	Pb210	Pb210	GRND	6.48e-02	0.9	1.1	v4.0.3	./joined/surf/teflon-surf-expo_C7.root
+#FR	7	teflon-surf-expo-500-in		Pb210	Pb210	GRND	4.97e-02	0	1e3	v4.0.3	./joined/surf/teflon-surf-expo_C7.root
+#BR	7	teflon-surf-expo-100-in		Pb210	Pb210	GRND	4.97e-02	0	1e3	v4.0.3	./joined/surf/teflon-surf-expo_C7.root
 BR	7	teflon		Pb210	Pb210	GRND	6.85e-01	0.1	10	v4.0.3	./joined/teflon.root
 BR01	7	internal	Pb210	Pb210	GRND	1.64e+00	0.8	1.2	v4.0.3	./joined/internal.root
 BR2	7	internal	Pb210	Pb210	GRND	1.633e+00	0.1	1.9	v4.0.3	./joined/po210/c7-po210-alphas.root
