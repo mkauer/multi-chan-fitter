@@ -216,7 +216,7 @@ BR	2	teflon-surf-expo-500-in		Pb210	Pb210	GRND	8.41e-02	0.9	1.1	v4.0.3	./joined/
 #FR	2	teflon-surf-expo-100-in		Pb210	Pb210	GRND	6.68e-02	0	1e3	v4.0.3	./joined/teflon-surf-expo.root
 BR	2	teflon		Pb210	Pb210	GRND	3.67e-01	0.1	10	v4.0.3	./joined/teflon.root
 BR01	2	internal	Pb210	Pb210	GRND	1.85e+00	0.8	1.2	v4.0.3	./joined/internal.root
-FR2	2	internal	Pb210	Pb210	GRND	1.860e+00	0.1	1.9	v4.0.3	./joined/po210/c2-po210-alphas.root
+BR2	2	internal	Pb210	Pb210	GRND	1.860e+00	0.1	1.9	v4.0.3	./joined/po210/c2-po210-alphas.root
 #BR	2	internal	Th232	Ra228	Th228	4.78e-02	0	10	v4.0.3	./joined/internal.root
 BR	2	internal	Th232	Ra228	Th228	5.57e-03	0	10	v4.0.3	./joined/internal.root
 #BR	2	internal	I126	I126	GRND	6.59e-02	0	10	v4.0.3	./joined/internal.root
@@ -378,7 +378,7 @@ BR	6	teflon-surf-expo-1000-in	Pb210	Pb210	GRND	1.70e-01	0.9	1.1	v4.0.3	./joined/
 #BR	6	teflon-surf-expo-100-in		Pb210	Pb210	GRND	5.56e-02	0	1e3	v4.0.3	./joined/teflon-surf-expo.root
 BR	6	teflon		Pb210	Pb210	GRND	5.80e-01	0.1	10	v4.0.3	./joined/teflon.root
 BR01	6	internal	Pb210	Pb210	GRND	1.60e+00	0.8	1.2	v4.0.3	./joined/internal.root
-FR2	6	internal	Pb210	Pb210	GRND	1.624e+00	0.1	1.9	v4.0.3	./joined/po210/c6-po210-alphas.root
+BR2	6	internal	Pb210	Pb210	GRND	1.624e+00	0.1	1.9	v4.0.3	./joined/po210/c6-po210-alphas.root
 #FR2	6	internal	Pb210	Pb210	GRND	1.624e+00	0.1	1.9	v4.0.3	./joined/po210/c6-po210-alphas-simple.root
 #BR	6	internal	Th232	Ra228	Th228	3.90e-02	0	1e3	v4.0.3	./joined/internal.root
 BR	6	internal	Th232	Ra228	Th228	2.25e-03	0	1e3	v4.0.3	./joined/internal.root
