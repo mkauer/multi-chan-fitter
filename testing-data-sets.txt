@@ -1,6 +1,0 @@
-# -*- sh -*-
-
-#DR	7	data	SET1	V00-04-19	./joined/data/x7_SET1_V00-04-19.root
-DR	7	data	SET2	V00-04-19	./joined/data/x7_SET2_V00-04-19.root
-DR	7	data	SET4	V00-04-19	./joined/data/x7_SET4_V00-04-19.root
-
