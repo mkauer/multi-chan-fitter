@@ -172,7 +172,7 @@ BR	1	internal	Th232	Ra228	Th228	1.95e-01	0	1e3	v4.0.3	./joined/internal.root
 #BR	1	internal	Th232	Ra228	Th228	9.08e-03	0	10	v4.0.3	./joined/internal.root
 #BR	1	internal	I126	I126	GRND	2.83e-03	0	10	v4.0.3	./joined/internal.root
 #FR	1	internal	I128	I128	GRND	5.75e-02	0	100	v4.0.3	./joined/build410-internalI128_GRND.root
-#FR	1	mystery		My007	My007	GRND	1.35e-02	0	100	v4.0.3	./testing-stuff/neon-30keV/mystery30kev.root
+#FR	1	mystery		My007	My007	GRND	1.35e-02	0	100	v4.0.3	./joined/mystery30kev.root
 BR	1	internal	Sn113	Sn113	GRND	5.83e-03	0	10	v4.0.3	./joined/internal.root
 BR	1	internal	Cd109	Cd109	GRND	1.36e-02	0	10	v4.0.3	./joined/internal.root
 BR	1	internal	H3	H3	GRND	3.46e-01	0	10	v4.0.3	./joined/internal.root
@@ -221,7 +221,7 @@ BR2	2	internal	Pb210	Pb210	GRND	1.860e+00	0.1	1.9	v4.0.3	./joined/po210/c2-po210
 #BR	2	internal	Th232	Ra228	Th228	4.78e-02	0	10	v4.0.3	./joined/internal.root
 BR	2	internal	Th232	Ra228	Th228	5.57e-03	0	10	v4.0.3	./joined/internal.root
 #BR	2	internal	I126	I126	GRND	6.59e-02	0	10	v4.0.3	./joined/internal.root
-BR	2	mystery		My007	My007	GRND	2.25e-02	0	100	v4.0.3	./testing-stuff/neon-30keV/mystery30kev.root
+BR	2	mystery		My007	My007	GRND	2.25e-02	0	100	v4.0.3	./joined/mystery30kev.root
 BR	2	internal	Sn113	Sn113	GRND	2.85e-03	0	10	v4.0.3	./joined/internal.root
 BR	2	internal	Cd109	Cd109	GRND	8.53e-03	0	10	v4.0.3	./joined/internal.root
 BR	2	internal	H3	H3	GRND	6.56e-02	0	10	v4.0.3	./joined/internal.root
@@ -271,7 +271,7 @@ BR2	3	internal	Pb210	Pb210	GRND	6.360e-01	0.1	1.9	v4.0.3	./joined/po210/c3-po210
 #BR	3	internal	Th232	Ra228	Th228	5.46e-02	0	10	v4.0.3	./joined/internal.root
 BR	3	internal	Th232	Ra228	Th228	1.95e-03	0	10	v4.0.3	./joined/internal.root
 #BR	3	internal	I126	I126	GRND	6.31e-02	0	10	v4.0.3	./joined/internal.root
-BR	3	mystery		My007	My007	GRND	2.13e-02	0	100	v4.0.3	./testing-stuff/neon-30keV/mystery30kev.root
+BR	3	mystery		My007	My007	GRND	2.13e-02	0	100	v4.0.3	./joined/mystery30kev.root
 BR	3	internal	Sn113	Sn113	GRND	4.71e-03	0	10	v4.0.3	./joined/internal.root
 BR	3	internal	Cd109	Cd109	GRND	1.76e-02	0	10	v4.0.3	./joined/internal.root
 BR	3	internal	H3	H3	GRND	2.02e-01	0	10	v4.0.3	./joined/internal.root
@@ -319,7 +319,7 @@ BR2	4	internal	Pb210	Pb210	GRND	6.780e-01	0.1	1.9	v4.0.3	./joined/po210/c4-po210
 #BR	4	internal	Th232	Ra228	Th228	3.41e-02	0	10	v4.0.3	./joined/internal.root
 BR	4	internal	Th232	Ra228	Th228	2.90e-03	0	10	v4.0.3	./joined/internal.root
 #BR	4	internal	I126	I126	GRND	2.32e-02	0	10	v4.0.3	./joined/internal.root
-BR	4	mystery		My007	My007	GRND	6.77e-03	0	100	v4.0.3	./testing-stuff/neon-30keV/mystery30kev.root
+BR	4	mystery		My007	My007	GRND	6.77e-03	0	100	v4.0.3	./joined/mystery30kev.root
 BR	4	internal	Sn113	Sn113	GRND	6.52e-03	0	10	v4.0.3	./joined/internal.root
 BR	4	internal	Cd109	Cd109	GRND	3.10e-02	0	10	v4.0.3	./joined/internal.root
 BR	4	internal	H3	H3	GRND	2.18e-01	0	10	v4.0.3	./joined/internal.root
@@ -385,7 +385,7 @@ BR2	6	internal	Pb210	Pb210	GRND	1.624e+00	0.1	1.9	v4.0.3	./joined/po210/c6-po210
 BR	6	internal	Th232	Ra228	Th228	2.25e-03	0	1e3	v4.0.3	./joined/internal.root
 #FR	6	internal	I126	I126	GRND	5.75e-02	0	10	v4.0.3	./joined/internal.root
 #FR	6	internal	I128	I128	GRND	5.75e-02	0	100	v4.0.3	./joined/build410-internalI128_GRND.root
-BR	6	mystery		My007	My007	GRND	2.18e-02	0	100	v4.0.3	./testing-stuff/neon-30keV/mystery30kev.root
+BR	6	mystery		My007	My007	GRND	2.18e-02	0	100	v4.0.3	./joined/mystery30kev.root
 #FR	6	internal	Te125m	Te125m	GRND	1.86e+00	0	100	v4.0.3	./joined/internal.root
 BR	6	internal	Sn113	Sn113	GRND	8.42e-04	0	10	v4.0.3	./joined/internal.root
 BR	6	internal	Cd109	Cd109	GRND	1.03e-02	0	10	v4.0.3	./joined/internal.root
@@ -434,7 +434,7 @@ BR2	7	internal	Pb210	Pb210	GRND	1.633e+00	0.1	1.9	v4.0.3	./joined/po210/c7-po210
 #BR	7	internal	Th232	Ra228	Th228	4.86e-02	0	10	v4.0.3	./joined/internal.root
 BR	7	internal	Th232	Ra228	Th228	2.22e-03	0	10	v4.0.3	./joined/internal.root
 #BR	7	internal	I126	I126	GRND	4.60e-02	0	10	v4.0.3	./joined/internal.root
-BR	7	mystery		My007	My007	GRND	1.98e-02	0	100	v4.0.3	./testing-stuff/neon-30keV/mystery30kev.root
+BR	7	mystery		My007	My007	GRND	1.98e-02	0	100	v4.0.3	./joined/mystery30kev.root
 BR	7	internal	Sn113	Sn113	GRND	3.95e-03	0	10	v4.0.3	./joined/internal.root
 BR	7	internal	Cd109	Cd109	GRND	1.27e-02	0	10	v4.0.3	./joined/internal.root
 BR	7	internal	H3	H3	GRND	8.11e-02	0	10	v4.0.3	./joined/internal.root
