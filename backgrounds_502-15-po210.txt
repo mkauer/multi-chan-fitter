@@ -75,7 +75,7 @@
 # 2023-08-31 - use new fits to po210 for all crystals
 # 2023-08-31 - refit po210 and th228 alphas
 # 2024-05-06 - split nai-surf-expo and teflon-surf-expo by crystal
-
+# 2024-05-06 - moved mystery30kev.root to joined
 
 
 # split data into sets for alpha Th228 fitting (C2 is different)
